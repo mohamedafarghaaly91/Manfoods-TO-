@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "dotnet-9.0", "postgresql-16"]
+modules = ["dotnet-7.0", "web", "nodejs-20", "nix", "dotnet-9.0"]
 
 [deployment]
 router = "application"
@@ -24,16 +24,16 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "dotnet run --project MvcApp.csproj"
 waitForPort = 5000
 
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [agent]
-stack = "PNPM_WORKSPACE"
+stack = "BEST_EFFORT_FALLBACK"
 expertMode = true
 
 [postMerge]
@@ -42,10 +42,6 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 8080
 externalPort = 80
 
 [[ports]]
