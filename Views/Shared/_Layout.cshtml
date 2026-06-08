@@ -7,16 +7,247 @@
     var isLoggedIn = session?.GetInt32("UserId") != null;
     var currentPath = HttpCtx.HttpContext?.Request.Path.Value ?? "";
     bool IsActive(string path) => currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+
+    string RoleLabel(string r) => r switch {
+        "Admin_Full"           => "Full Admin",
+        "Admin_Read"           => "Read Admin",
+        "Operation_Manager"    => "Ops Manager",
+        "Operation_Consultant" => "Consultant",
+        _                      => r.Replace("_"," ")
+    };
+    string RoleIcon(string r) => r switch {
+        "Admin_Full"           => "bi-shield-fill-check",
+        "Admin_Read"           => "bi-shield-fill",
+        "Operation_Manager"    => "bi-briefcase-fill",
+        "Operation_Consultant" => "bi-person-badge-fill",
+        _                      => "bi-person-fill"
+    };
+    var initials = string.IsNullOrEmpty(userEmail) ? "?" : userEmail.Substring(0,1).ToUpper();
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — Manfoods" : "Manfoods")</title>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — Manfoods McDonald's" : "Manfoods McDonald's")</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+        /* ── Creative Sidebar ──────────────────────────── */
+        .sidebar {
+            background: #ffffff;
+            border-right: none;
+            box-shadow: 4px 0 20px rgba(0,0,0,.07);
+        }
+
+        /* brand area */
+        .sidebar-brand {
+            background: linear-gradient(135deg, #DA291C 0%, #b82015 100%);
+            border-bottom: none;
+            height: auto;
+            padding: 18px 20px 14px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #FFC72C, #ffdb6e, #FFC72C);
+        }
+
+        /* subtle arc watermark */
+        .sidebar-brand::before {
+            content: '';
+            position: absolute;
+            right: -20px; top: -20px;
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+            pointer-events: none;
+        }
+
+        .brand-logo-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .brand-logo-img {
+            width: 36px; height: 36px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
+        }
+
+        .brand-texts { display: flex; flex-direction: column; }
+        .brand-name-main {
+            font-size: 15px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -.2px;
+        }
+        .brand-name-sub {
+            font-size: 10.5px;
+            color: rgba(255,255,255,.7);
+            font-weight: 500;
+            letter-spacing: .5px;
+        }
+
+        /* section labels */
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: #c5c1bd;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 14px 14px 6px;
+        }
+
+        /* nav items — redesigned */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 0;
+            border-radius: 10px;
+            color: #7a7672;
+            text-decoration: none;
+            transition: all .2s;
+            font-size: 13.5px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item-inner {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 14px;
+            width: 100%;
+            border-radius: 10px;
+            transition: all .2s;
+        }
+
+        .nav-item:hover .nav-item-inner {
+            background: #fff5f5;
+            color: #DA291C;
+            transform: translateX(3px);
+        }
+
+        .nav-item.active .nav-item-inner {
+            background: linear-gradient(135deg, #DA291C, #c0200f);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(218,41,28,.3);
+        }
+
+        .nav-item.active .nav-icon-wrap { background: rgba(255,255,255,.2); color: #fff; }
+
+        .nav-icon-wrap {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            background: #f5f5f5;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            transition: all .2s;
+            color: #9a9490;
+        }
+
+        .nav-item:hover .nav-icon-wrap { background: rgba(218,41,28,.12); color: #DA291C; }
+
+        .nav-item-label { flex: 1; }
+
+        .nav-item-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            background: #FFC72C;
+            color: #27251F;
+            line-height: 1.4;
+        }
+
+        /* active indicator */
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 60%;
+            background: #FFC72C;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* sidebar footer */
+        .sidebar-footer {
+            padding: 0;
+            border-top: none;
+            background: transparent;
+        }
+
+        .sidebar-footer-inner {
+            margin: 8px 10px 12px;
+            background: linear-gradient(135deg, #fff8e1, #fff3f3);
+            border: 1px solid #ffe082;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #DA291C, #b82015);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 800;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(218,41,28,.3);
+        }
+
+        .user-details { flex: 1; min-width: 0; }
+        .user-email { font-size: 11.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #27251F; }
+
+        .user-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #DA291C;
+            background: rgba(218,41,28,.08);
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-top: 2px;
+        }
+
+        .btn-logout {
+            background: none; border: none;
+            color: #c5c1bd;
+            cursor: pointer; padding: 6px;
+            border-radius: 8px;
+            transition: all .15s;
+            font-size: 16px; line-height: 1;
+        }
+        .btn-logout:hover { color: #DA291C; background: rgba(218,41,28,.08); }
+
+        /* nav scrollbar styling */
+        .sidebar-nav::-webkit-scrollbar { width: 3px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #e8e8e8; border-radius: 10px; }
+    </style>
 </head>
 <body>
 
@@ -25,52 +256,87 @@
     <div class="app-wrapper">
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="brand-icon">M</div>
-                <span class="brand-name">Manfoods</span>
+                <div class="brand-logo-row">
+                    <img src="/images/mclogo.png" alt="Logo" class="brand-logo-img" />
+                    <div class="brand-texts">
+                        <span class="brand-name-main">Manfoods</span>
+                        <span class="brand-name-sub">McDonald's</span>
+                    </div>
+                </div>
             </div>
+
             <nav class="sidebar-nav">
                 @if (isAdmin)
                 {
+                    <div class="nav-section-label">Analytics</div>
                     <a asp-controller="Admin" asp-action="Analytics" class="nav-item @(IsActive("/Admin/Analytics") ? "active" : "")">
-                        <i class="bi bi-bar-chart-line-fill"></i> Global Analytics
-                    </a>
-                    <a asp-controller="Admin" asp-action="Uploads" class="nav-item @(IsActive("/Admin/Uploads") ? "active" : "")">
-                        <i class="bi bi-cloud-upload-fill"></i> Data Management
+                        <span class="nav-item-inner">
+                            <span class="nav-icon-wrap"><i class="bi bi-bar-chart-line-fill"></i></span>
+                            <span class="nav-item-label">Global Analytics</span>
+                        </span>
                     </a>
                     <a asp-controller="Admin" asp-action="Turnover" class="nav-item @(IsActive("/Admin/Turnover") ? "active" : "")">
-                        <i class="bi bi-pie-chart-fill"></i> Turnover Analysis
+                        <span class="nav-item-inner">
+                            <span class="nav-icon-wrap"><i class="bi bi-pie-chart-fill"></i></span>
+                            <span class="nav-item-label">Turnover Analysis</span>
+                        </span>
+                    </a>
+
+                    <div class="nav-section-label">Management</div>
+                    <a asp-controller="Admin" asp-action="Uploads" class="nav-item @(IsActive("/Admin/Uploads") ? "active" : "")">
+                        <span class="nav-item-inner">
+                            <span class="nav-icon-wrap"><i class="bi bi-cloud-upload-fill"></i></span>
+                            <span class="nav-item-label">Data Management</span>
+                        </span>
+                    </a>
+                    <a asp-controller="Admin" asp-action="Reports" class="nav-item @(IsActive("/Admin/Reports") ? "active" : "")">
+                        <span class="nav-item-inner">
+                            <span class="nav-icon-wrap"><i class="bi bi-file-earmark-bar-graph-fill"></i></span>
+                            <span class="nav-item-label">Reports</span>
+                        </span>
                     </a>
                     @if (userRole == "Admin_Full")
                     {
+                        <div class="nav-section-label">System</div>
                         <a asp-controller="Admin" asp-action="Users" class="nav-item @(IsActive("/Admin/Users") ? "active" : "")">
-                            <i class="bi bi-people-fill"></i> Users
+                            <span class="nav-item-inner">
+                                <span class="nav-icon-wrap"><i class="bi bi-people-fill"></i></span>
+                                <span class="nav-item-label">Users</span>
+                                <span class="nav-item-badge">Admin</span>
+                            </span>
                         </a>
                     }
-                    <a asp-controller="Admin" asp-action="Reports" class="nav-item @(IsActive("/Admin/Reports") ? "active" : "")">
-                        <i class="bi bi-file-earmark-text-fill"></i> Reports
-                    </a>
                 }
                 else
                 {
+                    <div class="nav-section-label">Overview</div>
                     <a asp-controller="Dashboard" asp-action="Index" class="nav-item @(IsActive("/Dashboard") ? "active" : "")">
-                        <i class="bi bi-bar-chart-line-fill"></i> Dashboard
+                        <span class="nav-item-inner">
+                            <span class="nav-icon-wrap"><i class="bi bi-speedometer2"></i></span>
+                            <span class="nav-item-label">Dashboard</span>
+                        </span>
                     </a>
                 }
             </nav>
+
             <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar"><i class="bi bi-person-fill"></i></div>
+                <div class="sidebar-footer-inner">
+                    <div class="user-avatar">@initials</div>
                     <div class="user-details">
-                        <span class="user-email">@userEmail</span>
-                        <span class="user-role">@userRole.Replace("_", " ")</span>
+                        <div class="user-email">@userEmail</div>
+                        <div class="user-role-badge">
+                            <i class="bi @RoleIcon(userRole)" style="font-size:9px;"></i>
+                            @RoleLabel(userRole)
+                        </div>
                     </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-logout" title="Sign Out"><i class="bi bi-box-arrow-right"></i></button>
+                    </form>
                 </div>
-                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn-logout" title="Sign Out"><i class="bi bi-box-arrow-right"></i></button>
-                </form>
             </div>
         </aside>
+
         <main class="main-content">
             @if (TempData["Success"] != null)
             {
