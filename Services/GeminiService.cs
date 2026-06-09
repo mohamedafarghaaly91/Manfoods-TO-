@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -27,26 +26,74 @@ public class GeminiService : IGeminiService
 
         var storeLabel = string.IsNullOrEmpty(ctx.Store) ? "جميع الفروع" : ctx.Store;
 
+        // Build per-store breakdown table
+        var storeTable = new StringBuilder();
+        if (ctx.StoreBreakdowns.Count > 0)
+        {
+            storeTable.AppendLine("=== تفصيل الـ Turnover بالفروع (مرتب تنازلياً) ===");
+            storeTable.AppendLine($"{"الفرع",-30} {"Headcount",10} {"New Hires",10} {"استقالات",10} {"Turnover%",10}");
+            storeTable.AppendLine(new string('-', 70));
+            foreach (var s in ctx.StoreBreakdowns)
+                storeTable.AppendLine($"{s.Store,-30} {s.Headcount,10} {s.NewHires,10} {s.Resignations,10} {s.TurnoverRate,9:F1}%");
+            storeTable.AppendLine();
+        }
+
+        // Build job-title breakdown
+        var jobTitleSection = new StringBuilder();
+        if (ctx.TurnoverByJobTitle.Count > 0)
+        {
+            jobTitleSection.AppendLine("=== الاستقالات حسب المسمى الوظيفي ===");
+            foreach (var (label, value) in ctx.TurnoverByJobTitle)
+                jobTitleSection.AppendLine($"  • {label}: {value}");
+            jobTitleSection.AppendLine();
+        }
+
+        // Build tenure breakdown
+        var tenureSection = new StringBuilder();
+        if (ctx.TurnoverByTenure.Count > 0)
+        {
+            tenureSection.AppendLine("=== الاستقالات حسب مدة الخدمة ===");
+            foreach (var (label, value) in ctx.TurnoverByTenure)
+                tenureSection.AppendLine($"  • {label}: {value}");
+            tenureSection.AppendLine();
+        }
+
+        // Build gender breakdown
+        var genderSection = new StringBuilder();
+        if (ctx.GenderBreakdown.Count > 0)
+        {
+            genderSection.AppendLine("=== توزيع الموظفين حسب الجنس ===");
+            foreach (var (label, value) in ctx.GenderBreakdown)
+                genderSection.AppendLine($"  • {label}: {value}");
+            genderSection.AppendLine();
+        }
+
         var systemPrompt = $"""
             أنت مساعد HR ذكي متخصص في تحليل بيانات الموارد البشرية لشركة Manfoods McDonald's.
             مهمتك هي الإجابة على أسئلة المدراء بناءً على البيانات المتاحة فقط.
-            
-            === البيانات الحالية ===
+
+            === الملخص العام ===
             الفترة: {periodLabel}
-            الفرع: {storeLabel}
+            الفرع المختار: {storeLabel}
             إجمالي الموظفين (Headcount): {ctx.TotalHeadcount}
             الموظفون الجدد (New Hires): {ctx.NewHires}
             إجمالي الاستقالات: {ctx.TotalResignations}
-            معدل الـ Turnover: {ctx.TurnoverRate}%
-            ========================
-            
+            معدل الـ Turnover الإجمالي: {ctx.TurnoverRate}%
+            ====================
+
+            {storeTable}
+            {jobTitleSection}
+            {tenureSection}
+            {genderSection}
+
             قواعد مهمة:
             - أجب دائمًا بشكل موجز ومفيد.
-            - لا تخترع أرقامًا خارج البيانات المعطاة.
+            - استند فقط إلى الأرقام الموجودة في البيانات أعلاه — لا تخترع أرقامًا.
             - إذا سُئلت عن بيانات غير متاحة، اذكر ذلك بوضوح.
             - يمكنك الإجابة بالعربية أو الإنجليزية حسب لغة السؤال.
-            - قدم توصيات عملية عند الطلب.
-            
+            - قدّم توصيات عملية عند الطلب.
+            - عند الإجابة عن "أعلى فرع turnover"، استخدم جدول الفروع مباشرة.
+
             سؤال المستخدم: {userQuestion}
             """;
 

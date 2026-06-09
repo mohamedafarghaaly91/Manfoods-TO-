@@ -82,15 +82,31 @@ public class DashboardApiController : ControllerBase
 
         var kpis = await _dashboard.GetKpisAsync(request.Month, request.Year, request.Store, role, assignedName);
 
+        // Fetch all chart breakdowns to enrich AI context
+        var jobTitleTask = _dashboard.GetTurnoverByJobTitleAsync(kpis.Month, kpis.Year, request.Store, role, assignedName);
+        var tenureTask   = _dashboard.GetTurnoverByTenureAsync(kpis.Month, kpis.Year, request.Store, role, assignedName);
+        var genderTask   = _dashboard.GetGenderBreakdownAsync(kpis.Month, kpis.Year, request.Store, role, assignedName);
+
+        // Per-store breakdown only when viewing all stores
+        var storeTask = string.IsNullOrEmpty(request.Store)
+            ? _dashboard.GetPerStoreTurnoverAsync(kpis.Month, kpis.Year, role, assignedName)
+            : Task.FromResult(new List<StoreBreakdown>());
+
+        await Task.WhenAll(jobTitleTask, tenureTask, genderTask, storeTask);
+
         var context = new GeminiContext
         {
-            Month = kpis.Month,
-            Year = kpis.Year,
-            Store = request.Store,
-            TotalHeadcount = kpis.TotalHeadcount,
+            Month             = kpis.Month,
+            Year              = kpis.Year,
+            Store             = request.Store,
+            TotalHeadcount    = kpis.TotalHeadcount,
             TotalResignations = kpis.TotalResignations,
-            TurnoverRate = kpis.TurnoverRate,
-            NewHires = kpis.NewHires
+            TurnoverRate      = kpis.TurnoverRate,
+            NewHires          = kpis.NewHires,
+            StoreBreakdowns   = storeTask.Result,
+            TurnoverByJobTitle = jobTitleTask.Result.Select(x => (x.Label, x.Value)).ToList(),
+            TurnoverByTenure   = tenureTask.Result.Select(x => (x.Label, x.Value)).ToList(),
+            GenderBreakdown    = genderTask.Result.Select(x => (x.Label, x.Value)).ToList()
         };
 
         var answer = await _gemini.AskAsync(request.Question, context);

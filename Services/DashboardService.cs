@@ -142,4 +142,68 @@ public class DashboardService : IDashboardService
             .Select(p => new PeriodItem { Month = p.Month, Year = p.Year })
             .ToListAsync();
     }
+
+    public async Task<List<StoreBreakdown>> GetPerStoreTurnoverAsync(int month, int year, string role, string? assignedName)
+    {
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
+
+        // Headcount per store
+        var empQ = _db.ActiveEmployees.Where(e => e.Month == month && e.Year == year);
+        if (accessible != null && accessible.Count > 0)
+            empQ = empQ.Where(e => accessible.Contains(e.Store));
+
+        var headcounts = await empQ
+            .GroupBy(e => e.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        // Resignations per store
+        var resQ = _db.Resignations.Where(r => r.Month == month && r.Year == year);
+        if (accessible != null && accessible.Count > 0)
+            resQ = resQ.Where(r => accessible.Contains(r.Store));
+
+        var resignations = await resQ
+            .GroupBy(r => r.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        // Previous month for new hires
+        var prevMonth = month == 1 ? 12 : month - 1;
+        var prevYear  = month == 1 ? year - 1 : year;
+
+        var prevQ = _db.ActiveEmployees.Where(e => e.Month == prevMonth && e.Year == prevYear);
+        if (accessible != null && accessible.Count > 0)
+            prevQ = prevQ.Where(e => accessible.Contains(e.Store));
+
+        var prevIds = await prevQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
+        var currIds = await empQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
+
+        var prevByStore = prevIds.GroupBy(x => x.Store)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.EmployeeId).ToHashSet());
+
+        var newHiresByStore = currIds
+            .GroupBy(x => x.Store)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Count(x => !prevByStore.TryGetValue(x.Store, out var ids) || !ids.Contains(x.EmployeeId)));
+
+        var resByStore = resignations.ToDictionary(r => r.Store, r => r.Count);
+
+        return headcounts
+            .Select(h =>
+            {
+                var res = resByStore.TryGetValue(h.Store, out var r) ? r : 0;
+                var nh  = newHiresByStore.TryGetValue(h.Store, out var n) ? n : 0;
+                return new StoreBreakdown
+                {
+                    Store       = h.Store,
+                    Headcount   = h.Count,
+                    Resignations = res,
+                    TurnoverRate = h.Count > 0 ? Math.Round((double)res / h.Count * 100, 1) : 0,
+                    NewHires    = nh
+                };
+            })
+            .OrderByDescending(s => s.TurnoverRate)
+            .ToList();
+    }
 }
