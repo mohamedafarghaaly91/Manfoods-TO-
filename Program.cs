@@ -97,6 +97,10 @@ app.Run();
 
 static string BuildConnectionString()
 {
+    var neonUrl = Environment.GetEnvironmentVariable("NEON_DATABASE_URL");
+    if (!string.IsNullOrEmpty(neonUrl) && (neonUrl.StartsWith("postgresql://") || neonUrl.StartsWith("postgres://")))
+        return ParsePostgresUrl(neonUrl);
+
     var pgHost     = Environment.GetEnvironmentVariable("PGHOST");
     var pgPort     = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
     var pgUser     = Environment.GetEnvironmentVariable("PGUSER");
