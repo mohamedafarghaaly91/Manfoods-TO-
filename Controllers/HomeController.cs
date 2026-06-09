@@ -8,12 +8,12 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         if (HttpContext.Session.GetUserId() == null)
-            return RedirectToAction("Login", "Account");
+            return Redirect("/home/account/login");
 
-        var role = HttpContext.Session.GetRole();
-        if (role == "Admin_Full" || role == "Admin_Read")
-            return RedirectToAction("Analytics", "Admin");
-
-        return RedirectToAction("Index", "Dashboard");
+        return HttpContext.Session.IsAdmin()
+            ? Redirect("/admin/dashboard/analytics")
+            : Redirect("/home/dashboard");
     }
+
+    public IActionResult Error() => View();
 }

@@ -1,0 +1,91 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpCtx
+@{
+    var session = HttpCtx.HttpContext?.Session;
+    var userEmail    = session?.GetString("Email") ?? "";
+    var userRole     = session?.GetString("Role")  ?? "";
+    var assignedName = session?.GetString("AssignedName") ?? "";
+    var displayName  = !string.IsNullOrEmpty(assignedName) ? assignedName : userEmail;
+    var initials     = string.IsNullOrEmpty(displayName) ? "U" : displayName.Substring(0,1).ToUpper();
+
+    string RoleLabel(string r) => r switch {
+        "Operation_Manager"    => "Operations Manager",
+        "Operation_Consultant" => "Consultant",
+        _ => r.Replace("_"," ")
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — Manfoods" : "Manfoods McDonald's")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+</head>
+<body>
+<div class="app-wrapper">
+    <aside class="sidebar home-sidebar">
+        <div class="sidebar-brand home-brand">
+            <div class="brand-logo-row">
+                <img src="/images/mclogo.png" alt="Logo" class="brand-logo-img"/>
+                <div class="brand-texts">
+                    <span class="brand-name-main">Manfoods</span>
+                    <span class="brand-name-sub">McDonald's</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="home-user-hero">
+            <div class="hero-avatar">@initials</div>
+            <div class="hero-name">@displayName</div>
+            <div class="hero-role">@RoleLabel(userRole)</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">My Workspace</div>
+            <a href="/home/dashboard" class="nav-item active">
+                <span class="nav-item-inner">
+                    <span class="nav-icon-wrap"><i class="bi bi-speedometer2"></i></span>
+                    <span class="nav-item-label">Dashboard</span>
+                </span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-inner">
+                <form asp-area="Home" asp-controller="Account" asp-action="Logout" method="post" class="w-100">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-signout-full">
+                        <i class="bi bi-box-arrow-left me-2"></i>Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert-banner alert-success-banner">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert-banner alert-error-banner">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            </div>
+        }
+        <div class="page-content">
+            @RenderBody()
+        </div>
+    </main>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

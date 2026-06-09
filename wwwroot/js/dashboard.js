@@ -1,8 +1,10 @@
-/* Shared dashboard chart logic for Analytics and Turnover pages */
-Chart.defaults.color = '#94a3b8';
+/* Shared dashboard chart logic — Admin & Home areas */
+Chart.defaults.color = '#7a7672';
 
 let periodMonth, periodYear, storeFilter = '';
 let jobTitleChart, tenureChart, genderChart;
+
+const COLORS = ['#DA291C', '#FFC72C', '#27251F', '#e8630a', '#b82015'];
 
 async function fetchJson(url) {
     const r = await fetch(url);
@@ -13,10 +15,19 @@ function monthName(m, y) {
     return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
+function buildQuery() {
+    const p = new URLSearchParams();
+    if (periodMonth) p.set('month', periodMonth);
+    if (periodYear)  p.set('year',  periodYear);
+    if (storeFilter) p.set('store', storeFilter);
+    return p.toString();
+}
+
 async function loadPeriods() {
     const periods = await fetchJson('/api/dashboard/available-periods');
     const sel = document.getElementById('periodSelect');
     if (!sel) return;
+    sel.innerHTML = '<option value="">Select Period</option>';
     periods.forEach(p => {
         const opt = document.createElement('option');
         opt.value = `${p.month}-${p.year}`;
@@ -26,9 +37,8 @@ async function loadPeriods() {
     if (periods.length > 0) {
         sel.value = `${periods[0].month}-${periods[0].year}`;
         periodMonth = periods[0].month;
-        periodYear = periods[0].year;
-        const stSel = document.getElementById('storeSelect');
-        if (stSel) await loadStores();
+        periodYear  = periods[0].year;
+        if (document.getElementById('storeSelect')) await loadStores();
         await loadAll();
     }
 }
@@ -49,14 +59,6 @@ async function loadStores() {
     if (cur) sel.value = cur;
 }
 
-function buildQuery() {
-    const p = new URLSearchParams();
-    if (periodMonth) p.set('month', periodMonth);
-    if (periodYear) p.set('year', periodYear);
-    if (storeFilter) p.set('store', storeFilter);
-    return p.toString();
-}
-
 async function loadKpis() {
     const kpiEl = document.getElementById('kpiCards');
     if (!kpiEl) return;
@@ -68,8 +70,6 @@ async function loadKpis() {
         <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(data.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">Turnover Rate</div></div>
     `;
 }
-
-const COLORS = ['#6366f1', '#22d3ee', '#f59e0b', '#10b981', '#f43f5e'];
 
 function mkChart(ref, id, cfg) {
     if (ref) ref.destroy();
@@ -88,20 +88,20 @@ async function loadCharts() {
 
     jobTitleChart = mkChart(jobTitleChart, 'jobTitleChart', {
         type: 'bar',
-        data: { labels: jobTitle.map(d => d.label), datasets: [{ data: jobTitle.map(d => d.value), backgroundColor: '#6366f1', borderRadius: 4 }] },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2a2d35' }, ticks: { color: '#94a3b8' } }, y: { grid: { display: false }, ticks: { color: '#94a3b8' } } } }
+        data: { labels: jobTitle.map(d=>d.label), datasets: [{ data: jobTitle.map(d=>d.value), backgroundColor: '#DA291C', borderRadius: 4 }] },
+        options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#e8e8e8'},ticks:{color:'#7a7672'}},y:{grid:{display:false},ticks:{color:'#7a7672'}}} }
     });
 
     tenureChart = mkChart(tenureChart, 'tenureChart', {
         type: 'bar',
-        data: { labels: tenure.map(d => d.label), datasets: [{ data: tenure.map(d => d.value), backgroundColor: '#22d3ee', borderRadius: 4 }] },
-        options: { plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#94a3b8' } }, y: { grid: { color: '#2a2d35' }, ticks: { color: '#94a3b8' } } } }
+        data: { labels: tenure.map(d=>d.label), datasets: [{ data: tenure.map(d=>d.value), backgroundColor: '#FFC72C', borderRadius: 4 }] },
+        options: { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#7a7672'}},y:{grid:{color:'#e8e8e8'},ticks:{color:'#7a7672'}}} }
     });
 
     genderChart = mkChart(genderChart, 'genderChart', {
         type: 'doughnut',
-        data: { labels: gender.map(d => d.label), datasets: [{ data: gender.map(d => d.value), backgroundColor: COLORS, borderWidth: 0 }] },
-        options: { plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 16 } } } }
+        data: { labels: gender.map(d=>d.label), datasets: [{ data: gender.map(d=>d.value), backgroundColor: COLORS, borderWidth: 0 }] },
+        options: { plugins:{legend:{position:'bottom', labels:{color:'#7a7672', padding:16}}} }
     });
 }
 
@@ -109,7 +109,7 @@ async function loadAll() { await Promise.all([loadKpis(), loadCharts()]); }
 
 const periodSel = document.getElementById('periodSelect');
 if (periodSel) {
-    periodSel.addEventListener('change', async function () {
+    periodSel.addEventListener('change', async function() {
         if (!this.value) return;
         const [m, y] = this.value.split('-');
         periodMonth = parseInt(m); periodYear = parseInt(y);
@@ -122,7 +122,7 @@ if (periodSel) {
 
 const storeSel = document.getElementById('storeSelect');
 if (storeSel) {
-    storeSel.addEventListener('change', async function () {
+    storeSel.addEventListener('change', async function() {
         storeFilter = this.value || '';
         await loadAll();
     });
