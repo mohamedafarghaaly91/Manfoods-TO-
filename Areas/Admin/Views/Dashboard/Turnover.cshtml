@@ -441,7 +441,8 @@ async function tvLoadTrendMatrix() {
 
 document.getElementById('matrixSearch').addEventListener('input', mxRender);
 
-/* Load trend matrix once on page load (not period-dependent) */
-document.addEventListener('DOMContentLoaded', () => tvLoadTrendMatrix());
+/* Load trend matrix once — scripts block runs after DOMContentLoaded fires,
+   so call directly instead of adding a listener that would never fire. */
+tvLoadTrendMatrix();
 </script>
 }
