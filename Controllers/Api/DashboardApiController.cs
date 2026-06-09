@@ -12,11 +12,13 @@ public class DashboardApiController : ControllerBase
 {
     private readonly IDashboardService _dashboard;
     private readonly IStoreService _stores;
+    private readonly IGeminiService _gemini;
 
-    public DashboardApiController(IDashboardService dashboard, IStoreService stores)
+    public DashboardApiController(IDashboardService dashboard, IStoreService stores, IGeminiService gemini)
     {
         _dashboard = dashboard;
         _stores = stores;
+        _gemini = gemini;
     }
 
     [HttpGet("kpis")]
@@ -65,5 +67,33 @@ public class DashboardApiController : ControllerBase
         var assignedName = HttpContext.Session.GetAssignedName();
         var stores = await _stores.GetStoresAsync(month, year, role, assignedName);
         return Ok(stores.Select(s => new { storeName = s.StoreName }));
+    }
+
+    public record AiChatRequest(string Question, int? Month, int? Year, string? Store);
+
+    [HttpPost("ai-chat")]
+    public async Task<IActionResult> AiChat([FromBody] AiChatRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Question))
+            return BadRequest(new { error = "السؤال لا يمكن أن يكون فارغًا." });
+
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetAssignedName();
+
+        var kpis = await _dashboard.GetKpisAsync(request.Month, request.Year, request.Store, role, assignedName);
+
+        var context = new GeminiContext
+        {
+            Month = kpis.Month,
+            Year = kpis.Year,
+            Store = request.Store,
+            TotalHeadcount = kpis.TotalHeadcount,
+            TotalResignations = kpis.TotalResignations,
+            TurnoverRate = kpis.TurnoverRate,
+            NewHires = kpis.NewHires
+        };
+
+        var answer = await _gemini.AskAsync(request.Question, context);
+        return Ok(new { answer });
     }
 }
