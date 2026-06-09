@@ -1,11 +1,11 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpCtx
 @{
-    var session = HttpCtx.HttpContext?.Session;
-    var userEmail = session?.GetString("Email") ?? "";
-    var userRole  = session?.GetString("Role")  ?? "";
-    var currentPath = HttpCtx.HttpContext?.Request.Path.Value ?? "";
+    var session      = HttpCtx.HttpContext?.Session;
+    var userEmail    = session?.GetString("Email") ?? "";
+    var userRole     = session?.GetString("Role")  ?? "";
+    var currentPath  = HttpCtx.HttpContext?.Request.Path.Value ?? "";
     bool IsActive(string seg) => currentPath.Contains(seg, StringComparison.OrdinalIgnoreCase);
-    var initials = string.IsNullOrEmpty(userEmail) ? "A" : userEmail.Substring(0,1).ToUpper();
+    var initials     = string.IsNullOrEmpty(userEmail) ? "A" : userEmail.Substring(0,1).ToUpper();
     bool isFullAdmin = userRole == "Admin_Full";
 }
 <!DOCTYPE html>
@@ -20,99 +20,138 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
 </head>
 <body>
-<div class="app-wrapper">
-    <aside class="sidebar">
-        <div class="sidebar-brand">
-            <div class="brand-logo-row">
-                <img src="/images/mclogo.png" alt="Logo" class="brand-logo-img"/>
-                <div class="brand-texts">
-                    <span class="brand-name-main">Manfoods</span>
-                    <span class="brand-name-sub">Admin Portal</span>
-                </div>
+
+<!-- ══ TOP NAV ════════════════════════════════════════════ -->
+<header class="topnav">
+    <div class="topnav-inner">
+
+        <!-- Brand -->
+        <a class="topnav-brand" href="/admin/dashboard/analytics">
+            <img src="/images/mclogo.png" alt="Manfoods Logo" class="topnav-logo"/>
+            <div class="topnav-brand-texts">
+                <span class="topnav-brand-main">Manfoods</span>
+                <span class="topnav-brand-sub">Admin Portal</span>
             </div>
-        </div>
+        </a>
 
-        <nav class="sidebar-nav">
-            <div class="nav-section-label">Analytics</div>
-            <a href="/admin/dashboard/analytics" class="nav-item @(IsActive("Analytics") ? "active" : "")">
-                <span class="nav-item-inner">
-                    <span class="nav-icon-wrap"><i class="bi bi-bar-chart-line-fill"></i></span>
-                    <span class="nav-item-label">Global Analytics</span>
-                </span>
+        <!-- Center nav links -->
+        <nav class="topnav-links" id="topnavLinks">
+            <a href="/admin/dashboard/analytics" class="topnav-link @(IsActive("Analytics") ? "active" : "")">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                <span>Global Analytics</span>
             </a>
-            <a href="/admin/dashboard/turnover" class="nav-item @(IsActive("Turnover") ? "active" : "")">
-                <span class="nav-item-inner">
-                    <span class="nav-icon-wrap"><i class="bi bi-pie-chart-fill"></i></span>
-                    <span class="nav-item-label">Turnover Analysis</span>
-                </span>
+            <a href="/admin/dashboard/turnover" class="topnav-link @(IsActive("Turnover") ? "active" : "")">
+                <i class="bi bi-pie-chart-fill"></i>
+                <span>Turnover Analysis</span>
             </a>
-
-            <div class="nav-section-label">Management</div>
-            <a href="/admin/dashboard/uploads" class="nav-item @(IsActive("Uploads") ? "active" : "")">
-                <span class="nav-item-inner">
-                    <span class="nav-icon-wrap"><i class="bi bi-cloud-upload-fill"></i></span>
-                    <span class="nav-item-label">Data Management</span>
-                </span>
+            <a href="/admin/dashboard/uploads" class="topnav-link @(IsActive("Uploads") ? "active" : "")">
+                <i class="bi bi-cloud-upload-fill"></i>
+                <span>Data Management</span>
             </a>
-            <a href="/admin/dashboard/reports" class="nav-item @(IsActive("Reports") ? "active" : "")">
-                <span class="nav-item-inner">
-                    <span class="nav-icon-wrap"><i class="bi bi-file-earmark-bar-graph-fill"></i></span>
-                    <span class="nav-item-label">Reports</span>
-                </span>
+            <a href="/admin/dashboard/reports" class="topnav-link @(IsActive("Reports") ? "active" : "")">
+                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                <span>Reports</span>
             </a>
-
             @if (isFullAdmin)
             {
-                <div class="nav-section-label">System</div>
-                <a href="/admin/dashboard/users" class="nav-item @(IsActive("Users") ? "active" : "")">
-                    <span class="nav-item-inner">
-                        <span class="nav-icon-wrap"><i class="bi bi-people-fill"></i></span>
-                        <span class="nav-item-label">Users</span>
-                        <span class="nav-item-badge">Admin</span>
-                    </span>
+                <a href="/admin/dashboard/users" class="topnav-link @(IsActive("Users") ? "active" : "")">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Users</span>
+                    <span class="topnav-admin-badge">Admin</span>
                 </a>
             }
         </nav>
 
-        <div class="sidebar-footer">
-            <div class="sidebar-footer-inner">
-                <div class="user-avatar">@initials</div>
-                <div class="user-details">
-                    <div class="user-email">@userEmail</div>
-                    <div class="user-role-badge">
-                        <i class="bi bi-shield-fill-check" style="font-size:9px;"></i>
-                        @userRole.Replace("_"," ")
-                    </div>
-                </div>
-                <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn-logout" title="Sign Out"><i class="bi bi-box-arrow-right"></i></button>
-                </form>
+        <!-- Right: user + logout -->
+        <div class="topnav-user">
+            <div class="topnav-avatar">@initials</div>
+            <div class="topnav-user-details">
+                <div class="topnav-user-email">@userEmail</div>
+                <div class="topnav-user-role">@userRole.Replace("_"," ")</div>
             </div>
+            <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="d-inline ms-1">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="topnav-logout-btn" title="Sign Out">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
-    </aside>
 
-    <main class="main-content">
-        @if (TempData["Success"] != null)
+        <!-- Hamburger (mobile) -->
+        <button class="topnav-hamburger" id="topnavToggle" aria-label="Toggle menu">
+            <i class="bi bi-list" id="topnavHamburgerIcon"></i>
+        </button>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div class="topnav-mobile-menu" id="topnavMobileMenu">
+        <a href="/admin/dashboard/analytics" class="topnav-mobile-link @(IsActive("Analytics") ? "active" : "")">
+            <i class="bi bi-bar-chart-line-fill"></i> Global Analytics
+        </a>
+        <a href="/admin/dashboard/turnover" class="topnav-mobile-link @(IsActive("Turnover") ? "active" : "")">
+            <i class="bi bi-pie-chart-fill"></i> Turnover Analysis
+        </a>
+        <a href="/admin/dashboard/uploads" class="topnav-mobile-link @(IsActive("Uploads") ? "active" : "")">
+            <i class="bi bi-cloud-upload-fill"></i> Data Management
+        </a>
+        <a href="/admin/dashboard/reports" class="topnav-mobile-link @(IsActive("Reports") ? "active" : "")">
+            <i class="bi bi-file-earmark-bar-graph-fill"></i> Reports
+        </a>
+        @if (isFullAdmin)
         {
-            <div class="alert-banner alert-success-banner">
-                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
-            </div>
+            <a href="/admin/dashboard/users" class="topnav-mobile-link @(IsActive("Users") ? "active" : "")">
+                <i class="bi bi-people-fill"></i> Users
+            </a>
         }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert-banner alert-error-banner">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        <div class="topnav-mobile-user">
+            <div class="topnav-avatar">@initials</div>
+            <div class="topnav-user-details">
+                <div class="topnav-user-email">@userEmail</div>
+                <div class="topnav-user-role">@userRole.Replace("_"," ")</div>
             </div>
-        }
-        <div class="page-content">
-            @RenderBody()
+            <form asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post" class="d-inline ms-auto">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="topnav-logout-btn" title="Sign Out">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
-    </main>
-</div>
+    </div>
+</header>
+
+<!-- ══ MAIN CONTENT ═══════════════════════════════════════ -->
+<main class="main-content">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-banner alert-success-banner">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert-banner alert-error-banner">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+        </div>
+    }
+    <div class="page-content">
+        @RenderBody()
+    </div>
+</main>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const toggle = document.getElementById('topnavToggle');
+    const menu   = document.getElementById('topnavMobileMenu');
+    const icon   = document.getElementById('topnavHamburgerIcon');
+    if (!toggle) return;
+    toggle.addEventListener('click', () => {
+        const open = menu.classList.toggle('open');
+        icon.className = open ? 'bi bi-x-lg' : 'bi bi-list';
+    });
+})();
+</script>
 @await RenderSectionAsync("Scripts", required: false)
 
 <!-- ═══════════════════════════════════════════════════
@@ -122,7 +161,7 @@
     #ai-fab {
         position: fixed; bottom: 28px; right: 28px; z-index: 1050;
         width: 56px; height: 56px; border-radius: 50%;
-        background: linear-gradient(135deg, #c8102e, #da291c);
+        background: linear-gradient(135deg, #DA291C, #b82015);
         border: none; box-shadow: 0 4px 18px rgba(200,16,46,.45);
         cursor: pointer; display: flex; align-items: center; justify-content: center;
         transition: transform .2s, box-shadow .2s;
@@ -132,8 +171,7 @@
     #ai-fab .ai-fab-badge {
         position: absolute; top: -2px; right: -2px;
         width: 14px; height: 14px; border-radius: 50%;
-        background: #FFC72C; border: 2px solid #fff;
-        display: none;
+        background: #FFC72C; border: 2px solid #fff; display: none;
     }
     #ai-fab .ai-fab-badge.has-msg { display: block; }
 
@@ -151,9 +189,8 @@
         from { opacity: 0; transform: translateY(18px); }
         to   { opacity: 1; transform: translateY(0); }
     }
-
     .ai-header {
-        background: linear-gradient(135deg, #c8102e, #da291c);
+        background: linear-gradient(135deg, #DA291C, #b82015);
         color: #fff; padding: 14px 16px;
         display: flex; align-items: center; gap: 10px;
     }
@@ -164,36 +201,30 @@
     }
     .ai-header-texts { flex: 1; }
     .ai-header-title { font-size: 14px; font-weight: 700; line-height: 1.2; }
-    .ai-header-sub { font-size: 11px; opacity: .8; }
+    .ai-header-sub   { font-size: 11px; opacity: .8; }
     .ai-close-btn {
         background: none; border: none; color: #fff; opacity: .8;
         font-size: 20px; line-height: 1; cursor: pointer; padding: 0;
         transition: opacity .15s;
     }
     .ai-close-btn:hover { opacity: 1; }
-
     .ai-messages {
         flex: 1; overflow-y: auto; padding: 14px;
-        display: flex; flex-direction: column; gap: 10px;
-        background: #fafafa;
+        display: flex; flex-direction: column; gap: 10px; background: #fafafa;
     }
     .ai-messages::-webkit-scrollbar { width: 4px; }
     .ai-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
-
     .ai-bubble {
-        max-width: 88%; padding: 10px 13px;
-        border-radius: 14px; font-size: 13.5px; line-height: 1.55;
-        word-break: break-word;
+        max-width: 88%; padding: 10px 13px; border-radius: 14px;
+        font-size: 13.5px; line-height: 1.55; word-break: break-word;
     }
     .ai-bubble.bot {
         background: #fff; border: 1px solid #ececec;
-        border-bottom-left-radius: 4px; align-self: flex-start;
-        color: #222;
+        border-bottom-left-radius: 4px; align-self: flex-start; color: #222;
     }
     .ai-bubble.user {
-        background: linear-gradient(135deg, #c8102e, #da291c);
-        color: #fff; border-bottom-right-radius: 4px;
-        align-self: flex-end;
+        background: linear-gradient(135deg, #DA291C, #b82015);
+        color: #fff; border-bottom-right-radius: 4px; align-self: flex-end;
     }
     .ai-bubble.loading { background: #fff; border: 1px solid #ececec; align-self: flex-start; }
     .ai-dots span {
@@ -207,7 +238,6 @@
         0%,80%,100% { transform: scale(.7); opacity:.5; }
         40%          { transform: scale(1);  opacity:1; }
     }
-
     .ai-footer {
         padding: 10px 12px; border-top: 1px solid #f0f0f0;
         background: #fff; display: flex; gap: 8px; align-items: flex-end;
@@ -218,10 +248,10 @@
         outline: none; max-height: 90px; line-height: 1.4;
         font-family: inherit; transition: border-color .2s;
     }
-    #ai-input:focus { border-color: #c8102e; }
+    #ai-input:focus { border-color: #DA291C; }
     #ai-send-btn {
         width: 38px; height: 38px; border-radius: 10px; border: none; flex-shrink: 0;
-        background: linear-gradient(135deg, #c8102e, #da291c);
+        background: linear-gradient(135deg, #DA291C, #b82015);
         color: #fff; cursor: pointer; display: flex;
         align-items: center; justify-content: center;
         transition: opacity .2s; font-size: 15px;
@@ -253,49 +283,33 @@
     </div>
     <div class="ai-footer">
         <textarea id="ai-input" rows="1" placeholder="اكتب سؤالك هنا..."></textarea>
-        <button id="ai-send-btn" title="إرسال">
-            <i class="bi bi-send-fill"></i>
-        </button>
+        <button id="ai-send-btn" title="إرسال"><i class="bi bi-send-fill"></i></button>
     </div>
 </div>
 
 <script>
 (function () {
-    const fab       = document.getElementById('ai-fab');
-    const panel     = document.getElementById('ai-panel');
-    const closeBtn  = document.getElementById('ai-close-btn');
-    const messages  = document.getElementById('ai-messages');
-    const input     = document.getElementById('ai-input');
-    const sendBtn   = document.getElementById('ai-send-btn');
-    const badge     = document.getElementById('ai-badge');
+    const fab      = document.getElementById('ai-fab');
+    const panel    = document.getElementById('ai-panel');
+    const closeBtn = document.getElementById('ai-close-btn');
+    const messages = document.getElementById('ai-messages');
+    const input    = document.getElementById('ai-input');
+    const sendBtn  = document.getElementById('ai-send-btn');
+    const badge    = document.getElementById('ai-badge');
 
     let isOpen = false;
-    let unread = false;
 
     fab.addEventListener('click', () => {
         isOpen = !isOpen;
         panel.classList.toggle('open', isOpen);
-        if (isOpen) { badge.classList.remove('has-msg'); unread = false; input.focus(); scrollBottom(); }
+        if (isOpen) { badge.classList.remove('has-msg'); input.focus(); scrollBottom(); }
     });
-
-    closeBtn.addEventListener('click', () => {
-        isOpen = false;
-        panel.classList.remove('open');
-    });
-
-    input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-    input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = Math.min(input.scrollHeight, 90) + 'px';
-    });
-
+    closeBtn.addEventListener('click', () => { isOpen = false; panel.classList.remove('open'); });
+    input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+    input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 90) + 'px'; });
     sendBtn.addEventListener('click', sendMessage);
 
-    function scrollBottom() {
-        setTimeout(() => { messages.scrollTop = messages.scrollHeight; }, 50);
-    }
+    function scrollBottom() { setTimeout(() => { messages.scrollTop = messages.scrollHeight; }, 50); }
 
     function addBubble(text, type) {
         const d = document.createElement('div');
@@ -322,15 +336,11 @@
     async function sendMessage() {
         const q = input.value.trim();
         if (!q || sendBtn.disabled) return;
-
         addBubble(q, 'user');
-        input.value = '';
-        input.style.height = 'auto';
+        input.value = ''; input.style.height = 'auto';
         sendBtn.disabled = true;
-
         const loading = addBubble('', 'loading');
         const ctx = getPageContext();
-
         try {
             const res = await fetch('/api/dashboard/ai-chat', {
                 method: 'POST',
@@ -344,11 +354,8 @@
             loading.remove();
             addBubble('تعذر الاتصال بالخادم. حاول مرة أخرى.', 'bot');
         }
-
-        sendBtn.disabled = false;
-        input.focus();
-
-        if (!isOpen) { badge.classList.add('has-msg'); unread = true; }
+        sendBtn.disabled = false; input.focus();
+        if (!isOpen) badge.classList.add('has-msg');
     }
 })();
 </script>
