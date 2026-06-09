@@ -165,22 +165,15 @@ public class DashboardService : IDashboardService
             .Select(g => new { Store = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        var prevMonth = month == 1 ? 12 : month - 1;
-        var prevYear  = month == 1 ? year - 1 : year;
+        var newHireRaw = await empQ
+            .Where(e => e.HireDate != null
+                     && e.HireDate.Value.Month == month
+                     && e.HireDate.Value.Year  == year)
+            .GroupBy(e => e.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
 
-        var prevQ = _db.ActiveEmployees.Where(e => e.Month == prevMonth && e.Year == prevYear);
-        if (accessible != null && accessible.Count > 0)
-            prevQ = prevQ.Where(e => accessible.Contains(e.Store));
-
-        var prevIds = await prevQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
-        var currIds = await empQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
-
-        var prevByStore = prevIds.GroupBy(x => x.Store)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.EmployeeId).ToHashSet());
-        var newHiresByStore = currIds.GroupBy(x => x.Store)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Count(x => !prevByStore.TryGetValue(x.Store, out var ids) || !ids.Contains(x.EmployeeId)));
+        var newHiresByStore = newHireRaw.ToDictionary(x => x.Store, x => x.Count);
 
         // Take first match per store name to avoid duplicate-key issues
         var storeRefList = await _db.StoreReferences
