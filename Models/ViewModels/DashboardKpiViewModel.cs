@@ -21,3 +21,38 @@ public class PeriodItem
     public int Month { get; set; }
     public int Year { get; set; }
 }
+
+public class StoreComparisonRow
+{
+    public string StoreName { get; set; } = "";
+    public string OperationConsultant { get; set; } = "";
+    public string OperationManager { get; set; } = "";
+    public int Headcount { get; set; }
+    public int NewHires { get; set; }
+    public int Resignations { get; set; }
+    public double TurnoverRate { get; set; }
+}
+
+public class OcOmRow
+{
+    public string Name { get; set; } = "";
+    public string Type { get; set; } = "";
+    public int StoreCount { get; set; }
+    public int TotalHeadcount { get; set; }
+    public int TotalResignations { get; set; }
+    public double AvgTurnoverRate { get; set; }
+}
+
+public class OcOmAnalysisResult
+{
+    public List<OcOmRow> OcRows { get; set; } = new();
+    public List<OcOmRow> OmRows { get; set; } = new();
+}
+
+public class SmartInsightItem
+{
+    public string Icon { get; set; } = "";
+    public string Color { get; set; } = "";
+    public string Title { get; set; } = "";
+    public string Description { get; set; } = "";
+}

@@ -69,6 +69,33 @@ public class DashboardApiController : ControllerBase
         return Ok(stores.Select(s => new { storeName = s.StoreName }));
     }
 
+    [HttpGet("store-comparison")]
+    public async Task<IActionResult> StoreComparison([FromQuery] int? month, [FromQuery] int? year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetAssignedName();
+        var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName);
+        return Ok(await _dashboard.GetStoreComparisonAsync(kpis.Month, kpis.Year, role, assignedName));
+    }
+
+    [HttpGet("oc-om-analysis")]
+    public async Task<IActionResult> OcOmAnalysis([FromQuery] int? month, [FromQuery] int? year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetAssignedName();
+        var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName);
+        return Ok(await _dashboard.GetOcOmAnalysisAsync(kpis.Month, kpis.Year, role, assignedName));
+    }
+
+    [HttpGet("smart-insights")]
+    public async Task<IActionResult> SmartInsights([FromQuery] int? month, [FromQuery] int? year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetAssignedName();
+        var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName);
+        return Ok(await _dashboard.GetSmartInsightsAsync(kpis.Month, kpis.Year, role, assignedName));
+    }
+
     public record AiChatRequest(string Question, int? Month, int? Year, string? Store);
 
     [HttpPost("ai-chat")]

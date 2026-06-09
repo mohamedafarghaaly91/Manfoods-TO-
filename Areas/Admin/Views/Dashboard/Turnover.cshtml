@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-title">Turnover Analysis</h1>
-        <p class="page-subtitle">Deep-dive into resignation patterns</p>
+        <p class="page-subtitle">Deep-dive into resignation patterns and store performance</p>
     </div>
     <div class="d-flex gap-2">
         <select id="periodSelect" class="form-select form-select-dark" style="width:180px">
@@ -14,22 +14,291 @@
     </div>
 </div>
 
-<div class="charts-grid">
+<!-- ── Charts ────────────────────────────────────────────── -->
+<div class="charts-grid mb-4">
     <div class="chart-card">
-        <div class="chart-header"><h6>Turnover by Job Title</h6></div>
+        <div class="chart-header"><h6>Turnover by Job Title</h6><p>Resignations grouped by role</p></div>
         <div class="chart-body"><canvas id="jobTitleChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>Turnover by Tenure</h6></div>
+        <div class="chart-header"><h6>Turnover by Tenure</h6><p>Duration before resignation</p></div>
         <div class="chart-body"><canvas id="tenureChart"></canvas></div>
     </div>
     <div class="chart-card chart-full">
-        <div class="chart-header"><h6>Gender Breakdown</h6></div>
+        <div class="chart-header"><h6>Gender Breakdown</h6><p>Active workforce distribution</p></div>
         <div class="chart-body chart-body-sm"><canvas id="genderChart"></canvas></div>
     </div>
 </div>
 
+<!-- ── Smart Insights ─────────────────────────────────────── -->
+<div class="d-flex align-items-center gap-2 mb-3">
+    <div style="width:4px;height:22px;background:linear-gradient(135deg,#c8102e,#da291c);border-radius:2px"></div>
+    <h5 class="mb-0 fw-bold">Smart Insights</h5>
+    <span class="badge ms-1" style="background:#FFC72C;color:#27251F;font-size:10px;padding:4px 8px">AUTO-GENERATED</span>
+</div>
+<div id="insightsContainer" class="row g-3 mb-4">
+    <div class="col-12 text-center py-3 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" style="color:#c8102e"></div>Loading insights...
+    </div>
+</div>
+
+<!-- ── Store Comparison Table ─────────────────────────────── -->
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <div style="width:4px;height:22px;background:linear-gradient(135deg,#c8102e,#da291c);border-radius:2px"></div>
+        <h5 class="mb-0 fw-bold">Store Comparison</h5>
+        <span id="storeCountBadge" class="badge" style="background:#f0f0f0;color:#555;font-size:11px"></span>
+    </div>
+    <input type="text" id="storeSearch" class="form-control form-control-sm"
+           placeholder="&#xF52A; Search store, OC, OM…" style="width:220px;border-radius:20px">
+</div>
+<div class="chart-card mb-4 p-0" style="overflow:hidden">
+    <div class="table-responsive">
+        <table id="storeTable" class="table table-hover mb-0" style="font-size:13px">
+            <thead style="background:#f8f8f8;border-bottom:2px solid #eee">
+                <tr>
+                    <th class="tv-sort px-3 py-2" data-col="storeName" style="cursor:pointer;min-width:160px">
+                        Store Name <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2" data-col="operationConsultant" style="cursor:pointer">
+                        OC <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2" data-col="operationManager" style="cursor:pointer">
+                        OM <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2 text-center" data-col="headcount" style="cursor:pointer">
+                        Headcount <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2 text-center" data-col="newHires" style="cursor:pointer">
+                        New Hires <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2 text-center" data-col="resignations" style="cursor:pointer">
+                        Resignations <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                    <th class="tv-sort px-3 py-2 text-center" data-col="turnoverRate" style="cursor:pointer">
+                        Turnover% <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="storeTableBody">
+                <tr><td colspan="7" class="text-center py-4 text-muted">
+                    <div class="spinner-border spinner-border-sm me-2" style="color:#c8102e"></div>Loading...
+                </td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ── OC / OM Analysis ───────────────────────────────────── -->
+<div class="d-flex align-items-center gap-2 mb-3">
+    <div style="width:4px;height:22px;background:linear-gradient(135deg,#c8102e,#da291c);border-radius:2px"></div>
+    <h5 class="mb-0 fw-bold">By Operation Consultant &amp; Manager</h5>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="chart-card p-0 h-100" style="overflow:hidden">
+            <div class="chart-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-badge" style="color:#c8102e;font-size:16px"></i>
+                <div>
+                    <h6 class="mb-0">Operation Consultants</h6>
+                    <p class="mb-0">Ranked by weighted turnover rate</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                    <thead style="background:#f8f8f8">
+                        <tr>
+                            <th class="px-3 py-2">Name</th>
+                            <th class="px-3 py-2 text-center">Stores</th>
+                            <th class="px-3 py-2 text-center">Headcount</th>
+                            <th class="px-3 py-2 text-center">Resignations</th>
+                            <th class="px-3 py-2 text-center">Turnover%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ocTableBody">
+                        <tr><td colspan="5" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm me-2" style="color:#c8102e"></div>Loading...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-card p-0 h-100" style="overflow:hidden">
+            <div class="chart-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-gear" style="color:#FFC72C;font-size:16px"></i>
+                <div>
+                    <h6 class="mb-0">Operation Managers</h6>
+                    <p class="mb-0">Ranked by weighted turnover rate</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                    <thead style="background:#f8f8f8">
+                        <tr>
+                            <th class="px-3 py-2">Name</th>
+                            <th class="px-3 py-2 text-center">Stores</th>
+                            <th class="px-3 py-2 text-center">Headcount</th>
+                            <th class="px-3 py-2 text-center">Resignations</th>
+                            <th class="px-3 py-2 text-center">Turnover%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="omTableBody">
+                        <tr><td colspan="5" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm me-2" style="color:#FFC72C"></div>Loading...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/dashboard.js" asp-append-version="true"></script>
+<script>
+/* ── Turnover Analytics — extra sections ────────────────── */
+let tvStoreData = [], tvSortCol = 'turnoverRate', tvSortAsc = false;
+
+function tvRateColor(rate) {
+    if (rate >= 15) return { bg: '#c8102e', fg: '#fff' };
+    if (rate >= 8)  return { bg: '#e8630a', fg: '#fff' };
+    if (rate >= 4)  return { bg: '#FFC72C', fg: '#27251F' };
+    return { bg: '#28a745', fg: '#fff' };
+}
+
+/* Store Comparison ----------------------------------------- */
+function tvRenderStoreTable() {
+    const search = (document.getElementById('storeSearch').value || '').toLowerCase();
+    let rows = tvStoreData.filter(r =>
+        r.storeName.toLowerCase().includes(search) ||
+        (r.operationConsultant || '').toLowerCase().includes(search) ||
+        (r.operationManager    || '').toLowerCase().includes(search)
+    );
+    rows.sort((a, b) => {
+        const va = a[tvSortCol], vb = b[tvSortCol];
+        if (typeof va === 'string') return tvSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return tvSortAsc ? va - vb : vb - va;
+    });
+
+    const badge = document.getElementById('storeCountBadge');
+    if (badge) badge.textContent = rows.length + ' stores';
+
+    const tbody = document.getElementById('storeTableBody');
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No matching stores.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map(r => {
+        const c = tvRateColor(r.turnoverRate);
+        const rateBadge = `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.turnoverRate.toFixed(1)}%</span>`;
+        return `<tr>
+            <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
+            <td class="px-3 py-2" style="color:#666">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2" style="color:#666">${r.operationManager    || '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2 text-center">${r.headcount}</td>
+            <td class="px-3 py-2 text-center" style="color:#28a745;font-weight:600">+${r.newHires}</td>
+            <td class="px-3 py-2 text-center" style="color:#c8102e;font-weight:600">${r.resignations}</td>
+            <td class="px-3 py-2 text-center">${rateBadge}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function tvLoadStoreComparison() {
+    if (!periodMonth || !periodYear) return;
+    const data = await fetchJson(`/api/dashboard/store-comparison?month=${periodMonth}&year=${periodYear}`);
+    tvStoreData = data || [];
+    tvRenderStoreTable();
+}
+
+/* OC / OM Analysis ----------------------------------------- */
+function tvRenderOcOmTable(tbodyId, rows) {
+    const tbody = document.getElementById(tbodyId);
+    if (!rows || !rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No data for this period.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map((r, i) => {
+        const c     = tvRateColor(r.avgTurnoverRate);
+        const badge = `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.avgTurnoverRate.toFixed(1)}%</span>`;
+        const rank  = i === 0 ? '<span style="color:#c8102e">▲</span>' : i === 1 ? '<span style="color:#e8630a">▲</span>' : '<span style="color:#aaa">•</span>';
+        return `<tr>
+            <td class="px-3 py-2">${rank} <span class="fw-semibold">${r.name}</span></td>
+            <td class="px-3 py-2 text-center">${r.storeCount}</td>
+            <td class="px-3 py-2 text-center">${r.totalHeadcount}</td>
+            <td class="px-3 py-2 text-center" style="color:#c8102e;font-weight:600">${r.totalResignations}</td>
+            <td class="px-3 py-2 text-center">${badge}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function tvLoadOcOmAnalysis() {
+    if (!periodMonth || !periodYear) return;
+    const data = await fetchJson(`/api/dashboard/oc-om-analysis?month=${periodMonth}&year=${periodYear}`);
+    tvRenderOcOmTable('ocTableBody', data.ocRows);
+    tvRenderOcOmTable('omTableBody', data.omRows);
+}
+
+/* Smart Insights ------------------------------------------- */
+async function tvLoadSmartInsights() {
+    if (!periodMonth || !periodYear) return;
+    const items     = await fetchJson(`/api/dashboard/smart-insights?month=${periodMonth}&year=${periodYear}`);
+    const container = document.getElementById('insightsContainer');
+
+    if (!items || !items.length) {
+        container.innerHTML = '<div class="col-12"><div class="alert alert-secondary py-2">No insights available — upload data for multiple periods to enable trend analysis.</div></div>';
+        return;
+    }
+
+    const colorMap = {
+        danger:    { bg: '#fff5f5', border: '#c8102e', text: '#c8102e' },
+        success:   { bg: '#f0fff4', border: '#198754', text: '#198754' },
+        warning:   { bg: '#fffbf0', border: '#FFC72C', text: '#9a6c00' },
+        secondary: { bg: '#f8f9fa', border: '#6c757d', text: '#6c757d' }
+    };
+
+    container.innerHTML = items.map(item => {
+        const c = colorMap[item.color] || colorMap.secondary;
+        return `<div class="col-md-6 col-xl-4">
+            <div style="background:${c.bg};border-left:4px solid ${c.border};border-radius:8px;padding:14px 16px;height:100%">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:17px"></i>
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:${c.text};margin-bottom:3px">${item.title}</div>
+                        <div style="font-size:12.5px;color:#555;line-height:1.55">${item.description}</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* Wire up sort headers ------------------------------------- */
+document.querySelectorAll('#storeTable .tv-sort').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (tvSortCol === col) { tvSortAsc = !tvSortAsc; }
+        else { tvSortCol = col; tvSortAsc = (col === 'storeName' || col === 'operationConsultant' || col === 'operationManager'); }
+        // Update sort icons
+        document.querySelectorAll('#storeTable .tv-sort i').forEach(i => i.className = 'bi bi-arrow-down-up text-muted');
+        const icon = th.querySelector('i');
+        if (icon) icon.className = tvSortAsc ? 'bi bi-sort-up text-danger' : 'bi bi-sort-down text-danger';
+        tvRenderStoreTable();
+    });
+});
+
+/* Search filter -------------------------------------------- */
+document.getElementById('storeSearch').addEventListener('input', tvRenderStoreTable);
+
+/* Hook into dashboard.js loadAll so extras refresh on period change */
+const _tvOrigLoadAll = loadAll;
+loadAll = async function () {
+    await _tvOrigLoadAll();
+    await tvLoadSmartInsights();
+    await tvLoadStoreComparison();
+    await tvLoadOcOmAnalysis();
+};
+</script>
 }

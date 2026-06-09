@@ -143,6 +143,232 @@ public class DashboardService : IDashboardService
             .ToListAsync();
     }
 
+    public async Task<List<StoreComparisonRow>> GetStoreComparisonAsync(int month, int year, string role, string? assignedName)
+    {
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
+
+        var empQ = _db.ActiveEmployees.Where(e => e.Month == month && e.Year == year);
+        if (accessible != null && accessible.Count > 0)
+            empQ = empQ.Where(e => accessible.Contains(e.Store));
+
+        var headcounts = await empQ
+            .GroupBy(e => e.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var resQ = _db.Resignations.Where(r => r.Month == month && r.Year == year);
+        if (accessible != null && accessible.Count > 0)
+            resQ = resQ.Where(r => accessible.Contains(r.Store));
+
+        var resignations = await resQ
+            .GroupBy(r => r.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var prevMonth = month == 1 ? 12 : month - 1;
+        var prevYear  = month == 1 ? year - 1 : year;
+
+        var prevQ = _db.ActiveEmployees.Where(e => e.Month == prevMonth && e.Year == prevYear);
+        if (accessible != null && accessible.Count > 0)
+            prevQ = prevQ.Where(e => accessible.Contains(e.Store));
+
+        var prevIds = await prevQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
+        var currIds = await empQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
+
+        var prevByStore = prevIds.GroupBy(x => x.Store)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.EmployeeId).ToHashSet());
+        var newHiresByStore = currIds.GroupBy(x => x.Store)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Count(x => !prevByStore.TryGetValue(x.Store, out var ids) || !ids.Contains(x.EmployeeId)));
+
+        // Take first match per store name to avoid duplicate-key issues
+        var storeRefList = await _db.StoreReferences
+            .Where(s => s.Month == month && s.Year == year)
+            .ToListAsync();
+        var storeRefs = storeRefList
+            .GroupBy(s => s.StoreName)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var resByStore = resignations.ToDictionary(r => r.Store, r => r.Count);
+
+        return headcounts
+            .Select(h =>
+            {
+                var res = resByStore.TryGetValue(h.Store, out var r) ? r : 0;
+                var nh  = newHiresByStore.TryGetValue(h.Store, out var n) ? n : 0;
+                storeRefs.TryGetValue(h.Store, out var sr);
+                return new StoreComparisonRow
+                {
+                    StoreName           = h.Store,
+                    Headcount           = h.Count,
+                    NewHires            = nh,
+                    Resignations        = res,
+                    TurnoverRate        = h.Count > 0 ? Math.Round((double)res / h.Count * 100, 1) : 0,
+                    OperationConsultant = sr?.OperationConsultant ?? "",
+                    OperationManager    = sr?.OperationManager    ?? ""
+                };
+            })
+            .OrderByDescending(s => s.TurnoverRate)
+            .ToList();
+    }
+
+    public async Task<OcOmAnalysisResult> GetOcOmAnalysisAsync(int month, int year, string role, string? assignedName)
+    {
+        var stores = await GetStoreComparisonAsync(month, year, role, assignedName);
+
+        OcOmRow ToRow(IGrouping<string, StoreComparisonRow> g, string type) => new()
+        {
+            Name              = g.Key,
+            Type              = type,
+            StoreCount        = g.Count(),
+            TotalResignations = g.Sum(s => s.Resignations),
+            TotalHeadcount    = g.Sum(s => s.Headcount),
+            AvgTurnoverRate   = g.Sum(s => s.Headcount) > 0
+                ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1)
+                : 0
+        };
+
+        var ocRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.OperationConsultant))
+            .GroupBy(s => s.OperationConsultant)
+            .Select(g => ToRow(g, "OC"))
+            .OrderByDescending(r => r.AvgTurnoverRate)
+            .ToList();
+
+        var omRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.OperationManager))
+            .GroupBy(s => s.OperationManager)
+            .Select(g => ToRow(g, "OM"))
+            .OrderByDescending(r => r.AvgTurnoverRate)
+            .ToList();
+
+        return new OcOmAnalysisResult { OcRows = ocRows, OmRows = omRows };
+    }
+
+    public async Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string role, string? assignedName)
+    {
+        var insights = new List<SmartInsightItem>();
+        var current  = await GetStoreComparisonAsync(month, year, role, assignedName);
+        if (!current.Any()) return insights;
+
+        var prevMonth   = month == 1 ? 12 : month - 1;
+        var prevYear    = month == 1 ? year - 1 : year;
+        var previous    = await GetStoreComparisonAsync(prevMonth, prevYear, role, assignedName);
+        var prevByStore = previous.ToDictionary(s => s.StoreName);
+
+        // 1. Highest turnover store
+        var highest = current.First();
+        if (highest.TurnoverRate > 0)
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-exclamation-triangle-fill",
+                Color       = "danger",
+                Title       = $"Highest Turnover: {highest.StoreName}",
+                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {highest.Headcount} employees."
+            });
+
+        // 2. Best performing store
+        var best = current.Where(s => s.Headcount > 0).OrderBy(s => s.TurnoverRate).FirstOrDefault();
+        if (best != null && current.Count > 1 && best.StoreName != highest.StoreName)
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-check-circle-fill",
+                Color       = "success",
+                Title       = $"Best Performing: {best.StoreName}",
+                Description = $"Lowest turnover at {best.TurnoverRate:F1}% with only {best.Resignations} resignation(s)."
+            });
+
+        // 3. Spike detection (>= 5% jump vs previous month)
+        var spikes = current
+            .Where(s => prevByStore.TryGetValue(s.StoreName, out var p) && s.TurnoverRate - p.TurnoverRate >= 5)
+            .OrderByDescending(s => s.TurnoverRate - prevByStore[s.StoreName].TurnoverRate)
+            .Take(3)
+            .ToList();
+
+        foreach (var spike in spikes)
+        {
+            var prev  = prevByStore[spike.StoreName];
+            var delta = spike.TurnoverRate - prev.TurnoverRate;
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-graph-up-arrow",
+                Color       = "warning",
+                Title       = $"Turnover Spike: {spike.StoreName}",
+                Description = $"↑ +{delta:F1}% from last month ({prev.TurnoverRate:F1}% → {spike.TurnoverRate:F1}%)."
+            });
+        }
+
+        // 4. Overall trend
+        if (previous.Any())
+        {
+            var currTotal = current.Sum(s => s.Resignations);
+            var prevTotal = previous.Sum(s => s.Resignations);
+            var diff      = currTotal - prevTotal;
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = diff > 0 ? "bi-arrow-up-circle-fill" : diff < 0 ? "bi-arrow-down-circle-fill" : "bi-dash-circle-fill",
+                Color       = diff > 0 ? "danger" : diff < 0 ? "success" : "secondary",
+                Title       = diff > 0 ? "Trend: Worsening" : diff < 0 ? "Trend: Improving" : "Trend: Stable",
+                Description = diff != 0
+                    ? $"Resignations {(diff > 0 ? "increased" : "decreased")} by {Math.Abs(diff)} vs last month ({prevTotal} → {currTotal})."
+                    : $"Same number of resignations ({currTotal}) as last month."
+            });
+        }
+
+        // 5. Worst OC by weighted turnover rate
+        var worstOc = current
+            .Where(s => !string.IsNullOrEmpty(s.OperationConsultant))
+            .GroupBy(s => s.OperationConsultant)
+            .Select(g => new
+            {
+                Name            = g.Key,
+                StoreCount      = g.Count(),
+                TotalRes        = g.Sum(s => s.Resignations),
+                TotalHead       = g.Sum(s => s.Headcount),
+                AvgTurnoverRate = g.Sum(s => s.Headcount) > 0
+                    ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1) : 0
+            })
+            .OrderByDescending(g => g.AvgTurnoverRate)
+            .FirstOrDefault();
+
+        if (worstOc != null)
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-person-fill-exclamation",
+                Color       = "warning",
+                Title       = $"Highest OC Turnover: {worstOc.Name}",
+                Description = $"{worstOc.AvgTurnoverRate:F1}% weighted avg across {worstOc.StoreCount} store(s) — {worstOc.TotalRes} total resignation(s)."
+            });
+
+        // 6. Worst OM by weighted turnover rate
+        var worstOm = current
+            .Where(s => !string.IsNullOrEmpty(s.OperationManager))
+            .GroupBy(s => s.OperationManager)
+            .Select(g => new
+            {
+                Name            = g.Key,
+                StoreCount      = g.Count(),
+                TotalRes        = g.Sum(s => s.Resignations),
+                TotalHead       = g.Sum(s => s.Headcount),
+                AvgTurnoverRate = g.Sum(s => s.Headcount) > 0
+                    ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1) : 0
+            })
+            .OrderByDescending(g => g.AvgTurnoverRate)
+            .FirstOrDefault();
+
+        if (worstOm != null)
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-person-badge-fill",
+                Color       = "warning",
+                Title       = $"Highest OM Turnover: {worstOm.Name}",
+                Description = $"{worstOm.AvgTurnoverRate:F1}% weighted avg across {worstOm.StoreCount} store(s) — {worstOm.TotalRes} total resignation(s)."
+            });
+
+        return insights;
+    }
+
     public async Task<List<StoreBreakdown>> GetPerStoreTurnoverAsync(int month, int year, string role, string? assignedName)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);

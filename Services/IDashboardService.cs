@@ -10,4 +10,7 @@ public interface IDashboardService
     Task<List<ChartDataItem>> GetGenderBreakdownAsync(int? month, int? year, string? store, string role, string? assignedName);
     Task<List<PeriodItem>> GetAvailablePeriodsAsync();
     Task<List<StoreBreakdown>> GetPerStoreTurnoverAsync(int month, int year, string role, string? assignedName);
+    Task<List<StoreComparisonRow>> GetStoreComparisonAsync(int month, int year, string role, string? assignedName);
+    Task<OcOmAnalysisResult> GetOcOmAnalysisAsync(int month, int year, string role, string? assignedName);
+    Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string role, string? assignedName);
 }
