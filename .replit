@@ -1,4 +1,4 @@
-modules = ["web", "dotnet-7.0", "nodejs-20", "nix", "dotnet-9.0"]
+modules = ["web", "dotnet-7.0", "nodejs-20", "bash", "dotnet-9.0"]
 
 [deployment]
 router = "application"
@@ -44,9 +44,11 @@ timeoutMs = 20000
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 8081
-externalPort = 8081
-
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_Wqtia7cLlO2C@ep-purple-sun-aq0hpauv.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require"
+Gemini_API_Key = "AQ.Ab8RN6L_mL07berfDJXF86mf06WSA3J7bLi-G2rqjgTDnLDDtw"
