@@ -3,12 +3,42 @@
     ViewData["Title"] = "Data Management";
 }
 
-<div class="page-header">
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
         <h1 class="page-title">Data Management</h1>
         <p class="page-subtitle">Upload monthly Excel files to import workforce data</p>
     </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="/admin/dashboard/download-template?type=active_employees" class="btn btn-outline-template btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>Template: Active Employees
+        </a>
+        <a href="/admin/dashboard/download-template?type=resignations" class="btn btn-outline-template btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>Template: Resignations
+        </a>
+        <a href="/admin/dashboard/download-template?type=store_reference" class="btn btn-outline-template btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>Template: Store Reference
+        </a>
+    </div>
 </div>
+
+<style>
+    .btn-outline-template {
+        background: transparent;
+        border: 1px solid #27ae60;
+        color: #27ae60;
+        font-size: 12px;
+        border-radius: 7px;
+        padding: 6px 12px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: background .15s, color .15s;
+    }
+    .btn-outline-template:hover {
+        background: #27ae60;
+        color: #fff;
+    }
+</style>
 
 <div class="row g-4 mb-4">
     <div class="col-lg-4">
