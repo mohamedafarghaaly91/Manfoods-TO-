@@ -1,1 +1,2 @@
 - [Manfoods MVC conversion](manfoods-mvc.md) — ASP.NET Core 9 MVC, BCrypt + ClosedXML packages, PGHOST/* env vars for DB, EnsureCreated() not Migrate(), @() Razor syntax required for method-call expressions.
+- [Speedee font CORS](speedee-font-cors.md) — McDonald's Speedee woff2 files on mcdonalds.com CDN are CORS-blocked; fallback stack (system-ui → -apple-system → Segoe UI → Roboto) renders acceptably.

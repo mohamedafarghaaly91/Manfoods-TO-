@@ -26,8 +26,9 @@
 </head>
 <body>
 <div class="app-wrapper">
-    <aside class="sidebar home-sidebar">
-        <div class="sidebar-brand home-brand">
+    <aside class="home-sidebar">
+        <!-- Brand strip -->
+        <div class="home-brand sidebar-brand">
             <div class="brand-logo-row">
                 <img src="/images/mclogo.png" alt="Logo" class="brand-logo-img"/>
                 <div class="brand-texts">
@@ -37,13 +38,15 @@
             </div>
         </div>
 
+        <!-- User card -->
         <div class="home-user-hero">
             <div class="hero-avatar">@initials</div>
             <div class="hero-name">@displayName</div>
             <div class="hero-role">@RoleLabel(userRole)</div>
         </div>
 
-        <nav class="sidebar-nav">
+        <!-- Navigation -->
+        <nav class="sidebar-nav" style="flex:1; padding: 8px 0;">
             <div class="nav-section-label">My Workspace</div>
             <a href="/home/dashboard" class="nav-item active">
                 <span class="nav-item-inner">
@@ -53,6 +56,7 @@
             </a>
         </nav>
 
+        <!-- Sign out -->
         <div class="sidebar-footer">
             <div class="sidebar-footer-inner">
                 <form asp-area="Home" asp-controller="Account" asp-action="Logout" method="post" class="w-100">

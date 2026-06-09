@@ -12,71 +12,97 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <style>
-        @@keyframes cardEntrance { 0%{opacity:0;transform:translateY(40px) scale(.96)} 100%{opacity:1;transform:translateY(0) scale(1)} }
-        @@keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @@keyframes cardEntrance { 0%{opacity:0;transform:translateY(28px) scale(.97)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+        @@keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
         @@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-        @@keyframes floatUp { 0%{transform:translateY(0) rotate(0deg);opacity:.4} 100%{transform:translateY(-100vh) rotate(360deg);opacity:0} }
-        @@keyframes pulse-ring { 0%{transform:scale(1);opacity:.5} 100%{transform:scale(1.6);opacity:0} }
+        @@keyframes floatUp { 0%{transform:translateY(0) rotate(0deg);opacity:.25} 100%{transform:translateY(-100vh) rotate(360deg);opacity:0} }
 
         .login-body {
-            background: linear-gradient(145deg, #ffffff 0%, #f9f9f9 35%, #fff8e1 65%, #fffde7 100%);
-            min-height:100vh; display:flex; align-items:center; justify-content:center;
-            position:relative; overflow:hidden;
+            background: linear-gradient(150deg, #27251f 0%, #1e1c18 50%, #0f0e0b 100%);
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
         }
         .login-body::before {
-            content:''; position:absolute; top:0; left:0; right:0; height:4px;
-            background:linear-gradient(90deg,#FFC72C,#ffdb6e,#FFC72C);
-            background-size:200% 100%; animation:shimmer 2.5s linear infinite;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: #ffbc0d;
         }
-        .bubble { position:absolute; border-radius:50%; background:rgba(255,199,44,.15); animation:floatUp linear infinite; }
-        .login-container { width:100%; max-width:420px; padding:16px; position:relative; z-index:10; }
+
+        /* Floating orbs */
+        .bubble { position: absolute; border-radius: 50%; background: rgba(255,188,13,.1); animation: floatUp linear infinite; }
+
+        .login-container { width: 100%; max-width: 420px; padding: 16px; position: relative; z-index: 10; }
+
         .login-card {
-            background:rgba(255,255,255,.94); backdrop-filter:blur(18px);
-            border:1px solid rgba(255,199,44,.25); border-radius:24px; padding:44px 40px 36px;
-            box-shadow:0 8px 32px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.9);
-            animation:cardEntrance .6s cubic-bezier(.22,1,.36,1) both;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 44px 40px 36px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.3);
+            animation: cardEntrance .55s cubic-bezier(.22,1,.36,1) both;
         }
-        .logo-outer { position:relative; display:inline-block; margin-bottom:12px; }
-        .logo-outer img { width:72px; height:auto; animation:logoFloat 3s ease-in-out infinite; filter:drop-shadow(0 4px 12px rgba(255,199,44,.5)); }
-        .pr { position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(255,199,44,.45); animation:pulse-ring 2s ease-out infinite; }
-        .pr:nth-child(2) { animation-delay:.7s; }
-        .login-title { font-size:22px; font-weight:900; color:#27251F; margin:0; }
-        .login-title span { color:#DA291C; }
-        .login-subtitle { font-size:12px; color:#9a9490; margin:5px 0 0; letter-spacing:1.2px; text-transform:uppercase; font-weight:500; }
-        .divider { display:flex; align-items:center; gap:10px; margin:18px 0; }
-        .divider::before,.divider::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#e8e8e8,transparent); }
-        .divider span { font-size:11px; color:#bbb; font-weight:600; }
-        .field-wrap { position:relative; margin-bottom:16px; }
-        .field-wrap .fi { position:absolute; left:14px; top:calc(50% + 13px); transform:translateY(-50%); color:#ccc; font-size:15px; pointer-events:none; transition:color .2s; }
-        .field-wrap:focus-within .fi { color:#DA291C; }
-        .field-wrap label { font-size:11px; font-weight:700; color:#7a7672; text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; display:block; }
-        .field-wrap input { padding-left:40px; height:48px; font-size:14px; border-radius:12px; border:1.5px solid #eee; background:#fafafa; color:#27251F; width:100%; transition:all .2s; }
-        .field-wrap input:focus { background:#fff; border-color:#DA291C; box-shadow:0 0 0 3px rgba(218,41,28,.1); outline:none; }
-        .field-wrap input::placeholder { color:#ccc; }
-        .btn-signin { width:100%; height:50px; background:linear-gradient(135deg,#DA291C,#c0200f); border:none; border-radius:12px; color:#fff; font-size:15px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 14px rgba(218,41,28,.35); margin-top:8px; position:relative; overflow:hidden; }
-        .btn-signin::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent); transition:left .4s; }
-        .btn-signin:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(218,41,28,.45); }
-        .btn-signin:hover::before { left:100%; }
-        .alert-banner { border-radius:10px; margin-bottom:16px; }
-        .login-footer { text-align:center; margin-top:18px; font-size:11px; color:#ccc; }
-        .admin-link { display:block; text-align:center; margin-top:14px; font-size:12px; color:#bbb; }
-        .admin-link a { color:#DA291C; font-weight:600; text-decoration:none; }
-        .admin-link a:hover { text-decoration:underline; }
+
+        .logo-wrap {
+            display: inline-block;
+            animation: logoFloat 3.5s ease-in-out infinite;
+            filter: drop-shadow(0 4px 12px rgba(255,188,13,.4));
+            margin-bottom: 14px;
+        }
+        .logo-wrap img { width: 72px; height: auto; }
+
+        .login-title { font-size: 28px; font-weight: 700; color: #292929; margin: 0; line-height: 32px; letter-spacing: -.15px; }
+        .login-title span { color: #ffbc0d; }
+        .login-subtitle { font-size: 11px; color: #9a9490; margin: 6px 0 0; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 400; }
+
+        .divider { display: flex; align-items: center; gap: 10px; margin: 22px 0 18px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+        .divider span { font-size: 11px; color: #bbb; font-weight: 400; white-space: nowrap; }
+
+        .field-wrap { position: relative; margin-bottom: 16px; }
+        .field-wrap .fi { position: absolute; left: 14px; top: calc(50% + 13px); transform: translateY(-50%); color: #ccc; font-size: 15px; pointer-events: none; transition: color .2s; }
+        .field-wrap:focus-within .fi { color: #c08b00; }
+        .field-wrap label { font-size: 11px; font-weight: 700; color: #6b6b6b; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; display: block; }
+        .field-wrap input {
+            padding-left: 40px; height: 48px; font-size: 15px;
+            border-radius: 8px; border: 1.5px solid #e5e7eb;
+            background: #fafafa; color: #292929; width: 100%;
+            transition: all .2s; outline: none;
+            font-family: 'Speedee', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .field-wrap input:focus { background: #fff; border-color: #ffbc0d; box-shadow: 0 0 0 3px rgba(255,188,13,.2); }
+        .field-wrap input::placeholder { color: #ccc; }
+
+        .btn-signin {
+            width: 100%; min-height: 50px;
+            background-color: #ffbc0d; border: 1px solid #c08b00;
+            border-radius: 48px; color: #292929;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: background .15s, box-shadow .15s, transform .1s;
+            margin-top: 8px;
+            font-family: 'Speedee', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .btn-signin:hover { background-color: #e6a800; box-shadow: 0 4px 14px rgba(255,188,13,.4); transform: translateY(-1px); }
+
+        .admin-link { display: block; text-align: center; margin-top: 16px; font-size: 12px; color: #bbb; }
+        .admin-link a { color: #c08b00; font-weight: 700; text-decoration: none; }
+        .admin-link a:hover { text-decoration: underline; }
+        .login-footer { text-align: center; margin-top: 18px; font-size: 11px; color: #ccc; }
+
+        .alert-error-banner { background: #fff5f5; border-left: 4px solid #c8102e; color: #c8102e; padding: 11px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; }
     </style>
 </head>
 <body class="login-body">
-    <div class="bubble" style="width:60px;height:60px;left:8%;animation-duration:12s;bottom:-60px;"></div>
+
+    <div class="bubble" style="width:60px;height:60px;left:8%;animation-duration:13s;bottom:-60px;"></div>
     <div class="bubble" style="width:30px;height:30px;left:22%;animation-duration:9s;animation-delay:2s;bottom:-30px;"></div>
-    <div class="bubble" style="width:80px;height:80px;left:72%;animation-duration:15s;animation-delay:1s;bottom:-80px;"></div>
-    <div class="bubble" style="width:20px;height:20px;left:87%;animation-duration:8s;animation-delay:3s;bottom:-20px;background:rgba(218,41,28,.08);"></div>
-    <div class="bubble" style="width:50px;height:50px;left:50%;animation-duration:11s;animation-delay:.5s;bottom:-50px;"></div>
+    <div class="bubble" style="width:80px;height:80px;left:72%;animation-duration:16s;animation-delay:1s;bottom:-80px;"></div>
+    <div class="bubble" style="width:18px;height:18px;left:87%;animation-duration:8s;animation-delay:3s;bottom:-18px;"></div>
+    <div class="bubble" style="width:50px;height:50px;left:50%;animation-duration:12s;animation-delay:.5s;bottom:-50px;"></div>
 
     <div class="login-container">
         <div class="login-card">
             <div class="text-center">
-                <div class="logo-outer">
-                    <div class="pr"></div>
-                    <div class="pr"></div>
+                <div class="logo-wrap">
                     <img src="/images/mclogo.png" alt="Logo"/>
                 </div>
                 <h1 class="login-title">Manfoods <span>McDonald's</span></h1>
@@ -90,7 +116,7 @@
 
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <div class="alert-banner alert-error-banner mb-3">
+                    <div class="alert-error-banner">
                         @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                         {
                             <div><i class="bi bi-exclamation-triangle-fill me-1"></i>@err.ErrorMessage</div>
