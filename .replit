@@ -1,4 +1,4 @@
-modules = ["dotnet-7.0", "web", "nodejs-20", "nix", "dotnet-9.0"]
+modules = ["web", "dotnet-7.0", "nodejs-20", "nix", "dotnet-9.0"]
 
 [deployment]
 router = "application"
