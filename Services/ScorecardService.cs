@@ -102,6 +102,7 @@ public class ScorecardService : IScorecardService
     {
         public string Store { get; set; } = "";
         public int? TenureDays { get; set; }
+        public DateOnly HireDate { get; set; }
         /// <summary>YYYYMM key derived from the employee's hire date — used to scope
         /// early-leaver / retention rates to the selected period.</summary>
         public int HireDateKey { get; set; }
@@ -126,6 +127,7 @@ public class ScorecardService : IScorecardService
             {
                 Store       = a.Store,
                 TenureDays  = null,
+                HireDate    = a.HireDate!.Value,
                 HireDateKey = a.HireDate!.Value.Year * 100 + a.HireDate!.Value.Month,
             };
         }
@@ -136,6 +138,7 @@ public class ScorecardService : IScorecardService
             {
                 Store       = r.Store,
                 TenureDays  = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
+                HireDate    = r.HireDate!.Value,
                 HireDateKey = r.HireDate!.Value.Year * 100 + r.HireDate!.Value.Month,
             };
         }
@@ -163,17 +166,31 @@ public class ScorecardService : IScorecardService
             ? historical.Where(h => periodKeys.Contains(h.HireDateKey)).ToList()
             : historical;
 
+        var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<ScorecardRow>();
         // Sequential — EF Core DbContext does not support concurrent queries.
         foreach (var (name, agg) in aggregates)
         {
             var avgHeadcount = agg.PeriodHeadcount.Count > 0 ? agg.PeriodHeadcount.Values.Average() : 0;
-            var turnoverRate = avgHeadcount > 0 ? Math.Round(agg.TotalResignations * 100.0 / avgHeadcount, 1) : 0;
+            var turnoverRate = MetricsCalculationService.RatePercent(agg.TotalResignations, avgHeadcount);
 
             var records = periodFiltered.Where(h => agg.Stores.Contains(h.Store)).ToList();
-            var total = records.Count;
-            var early90 = total > 0 ? Math.Round(records.Count(r => r.TenureDays != null && r.TenureDays <= 90) * 100.0 / total, 1) : 0;
-            var retained180 = total > 0 ? Math.Round(records.Count(r => r.TenureDays == null || r.TenureDays > 180) * 100.0 / total, 1) : 0;
+
+            // 90-Day Early Leavers: (resigned with tenure ≤ 90 days) ÷ (total New Hires),
+            // gated to the go-live cohort — the same formula and population as
+            // NinetyDayTurnoverService and EarlyWarningService.
+            var eligibleFor90 = records.Where(r => MetricsCalculationService.IsPastGoLive(r.HireDate)).ToList();
+            var early90 = MetricsCalculationService.NinetyDayRate(
+                eligibleFor90.Count, eligibleFor90.Count(r => MetricsCalculationService.IsEarlyLeaver(r.TenureDays)));
+
+            // 6-Month Retention: exclude still-active hires too recent to have reached
+            // the 180-day milestone — they have no determined outcome yet.
+            var eligibleForRetention = records
+                .Where(r => MetricsCalculationService.IsEligibleForMilestone(r.HireDate, r.TenureDays, MetricsCalculationService.SixMonthRetentionDays, asOf))
+                .ToList();
+            var retained180 = MetricsCalculationService.RatePercent(
+                eligibleForRetention.Count(r => MetricsCalculationService.IsRetainedAtMilestone(r.TenureDays, MetricsCalculationService.SixMonthRetentionDays)),
+                eligibleForRetention.Count);
 
             var filter = dimension switch
             {
@@ -249,7 +266,7 @@ public class ScorecardService : IScorecardService
                 PeriodLabel = $"{r.Month:00}/{r.Year}",
                 Headcount = hc,
                 Resignations = res,
-                TurnoverRate = hc > 0 ? Math.Round(res * 100.0 / hc, 1) : 0,
+                TurnoverRate = MetricsCalculationService.RatePercent(res, hc),
                 IsStoreTransition = previousStore != null && previousStore != r.StoreName,
             });
             previousStore = r.StoreName;
@@ -298,7 +315,7 @@ public class ScorecardService : IScorecardService
             Name = name,
             TotalLeaders = leaders.Count,
             FlaggedLeaders = flagged,
-            FlaggedPercent = leaders.Count > 0 ? Math.Round(flagged * 100.0 / leaders.Count, 1) : 0,
+            FlaggedPercent = MetricsCalculationService.RatePercent(flagged, leaders.Count),
         };
     }
 }

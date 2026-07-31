@@ -69,6 +69,20 @@ public class DashboardService : IDashboardService
             .Select(k => (Month: k % 100, Year: k / 100)).ToList();
     }
 
+    // New Hires: an ActiveEmployees row counts as a new hire for its OWN (Month, Year)
+    // snapshot only when that same row's HireDate falls in that exact month — strictly
+    // HireDate-driven, never a roster diff against the prior month's active list. Scoping
+    // to the row's own snapshot period (rather than just "HireDate falls somewhere in the
+    // selected range") also prevents the same employee being counted once per monthly
+    // snapshot they still appear in when a multi-month range is selected.
+    private IQueryable<ActiveEmployee> NewHiresQuery(IEnumerable<int> periodKeys)
+    {
+        var keys = periodKeys as ICollection<int> ?? periodKeys.ToList();
+        return _db.ActiveEmployees.Where(e => e.HireDate != null
+            && keys.Contains(e.Year * 100 + e.Month)
+            && (e.HireDate!.Value.Year * 100 + e.HireDate!.Value.Month) == (e.Year * 100 + e.Month));
+    }
+
     // Stores whose Operation Manager / Operation Consultant (as of the given period) match the filter.
     // Returns null when no OM/OC filter is set (caller should skip the store-list filter entirely).
     private async Task<List<string>?> GetStoresForOmOcAsync(int month, int year, string? om, string? oc)
@@ -132,13 +146,13 @@ public class DashboardService : IDashboardService
         var headcountsPerPeriod = new List<int>();
         var toHeadcount = 0;
         var totalResignations = 0;
-        var totalNewHires = 0;
 
         foreach (var p in periods)
         {
             // Role-based store access is ALWAYS applied (never bypassed by an
             // explicit store/om/oc selection) — the explicit filter, when present,
             // narrows further on top of it. Final population = accessible ∩ explicit.
+            // Headcount is a snapshot: the active-employee count for this exact period.
             var empQ = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year);
             if (accessible != null) empQ = empQ.Where(e => accessible.Contains(e.Store));
             if (stores != null) empQ = empQ.Where(e => stores.Contains(e.Store));
@@ -153,21 +167,19 @@ public class DashboardService : IDashboardService
             if (stores != null) resQ = resQ.Where(r => stores.Contains(r.Store));
             else if (omOcStores != null) resQ = resQ.Where(r => omOcStores.Contains(r.Store));
             totalResignations += await resQ.CountAsync();
-
-            var prevMonth = p.Month == 1 ? 12 : p.Month - 1;
-            var prevYear = p.Month == 1 ? p.Year - 1 : p.Year;
-            var prevQ = _db.ActiveEmployees.Where(e => e.Month == prevMonth && e.Year == prevYear);
-            if (accessible != null) prevQ = prevQ.Where(e => accessible.Contains(e.Store));
-            if (stores != null) prevQ = prevQ.Where(e => stores.Contains(e.Store));
-            else if (omOcStores != null) prevQ = prevQ.Where(e => omOcStores.Contains(e.Store));
-
-            var prevIds = await prevQ.Select(e => e.EmployeeId).ToListAsync();
-            var currIds = await empQ.Select(e => e.EmployeeId).ToListAsync();
-            totalNewHires += currIds.Except(prevIds).Count();
         }
 
+        // New Hires: strictly HireDate-driven across the resolved periods — no
+        // roster-diffing against the prior month's active list.
+        var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToList();
+        var newHireQ = NewHiresQuery(periodKeys);
+        if (accessible != null) newHireQ = newHireQ.Where(e => accessible.Contains(e.Store));
+        if (stores != null) newHireQ = newHireQ.Where(e => stores.Contains(e.Store));
+        else if (omOcStores != null) newHireQ = newHireQ.Where(e => omOcStores.Contains(e.Store));
+        var totalNewHires = await newHireQ.CountAsync();
+
         var avgHeadcount = headcountsPerPeriod.Count > 0 ? headcountsPerPeriod.Average() : 0;
-        var turnoverRate = avgHeadcount > 0 ? Math.Round(totalResignations / avgHeadcount * 100, 2) : 0;
+        var turnoverRate = MetricsCalculationService.RatePercent(totalResignations, avgHeadcount, 2);
 
         var result = new DashboardKpiViewModel
         {
@@ -331,8 +343,10 @@ public class DashboardService : IDashboardService
             .Select(g => new { Store = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        var newHireQ = _db.ActiveEmployees
-            .Where(e => e.HireDate != null && keys.Contains(e.HireDate.Value.Year * 100 + e.HireDate.Value.Month));
+        // New Hires: strictly HireDate-driven, scoped to each row's own snapshot
+        // period so an employee who stays active across the whole range isn't
+        // counted once per monthly snapshot they appear in.
+        var newHireQ = NewHiresQuery(keys);
         if (accessible != null)
             newHireQ = newHireQ.Where(e => accessible.Contains(e.Store));
 
@@ -366,7 +380,7 @@ public class DashboardService : IDashboardService
                     Headcount           = headcount,
                     NewHires            = nh,
                     Resignations        = res,
-                    TurnoverRate        = h.AvgCount > 0 ? Math.Round(res / h.AvgCount * 100, 1) : 0,
+                    TurnoverRate        = MetricsCalculationService.RatePercent(res, h.AvgCount),
                     OperationConsultant = sr?.OperationConsultant ?? "",
                     OperationManager    = sr?.OperationManager    ?? ""
                 };
@@ -390,9 +404,7 @@ public class DashboardService : IDashboardService
             StoreCount        = g.Count(),
             TotalResignations = g.Sum(s => s.Resignations),
             TotalHeadcount    = g.Sum(s => s.Headcount),
-            AvgTurnoverRate   = g.Sum(s => s.Headcount) > 0
-                ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1)
-                : 0
+            AvgTurnoverRate   = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
         };
 
         var ocRows = stores
@@ -508,8 +520,8 @@ public class DashboardService : IDashboardService
             var currHead = current.Sum(s => s.Headcount);
             var prevHead = previous.Sum(s => s.Headcount);
 
-            var currRate = currHead > 0 ? Math.Round(currRes * 100.0 / currHead, 1) : 0;
-            var prevRate = prevHead > 0 ? Math.Round(prevRes * 100.0 / prevHead, 1) : 0;
+            var currRate = MetricsCalculationService.RatePercent(currRes, currHead);
+            var prevRate = MetricsCalculationService.RatePercent(prevRes, prevHead);
             var rateDiff = Math.Round(currRate - prevRate, 1);
 
             insights.Add(new SmartInsightItem
@@ -533,8 +545,7 @@ public class DashboardService : IDashboardService
                 StoreCount      = g.Count(),
                 TotalRes        = g.Sum(s => s.Resignations),
                 TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = g.Sum(s => s.Headcount) > 0
-                    ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1) : 0
+                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
             })
             .OrderByDescending(g => g.AvgTurnoverRate)
             .FirstOrDefault();
@@ -558,8 +569,7 @@ public class DashboardService : IDashboardService
                 StoreCount      = g.Count(),
                 TotalRes        = g.Sum(s => s.Resignations),
                 TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = g.Sum(s => s.Headcount) > 0
-                    ? Math.Round((double)g.Sum(s => s.Resignations) / g.Sum(s => s.Headcount) * 100, 1) : 0
+                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
             })
             .OrderByDescending(g => g.AvgTurnoverRate)
             .FirstOrDefault();
@@ -600,25 +610,16 @@ public class DashboardService : IDashboardService
             .Select(g => new { Store = g.Key, Count = g.Count() })
             .ToListAsync();
 
-        // Previous month for new hires
-        var prevMonth = month == 1 ? 12 : month - 1;
-        var prevYear  = month == 1 ? year - 1 : year;
-
-        var prevQ = _db.ActiveEmployees.Where(e => e.Month == prevMonth && e.Year == prevYear);
+        // New Hires: strictly HireDate-driven — no roster diff against last month.
+        var newHireQ = NewHiresQuery(new[] { year * 100 + month });
         if (accessible != null)
-            prevQ = prevQ.Where(e => accessible.Contains(e.Store));
+            newHireQ = newHireQ.Where(e => accessible.Contains(e.Store));
 
-        var prevIds = await prevQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
-        var currIds = await empQ.Select(e => new { e.Store, e.EmployeeId }).ToListAsync();
-
-        var prevByStore = prevIds.GroupBy(x => x.Store)
-            .ToDictionary(g => g.Key, g => g.Select(x => x.EmployeeId).ToHashSet());
-
-        var newHiresByStore = currIds
-            .GroupBy(x => x.Store)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Count(x => !prevByStore.TryGetValue(x.Store, out var ids) || !ids.Contains(x.EmployeeId)));
+        var newHireRaw = await newHireQ
+            .GroupBy(e => e.Store)
+            .Select(g => new { Store = g.Key, Count = g.Count() })
+            .ToListAsync();
+        var newHiresByStore = newHireRaw.ToDictionary(x => x.Store, x => x.Count);
 
         var resByStore = resignations.ToDictionary(r => r.Store, r => r.Count);
 
@@ -632,7 +633,7 @@ public class DashboardService : IDashboardService
                     Store       = h.Store,
                     Headcount   = h.Count,
                     Resignations = res,
-                    TurnoverRate = h.Count > 0 ? Math.Round((double)res / h.Count * 100, 1) : 0,
+                    TurnoverRate = MetricsCalculationService.RatePercent(res, h.Count),
                     NewHires    = nh
                 };
             })
@@ -710,7 +711,7 @@ public class DashboardService : IDashboardService
                 if (hcLookup.TryGetValue(key, out var hc) && hc > 0)
                 {
                     var res  = resLookup.TryGetValue(key, out var rc) ? rc : 0;
-                    var rate = Math.Round((double)res / hc * 100, 1);
+                    var rate = MetricsCalculationService.RatePercent(res, hc);
                     periodRates[pk] = rate;
                     nonNullRates.Add(rate);
                 }

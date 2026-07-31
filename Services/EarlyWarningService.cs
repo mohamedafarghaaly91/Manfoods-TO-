@@ -31,6 +31,7 @@ public class EarlyWarningService : IEarlyWarningService
         public string Store    { get; set; } = "";
         public string JobTitle { get; set; } = "";
         public string Gender   { get; set; } = "";
+        public DateOnly HireDate { get; set; }
         /// <summary>Null = still active (never resigned).</summary>
         public int? TenureDays { get; set; }
     }
@@ -66,7 +67,7 @@ public class EarlyWarningService : IEarlyWarningService
             if (string.IsNullOrWhiteSpace(a.EmployeeId)) continue;
             byEmployee[a.EmployeeId] = new HistoricalRecord
             {
-                Store = a.Store, JobTitle = a.JobTitle, Gender = a.Gender, TenureDays = null,
+                Store = a.Store, JobTitle = a.JobTitle, Gender = a.Gender, HireDate = a.HireDate!.Value, TenureDays = null,
             };
         }
 
@@ -79,6 +80,7 @@ public class EarlyWarningService : IEarlyWarningService
                 Store      = r.Store,
                 JobTitle   = r.JobTitle,
                 Gender     = r.Gender,
+                HireDate   = r.HireDate!.Value,
                 TenureDays = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
             };
         }
@@ -167,7 +169,7 @@ public class EarlyWarningService : IEarlyWarningService
     private static (Dictionary<string, double> Rates, double Mean, double Std) ComputeGroupRates(
         List<HistoricalRecord> historical,
         Func<HistoricalRecord, string> keySelector,
-        int windowDays = DefaultNewHireWindowDays)
+        int windowDays = MetricsCalculationService.NinetyDayWindowDays)
     {
         var valid = historical
             .Where(h => !string.IsNullOrWhiteSpace(keySelector(h)))
@@ -176,7 +178,7 @@ public class EarlyWarningService : IEarlyWarningService
             {
                 var list = g.ToList();
                 if (list.Count < MinRateSampleSize) return (Key: (string?)null, Rate: 0.0);
-                var rate = list.Count(h => h.TenureDays != null && h.TenureDays <= windowDays) * 100.0 / list.Count;
+                var rate = MetricsCalculationService.RatePercent(list.Count(h => h.TenureDays != null && h.TenureDays <= windowDays), list.Count);
                 return (Key: g.Key, Rate: rate);
             })
             .Where(x => x.Key != null)
@@ -320,7 +322,7 @@ public class EarlyWarningService : IEarlyWarningService
             .GroupBy(h => h.Store)
             .ToDictionary(g => g.Key, g => (
                 Total:      g.Count(),
-                EarlyLeave: g.Count(h => h.TenureDays != null && h.TenureDays <= DefaultNewHireWindowDays)));
+                EarlyLeave: g.Count(h => MetricsCalculationService.IsEarlyLeaver(h.TenureDays))));
 
         // Weighted early-leave rate per leader across all their stores
         var leaderRates = new Dictionary<string, double>();
@@ -330,7 +332,7 @@ public class EarlyWarningService : IEarlyWarningService
             foreach (var s in stores)
                 if (histByStore.TryGetValue(s, out var hr)) { total += hr.Total; earlyLeave += hr.EarlyLeave; }
             if (total >= MinRateSampleSize)
-                leaderRates[leader] = earlyLeave * 100.0 / total;
+                leaderRates[leader] = MetricsCalculationService.RatePercent(earlyLeave, total);
         }
 
         // Map store → (leader, rate)
@@ -377,18 +379,24 @@ public class EarlyWarningService : IEarlyWarningService
         if (MultiValueFilter.Split(store) is { } stores)
             candidates = candidates.Where(c => stores.Contains(c.Store)).ToList();
 
-        // ── Company-wide baseline ─────────────────────────────────────────────
-        var companyTotal    = historical.Count;
-        var companyEarly    = historical.Count(h => h.TenureDays != null && h.TenureDays <= DefaultNewHireWindowDays);
-        var companyRate     = companyTotal > 0 ? companyEarly * 100.0 / companyTotal : 0;
+        // ── Company-wide 90-day baseline ──────────────────────────────────────
+        // Gated to the go-live cohort and using the same (early leavers ÷ new
+        // hires) formula as NinetyDayTurnoverService/ScorecardService, so the
+        // "Company Baseline" figure shown here matches the 90-Day Turnover page.
+        var goLiveHistorical = historical.Where(h => MetricsCalculationService.IsPastGoLive(h.HireDate)).ToList();
+        var companyTotal    = goLiveHistorical.Count;
+        var companyEarly    = goLiveHistorical.Count(h => MetricsCalculationService.IsEarlyLeaver(h.TenureDays));
+        var companyRate     = MetricsCalculationService.NinetyDayRate(companyTotal, companyEarly);
 
-        // ── Role-specific new-hire windows ────────────────────────────────────
+        // ── Role-specific new-hire windows (uses full history — a distinct,
+        //    long-run heuristic for sizing the "new hire" window itself,
+        //    not the 90-day rate) ──────────────────────────────────────────
         var roleWindows = ComputeRoleWindows(historical);
 
-        // ── Rate distributions with StdDev thresholds ────────────────────────
-        var (storeRates,  storeMean,  storeStd)  = ComputeGroupRates(historical, h => h.Store);
-        var (roleRates,   roleMean,   roleStd)   = ComputeGroupRates(historical, h => h.JobTitle);
-        var (genderRates, genderMean, genderStd) = ComputeGroupRates(historical, h => h.Gender);
+        // ── Rate distributions with StdDev thresholds (go-live-gated) ────────
+        var (storeRates,  storeMean,  storeStd)  = ComputeGroupRates(goLiveHistorical, h => h.Store);
+        var (roleRates,   roleMean,   roleStd)   = ComputeGroupRates(goLiveHistorical, h => h.JobTitle);
+        var (genderRates, genderMean, genderStd) = ComputeGroupRates(goLiveHistorical, h => h.Gender);
 
         // ── Peak windows (store → role → company fallback) ────────────────────
         var lateHistorical = historical
@@ -408,7 +416,7 @@ public class EarlyWarningService : IEarlyWarningService
         var exitStd     = Math.Max(CalcStdDev(exitScores.Values), MinStdDev);
 
         // ── Store leader history ──────────────────────────────────────────────
-        var leaderRates     = await LoadStoreLeaderRatesAsync(historical);
+        var leaderRates     = await LoadStoreLeaderRatesAsync(goLiveHistorical);
         var allLeaderRates  = leaderRates.Values.Select(x => x.LeaderRate).ToList();
         var leaderMean      = allLeaderRates.Count > 0 ? allLeaderRates.Average() : companyRate;
         var leaderStd       = Math.Max(CalcStdDev(allLeaderRates), MinStdDev);
@@ -552,10 +560,13 @@ public class EarlyWarningService : IEarlyWarningService
     public async Task<EarlyWarningSummary> GetSummaryAsync(
         string? store, string role, string? assignedName, string? months = null, int? year = null)
     {
+        // Same go-live-gated (early leavers ÷ new hires) formula as GetWatchlistAsync,
+        // NinetyDayTurnoverService, and ScorecardService — kept in sync.
         var historical   = await LoadHistoricalRecordsAsync();
-        var companyTotal = historical.Count;
-        var companyEarly = historical.Count(h => h.TenureDays != null && h.TenureDays <= DefaultNewHireWindowDays);
-        var companyRate  = companyTotal > 0 ? companyEarly * 100.0 / companyTotal : 0;
+        var goLiveHistorical = historical.Where(h => MetricsCalculationService.IsPastGoLive(h.HireDate)).ToList();
+        var companyTotal = goLiveHistorical.Count;
+        var companyEarly = goLiveHistorical.Count(h => MetricsCalculationService.IsEarlyLeaver(h.TenureDays));
+        var companyRate  = MetricsCalculationService.NinetyDayRate(companyTotal, companyEarly);
 
         var list = await GetWatchlistAsync(store, role, assignedName, months, year);
         return new EarlyWarningSummary
@@ -563,7 +574,7 @@ public class EarlyWarningService : IEarlyWarningService
             TotalWatchlist      = list.Count,
             HighRiskCount       = list.Count(r => r.Stars >= 4),
             NewHireWindowCount  = list.Count(r => r.Reasons.Any(x => x.Type == "new_hire_window")),
-            CompanyBaselineRate = Math.Round(companyRate, 1),
+            CompanyBaselineRate = companyRate,
         };
     }
 }

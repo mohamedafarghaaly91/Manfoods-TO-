@@ -16,20 +16,21 @@ public class RetentionService : IRetentionService
     }
 
     // Real "retention" is a long-term measure — 30/90-day attrition is covered by the
-    // dedicated 90-Day Turnover page instead.
+    // dedicated 90-Day Turnover page instead. The 6-month mark is standardized to
+    // MetricsCalculationService.SixMonthRetentionDays (180 days) company-wide.
     private static readonly (int Days, string Label)[] Milestones =
     {
-        (182, "6 Months"), (365, "1 Year"), (730, "2 Years"), (1095, "3 Years"), (1460, "4 Years"), (1825, "5 Years")
+        (MetricsCalculationService.SixMonthRetentionDays, "6 Months"), (365, "1 Year"), (730, "2 Years"), (1095, "3 Years"), (1460, "4 Years"), (1825, "5 Years")
     };
     private static readonly (int Days, string Label)[] CurvePoints =
     {
-        (0, "Day 0"), (30, "1mo"), (90, "3mo"), (182, "6mo"), (365, "1yr"), (545, "1.5yr"), (730, "2yr"), (1095, "3yr"), (1460, "4yr"), (1825, "5yr")
+        (0, "Day 0"), (30, "1mo"), (90, "3mo"), (MetricsCalculationService.SixMonthRetentionDays, "6mo"), (365, "1yr"), (545, "1.5yr"), (730, "2yr"), (1095, "3yr"), (1460, "4yr"), (1825, "5yr")
     };
     private const int LeaderboardDays = 365; // 1-year retention, the standard HR benchmark
     private static readonly (string Label, int Min, int Max)[] TenureBuckets =
     {
-        ("< 6 months", 0, 182),
-        ("6–12 months", 182, 365),
+        ("< 6 months", 0, MetricsCalculationService.SixMonthRetentionDays),
+        ("6–12 months", MetricsCalculationService.SixMonthRetentionDays, 365),
         ("1–2 years", 365, 730),
         ("2–3 years", 730, 1095),
         ("3–4 years", 1095, 1460),
@@ -41,6 +42,7 @@ public class RetentionService : IRetentionService
     {
         public string EmployeeId { get; set; } = "";
         public string Store { get; set; } = "";
+        public DateOnly HireDate { get; set; }
         public int CohortMonth { get; set; }
         public int CohortYear { get; set; }
         /// <summary>Null means still active (never resigned) as of the latest upload.</summary>
@@ -85,6 +87,7 @@ public class RetentionService : IRetentionService
             {
                 EmployeeId = a.EmployeeId,
                 Store = a.Store,
+                HireDate = a.HireDate!.Value,
                 CohortMonth = a.HireDate!.Value.Month,
                 CohortYear = a.HireDate!.Value.Year,
                 TenureDays = null,
@@ -99,6 +102,7 @@ public class RetentionService : IRetentionService
             {
                 EmployeeId = r.EmployeeId,
                 Store = r.Store,
+                HireDate = r.HireDate!.Value,
                 CohortMonth = r.HireDate!.Value.Month,
                 CohortYear = r.HireDate!.Value.Year,
                 TenureDays = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
@@ -153,23 +157,27 @@ public class RetentionService : IRetentionService
         var cohorts = await LoadEmployeeCohortsAsync(role, assignedName, fromMonth, fromYear, toMonth, toYear, om, oc, months);
         if (MultiValueFilter.Split(store) is { } stores) cohorts = cohorts.Where(c => stores.Contains(c.Store)).ToList();
 
+        var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<RetentionMilestoneItem>();
         foreach (var (days, label) in Milestones)
         {
-            var included = cohorts.Where(c => CohortReaches(c.CohortMonth, c.CohortYear, days)).ToList();
+            // Exclude ineligible cohorts: a still-active hire whose tenure hasn't yet
+            // reached the milestone has an undetermined outcome and must not skew the
+            // denominator — resigned employees are always eligible (their fate is known).
+            var included = cohorts.Where(c => MetricsCalculationService.IsEligibleForMilestone(c.HireDate, c.TenureDays, days, asOf)).ToList();
             if (included.Count == 0)
             {
                 result.Add(new RetentionMilestoneItem { Days = days, Label = label });
                 continue;
             }
             var total = included.Count;
-            var retained = included.Count(c => c.TenureDays == null || c.TenureDays > days);
+            var retained = included.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, days));
             var latest = included.OrderByDescending(c => c.CohortYear).ThenByDescending(c => c.CohortMonth).First();
             result.Add(new RetentionMilestoneItem
             {
                 Days = days,
                 Label = label,
-                RetentionRate = Math.Round(retained * 100.0 / total, 1),
+                RetentionRate = MetricsCalculationService.RatePercent(retained, total),
                 TotalHires = total,
                 Retained = retained,
                 ThroughCohortLabel = new DateOnly(latest.CohortYear, latest.CohortMonth, 1).ToString("MMM yyyy"),
@@ -184,18 +192,19 @@ public class RetentionService : IRetentionService
         var cohorts = await LoadEmployeeCohortsAsync(role, assignedName, fromMonth, fromYear, toMonth, toYear, om, oc, months);
         if (MultiValueFilter.Split(store) is { } stores) cohorts = cohorts.Where(c => stores.Contains(c.Store)).ToList();
 
+        var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<SurvivalPoint>();
         foreach (var (day, label) in CurvePoints)
         {
-            var included = cohorts.Where(c => CohortReaches(c.CohortMonth, c.CohortYear, day)).ToList();
+            var included = cohorts.Where(c => MetricsCalculationService.IsEligibleForMilestone(c.HireDate, c.TenureDays, day, asOf)).ToList();
             if (included.Count == 0) continue;
             var total = included.Count;
-            var retained = included.Count(c => c.TenureDays == null || c.TenureDays > day);
+            var retained = included.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, day));
             result.Add(new SurvivalPoint
             {
                 Day = day,
                 Label = label,
-                RetentionRate = Math.Round(retained * 100.0 / total, 1),
+                RetentionRate = MetricsCalculationService.RatePercent(retained, total),
                 SampleSize = total,
             });
         }
@@ -225,7 +234,7 @@ public class RetentionService : IRetentionService
             var point = new RetentionTrendPoint { Label = new DateOnly(year, month, 1).ToString("MMM yy") };
             foreach (var (days, label) in Milestones)
             {
-                point.Rates[label] = Math.Round(cohortRows.Count(c => c.TenureDays == null || c.TenureDays > days) * 100.0 / total, 1);
+                point.Rates[label] = MetricsCalculationService.RatePercent(cohortRows.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, days)), total);
                 point.Provisional[label] = !CohortReaches(month, year, days);
             }
             result.Add(point);
@@ -237,15 +246,16 @@ public class RetentionService : IRetentionService
         int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? months = null)
     {
         var cohorts = await LoadEmployeeCohortsAsync(role, assignedName, fromMonth, fromYear, toMonth, toYear, om, oc, months);
+        var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var included = cohorts
-            .Where(c => !string.IsNullOrWhiteSpace(c.Store) && CohortReaches(c.CohortMonth, c.CohortYear, LeaderboardDays))
+            .Where(c => !string.IsNullOrWhiteSpace(c.Store) && MetricsCalculationService.IsEligibleForMilestone(c.HireDate, c.TenureDays, LeaderboardDays, asOf))
             .ToList();
 
         return included.GroupBy(c => c.Store)
             .Select(g => new ChartDataItem
             {
                 Label = g.Key,
-                Value = (int)Math.Round(g.Count(c => c.TenureDays == null || c.TenureDays > LeaderboardDays) * 100.0 / g.Count()),
+                Value = (int)MetricsCalculationService.RatePercent(g.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, LeaderboardDays)), g.Count(), 0),
             })
             .OrderByDescending(c => c.Value)
             .ToList();
@@ -385,7 +395,7 @@ public class RetentionService : IRetentionService
         if (totalActive > 0)
         {
             var seasoned = tenureDist.Where(t => t.Label is "1–2 years" or "2–3 years" or "3–4 years" or "4–5 years" or "5+ years").Sum(t => t.Value);
-            var pct = Math.Round(seasoned * 100.0 / totalActive, 0);
+            var pct = MetricsCalculationService.RatePercent(seasoned, totalActive, 0);
             insights.Add(new SmartInsightItem
             {
                 Icon = "bi-shield-check",

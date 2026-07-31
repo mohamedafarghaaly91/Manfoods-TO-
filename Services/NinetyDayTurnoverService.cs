@@ -30,8 +30,11 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
     private async Task<List<(string EmployeeId, string Store, int Month, int Year)>> LoadActiveHiresAsync()
     {
+        // Go-live threshold is a dynamic date comparison (not a hardcoded year), so it
+        // keeps working unchanged as future years' data arrives.
+        var goLive = MetricsCalculationService.GoLiveDate;
         var rows = await _db.ActiveEmployees
-            .Where(e => e.HireDate != null && e.HireDate.Value.Year >= 2026)
+            .Where(e => e.HireDate != null && e.HireDate.Value >= goLive)
             .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
             .ToListAsync();
         return rows.Select(r => (r.EmployeeId, r.Store, r.HireDate!.Value.Month, r.HireDate!.Value.Year)).ToList();
@@ -39,8 +42,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
     private async Task<List<ResignationTenure>> LoadResignationTenuresAsync()
     {
+        var goLive = MetricsCalculationService.GoLiveDate;
         var rows = await _db.Resignations
-            .Where(r => r.HireDate != null && r.ResignationDate != null && r.HireDate.Value.Year >= 2026)
+            .Where(r => r.HireDate != null && r.ResignationDate != null && r.HireDate.Value >= goLive)
             .ToListAsync();
         return rows.Select(r => new ResignationTenure
         {
@@ -87,7 +91,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var hireIds = fromActive.Concat(fromRes).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToHashSet();
 
         var earlyLeaverIds = resTenures
-            .Where(r => cohortKeys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && r.TenureDays <= 90 && StoreOk(r.Store))
+            .Where(r => cohortKeys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && MetricsCalculationService.IsEarlyLeaver(r.TenureDays) && StoreOk(r.Store))
             .Select(r => r.EmployeeId)
             .Where(id => !string.IsNullOrWhiteSpace(id))
             .Distinct()
@@ -95,10 +99,10 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
         var totalHires = hireIds.Count;
         var earlyLeavers = earlyLeaverIds.Count;
-        var rate = totalHires > 0 ? Math.Round(earlyLeavers * 100.0 / totalHires, 1) : 0;
+        var rate = MetricsCalculationService.NinetyDayRate(totalHires, earlyLeavers);
 
         var cohortCloseDate = new DateOnly(latestYear, latestMonth, DateTime.DaysInMonth(latestYear, latestMonth));
-        var isProvisional = DateOnly.FromDateTime(DateTime.UtcNow) < cohortCloseDate.AddDays(90);
+        var isProvisional = DateOnly.FromDateTime(DateTime.UtcNow) < cohortCloseDate.AddDays(MetricsCalculationService.NinetyDayWindowDays);
 
         return new NinetyDayKpiViewModel
         {
@@ -262,9 +266,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             StoreCount   = g.Count(),
             TotalHires   = g.Sum(s => s.TotalHires),
             EarlyLeavers = g.Sum(s => s.EarlyLeavers),
-            AvgRate      = g.Sum(s => s.TotalHires) > 0
-                ? Math.Round(g.Sum(s => s.EarlyLeavers) * 100.0 / g.Sum(s => s.TotalHires), 1)
-                : 0,
+            AvgRate      = MetricsCalculationService.NinetyDayRate(g.Sum(s => s.TotalHires), g.Sum(s => s.EarlyLeavers)),
         };
 
         var ocRows = stores
@@ -294,7 +296,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return resTenures
-            .Where(r => keys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && r.TenureDays <= 90
+            .Where(r => keys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && MetricsCalculationService.IsEarlyLeaver(r.TenureDays)
                      && (stores == null || stores.Contains(r.Store))
                      && (omOcStores == null || omOcStores.Contains(r.Store))
                      && (accessible == null || accessible.Contains(r.Store)))
@@ -323,7 +325,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return resTenures
-            .Where(r => keys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && r.TenureDays <= 90
+            .Where(r => keys.Contains(r.HireDate.Year * 100 + r.HireDate.Month) && MetricsCalculationService.IsEarlyLeaver(r.TenureDays)
                      && (stores == null || stores.Contains(r.Store))
                      && (omOcStores == null || omOcStores.Contains(r.Store))
                      && (accessible == null || accessible.Contains(r.Store)))
