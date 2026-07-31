@@ -18,7 +18,7 @@ public class OtpService : IOtpService
     public async Task<(int count, byte[] excelBytes)> GenerateBulkOtpsAsync()
     {
         var pendingUsers = await _db.Users
-            .Where(u => u.Role == "User" && u.PasswordHash == null)
+            .Where(u => u.Role != "Admin" && u.PasswordHash == null)
             .ToListAsync();
 
         var results = new List<(string Email, string Phone, string Otp)>();
@@ -68,7 +68,7 @@ public class OtpService : IOtpService
     public async Task<string?> GenerateSingleOtpAsync(int userId)
     {
         var user = await _db.Users.FindAsync(userId);
-        if (user == null || user.Role != "User") return null;
+        if (user == null || user.Role == "Admin") return null;
 
         await _db.PasswordResetOtps.Where(o => o.UserId == user.Id && !o.IsUsed).ExecuteDeleteAsync();
 
@@ -87,7 +87,7 @@ public class OtpService : IOtpService
     {
         identifier = identifier.Trim();
         var user = await _db.Users.FirstOrDefaultAsync(u =>
-            u.Role == "User" && (u.Email == identifier.ToLower() || u.Phone == identifier));
+            u.Role != "Admin" && (u.Email == identifier.ToLower() || u.Phone == identifier));
         if (user == null) return (false, "No account found with that email or phone.");
 
         var otp = await _db.PasswordResetOtps

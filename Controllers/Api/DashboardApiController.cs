@@ -24,7 +24,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var result = await _dashboard.GetKpisAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
         return Ok(result);
     }
@@ -34,7 +34,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetTurnoverByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
@@ -43,7 +43,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetTurnoverByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
@@ -52,7 +52,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetTurnoverByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
@@ -61,7 +61,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] string? om, [FromQuery] string? oc)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, om, oc));
     }
 
@@ -75,7 +75,7 @@ public class DashboardApiController : ControllerBase
     public async Task<IActionResult> Stores([FromQuery] int? month, [FromQuery] int? year)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var stores = await _stores.GetStoresAsync(month, year, role, assignedName);
         return Ok(stores.Select(s => new { storeName = s.StoreName }));
     }
@@ -97,7 +97,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
         return Ok(await _dashboard.GetStoreComparisonAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
@@ -107,7 +107,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
         return Ok(await _dashboard.GetOcOmAnalysisAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
@@ -117,7 +117,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
         return Ok(await _dashboard.GetSmartInsightsAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
@@ -126,7 +126,7 @@ public class DashboardApiController : ControllerBase
     public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] int? sinceYear, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, sinceYear, months));
     }
 
@@ -135,7 +135,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] string? om, [FromQuery] string? oc)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, om, oc));
     }
 
@@ -144,7 +144,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] string? om, [FromQuery] string? oc)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, om, oc));
     }
 
@@ -153,7 +153,7 @@ public class DashboardApiController : ControllerBase
         [FromQuery] string? om, [FromQuery] string? oc)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         return Ok(await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, om, oc));
     }
 

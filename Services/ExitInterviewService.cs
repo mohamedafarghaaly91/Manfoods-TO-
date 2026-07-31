@@ -13,7 +13,16 @@ public class ExitInterviewService : IExitInterviewService
 
     private static IQueryable<ExitInterview> ApplyFilter(IQueryable<ExitInterview> q, ExitInterviewFilter filter, string role, string? assignedName)
     {
-        // Role system simplified to Admin/User — no more per-store restriction.
+        // "assignedName" here is actually the logged-in user's email (see
+        // HttpContext.Session.GetEmail() at call sites), matched against the
+        // OM/OC email copied onto each row at upload time.
+        if (role == "Operation_Manager" || role == "Operation_Consultant")
+        {
+            var email = (assignedName ?? "").Trim().ToLowerInvariant();
+            q = string.IsNullOrEmpty(email) ? q.Where(e => false)
+                : role == "Operation_Manager" ? q.Where(e => e.OperationManagerEmail.ToLower() == email)
+                : q.Where(e => e.OperationConsultantEmail.ToLower() == email);
+        }
         if (MultiValueFilter.Split(filter.Store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
         if (!string.IsNullOrWhiteSpace(filter.StoreLeader)) q = q.Where(e => e.StoreLeader == filter.StoreLeader);
         if (MultiValueFilter.Split(filter.OperationConsultant) is { } ocs) q = q.Where(e => ocs.Contains(e.OperationConsultant));

@@ -62,7 +62,7 @@ public class DashboardController : Controller
         if (MvcApp.Models.ViewModels.ReportCatalog.Find(reportType) == null) return NotFound();
 
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var periods = await _dashboard.GetAvailablePeriodsAsync();
         var stores = await _stores.GetStoresAsync(null, null, role, assignedName);
         ViewBag.Stores = stores.Select(s => s.StoreName).Distinct().OrderBy(s => s).ToList();
@@ -89,7 +89,7 @@ public class DashboardController : Controller
         string? store = null, string? om = null, string? oc = null, string? months = null)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         store = string.IsNullOrWhiteSpace(store) ? null : store;
         om = string.IsNullOrWhiteSpace(om) ? null : om;
         oc = string.IsNullOrWhiteSpace(oc) ? null : oc;
@@ -246,7 +246,7 @@ public class DashboardController : Controller
         {
             fileName = "Template_Store_Reference.xlsx";
             var ws = wb.AddWorksheet("Store Reference");
-            var headers = new[] { "Store Name", "Store Leader", "Operation Consultant", "Operation Manager" };
+            var headers = new[] { "Store Name", "Store Leader", "Operation Consultant", "Operation Manager", "Operation Consultant Email", "Operation Manager Email" };
             for (int i = 0; i < headers.Length; i++)
             {
                 var cell = ws.Cell(1, i + 1);
@@ -258,10 +258,13 @@ public class DashboardController : Controller
             }
             ws.Cell(2, 1).Value = "Store 1"; ws.Cell(2, 2).Value = "Khaled Ibrahim";
             ws.Cell(2, 3).Value = "Ahmed Samy"; ws.Cell(2, 4).Value = "Mohamed Nour";
+            ws.Cell(2, 5).Value = "ahmed.samy@manfoods.com"; ws.Cell(2, 6).Value = "mohamed.nour@manfoods.com";
             ws.Cell(3, 1).Value = "Store 2"; ws.Cell(3, 2).Value = "Sara Hassan";
             ws.Cell(3, 3).Value = "Mona Ali"; ws.Cell(3, 4).Value = "Mohamed Nour";
+            ws.Cell(3, 5).Value = "mona.ali@manfoods.com"; ws.Cell(3, 6).Value = "mohamed.nour@manfoods.com";
             ws.Cell(4, 1).Value = "Store 3"; ws.Cell(4, 2).Value = "Omar Tarek";
             ws.Cell(4, 3).Value = "Ahmed Samy"; ws.Cell(4, 4).Value = "Fatma Reda";
+            ws.Cell(4, 5).Value = "ahmed.samy@manfoods.com"; ws.Cell(4, 6).Value = "fatma.reda@manfoods.com";
             ws.Columns().AdjustToContents();
         }
         else if (type == "exit_interviews")

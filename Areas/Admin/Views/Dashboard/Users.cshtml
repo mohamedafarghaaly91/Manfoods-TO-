@@ -67,7 +67,7 @@
                             </td>
                             <td class="text-muted-custom small">@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                             <td class="text-end">
-                                @if (user.Role == "User")
+                                @if (user.Role != "Admin")
                                 {
                                     <button type="button" class="btn btn-sm btn-outline-secondary me-1 js-generate-otp" data-id="@user.Id" data-email="@user.Email" title="Generate OTP"><i class="bi bi-key"></i></button>
                                 }

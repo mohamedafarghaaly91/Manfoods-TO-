@@ -19,7 +19,7 @@ public class ExitInterviewApiController : ControllerBase
         new() { Store = store, StoreLeader = storeLeader, OperationConsultant = oc, OperationManager = om, Year = year, Months = months };
 
     private (string role, string? assignedName) Identity() =>
-        (HttpContext.Session.GetRole(), HttpContext.Session.GetAssignedName());
+        (HttpContext.Session.GetRole(), HttpContext.Session.GetEmail());
 
     [HttpGet("filters")]
     public async Task<IActionResult> Filters()

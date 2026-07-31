@@ -31,6 +31,12 @@ public class ExitInterview
     [Column("operation_manager")]
     public string OperationManager { get; set; } = "";
 
+    [Column("operation_manager_email")]
+    public string OperationManagerEmail { get; set; } = "";
+
+    [Column("operation_consultant_email")]
+    public string OperationConsultantEmail { get; set; } = "";
+
     [Column("job_title")]
     public string JobTitle { get; set; } = "";
 

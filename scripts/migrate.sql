@@ -20,10 +20,13 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '';
 ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 
--- Role system simplified from Admin_Full/Admin_Read/Operation_Manager/
--- Operation_Consultant/Viewer down to just Admin/User.
+-- One-time historical cleanup (already applied): Admin_Full/Admin_Read were
+-- folded into Admin, and Viewer into User. Operation_Manager/Operation_Consultant
+-- are valid role values again (per-store access restriction) — do NOT add a
+-- rewrite-to-User statement here, since this script is re-run on every deploy
+-- and would silently wipe out live OM/OC role assignments.
 UPDATE users SET role = 'Admin' WHERE role IN ('Admin_Full', 'Admin_Read');
-UPDATE users SET role = 'User' WHERE role IN ('Operation_Manager', 'Operation_Consultant', 'Viewer');
+UPDATE users SET role = 'User' WHERE role = 'Viewer';
 
 -- ── password_reset_otps ────────────────────────
 -- OTPs for the self-service "forgot password" flow (User accounts only —
@@ -91,6 +94,12 @@ CREATE TABLE IF NOT EXISTS store_references (
     is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- The actual table backing Models/StoreReference.cs is "store_reference"
+-- (singular, EnsureCreated()-managed) — unrelated to "store_references" above.
+-- Backfill the OM/OC email columns used for per-store access restriction.
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
+
 -- ── exit_interviews ────────────────────────────
 -- One row per Microsoft Forms exit-interview submission. No name / national
 -- ID is stored — employee_id is kept only to resolve store/leader/OC/OM at
@@ -131,6 +140,8 @@ CREATE TABLE IF NOT EXISTS exit_interviews (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_exit_interviews_forms_response_id
     ON exit_interviews (forms_response_id) WHERE forms_response_id <> '';
+ALTER TABLE exit_interviews ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
+ALTER TABLE exit_interviews ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
 
 -- ── upload_logs ───────────────────────────────
 CREATE TABLE IF NOT EXISTS upload_logs (

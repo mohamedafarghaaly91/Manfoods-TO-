@@ -152,6 +152,8 @@ public class UploadService : IUploadService
                 StoreLeader = Col(row, ws, "Store Leader", "StoreLeader", "store_leader"),
                 OperationConsultant = Col(row, ws, "Operation Consultant", "OperationConsultant", "OC", "Consultant"),
                 OperationManager = Col(row, ws, "Operation Manager", "OperationManager", "OM", "Manager"),
+                OperationManagerEmail = Col(row, ws, "Operation Manager Email", "OperationManagerEmail", "OM Email", "Manager Email").Trim().ToLowerInvariant(),
+                OperationConsultantEmail = Col(row, ws, "Operation Consultant Email", "OperationConsultantEmail", "OC Email", "Consultant Email").Trim().ToLowerInvariant(),
             });
         }
         return records;
@@ -201,7 +203,36 @@ public class UploadService : IUploadService
             ["resignations"] = resignRecords.Count,
             ["store_reference"] = storeRecords.Count,
         };
-        return (true, $"Uploaded {activeRecords.Count} active employees, {resignRecords.Count} resignations, and {storeRecords.Count} store references.", counts);
+
+        var message = $"Uploaded {activeRecords.Count} active employees, {resignRecords.Count} resignations, and {storeRecords.Count} store references.";
+        var unmatchedWarning = await BuildUnmatchedOmOcWarningAsync(storeRecords);
+        if (unmatchedWarning != null) message += " " + unmatchedWarning;
+
+        return (true, message, counts);
+    }
+
+    // Flags OM/OC emails in the just-uploaded store reference batch that don't
+    // match any user account with the matching role, so the admin can create or
+    // fix that account before the person complains their stores are missing.
+    private async Task<string?> BuildUnmatchedOmOcWarningAsync(List<StoreReference> storeRecords)
+    {
+        var omEmails = storeRecords.Select(s => s.OperationManagerEmail).Where(e => !string.IsNullOrWhiteSpace(e)).Distinct().ToList();
+        var ocEmails = storeRecords.Select(s => s.OperationConsultantEmail).Where(e => !string.IsNullOrWhiteSpace(e)).Distinct().ToList();
+        if (omEmails.Count == 0 && ocEmails.Count == 0) return null;
+
+        var omUserEmails = (await _db.Users.Where(u => u.Role == "Operation_Manager").Select(u => u.Email).ToListAsync())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var ocUserEmails = (await _db.Users.Where(u => u.Role == "Operation_Consultant").Select(u => u.Email).ToListAsync())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var unmatched = omEmails.Where(e => !omUserEmails.Contains(e))
+            .Concat(ocEmails.Where(e => !ocUserEmails.Contains(e)))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(e => e)
+            .ToList();
+
+        return unmatched.Count == 0 ? null
+            : $"⚠ {unmatched.Count} OM/OC email(s) in this file don't match any Operation Manager/Consultant account: {string.Join(", ", unmatched)}.";
     }
 
     private static string NormalizeHeader(string s) => Regex.Replace(s ?? "", @"\s+", " ").Trim();
@@ -326,6 +357,8 @@ public class UploadService : IUploadService
                 interview.StoreLeader = refMatch.StoreLeader;
                 interview.OperationConsultant = refMatch.OperationConsultant;
                 interview.OperationManager = refMatch.OperationManager;
+                interview.OperationConsultantEmail = refMatch.OperationConsultantEmail;
+                interview.OperationManagerEmail = refMatch.OperationManagerEmail;
             }
         }
 
@@ -500,7 +533,7 @@ public class UploadService : IUploadService
     {
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Store Reference");
-        string[] headers = ["Store Name", "Store Leader", "Operation Consultant", "Operation Manager"];
+        string[] headers = ["Store Name", "Store Leader", "Operation Consultant", "Operation Manager", "Operation Consultant Email", "Operation Manager Email"];
         for (int i = 0; i < headers.Length; i++) ws.Cell(1, i + 1).Value = headers[i];
         ws.Row(1).Style.Font.Bold = true;
         for (int r = 0; r < rows.Count; r++)
@@ -510,6 +543,8 @@ public class UploadService : IUploadService
             ws.Cell(row, 2).Value = e.StoreLeader;
             ws.Cell(row, 3).Value = e.OperationConsultant;
             ws.Cell(row, 4).Value = e.OperationManager;
+            ws.Cell(row, 5).Value = e.OperationConsultantEmail;
+            ws.Cell(row, 6).Value = e.OperationManagerEmail;
         }
         ws.Columns().AdjustToContents();
         using var ms = new MemoryStream(); wb.SaveAs(ms); return ms.ToArray();

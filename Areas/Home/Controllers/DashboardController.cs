@@ -55,7 +55,7 @@ public class DashboardController : Controller
         if (MvcApp.Models.ViewModels.ReportCatalog.Find(reportType) == null) return NotFound();
 
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         var periods = await _dashboard.GetAvailablePeriodsAsync();
         var stores = await _stores.GetStoresAsync(null, null, role, assignedName);
         ViewBag.Stores = stores.Select(s => s.StoreName).Distinct().OrderBy(s => s).ToList();
@@ -84,7 +84,7 @@ public class DashboardController : Controller
         string? store = null, string? om = null, string? oc = null, string? months = null)
     {
         var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetAssignedName();
+        var assignedName = HttpContext.Session.GetEmail();
         store = string.IsNullOrWhiteSpace(store) ? null : store;
         om = string.IsNullOrWhiteSpace(om) ? null : om;
         oc = string.IsNullOrWhiteSpace(oc) ? null : oc;
