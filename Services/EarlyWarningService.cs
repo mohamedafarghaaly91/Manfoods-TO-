@@ -7,7 +7,12 @@ namespace MvcApp.Services;
 public class EarlyWarningService : IEarlyWarningService
 {
     private readonly AppDbContext _db;
-    public EarlyWarningService(AppDbContext db) => _db = db;
+    private readonly IStoreAccessService _storeAccess;
+    public EarlyWarningService(AppDbContext db, IStoreAccessService storeAccess)
+    {
+        _db = db;
+        _storeAccess = storeAccess;
+    }
 
     // ── Constants ─────────────────────────────────────────────────────────────
     private const int DefaultNewHireWindowDays = 90;
@@ -348,23 +353,27 @@ public class EarlyWarningService : IEarlyWarningService
     };
 
     // ── Public API ────────────────────────────────────────────────────────────
-    public async Task<List<string>> GetStoreListAsync()
+    public async Task<List<string>> GetStoreListAsync(string role, string? assignedName)
     {
         var (candidates, _, _) = await LoadActiveCandidatesAsync(null, null);
-        return candidates.Select(c => c.Store)
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Distinct()
-            .OrderBy(s => s)
-            .ToList();
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var stores = candidates.Select(c => c.Store).Where(s => !string.IsNullOrWhiteSpace(s));
+        if (accessible != null) stores = stores.Where(s => accessible.Contains(s));
+        return stores.Distinct().OrderBy(s => s).ToList();
     }
 
     public async Task<List<EarlyWarningItem>> GetWatchlistAsync(
-        string? store, string? months = null, int? year = null)
+        string? store, string role, string? assignedName, string? months = null, int? year = null)
     {
         // ── Load raw data ─────────────────────────────────────────────────────
         var historical = await LoadHistoricalRecordsAsync();
         var (candidatesRaw, anchorMonth, anchorYear) = await LoadActiveCandidatesAsync(months, year);
         var candidates = candidatesRaw;
+
+        // Role-based store access is always applied — never bypassed by the
+        // explicit store filter, which only narrows further on top of it.
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        if (accessible != null) candidates = candidates.Where(c => accessible.Contains(c.Store)).ToList();
         if (MultiValueFilter.Split(store) is { } stores)
             candidates = candidates.Where(c => stores.Contains(c.Store)).ToList();
 
@@ -541,14 +550,14 @@ public class EarlyWarningService : IEarlyWarningService
     }
 
     public async Task<EarlyWarningSummary> GetSummaryAsync(
-        string? store, string? months = null, int? year = null)
+        string? store, string role, string? assignedName, string? months = null, int? year = null)
     {
         var historical   = await LoadHistoricalRecordsAsync();
         var companyTotal = historical.Count;
         var companyEarly = historical.Count(h => h.TenureDays != null && h.TenureDays <= DefaultNewHireWindowDays);
         var companyRate  = companyTotal > 0 ? companyEarly * 100.0 / companyTotal : 0;
 
-        var list = await GetWatchlistAsync(store, months, year);
+        var list = await GetWatchlistAsync(store, role, assignedName, months, year);
         return new EarlyWarningSummary
         {
             TotalWatchlist      = list.Count,

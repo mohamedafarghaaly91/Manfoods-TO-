@@ -9,11 +9,13 @@ public class ScorecardService : IScorecardService
 {
     private readonly AppDbContext _db;
     private readonly IExitInterviewService _exitInterviews;
+    private readonly IStoreAccessService _storeAccess;
 
-    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews)
+    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess)
     {
         _db = db;
         _exitInterviews = exitInterviews;
+        _storeAccess = storeAccess;
     }
 
     private static string Pick(StoreReference s, string dimension) => dimension switch
@@ -52,13 +54,17 @@ public class ScorecardService : IScorecardService
     // following each person across whichever store(s) they were assigned to in each
     // period — instead of only looking at the single latest period's assignment.
     private async Task<Dictionary<string, NameAggregate>> BuildNameAggregatesAsync(
-        string dimension, string? om, string? oc, string? months, int? year)
+        string dimension, string role, string? assignedName, string? om, string? oc, string? months, int? year)
     {
         var periods = DashboardService.ResolvePeriods(null, year, null, null, months);
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         if (periodKeys.Count == 0) return new Dictionary<string, NameAggregate>();
 
         var storeRefs = await _db.StoreReferences.Where(s => periodKeys.Contains(s.Year * 100 + s.Month)).ToListAsync();
+        // Role-based store access is always applied first — never bypassed by
+        // the om/oc filter, which only narrows further on top of it.
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        if (accessible != null) storeRefs = storeRefs.Where(s => accessible.Contains(s.StoreName)).ToList();
         if (MultiValueFilter.Split(om) is { } oms) storeRefs = storeRefs.Where(s => oms.Contains(s.OperationManager)).ToList();
         if (MultiValueFilter.Split(oc) is { } ocs) storeRefs = storeRefs.Where(s => ocs.Contains(s.OperationConsultant)).ToList();
 
@@ -136,13 +142,13 @@ public class ScorecardService : IScorecardService
         return byEmployee.Values.ToList();
     }
 
-    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string? om = null, string? oc = null, string? months = null, int? year = null)
+    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
     {
         // Resolve once so both aggregates and the historical period window use
         // the same effective year (latest data year when caller passes no year).
         var effectiveYear = await ResolveEffectiveYearAsync(year);
 
-        var aggregates = await BuildNameAggregatesAsync(dimension, om, oc, months, effectiveYear);
+        var aggregates = await BuildNameAggregatesAsync(dimension, role, assignedName, om, oc, months, effectiveYear);
         if (aggregates.Count == 0) return new List<ScorecardRow>();
 
         var historical = await LoadHistoricalRecordsAsync();
@@ -176,7 +182,7 @@ public class ScorecardService : IScorecardService
                 "om" => new ExitInterviewFilter { OperationManager = name },
                 _ => new ExitInterviewFilter(),
             };
-            var sentiment = await _exitInterviews.GetSentimentSummaryAsync(filter, "Admin", null);
+            var sentiment = await _exitInterviews.GetSentimentSummaryAsync(filter, role, assignedName);
 
             result.Add(new ScorecardRow
             {
@@ -194,11 +200,15 @@ public class ScorecardService : IScorecardService
         return result.OrderByDescending(r => r.TurnoverRate).ToList();
     }
 
-    public async Task<List<string>> GetLeaderNamesAsync() =>
-        await _db.StoreReferences.Where(s => s.StoreLeader != "")
-            .Select(s => s.StoreLeader).Distinct().OrderBy(s => s).ToListAsync();
+    public async Task<List<string>> GetLeaderNamesAsync(string role, string? assignedName)
+    {
+        var q = _db.StoreReferences.Where(s => s.StoreLeader != "");
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        if (accessible != null) q = q.Where(s => accessible.Contains(s.StoreName));
+        return await q.Select(s => s.StoreLeader).Distinct().OrderBy(s => s).ToListAsync();
+    }
 
-    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string? months = null, int? year = null)
+    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
     {
         if (string.IsNullOrWhiteSpace(leaderName)) return new List<LeaderHistoryRow>();
 
@@ -206,8 +216,11 @@ public class ScorecardService : IScorecardService
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         if (periodKeys.Count == 0) return new List<LeaderHistoryRow>();
 
-        var rows = await _db.StoreReferences
-            .Where(s => s.StoreLeader == leaderName && periodKeys.Contains(s.Year * 100 + s.Month))
+        var rowsQuery = _db.StoreReferences
+            .Where(s => s.StoreLeader == leaderName && periodKeys.Contains(s.Year * 100 + s.Month));
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        if (accessible != null) rowsQuery = rowsQuery.Where(s => accessible.Contains(s.StoreName));
+        var rows = await rowsQuery
             .OrderBy(s => s.Year).ThenBy(s => s.Month)
             .ToListAsync();
         if (rows.Count == 0) return new List<LeaderHistoryRow>();
@@ -244,10 +257,10 @@ public class ScorecardService : IScorecardService
         return result;
     }
 
-    public async Task<ScorecardRollupResult> GetRollupAsync(string? months = null, int? year = null)
+    public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? months = null, int? year = null)
     {
         var result = new ScorecardRollupResult();
-        var leaderAggregates = await BuildNameAggregatesAsync("leader", null, null, months, year);
+        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, null, null, months, year);
         if (leaderAggregates.Count == 0) return result;
 
         var leaderRates = leaderAggregates.Select(kv =>

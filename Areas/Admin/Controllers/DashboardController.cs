@@ -70,8 +70,8 @@ public class DashboardController : Controller
         var periods = await _dashboard.GetAvailablePeriodsAsync();
         var stores = await _stores.GetStoresAsync(null, null, role, assignedName);
         ViewBag.Stores = stores.Select(s => s.StoreName).Distinct().OrderBy(s => s).ToList();
-        ViewBag.OperationManagers = await _dashboard.GetOperationManagersAsync(null, null);
-        ViewBag.OperationConsultants = await _dashboard.GetOperationConsultantsAsync(null, null);
+        ViewBag.OperationManagers = await _dashboard.GetOperationManagersAsync(null, null, role, assignedName);
+        ViewBag.OperationConsultants = await _dashboard.GetOperationConsultantsAsync(null, null, role, assignedName);
         ViewBag.ReportType = reportType;
         return View(periods);
     }
@@ -106,22 +106,22 @@ public class DashboardController : Controller
                     await _reports.BuildStoreComparisonReportAsync(month, year, role, assignedName, om, oc),
                     $"Store_Comparison_{year}_{month:D2}.xlsx");
             case "ninety-day":
-                return await DownloadWorkbookAsync(await _reports.BuildNinetyDayReportAsync(store), "90_Day_Turnover_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildNinetyDayReportAsync(role, assignedName, store), "90_Day_Turnover_Report.xlsx");
             case "retention":
-                return await DownloadWorkbookAsync(await _reports.BuildRetentionReportAsync(store), "Retention_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildRetentionReportAsync(role, assignedName, store), "Retention_Report.xlsx");
             case "exit-interviews":
-                return await DownloadWorkbookAsync(await _reports.BuildExitInterviewReportAsync(store, om, oc), "Exit_Interview_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildExitInterviewReportAsync(role, assignedName, store, om, oc), "Exit_Interview_Report.xlsx");
             case "scorecard":
-                return await DownloadWorkbookAsync(await _reports.BuildScorecardReportAsync(om, oc), "Scorecard_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildScorecardReportAsync(role, assignedName, om, oc), "Scorecard_Report.xlsx");
             case "early-warning":
-                return await DownloadWorkbookAsync(await _reports.BuildEarlyWarningReportAsync(store), "Early_Warning_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildEarlyWarningReportAsync(role, assignedName, store), "Early_Warning_Report.xlsx");
             case "trend-matrix":
                 return await DownloadWorkbookAsync(
                     await _reports.BuildTrendMatrixReportAsync(role, assignedName, om, oc, year > 0 ? year : null, months),
                     $"Turnover_Trend_Matrix_{year}.xlsx");
             case "ninety-day-trend-matrix":
                 return await DownloadWorkbookAsync(
-                    await _reports.BuildNinetyDayTrendMatrixReportAsync(om, oc, months, year > 0 ? year : null),
+                    await _reports.BuildNinetyDayTrendMatrixReportAsync(role, assignedName, om, oc, months, year > 0 ? year : null),
                     "90_Day_Trend_Matrix_Report.xlsx");
             default:
                 return await DownloadWorkbookAsync(

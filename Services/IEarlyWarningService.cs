@@ -4,7 +4,7 @@ namespace MvcApp.Services;
 
 public interface IEarlyWarningService
 {
-    Task<List<string>> GetStoreListAsync();
+    Task<List<string>> GetStoreListAsync(string role, string? assignedName);
 
     /// <summary>Currently active employees flagged with one or more historical
     /// risk factors (new-hire window, store/role early-leaver history,
@@ -12,7 +12,7 @@ public interface IEarlyWarningService
     /// "months"/"year" pick which Active Employees snapshot counts as "currently
     /// active" (defaults to the latest uploaded period) — the historical
     /// baseline behind each risk factor always uses all-time data.</summary>
-    Task<List<EarlyWarningItem>> GetWatchlistAsync(string? store, string? months = null, int? year = null);
+    Task<List<EarlyWarningItem>> GetWatchlistAsync(string? store, string role, string? assignedName, string? months = null, int? year = null);
 
-    Task<EarlyWarningSummary> GetSummaryAsync(string? store, string? months = null, int? year = null);
+    Task<EarlyWarningSummary> GetSummaryAsync(string? store, string role, string? assignedName, string? months = null, int? year = null);
 }

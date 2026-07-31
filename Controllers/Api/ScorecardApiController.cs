@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
 
@@ -15,25 +16,37 @@ public class ScorecardApiController : ControllerBase
 
     private static readonly HashSet<string> ValidDimensions = new() { "leader", "oc", "om" };
 
+    private (string role, string? assignedName) Identity() =>
+        (HttpContext.Session.GetRole(), HttpContext.Session.GetEmail());
+
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string dimension = "leader", [FromQuery] string? om = null,
         [FromQuery] string? oc = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         if (!ValidDimensions.Contains(dimension)) return BadRequest(new { error = "Invalid dimension." });
-        return Ok(await _scorecard.GetScorecardAsync(dimension, om, oc, months, year));
+        var (role, assignedName) = Identity();
+        return Ok(await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, months, year));
     }
 
     [HttpGet("leaders")]
-    public async Task<IActionResult> Leaders() => Ok(await _scorecard.GetLeaderNamesAsync());
+    public async Task<IActionResult> Leaders()
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _scorecard.GetLeaderNamesAsync(role, assignedName));
+    }
 
     [HttpGet("leader-history")]
     public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         if (string.IsNullOrWhiteSpace(leader)) return BadRequest(new { error = "Leader name is required." });
-        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, months, year));
+        var (role, assignedName) = Identity();
+        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, role, assignedName, months, year));
     }
 
     [HttpGet("rollup")]
-    public async Task<IActionResult> Rollup([FromQuery] string? months = null, [FromQuery] int? year = null) =>
-        Ok(await _scorecard.GetRollupAsync(months, year));
+    public async Task<IActionResult> Rollup([FromQuery] string? months = null, [FromQuery] int? year = null)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _scorecard.GetRollupAsync(role, assignedName, months, year));
+    }
 }

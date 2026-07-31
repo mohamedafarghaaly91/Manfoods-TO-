@@ -374,7 +374,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         }
 
         // Early turnover within first 90 days.
-        var ninety = await _ninetyDay.GetKpiAsync(month, year, storeName);
+        var ninety = await _ninetyDay.GetKpiAsync(month, year, storeName, SystemRole, null);
         if (ninety.TotalHires > 0)
         {
             metrics.EarlyLeaverRate = ninety.Rate;
@@ -396,7 +396,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         }
 
         // Retention at the 6-month mark.
-        var milestones = await _retention.GetMilestonesAsync(storeName);
+        var milestones = await _retention.GetMilestonesAsync(storeName, SystemRole, null);
         var sixMonth = milestones.FirstOrDefault(m => m.Label == "6 Months");
         if (sixMonth != null && sixMonth.TotalHires > 0)
         {
@@ -479,7 +479,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         }
 
         // Early-warning watchlist (currently active, at-risk employees).
-        var watchlist = await _earlyWarning.GetSummaryAsync(storeName);
+        var watchlist = await _earlyWarning.GetSummaryAsync(storeName, SystemRole, null);
         if (watchlist.HighRiskCount >= EarlyWarningHighRiskThreshold)
         {
             metrics.Signals.Add(new FiredSignal

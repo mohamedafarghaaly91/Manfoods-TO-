@@ -72,8 +72,8 @@ public class AiAssistantApiController : ControllerBase
             ? await _dashboard.GetPerStoreTurnoverAsync(kpis.Month, kpis.Year, role, assignedName)
             : new List<StoreBreakdown>();
 
-        var milestones = await _retention.GetMilestonesAsync(request.Store);
-        var ninetyDayTrend = await _ninetyDay.GetTrendAsync(request.Store);
+        var milestones = await _retention.GetMilestonesAsync(request.Store, role, assignedName);
+        var ninetyDayTrend = await _ninetyDay.GetTrendAsync(request.Store, role, assignedName);
         var exitReasons = await _exitInterviews.GetReasonsForLeavingAsync(new ExitInterviewFilter { Store = request.Store }, role, assignedName);
 
         var context = new GeminiContext

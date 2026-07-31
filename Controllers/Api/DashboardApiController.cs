@@ -83,13 +83,17 @@ public class DashboardApiController : ControllerBase
     [HttpGet("operation-managers")]
     public async Task<IActionResult> OperationManagers([FromQuery] int? month, [FromQuery] int? year)
     {
-        return Ok(await _dashboard.GetOperationManagersAsync(month, year));
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetOperationManagersAsync(month, year, role, assignedName));
     }
 
     [HttpGet("operation-consultants")]
     public async Task<IActionResult> OperationConsultants([FromQuery] int? month, [FromQuery] int? year)
     {
-        return Ok(await _dashboard.GetOperationConsultantsAsync(month, year));
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetOperationConsultantsAsync(month, year, role, assignedName));
     }
 
     [HttpGet("store-comparison")]
@@ -158,11 +162,19 @@ public class DashboardApiController : ControllerBase
     }
 
     [HttpGet("headcount-trend")]
-    public async Task<IActionResult> HeadcountTrend([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] int? sinceYear) =>
-        Ok(await _dashboard.GetHeadcountTrendAsync(store, om, oc, sinceYear));
+    public async Task<IActionResult> HeadcountTrend([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] int? sinceYear)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetHeadcountTrendAsync(store, role, assignedName, om, oc, sinceYear));
+    }
 
     [HttpGet("store-headcount-breakdown")]
-    public async Task<IActionResult> StoreHeadcountBreakdown([FromQuery] int month, [FromQuery] int year, [FromQuery] string? om, [FromQuery] string? oc) =>
-        Ok(await _dashboard.GetStoreHeadcountBreakdownAsync(month, year, om, oc));
+    public async Task<IActionResult> StoreHeadcountBreakdown([FromQuery] int month, [FromQuery] int year, [FromQuery] string? om, [FromQuery] string? oc)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetStoreHeadcountBreakdownAsync(month, year, role, assignedName, om, oc));
+    }
 
 }

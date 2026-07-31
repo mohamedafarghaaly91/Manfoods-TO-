@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
 
@@ -13,14 +14,27 @@ public class EarlyWarningApiController : ControllerBase
 
     public EarlyWarningApiController(IEarlyWarningService earlyWarning) => _earlyWarning = earlyWarning;
 
+    private (string role, string? assignedName) Identity() =>
+        (HttpContext.Session.GetRole(), HttpContext.Session.GetEmail());
+
     [HttpGet("stores")]
-    public async Task<IActionResult> Stores() => Ok(await _earlyWarning.GetStoreListAsync());
+    public async Task<IActionResult> Stores()
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _earlyWarning.GetStoreListAsync(role, assignedName));
+    }
 
     [HttpGet("watchlist")]
-    public async Task<IActionResult> Watchlist([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year) =>
-        Ok(await _earlyWarning.GetWatchlistAsync(store, months, year));
+    public async Task<IActionResult> Watchlist([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _earlyWarning.GetWatchlistAsync(store, role, assignedName, months, year));
+    }
 
     [HttpGet("summary")]
-    public async Task<IActionResult> Summary([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year) =>
-        Ok(await _earlyWarning.GetSummaryAsync(store, months, year));
+    public async Task<IActionResult> Summary([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _earlyWarning.GetSummaryAsync(store, role, assignedName, months, year));
+    }
 }
