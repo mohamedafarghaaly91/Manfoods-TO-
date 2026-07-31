@@ -11,13 +11,15 @@ public class UploadService : IUploadService
 {
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IStoreActionPlanService _actionPlans;
 
     private static readonly HashSet<string> PeriodFileTypes = new() { "active_employees", "resignations", "store_reference" };
 
-    public UploadService(AppDbContext db, IStoreAccessService storeAccess)
+    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IStoreActionPlanService actionPlans)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _actionPlans = actionPlans;
     }
 
     private static string Norm(IXLCell cell) => cell.GetString().Trim();
@@ -203,6 +205,10 @@ public class UploadService : IUploadService
 
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
+
+        // Runs after commit, outside the upload's own transaction, so a plan
+        // creation/evaluation failure here can't roll back an otherwise-good upload.
+        await _actionPlans.RunDetectionForPeriodAsync(month, year);
 
         var counts = new Dictionary<string, int>
         {
@@ -632,6 +638,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "active_employees", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+                await _actionPlans.RunDetectionForPeriodAsync(month, year);
                 return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.");
 
             case "resignations":
@@ -642,6 +649,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "resignations", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+                await _actionPlans.RunDetectionForPeriodAsync(month, year);
                 return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.");
 
             case "store_reference":
@@ -652,6 +660,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "store_reference", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+                await _actionPlans.RunDetectionForPeriodAsync(month, year);
                 return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.");
 
             default:

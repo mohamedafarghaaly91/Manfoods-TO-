@@ -172,6 +172,69 @@ CREATE TABLE IF NOT EXISTS ai_usage_daily (
 ALTER TABLE ai_usage_daily ADD COLUMN IF NOT EXISTS prompt_tokens BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE ai_usage_daily ADD COLUMN IF NOT EXISTS completion_tokens BIGINT NOT NULL DEFAULT 0;
 
+-- ── store_action_plans / recommendations / notes ──────────────────────────
+-- Store Action Plan feature. No EF Migrations in this app (Program.cs uses
+-- Database.EnsureCreated(), which only builds schema for a brand-new
+-- database) — this script is the real schema change for the existing DB.
+-- Store is the permission/ownership unit: StoreReference remains the single
+-- source of truth for who's responsible for a store, so these tables never
+-- store a user-store assignment of their own.
+CREATE TABLE IF NOT EXISTS store_action_plans (
+    id SERIAL PRIMARY KEY,
+    store_name TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'Active',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_month INTEGER NOT NULL DEFAULT 0,
+    created_year INTEGER NOT NULL DEFAULT 0,
+    resolved_at TIMESTAMPTZ,
+    resolved_reason TEXT,
+    baseline_turnover_rate DOUBLE PRECISION,
+    baseline_early_leaver_rate DOUBLE PRECISION,
+    baseline_retention_rate DOUBLE PRECISION,
+    detected_issues_summary TEXT NOT NULL DEFAULT '',
+    healthy_streak_count INTEGER NOT NULL DEFAULT 0,
+    -- Not part of the originally-specified column list — needed so detection
+    -- can be re-run safely for a period that was already evaluated (e.g. after
+    -- a single-file re-upload correction) without double-counting a monthly
+    -- cycle toward the 2-consecutive-healthy-cycle auto-resolve rule.
+    last_evaluated_month INTEGER,
+    last_evaluated_year INTEGER
+);
+ALTER TABLE store_action_plans ADD COLUMN IF NOT EXISTS last_evaluated_month INTEGER;
+ALTER TABLE store_action_plans ADD COLUMN IF NOT EXISTS last_evaluated_year INTEGER;
+
+-- Only one Active plan per store — a partial unique index rather than a
+-- plain one, since Resolved plans for the same store must coexist historically.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_store_action_plans_active_store
+    ON store_action_plans (store_name)
+    WHERE status = 'Active';
+CREATE INDEX IF NOT EXISTS ix_store_action_plans_store_name ON store_action_plans (store_name);
+
+CREATE TABLE IF NOT EXISTS action_plan_recommendations (
+    id SERIAL PRIMARY KEY,
+    store_action_plan_id INTEGER NOT NULL REFERENCES store_action_plans (id) ON DELETE CASCADE,
+    signal_code TEXT NOT NULL DEFAULT '',
+    category TEXT NOT NULL DEFAULT '',
+    recommendation_text TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_action_plan_recommendations_plan_id ON action_plan_recommendations (store_action_plan_id);
+
+-- Manager notes are append-only in V1 — no update/delete path in the app,
+-- and author_name/author_role are snapshotted per row at write time so a
+-- historical note keeps its original author even if that user account's
+-- role or assigned name changes later.
+CREATE TABLE IF NOT EXISTS action_plan_notes (
+    id SERIAL PRIMARY KEY,
+    store_action_plan_id INTEGER NOT NULL REFERENCES store_action_plans (id) ON DELETE CASCADE,
+    author_user_id INTEGER NOT NULL,
+    author_name TEXT NOT NULL DEFAULT '',
+    author_role TEXT NOT NULL DEFAULT '',
+    note_text TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_action_plan_notes_plan_id ON action_plan_notes (store_action_plan_id);
+
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal

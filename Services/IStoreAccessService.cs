@@ -1,4 +1,5 @@
 using MvcApp.Models;
+using MvcApp.Models.ViewModels;
 
 namespace MvcApp.Services;
 
@@ -25,4 +26,21 @@ public interface IStoreAccessService
 
     /// <summary>The email value on a StoreReference row for the given restricted role (e.g. for upload validation).</summary>
     string GetEmailForRole(StoreReference store, string role);
+
+    /// <summary>True if the given role/email can see the given store — unrestricted
+    /// roles (Admin/User) always true; restricted roles checked against the same
+    /// latest-period access list as <see cref="GetAccessibleStoreNamesAsync"/>.</summary>
+    Task<bool> CanAccessStoreAsync(string role, string? email, string storeName);
+
+    /// <summary>Resolves who is currently responsible for a store: the Head Manager
+    /// if one is assigned on the latest StoreReference data, otherwise the Operation
+    /// Consultant. Computed live on every call — never persisted — so a Store
+    /// Reference change takes effect immediately. Null if the store isn't found.</summary>
+    Task<ResponsibleParty?> GetResponsiblePartyAsync(string storeName);
+
+    /// <summary>Pure "Head Manager if assigned, else Operation Consultant" rule
+    /// applied to an already-loaded StoreReference row — shared by
+    /// <see cref="GetResponsiblePartyAsync"/> and by callers batch-resolving
+    /// responsibility for many stores at once without a query per store.</summary>
+    ResponsibleParty ResolveResponsible(StoreReference reference);
 }

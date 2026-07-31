@@ -16,11 +16,24 @@ public class AppDbContext : DbContext
     public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
     public DbSet<AppSetting> AppSettings { get; set; }
     public DbSet<AiUsageDaily> AiUsageDaily { get; set; }
+    public DbSet<StoreActionPlan> StoreActionPlans { get; set; }
+    public DbSet<ActionPlanRecommendation> ActionPlanRecommendations { get; set; }
+    public DbSet<ActionPlanNote> ActionPlanNotes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         modelBuilder.Entity<AiUsageDaily>().HasKey(a => new { a.UserId, a.UsageDate });
+
+        // Only one Active plan per store. This config only takes effect for a
+        // fresh EnsureCreated() database (e.g. local/test) — the real schema
+        // change for the existing production database is scripts/migrate.sql,
+        // since this app doesn't use EF Migrations.
+        modelBuilder.Entity<StoreActionPlan>()
+            .HasIndex(p => p.StoreName)
+            .IsUnique()
+            .HasFilter("status = 'Active'")
+            .HasDatabaseName("ux_store_action_plans_active_store");
     }
 }

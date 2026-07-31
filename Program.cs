@@ -88,6 +88,7 @@ builder.Services.AddScoped<INinetyDayTurnoverService, NinetyDayTurnoverService>(
 builder.Services.AddScoped<IRetentionService, RetentionService>();
 builder.Services.AddScoped<IEarlyWarningService, EarlyWarningService>();
 builder.Services.AddScoped<IScorecardService, ScorecardService>();
+builder.Services.AddScoped<IStoreActionPlanService, StoreActionPlanService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IAiUsageService, AiUsageService>();
 builder.Services.AddHttpClient();
