@@ -273,6 +273,7 @@ public class DashboardService : IDashboardService
 
         return await q.GroupBy(e => e.Gender)
             .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+            .OrderBy(c => c.Label)
             .ToListAsync();
     }
 
@@ -838,7 +839,7 @@ public class DashboardService : IDashboardService
             {
                 StoreName       = g.Key,
                 Headcount       = g.Count(),
-                GenderBreakdown = g.GroupBy(x => x.Gender).ToDictionary(gg => gg.Key, gg => gg.Count())
+                GenderBreakdown = g.GroupBy(x => x.Gender).OrderBy(gg => gg.Key).ToDictionary(gg => gg.Key, gg => gg.Count())
             })
             .OrderByDescending(r => r.Headcount)
             .ToList();

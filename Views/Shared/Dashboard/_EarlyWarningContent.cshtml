@@ -214,6 +214,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>Chart.register(ChartDataLabels);</script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
 /* ── Early Warning page — Year + discrete Months multi-select (picks which
    Active Employees snapshot counts as "currently active"), same filter
@@ -224,15 +225,6 @@ let ewStoreFilter = '';
 let ewWatchlistData = [];
 
 const EW_REASON_TYPES = ['new_hire_window', 'store_history', 'role_history', 'peak_window', 'gender_history', 'exit_interview_score', 'store_leader_history'];
-const EW_REASON_COLORS = {
-    new_hire_window:      'oklch(0.55 0.19 25)',
-    store_history:        'oklch(0.65 0.15 190)',
-    role_history:         'oklch(0.7 0.16 145)',
-    peak_window:          'oklch(0.72 0.17 60)',
-    gender_history:       'oklch(0.68 0.15 310)',
-    exit_interview_score: 'oklch(0.62 0.18 15)',
-    store_leader_history: 'oklch(0.66 0.14 230)',
-};
 const EW_L = document.getElementById('ewLocalization').dataset;
 
 function ewMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
@@ -405,10 +397,10 @@ function ewReasonText(reason) {
 }
 
 function ewRiskBadge(stars) {
-    const color = stars >= 4 ? 'oklch(0.6 0.22 22)'
-                : stars >= 3 ? 'oklch(0.72 0.19 50)'
-                : stars >= 2 ? 'oklch(0.75 0.16 75)'
-                :              'oklch(0.55 0.15 25)';
+    // High risk (4-5 stars) -> red, Medium risk (2-3 stars) -> amber, Low risk (0-1 stars) -> green.
+    const color = stars >= 4 ? ChartColors.SEMANTIC.BAD
+                : stars >= 2 ? ChartColors.SEMANTIC.WARNING
+                :              ChartColors.SEMANTIC.GOOD;
     const filled = '★'.repeat(stars);
     const empty  = '☆'.repeat(5 - stars);
     return `<span style="color:${color};font-size:15px;letter-spacing:1px;line-height:1" title="${stars}/5">${filled}${empty}</span>`;
@@ -526,7 +518,7 @@ function ewLoadReasonChart(rows) {
         type: 'bar',
         data: {
             labels: EW_REASON_TYPES.map(t => labelMap[t]),
-            datasets: [{ data: EW_REASON_TYPES.map(t => counts[t]), backgroundColor: EW_REASON_TYPES.map(t => EW_REASON_COLORS[t]), borderRadius: 4, maxBarThickness: 34 }],
+            datasets: [{ data: EW_REASON_TYPES.map(t => counts[t]), backgroundColor: EW_REASON_TYPES.map(t => ChartColors.EARLY_WARNING_REASON_COLORS[t]), borderRadius: 4, maxBarThickness: 34 }],
         },
         options: {
             indexAxis: 'y', maintainAspectRatio: false,

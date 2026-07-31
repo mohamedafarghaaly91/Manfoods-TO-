@@ -194,6 +194,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>Chart.register(ChartDataLabels);</script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
 /* ── Exit Interviews page — Year + discrete Months multi-select, same
    filter components as Turnover/Retention/Scorecard/etc. Employee identity
@@ -201,8 +202,6 @@
    choice-question counts and anonymous free-text comments. */
 let eiYear = null, eiMonths = [], eiYearMonthsMap = {};
 let eiStoreFilter = '', eiLeaderFilter = '', eiOcFilter = '', eiOmFilter = '';
-
-const DRIVER_COLORS = ['oklch(0.55 0.19 25)', 'oklch(0.65 0.15 190)', 'oklch(0.7 0.16 145)', 'oklch(0.72 0.17 60)', 'oklch(0.62 0.2 15)'];
 
 function eiMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function eiMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -375,7 +374,7 @@ function eiMkChart(ref, id, labels, values, horizontal) {
     }
     return new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
-        data: { labels, datasets: [{ data: values, backgroundColor: DRIVER_COLORS, borderWidth: 2, borderColor: 'oklch(1 0 0)' }] },
+        data: { labels, datasets: [{ data: values, backgroundColor: ChartColors.colorsByLabel(labels), borderWidth: 2, borderColor: 'oklch(1 0 0)' }] },
         options: { cutout: '60%', maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'oklch(0.5 0.03 258)', boxWidth: 10, boxHeight: 10, padding: 12, font: { size: 11 } } }, datalabels: { color: '#fff', font: { size: 11, weight: '700' }, textShadowBlur: 4, textShadowColor: 'rgba(0,0,0,0.4)', formatter: (v, ctx) => { const t = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return t > 0 && v > 0 ? Math.round(v / t * 100) + '%' : ''; } } } }
     });
 }
@@ -410,9 +409,9 @@ async function eiLoadWorkPressure() {
 }
 
 function eiDriverTone(pct) {
-    if (pct >= 70) return 'oklch(0.62 0.15 155)';
-    if (pct >= 40) return 'oklch(0.75 0.16 75)';
-    return 'oklch(0.6 0.22 22)';
+    if (pct >= 70) return ChartColors.SEMANTIC.GOOD;
+    if (pct >= 40) return ChartColors.SEMANTIC.WARNING;
+    return ChartColors.SEMANTIC.BAD;
 }
 
 async function eiLoadDrivers() {

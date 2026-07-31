@@ -342,6 +342,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .Where(r => !string.IsNullOrWhiteSpace(r.Gender))
             .GroupBy(r => r.Gender)
             .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+            .OrderBy(c => c.Label)
             .ToList();
     }
 

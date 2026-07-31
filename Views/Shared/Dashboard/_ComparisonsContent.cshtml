@@ -282,10 +282,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 <script>
 /* ── Comparisons page — two independent filter panels (A / B) ──────────
-   Reuses fetchJson/mkChart/COLORS from dashboard.js; does NOT use
+   Reuses fetchJson/mkChart from dashboard.js; does NOT use
    dashboard.js's period/store selects or buildQuery/loadAll (those target
    #periodSelect etc. which don't exist here, so they safely no-op). */
 

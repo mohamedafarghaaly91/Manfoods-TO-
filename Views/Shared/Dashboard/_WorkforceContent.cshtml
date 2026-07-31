@@ -234,6 +234,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 <script>
 /* ── Workforce page — Year + discrete Months multi-select, same filter
@@ -432,9 +433,11 @@ async function wfLoadTenureChart() {
 
 async function wfLoadGenderChart() {
     const data = await fetchJson(`/api/dashboard/gender-breakdown?${buildQuery()}`);
+    const genderLabels = data.map(d => d.label);
+    const genderColors = ChartColors.colorsByLabel(genderLabels, ChartColors.GENDER_COLORS);
     wfGenderChart = mkChart(wfGenderChart, 'wfGenderChart', {
         type: 'doughnut',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: COLORS, borderWidth: 0 }] },
+        data: { labels: genderLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: genderColors, borderWidth: 0 }] },
         options: { plugins: { legend: { display: false } } }
     });
 
@@ -444,7 +447,7 @@ async function wfLoadGenderChart() {
     el.innerHTML = data.map((d, i) => {
         const pct = total > 0 ? Math.round(d.value / total * 100) : 0;
         return `<div class="wf-gender-row">
-            <span class="wf-gender-dot" style="background:${COLORS[i % COLORS.length]}"></span>
+            <span class="wf-gender-dot" style="background:${genderColors[i]}"></span>
             <span class="wf-gender-label">${d.label}</span>
             <span class="wf-gender-value">${d.value} <span class="wf-gender-pct">(${pct}%)</span></span>
         </div>`;
@@ -480,9 +483,10 @@ function wfRenderStoreTable(rows) {
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-muted">No data for this period.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
         const total = Object.values(r.genderBreakdown).reduce((s, v) => s + v, 0) || 1;
-        const genderHtml = Object.entries(r.genderBreakdown).map(([label, value], i) => {
+        const genderHtml = Object.entries(r.genderBreakdown).map(([label, value]) => {
             const pct = Math.round(value / total * 100);
-            return `<span><span class="wf-store-gender-dot" style="background:${COLORS[i % COLORS.length]}"></span>${label} ${pct}%</span>`;
+            const color = ChartColors.GENDER_COLORS[label] || ChartColors.hashColor(label);
+            return `<span><span class="wf-store-gender-dot" style="background:${color}"></span>${label} ${pct}%</span>`;
         }).join(' ');
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
@@ -507,7 +511,7 @@ function wfRenderOcOmTable(tbodyId, rows) {
     const tbody = document.getElementById(tbodyId);
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No data for this period.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
-        const bg = r.avgTurnoverRate >= 15 ? 'oklch(0.6 0.22 22)' : r.avgTurnoverRate >= 8 ? 'oklch(0.68 0.18 55)' : r.avgTurnoverRate >= 4 ? 'oklch(0.75 0.16 75)' : 'oklch(0.62 0.15 155)';
+        const bg = r.avgTurnoverRate >= 15 ? ChartColors.SEMANTIC.BAD : r.avgTurnoverRate >= 8 ? ChartColors.SEMANTIC.WARNING_STRONG : r.avgTurnoverRate >= 4 ? ChartColors.SEMANTIC.WARNING : ChartColors.SEMANTIC.GOOD;
         const badge = `<span style="background:${bg};color:#fff;padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.avgTurnoverRate.toFixed(1)}%</span>`;
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${r.name}</td>

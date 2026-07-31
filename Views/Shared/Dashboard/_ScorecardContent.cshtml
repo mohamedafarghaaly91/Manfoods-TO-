@@ -234,6 +234,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
 /* ── Scorecard page — Year + discrete Months multi-select controls the
    aggregation window for all three sections: ranking, leader drill-down,
@@ -257,7 +258,7 @@ function scBuildQuery(extra) {
 function scRateBadge(rate, goodIsHigh) {
     const good = goodIsHigh ? rate >= 70 : rate <= 5;
     const warn = goodIsHigh ? (rate >= 40 && rate < 70) : (rate > 5 && rate <= 12);
-    const bg = good ? 'oklch(0.62 0.15 155)' : warn ? 'oklch(0.75 0.16 75)' : 'oklch(0.6 0.22 22)';
+    const bg = good ? ChartColors.SEMANTIC.GOOD : warn ? ChartColors.SEMANTIC.WARNING : ChartColors.SEMANTIC.BAD;
     const fg = warn ? '#1C1C27' : '#fff';
     return `<span style="background:${bg};color:${fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${rate.toFixed(1)}%</span>`;
 }

@@ -184,6 +184,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>Chart.register(ChartDataLabels);</script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
 /* ── Retention page — Year + discrete cohort-Months multi-select, same
    filter components as Turnover/Comparisons/90-Day/Workforce. */
@@ -191,11 +192,6 @@ let rtYear = null, rtMonths = [], rtYearMonthsMap = {};
 let rtStoreFilter = '', rtOmFilter = '', rtOcFilter = '';
 
 const RT_MILESTONE_ORDER = ['6 Months', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years'];
-const RT_MILESTONE_COLORS = {
-    '6 Months': 'oklch(0.55 0.19 25)', '1 Year': 'oklch(0.65 0.15 190)', '2 Years': 'oklch(0.7 0.16 145)',
-    '3 Years': 'oklch(0.72 0.17 60)', '4 Years': 'oklch(0.62 0.2 15)', '5 Years': 'oklch(0.6 0.16 280)'
-};
-const RT_TENURE_BUCKET_COLORS = ['oklch(0.55 0.19 25)', 'oklch(0.65 0.15 190)', 'oklch(0.7 0.16 145)', 'oklch(0.72 0.17 60)', 'oklch(0.62 0.2 15)', 'oklch(0.6 0.16 280)', 'oklch(0.5 0.03 258)'];
 
 function rtMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function rtMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -425,7 +421,7 @@ async function rtLoadTrend() {
             datasets: RT_MILESTONE_ORDER.map(label => ({
                 label,
                 data: data.map(d => d.rates?.[label] ?? null),
-                borderColor: RT_MILESTONE_COLORS[label],
+                borderColor: ChartColors.RETENTION_MILESTONE_COLORS[label] || ChartColors.hashColor(label),
                 backgroundColor: 'transparent',
                 segment: { borderDash: c => data[c.p1DataIndex]?.provisional?.[label] ? [6, 4] : undefined },
                 tension: 0.3, fill: false, pointRadius: 3, spanGaps: true
@@ -469,12 +465,13 @@ function rtRenderTenureTable(rows) {
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-muted">No data for this period.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
         const total = r.buckets.reduce((s, b) => s + b.value, 0) || 1;
-        const segs = r.buckets.filter(b => b.value > 0).map((b, i) => {
+        const bucketColor = b => ChartColors.RETENTION_TENURE_BUCKET_COLORS[b.label] || ChartColors.hashColor(b.label);
+        const segs = r.buckets.filter(b => b.value > 0).map((b) => {
             const pct = Math.round(b.value / total * 100);
-            return `<span class="rt-tenure-bar-seg" style="width:${pct}%;background:${RT_TENURE_BUCKET_COLORS[i % RT_TENURE_BUCKET_COLORS.length]}" title="${b.label}: ${b.value} (${pct}%)"></span>`;
+            return `<span class="rt-tenure-bar-seg" style="width:${pct}%;background:${bucketColor(b)}" title="${b.label}: ${b.value} (${pct}%)"></span>`;
         }).join('');
-        const legend = r.buckets.filter(b => b.value > 0).map((b, i) =>
-            `<span style="color:var(--text-3);font-size:10.5px;margin-inline-end:8px"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${RT_TENURE_BUCKET_COLORS[i % RT_TENURE_BUCKET_COLORS.length]};margin-inline-end:3px"></span>${b.label} (${b.value})</span>`
+        const legend = r.buckets.filter(b => b.value > 0).map((b) =>
+            `<span style="color:var(--text-3);font-size:10.5px;margin-inline-end:8px"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${bucketColor(b)};margin-inline-end:3px"></span>${b.label} (${b.value})</span>`
         ).join('');
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
@@ -500,9 +497,9 @@ function rtRenderInsights(items) {
     const el = document.getElementById('rtInsights');
     if (!items || !items.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">No insights available yet — upload more periods of data to enable trend analysis.</div>'; return; }
     const colorMap = {
-        danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: 'oklch(0.6 0.22 22)', text: 'oklch(0.6 0.22 22)' },
-        success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: 'oklch(0.62 0.15 155)', text: 'oklch(0.62 0.15 155)' },
-        warning:   { bg: 'oklch(0.75 0.16 75 / .12)', border: 'oklch(0.75 0.16 75)', text: 'oklch(0.6 0.14 75)' },
+        danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
+        success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: ChartColors.SEMANTIC.GOOD, text: ChartColors.SEMANTIC.GOOD },
+        warning:   { bg: 'oklch(0.75 0.16 75 / .12)', border: ChartColors.SEMANTIC.WARNING, text: 'oklch(0.6 0.14 75)' },
         secondary: { bg: 'var(--bg-2)', border: 'var(--text-3)', text: 'var(--text-2)' }
     };
     el.innerHTML = items.map(item => {

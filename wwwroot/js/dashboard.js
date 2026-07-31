@@ -4,8 +4,6 @@ Chart.defaults.color = '#5B5875';
 let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '';
 let jobTitleChart, tenureChart, genderChart;
 
-const COLORS = ['#6D5DFB', '#A78BFA', '#1C1C27', '#7EB6FF', '#5B3FE0'];
-
 async function fetchJson(url) {
     const r = await fetch(url);
     return r.ok ? r.json() : [];
@@ -165,9 +163,10 @@ async function loadCharts() {
         options: { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#5B5875'}},y:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}}} }
     });
 
+    const genderLabels = gender.map(d=>d.label);
     genderChart = mkChart(genderChart, 'genderChart', {
         type: 'doughnut',
-        data: { labels: gender.map(d=>d.label), datasets: [{ data: gender.map(d=>d.value), backgroundColor: COLORS, borderWidth: 0 }] },
+        data: { labels: genderLabels, datasets: [{ data: gender.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(genderLabels, ChartColors.GENDER_COLORS), borderWidth: 0 }] },
         options: { plugins:{legend:{position:'bottom', labels:{color:'#5B5875', padding:16}}} }
     });
 }
