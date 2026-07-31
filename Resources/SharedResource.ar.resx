@@ -31,6 +31,33 @@
   <data name="Nav_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>خطط العمل</value></data>
   <data name="Nav_Stores" xml:space="preserve"><value>الفروع</value></data>
+  <data name="SAP_LoadingStores" xml:space="preserve"><value>جاري تحميل الفروع…</value></data>
+  <data name="SAP_Loading" xml:space="preserve"><value>جاري التحميل…</value></data>
+  <data name="SAP_NoMatchingStores" xml:space="preserve"><value>لا توجد فروع مطابقة.</value></data>
+  <data name="SAP_StatusActive" xml:space="preserve"><value>خطة نشطة</value></data>
+  <data name="SAP_StatusResolved" xml:space="preserve"><value>تم الحل</value></data>
+  <data name="SAP_StatusNone" xml:space="preserve"><value>لا توجد خطة نشطة</value></data>
+  <data name="SAP_Responsible" xml:space="preserve"><value>المسؤول</value></data>
+  <data name="SAP_NoIssuesDetected" xml:space="preserve"><value>لم يتم رصد أي مشكلات في معدل الدوران لهذا الفرع.</value></data>
+  <data name="SAP_KpiTurnoverRate" xml:space="preserve"><value>معدل الدوران (وقت الرصد)</value></data>
+  <data name="SAP_KpiEarlyLeaverRate" xml:space="preserve"><value>الدوران المبكر خلال 90 يوم (وقت الرصد)</value></data>
+  <data name="SAP_KpiRetentionRate" xml:space="preserve"><value>معدل الاستبقاء بعد 6 أشهر (وقت الرصد)</value></data>
+  <data name="SAP_MetaCreated" xml:space="preserve"><value>تاريخ الإنشاء</value></data>
+  <data name="SAP_MetaResolvedDate" xml:space="preserve"><value>تاريخ الحل</value></data>
+  <data name="SAP_MetaHealthyStreak" xml:space="preserve"><value>أشهر التحسن المتتالية</value></data>
+  <data name="SAP_HealthyStreakSuffix" xml:space="preserve"><value>/ 2 أشهر</value></data>
+  <data name="SAP_DetectedIssues" xml:space="preserve"><value>المشكلات المرصودة</value></data>
+  <data name="SAP_Recommendations" xml:space="preserve"><value>التوصيات</value></data>
+  <data name="SAP_NoRecommendationsYet" xml:space="preserve"><value>لا توجد توصيات حتى الآن.</value></data>
+  <data name="SAP_Notes" xml:space="preserve"><value>الملاحظات</value></data>
+  <data name="SAP_NoNotesYet" xml:space="preserve"><value>لا توجد ملاحظات حتى الآن.</value></data>
+  <data name="SAP_NotePlaceholder" xml:space="preserve"><value>اذكر ما تم تنفيذه…</value></data>
+  <data name="SAP_AddNote" xml:space="preserve"><value>إضافة ملاحظة</value></data>
+  <data name="SAP_NoteRequired" xml:space="preserve"><value>الرجاء إدخال ملاحظة.</value></data>
+  <data name="SAP_NoteAddFailed" xml:space="preserve"><value>تعذّرت إضافة الملاحظة.</value></data>
+  <data name="SAP_NoteAddFailedRetry" xml:space="preserve"><value>تعذّرت إضافة الملاحظة. الرجاء المحاولة مرة أخرى.</value></data>
+  <data name="SAP_NoStoreSelected" xml:space="preserve"><value>لم يتم اختيار فرع. الرجاء الرجوع واختيار فرع.</value></data>
+  <data name="SAP_NoAccessOrNotFound" xml:space="preserve"><value>لا تملك صلاحية الوصول لهذا الفرع، أو أنه غير موجود.</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>إدارة البيانات</value></data>
   <data name="Nav_Reports" xml:space="preserve"><value>التقارير</value></data>
 

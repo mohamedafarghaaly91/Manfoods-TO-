@@ -13,12 +13,18 @@
     </div>
 </div>
 
-<div id="sapCardsContainer" class="row g-3">
+<div id="sapCardsContainer" class="row g-3"
+     data-no-matches="@L["SAP_NoMatchingStores"]"
+     data-status-active="@L["SAP_StatusActive"]"
+     data-status-resolved="@L["SAP_StatusResolved"]"
+     data-status-none="@L["SAP_StatusNone"]"
+     data-responsible-label="@L["SAP_Responsible"]">
     <div class="col-12 text-center py-5 text-muted">
-        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading stores…
+        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["SAP_LoadingStores"]
     </div>
 </div>
 
+<script src="~/js/store-action-plan.js" asp-append-version="true"></script>
 <script>
 /* Store Action Plans — list of accessible stores with their current plan
    status. Self-contained (no dashboard.js dependency, no period selector):
@@ -27,26 +33,12 @@
 const __AREA_PREFIX = '@__areaPrefix';
 let sapStoreData = [];
 
-function sapEscape(s) {
-    if (s === null || s === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(s);
-    return div.innerHTML;
-}
-
-async function sapFetchJson(url) {
-    const r = await fetch(url);
-    return r.ok ? r.json() : [];
-}
-
-function sapStatusMeta(status) {
-    if (status === 'Active')   return { label: 'Active plan', tone: 'warning' };
-    if (status === 'Resolved') return { label: 'Resolved', tone: 'success' };
-    return { label: 'No active plan', tone: 'neutral' };
-}
-
-const sapToneVar = { success: 'oklch(0.62 0.15 155)', warning: 'oklch(0.75 0.16 75)', neutral: 'var(--text-3)' };
-const sapToneBg  = { success: 'oklch(0.62 0.15 155 / .1)', warning: 'oklch(0.75 0.16 75 / .15)', neutral: 'var(--card-bg-2)' };
+const sapContainerEl = document.getElementById('sapCardsContainer');
+const SAP_LABELS = {
+    active: sapContainerEl.dataset.statusActive,
+    resolved: sapContainerEl.dataset.statusResolved,
+    none: sapContainerEl.dataset.statusNone,
+};
 
 function sapRenderCards() {
     const search = (document.getElementById('sapSearch').value || '').toLowerCase();
@@ -55,22 +47,21 @@ function sapRenderCards() {
         (r.responsibleName || '').toLowerCase().includes(search)
     );
 
-    const container = document.getElementById('sapCardsContainer');
     if (!rows.length) {
-        container.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-clipboard-check"></i><p>No matching stores.</p></div>';
+        sapContainerEl.innerHTML = `<div class="col-12 empty-state"><i class="bi bi-clipboard-check"></i><p>${sapEscape(sapContainerEl.dataset.noMatches)}</p></div>`;
         return;
     }
 
-    container.innerHTML = rows.map(r => {
-        const m = sapStatusMeta(r.planStatus);
+    sapContainerEl.innerHTML = rows.map(r => {
+        const m = sapStatusMeta(r.planStatus, SAP_LABELS);
         const roleLabel = r.responsibleRole ? sapEscape(r.responsibleRole.replace('_', ' ')) : '';
         return `<div class="col-sm-6 col-lg-4 col-xl-3">
             <a href="${__AREA_PREFIX}/dashboard/storeactionplandetail?store=${encodeURIComponent(r.storeName)}" class="card-dark d-block h-100" style="text-decoration:none;color:inherit">
                 <div class="d-flex align-items-start justify-content-between mb-3 gap-2">
                     <h6 class="mb-0 fw-bold" style="font-size:14px">${sapEscape(r.storeName)}</h6>
-                    <span style="background:${sapToneBg[m.tone]};color:${sapToneVar[m.tone]};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap">${m.label}</span>
+                    <span style="background:${SAP_TONE_BG[m.tone]};color:${SAP_TONE_VAR[m.tone]};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap">${sapEscape(m.label)}</span>
                 </div>
-                <div style="font-size:11px;color:var(--text-3)">Responsible</div>
+                <div style="font-size:11px;color:var(--text-3)">${sapEscape(sapContainerEl.dataset.responsibleLabel)}</div>
                 <div class="fw-semibold mt-1" style="font-size:13px">
                     ${r.responsibleName ? sapEscape(r.responsibleName) : '—'}${roleLabel ? ` <span style="color:var(--text-3);font-weight:400">(${roleLabel})</span>` : ''}
                 </div>

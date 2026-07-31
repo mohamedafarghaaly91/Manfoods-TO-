@@ -31,6 +31,33 @@
   <data name="Nav_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>Action Plans</value></data>
   <data name="Nav_Stores" xml:space="preserve"><value>Stores</value></data>
+  <data name="SAP_LoadingStores" xml:space="preserve"><value>Loading stores…</value></data>
+  <data name="SAP_Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="SAP_NoMatchingStores" xml:space="preserve"><value>No matching stores.</value></data>
+  <data name="SAP_StatusActive" xml:space="preserve"><value>Active plan</value></data>
+  <data name="SAP_StatusResolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="SAP_StatusNone" xml:space="preserve"><value>No active plan</value></data>
+  <data name="SAP_Responsible" xml:space="preserve"><value>Responsible</value></data>
+  <data name="SAP_NoIssuesDetected" xml:space="preserve"><value>No turnover issues have been detected for this store.</value></data>
+  <data name="SAP_KpiTurnoverRate" xml:space="preserve"><value>Turnover rate (at detection)</value></data>
+  <data name="SAP_KpiEarlyLeaverRate" xml:space="preserve"><value>Early turnover, 90-day (at detection)</value></data>
+  <data name="SAP_KpiRetentionRate" xml:space="preserve"><value>6-month retention (at detection)</value></data>
+  <data name="SAP_MetaCreated" xml:space="preserve"><value>Created</value></data>
+  <data name="SAP_MetaResolvedDate" xml:space="preserve"><value>Resolved</value></data>
+  <data name="SAP_MetaHealthyStreak" xml:space="preserve"><value>Healthy streak</value></data>
+  <data name="SAP_HealthyStreakSuffix" xml:space="preserve"><value>/ 2 months</value></data>
+  <data name="SAP_DetectedIssues" xml:space="preserve"><value>Detected issues</value></data>
+  <data name="SAP_Recommendations" xml:space="preserve"><value>Recommendations</value></data>
+  <data name="SAP_NoRecommendationsYet" xml:space="preserve"><value>No recommendations yet.</value></data>
+  <data name="SAP_Notes" xml:space="preserve"><value>Notes</value></data>
+  <data name="SAP_NoNotesYet" xml:space="preserve"><value>No notes yet.</value></data>
+  <data name="SAP_NotePlaceholder" xml:space="preserve"><value>Describe what was done…</value></data>
+  <data name="SAP_AddNote" xml:space="preserve"><value>Add Note</value></data>
+  <data name="SAP_NoteRequired" xml:space="preserve"><value>Please enter a note.</value></data>
+  <data name="SAP_NoteAddFailed" xml:space="preserve"><value>Could not add note.</value></data>
+  <data name="SAP_NoteAddFailedRetry" xml:space="preserve"><value>Could not add note. Please try again.</value></data>
+  <data name="SAP_NoStoreSelected" xml:space="preserve"><value>No store selected. Go back and choose a store.</value></data>
+  <data name="SAP_NoAccessOrNotFound" xml:space="preserve"><value>You do not have access to this store, or it could not be found.</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>Data Management</value></data>
   <data name="Nav_Reports" xml:space="preserve"><value>Reports</value></data>
 
