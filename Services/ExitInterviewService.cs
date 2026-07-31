@@ -8,21 +8,24 @@ namespace MvcApp.Services;
 public class ExitInterviewService : IExitInterviewService
 {
     private readonly AppDbContext _db;
+    private readonly IStoreAccessService _storeAccess;
 
-    public ExitInterviewService(AppDbContext db) => _db = db;
-
-    private static IQueryable<ExitInterview> ApplyFilter(IQueryable<ExitInterview> q, ExitInterviewFilter filter, string role, string? assignedName)
+    public ExitInterviewService(AppDbContext db, IStoreAccessService storeAccess)
     {
-        // "assignedName" here is actually the logged-in user's email (see
-        // HttpContext.Session.GetEmail() at call sites), matched against the
-        // OM/OC email copied onto each row at upload time.
-        if (role == "Operation_Manager" || role == "Operation_Consultant")
-        {
-            var email = (assignedName ?? "").Trim().ToLowerInvariant();
-            q = string.IsNullOrEmpty(email) ? q.Where(e => false)
-                : role == "Operation_Manager" ? q.Where(e => e.OperationManagerEmail.ToLower() == email)
-                : q.Where(e => e.OperationConsultantEmail.ToLower() == email);
-        }
+        _db = db;
+        _storeAccess = storeAccess;
+    }
+
+    private async Task<IQueryable<ExitInterview>> ApplyFilterAsync(IQueryable<ExitInterview> q, ExitInterviewFilter filter, string role, string? assignedName)
+    {
+        // The Store is the access boundary: a restricted role sees every exit
+        // interview for a store it currently owns (per the latest Store
+        // Reference upload), regardless of who managed that store when the
+        // interview happened. "assignedName" here is actually the logged-in
+        // user's email (see HttpContext.Session.GetEmail() at call sites).
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+
         if (MultiValueFilter.Split(filter.Store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
         if (!string.IsNullOrWhiteSpace(filter.StoreLeader)) q = q.Where(e => e.StoreLeader == filter.StoreLeader);
         if (MultiValueFilter.Split(filter.OperationConsultant) is { } ocs) q = q.Where(e => ocs.Contains(e.OperationConsultant));
@@ -38,8 +41,8 @@ public class ExitInterviewService : IExitInterviewService
         return q;
     }
 
-    private Task<List<ExitInterview>> FilteredAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        ApplyFilter(_db.ExitInterviews.AsNoTracking(), filter, role, assignedName).ToListAsync();
+    private async Task<List<ExitInterview>> FilteredAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        await (await ApplyFilterAsync(_db.ExitInterviews.AsNoTracking(), filter, role, assignedName)).ToListAsync();
 
     private static List<ChartDataItem> GroupCount(IEnumerable<string> values) =>
         values.Where(v => !string.IsNullOrWhiteSpace(v))
@@ -90,7 +93,7 @@ public class ExitInterviewService : IExitInterviewService
 
     public async Task<ExitInterviewFilterOptions> GetFilterOptionsAsync(string role, string? assignedName)
     {
-        var rows = await ApplyFilter(_db.ExitInterviews.AsNoTracking(), new ExitInterviewFilter(), role, assignedName)
+        var rows = await (await ApplyFilterAsync(_db.ExitInterviews.AsNoTracking(), new ExitInterviewFilter(), role, assignedName))
             .Select(e => new { e.Store, e.StoreLeader, e.OperationConsultant, e.OperationManager })
             .ToListAsync();
 

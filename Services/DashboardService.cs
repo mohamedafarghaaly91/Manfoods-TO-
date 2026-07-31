@@ -10,32 +10,27 @@ public class DashboardService : IDashboardService
 {
     private readonly AppDbContext _db;
     private readonly IMemoryCache _cache;
+    private readonly IStoreAccessService _storeAccess;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
-    public DashboardService(AppDbContext db, IMemoryCache cache) { _db = db; _cache = cache; }
-
-    // Returns the store names an Operation Manager/Consultant is restricted to,
-    // or null for unrestricted access (Admin/User). "assignedName" here is
-    // actually the logged-in user's email (see HttpContext.Session.GetEmail()
-    // at call sites), matched against StoreReference's OM/OC email column —
-    // matching live off the latest monthly upload means a rotation (someone's
-    // stores changing next month) needs no manual re-linking.
-    private async Task<List<string>?> GetAccessibleStoresAsync(string role, string? assignedName, int? month, int? year)
+    public DashboardService(AppDbContext db, IMemoryCache cache, IStoreAccessService storeAccess)
     {
-        if (role != "Operation_Manager" && role != "Operation_Consultant") return null;
-
-        var email = (assignedName ?? "").Trim().ToLowerInvariant();
-        if (string.IsNullOrEmpty(email)) return new List<string>();
-
-        var q = _db.StoreReferences.AsQueryable();
-        if (month.HasValue) q = q.Where(s => s.Month == month);
-        if (year.HasValue) q = q.Where(s => s.Year == year);
-        q = role == "Operation_Manager"
-            ? q.Where(s => s.OperationManagerEmail.ToLower() == email)
-            : q.Where(s => s.OperationConsultantEmail.ToLower() == email);
-
-        return await q.Select(s => s.StoreName).Distinct().ToListAsync();
+        _db = db;
+        _cache = cache;
+        _storeAccess = storeAccess;
     }
+
+    // Returns the store names a restricted role (Operation Manager/Consultant,
+    // Head Manager, ...) is limited to, or null for unrestricted access
+    // (Admin/User). "assignedName" here is actually the logged-in user's email
+    // (see HttpContext.Session.GetEmail() at call sites). Delegates to
+    // IStoreAccessService, the single source of truth — always resolved
+    // against the latest uploaded period regardless of which month/year this
+    // particular call is displaying, so callers keep passing month/year
+    // unchanged (kept for signature compatibility with ~18 call sites) even
+    // though the access check itself no longer scopes by them.
+    private Task<List<string>?> GetAccessibleStoresAsync(string role, string? assignedName, int? month, int? year) =>
+        _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
     // Expands a from/to month-year range (inclusive) into "YYYYMM" sortable int keys.
     internal static List<int> ExpandRangeKeys(int fromMonth, int fromYear, int toMonth, int toYear)

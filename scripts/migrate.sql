@@ -99,6 +99,8 @@ CREATE TABLE IF NOT EXISTS store_references (
 -- Backfill the OM/OC email columns used for per-store access restriction.
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager_email TEXT NOT NULL DEFAULT '';
 
 -- ── exit_interviews ────────────────────────────
 -- One row per Microsoft Forms exit-interview submission. No name / national
@@ -140,8 +142,6 @@ CREATE TABLE IF NOT EXISTS exit_interviews (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_exit_interviews_forms_response_id
     ON exit_interviews (forms_response_id) WHERE forms_response_id <> '';
-ALTER TABLE exit_interviews ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
-ALTER TABLE exit_interviews ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
 
 -- ── upload_logs ───────────────────────────────
 CREATE TABLE IF NOT EXISTS upload_logs (

@@ -32,4 +32,10 @@ public class StoreReference
 
     [Column("operation_consultant_email")]
     public string OperationConsultantEmail { get; set; } = "";
+
+    [Column("head_manager")]
+    public string HeadManager { get; set; } = "";
+
+    [Column("head_manager_email")]
+    public string HeadManagerEmail { get; set; } = "";
 }
