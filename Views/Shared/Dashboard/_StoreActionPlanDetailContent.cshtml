@@ -1,0 +1,210 @@
+@{
+    var __area = ViewContext.RouteData.Values["area"]?.ToString();
+    var __areaPrefix = string.Equals(__area, "Home", StringComparison.OrdinalIgnoreCase) ? "/home" : "/admin";
+}
+<style>
+.sap-back-btn { display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--text-2); text-decoration:none; margin-bottom:14px; }
+.sap-back-btn:hover { color:var(--red); }
+.sap-back-btn i { font-size:12px; }
+[dir="rtl"] .sap-back-btn i { transform:scaleX(-1); }
+.sap-kpi-label { font-size:11px; color:var(--text-3); }
+.sap-kpi-value { font-size:22px; font-weight:700; margin-top:2px; }
+.sap-meta-label { font-size:11px; color:var(--text-3); }
+.sap-rec-item { border-left:3px solid var(--red); padding:8px 12px; background:var(--card-bg-2); border-radius:8px; }
+.sap-rec-category { font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+.sap-note-item { border-bottom:1px solid var(--card-border); padding-bottom:10px; }
+</style>
+
+<a class="sap-back-btn" href="@(__areaPrefix)/dashboard/storeactionplans">
+    <i class="bi bi-arrow-left"></i>@L["Common_Back"]
+</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title" id="sapdStoreName">@L["Page_StoreActionPlans"]</h1>
+        <p class="page-subtitle" id="sapdSubtitle"></p>
+    </div>
+</div>
+
+<div id="sapdContent">
+    <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading…
+    </div>
+</div>
+
+<script>
+/* Store Action Plan detail — one store's plan, recommendations and notes.
+   Store comes from the ?store= query string (same convention the Turnover
+   page uses when linked from the Stores page), not a route segment, since
+   store names can contain spaces/characters that don't belong in a path. */
+function sapdEscape(s) {
+    if (s === null || s === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(s);
+    return div.innerHTML;
+}
+
+function sapdFmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function sapdRate(v) {
+    return (v === null || v === undefined) ? '—' : Number(v).toFixed(1) + '%';
+}
+
+function sapdStatusMeta(status) {
+    if (status === 'Active')   return { label: 'Active plan', tone: 'warning' };
+    if (status === 'Resolved') return { label: 'Resolved', tone: 'success' };
+    return { label: 'No active plan', tone: 'neutral' };
+}
+
+const sapdToneVar = { success: 'oklch(0.62 0.15 155)', warning: 'oklch(0.75 0.16 75)', neutral: 'var(--text-3)' };
+const sapdToneBg  = { success: 'oklch(0.62 0.15 155 / .1)', warning: 'oklch(0.75 0.16 75 / .15)', neutral: 'var(--card-bg-2)' };
+
+function sapdCurrentStore() {
+    return new URLSearchParams(window.location.search).get('store');
+}
+
+function sapdRender(data) {
+    document.getElementById('sapdStoreName').textContent = data.storeName;
+    document.title = data.storeName + ' — Workforce Intelligence';
+
+    const meta = sapdStatusMeta(data.status);
+    document.getElementById('sapdSubtitle').innerHTML =
+        `<span style="background:${sapdToneBg[meta.tone]};color:${sapdToneVar[meta.tone]};padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block">${meta.label}</span>`;
+
+    const resp = data.responsibleParty;
+    const respHtml = resp && resp.name
+        ? `${sapdEscape(resp.name)}${resp.role ? ` <span style="color:var(--text-3)">(${sapdEscape(resp.role.replace('_', ' '))})</span>` : ''}`
+        : '—';
+
+    let html = '';
+
+    if (data.status === 'None') {
+        html = `<div class="card-dark empty-state">
+            <i class="bi bi-clipboard-check"></i>
+            <p>No turnover issues have been detected for this store.</p>
+        </div>`;
+        document.getElementById('sapdContent').innerHTML = html;
+        return;
+    }
+
+    html += `<div class="row g-3 mb-4">
+        <div class="col-sm-4"><div class="card-dark"><div class="sap-kpi-label">Turnover rate (at detection)</div><div class="sap-kpi-value">${sapdRate(data.baselineTurnoverRate)}</div></div></div>
+        <div class="col-sm-4"><div class="card-dark"><div class="sap-kpi-label">Early turnover, 90-day (at detection)</div><div class="sap-kpi-value">${sapdRate(data.baselineEarlyLeaverRate)}</div></div></div>
+        <div class="col-sm-4"><div class="card-dark"><div class="sap-kpi-label">6-month retention (at detection)</div><div class="sap-kpi-value">${sapdRate(data.baselineRetentionRate)}</div></div></div>
+    </div>`;
+
+    html += `<div class="card-dark mb-4">
+        <div class="d-flex flex-wrap gap-4 mb-3">
+            <div><div class="sap-meta-label">Responsible</div><div class="fw-semibold mt-1">${respHtml}</div></div>
+            <div><div class="sap-meta-label">Created</div><div class="fw-semibold mt-1">${sapdFmtDate(data.createdAt)}</div></div>
+            ${data.status === 'Resolved' ? `<div><div class="sap-meta-label">Resolved</div><div class="fw-semibold mt-1">${sapdFmtDate(data.resolvedAt)}</div></div>` : ''}
+            <div><div class="sap-meta-label">Healthy streak</div><div class="fw-semibold mt-1">${data.healthyStreakCount} / 2 months</div></div>
+        </div>
+        <div class="sap-meta-label mb-1">Detected issues</div>
+        <div style="white-space:pre-line;font-size:13.5px;color:var(--text-2)">${sapdEscape(data.detectedIssuesSummary) || '—'}</div>
+    </div>`;
+
+    const recs = data.recommendations || [];
+    html += `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-3">Recommendations</h6>
+        ${recs.length === 0 ? '<p class="text-muted-custom mb-0">No recommendations yet.</p>' : `
+        <div class="d-flex flex-column gap-2">
+            ${recs.map(r => `
+                <div class="sap-rec-item">
+                    <div class="sap-rec-category">${sapdEscape(r.category)}</div>
+                    <div style="font-size:13.5px;margin-top:2px">${sapdEscape(r.recommendationText)}</div>
+                </div>
+            `).join('')}
+        </div>`}
+    </div>`;
+
+    const notes = data.notes || [];
+    html += `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-3">Notes</h6>
+        <div class="d-flex flex-column gap-3 mb-3" id="sapdNotesList">
+            ${notes.length === 0 ? '<p class="text-muted-custom mb-0">No notes yet.</p>' : notes.map(n => `
+                <div class="sap-note-item">
+                    <div class="d-flex justify-content-between align-items-baseline gap-2">
+                        <span class="fw-semibold" style="font-size:13px">${sapdEscape(n.authorName)}${n.authorRole ? ` <span style="color:var(--text-3);font-weight:400">(${sapdEscape(n.authorRole.replace('_', ' '))})</span>` : ''}</span>
+                        <span style="font-size:11px;color:var(--text-3);white-space:nowrap">${sapdFmtDate(n.createdAt)}</span>
+                    </div>
+                    <div style="font-size:13.5px;color:var(--text-2);margin-top:4px;white-space:pre-line">${sapdEscape(n.noteText)}</div>
+                </div>
+            `).join('')}
+        </div>
+        ${data.canAddNotes ? `
+        <div class="d-flex flex-column gap-2">
+            <textarea id="sapdNoteInput" rows="3" class="form-control form-control-dark" placeholder="Describe what was done…"></textarea>
+            <div id="sapdNoteError" class="small" style="display:none;color:oklch(0.6 0.22 22)"></div>
+            <button class="btn-primary align-self-start" id="sapdAddNoteBtn" type="button" onclick="sapdSubmitNote()"><i class="bi bi-plus-lg me-1"></i>Add Note</button>
+        </div>` : ''}
+    </div>`;
+
+    document.getElementById('sapdContent').innerHTML = html;
+}
+
+async function sapdLoad() {
+    const store = sapdCurrentStore();
+    const container = document.getElementById('sapdContent');
+
+    if (!store) {
+        container.innerHTML = '<div class="card-dark empty-state"><i class="bi bi-shop"></i><p>No store selected. Go back and choose a store.</p></div>';
+        return;
+    }
+
+    const res = await fetch('/api/store-action-plan?store=' + encodeURIComponent(store));
+    if (!res.ok) {
+        document.getElementById('sapdStoreName').textContent = store;
+        container.innerHTML = '<div class="card-dark empty-state"><i class="bi bi-lock"></i><p>You do not have access to this store, or it could not be found.</p></div>';
+        return;
+    }
+
+    const data = await res.json();
+    sapdRender(data);
+}
+
+async function sapdSubmitNote() {
+    const store = sapdCurrentStore();
+    const textEl = document.getElementById('sapdNoteInput');
+    const errEl = document.getElementById('sapdNoteError');
+    const btn = document.getElementById('sapdAddNoteBtn');
+    const text = (textEl.value || '').trim();
+
+    errEl.style.display = 'none';
+    if (!text) {
+        errEl.textContent = 'Please enter a note.';
+        errEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ noteText: text })
+        });
+
+        if (!res.ok) {
+            const msg = await res.json().catch(() => null);
+            errEl.textContent = (typeof msg === 'string' && msg) ? msg : 'Could not add note.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            return;
+        }
+
+        await sapdLoad();
+    } catch {
+        errEl.textContent = 'Could not add note. Please try again.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+    }
+}
+
+sapdLoad();
+</script>

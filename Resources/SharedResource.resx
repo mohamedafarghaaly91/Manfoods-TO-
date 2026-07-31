@@ -29,6 +29,7 @@
   <data name="Nav_AiUsage" xml:space="preserve"><value>AI Usage</value></data>
   <data name="Nav_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>
   <data name="Nav_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
+  <data name="Nav_StoreActionPlan" xml:space="preserve"><value>Action Plans</value></data>
   <data name="Nav_Stores" xml:space="preserve"><value>Stores</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>Data Management</value></data>
   <data name="Nav_Reports" xml:space="preserve"><value>Reports</value></data>
@@ -241,6 +242,8 @@
   <data name="Page_EarlyWarningSub" xml:space="preserve"><value>At-risk employees identified before they resign</value></data>
   <data name="Page_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Page_ScorecardSub" xml:space="preserve"><value>Performance rankings across store leaders, consultants, and managers</value></data>
+  <data name="Page_StoreActionPlans" xml:space="preserve"><value>Store Action Plans</value></data>
+  <data name="Page_StoreActionPlansSub" xml:space="preserve"><value>Turnover action plans and follow-up notes, per store</value></data>
   <data name="Page_Stores" xml:space="preserve"><value>Stores</value></data>
   <data name="Page_StoresSub" xml:space="preserve"><value>Turnover health across every store</value></data>
   <data name="Page_Reports" xml:space="preserve"><value>Reports</value></data>

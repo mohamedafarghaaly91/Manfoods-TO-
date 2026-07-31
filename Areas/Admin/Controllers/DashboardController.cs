@@ -50,6 +50,10 @@ public class DashboardController : Controller
 
     public IActionResult Scorecard() => View();
 
+    public IActionResult StoreActionPlans() => View();
+
+    public IActionResult StoreActionPlanDetail() => View();
+
     public async Task<IActionResult> Reports()
     {
         var periods = await _dashboard.GetAvailablePeriodsAsync();
