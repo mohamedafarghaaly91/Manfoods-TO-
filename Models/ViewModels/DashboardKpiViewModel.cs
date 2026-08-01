@@ -22,6 +22,15 @@ public class PeriodItem
     public int Year { get; set; }
 }
 
+public class StoreBreakdown
+{
+    public string Store { get; set; } = "";
+    public int Headcount { get; set; }
+    public int Resignations { get; set; }
+    public double TurnoverRate { get; set; }
+    public int NewHires { get; set; }
+}
+
 public class StoreComparisonRow
 {
     public string StoreName { get; set; } = "";
