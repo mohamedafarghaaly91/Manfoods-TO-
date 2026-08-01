@@ -25,8 +25,6 @@
   <data name="Nav_Retention" xml:space="preserve"><value>Retention</value></data>
   <data name="Nav_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
   <data name="Nav_NinetyDay" xml:space="preserve"><value>90-Day Turnover</value></data>
-  <data name="Nav_AiAssistant" xml:space="preserve"><value>AI Assistant</value></data>
-  <data name="Nav_AiUsage" xml:space="preserve"><value>AI Usage</value></data>
   <data name="Nav_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>
   <data name="Nav_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>Action Plans</value></data>
@@ -228,10 +226,6 @@
   <data name="Page_NinetyDaySub" xml:space="preserve"><value>Of everyone hired in a month, the share who resigned within their first 90 days</value></data>
   <data name="Chart_NinetyDayByCohort" xml:space="preserve"><value>90-Day Rate by Cohort Month</value></data>
   <data name="Chart_NinetyDayByCohortSub" xml:space="preserve"><value>Early leavers ÷ hires for each selected cohort month</value></data>
-  <data name="Page_AiAssistant" xml:space="preserve"><value>AI Assistant</value></data>
-  <data name="Page_AiAssistantSub" xml:space="preserve"><value>Ask anything about your workforce data</value></data>
-  <data name="Page_AiUsage" xml:space="preserve"><value>AI Usage</value></data>
-  <data name="Page_AiUsageSub" xml:space="preserve"><value>AI Assistant consumption — limits, questions, tokens, and estimated cost</value></data>
 
   <!-- AI Assistant -->
   <data name="AI_NewChat" xml:space="preserve"><value>New Chat</value></data>
@@ -245,24 +239,6 @@
   <data name="AI_LimitReached" xml:space="preserve"><value>You've reached today's maximum number of questions.</value></data>
 
   <!-- AI Usage -->
-  <data name="AU_DailyLimit" xml:space="preserve"><value>Daily Question Limit</value></data>
-  <data name="AU_DailyLimitSub" xml:space="preserve"><value>Maximum number of AI questions allowed per user per day</value></data>
-  <data name="AU_CostRates" xml:space="preserve"><value>Cost Rates</value></data>
-  <data name="AU_CostRatesSub" xml:space="preserve"><value>Gemini API pricing used to estimate cost</value></data>
-  <data name="AU_InputPrice" xml:space="preserve"><value>Input $/1M</value></data>
-  <data name="AU_OutputPrice" xml:space="preserve"><value>Output $/1M</value></data>
-  <data name="AU_SaveRates" xml:space="preserve"><value>Save Rates</value></data>
-  <data name="AU_UsageTrend" xml:space="preserve"><value>Usage Trend</value></data>
-  <data name="AU_UsageTrendSub" xml:space="preserve"><value>Questions and tokens over the last 30 days</value></data>
-  <data name="AU_TopUsers" xml:space="preserve"><value>Top Users (Last 30 Days)</value></data>
-  <data name="AU_Email" xml:space="preserve"><value>Email</value></data>
-  <data name="AU_Questions" xml:space="preserve"><value>Questions</value></data>
-  <data name="AU_Tokens" xml:space="preserve"><value>Tokens</value></data>
-  <data name="AU_EstCost" xml:space="preserve"><value>Est. Cost</value></data>
-  <data name="AU_Action" xml:space="preserve"><value>Action</value></data>
-  <data name="AU_ResetTooltip" xml:space="preserve"><value>Reset today's count</value></data>
-  <data name="AU_ResetBtn" xml:space="preserve"><value>Reset</value></data>
-  <data name="AU_NoUsage" xml:space="preserve"><value>No usage recorded yet.</value></data>
   <data name="Common_Saved" xml:space="preserve"><value>Saved</value></data>
 
   <data name="Page_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>

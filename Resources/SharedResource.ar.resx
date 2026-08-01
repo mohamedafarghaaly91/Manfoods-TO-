@@ -25,8 +25,6 @@
   <data name="Nav_Retention" xml:space="preserve"><value>الاحتفاظ</value></data>
   <data name="Nav_ExitInterviews" xml:space="preserve"><value>مقابلات الخروج</value></data>
   <data name="Nav_NinetyDay" xml:space="preserve"><value>دوران 90 يوم</value></data>
-  <data name="Nav_AiAssistant" xml:space="preserve"><value>المساعد الذكي</value></data>
-  <data name="Nav_AiUsage" xml:space="preserve"><value>استخدام الذكاء الاصطناعي</value></data>
   <data name="Nav_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
   <data name="Nav_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>خطط العمل</value></data>
@@ -228,10 +226,6 @@
   <data name="Page_NinetyDaySub" xml:space="preserve"><value>من بين كل من تم توظيفه في شهر، نسبة من استقال خلال أول 90 يومًا</value></data>
   <data name="Chart_NinetyDayByCohort" xml:space="preserve"><value>معدل الـ90 يوم لكل شهر تعيين</value></data>
   <data name="Chart_NinetyDayByCohortSub" xml:space="preserve"><value>المغادرون قبل 90 يوم ÷ عدد المعيّنين لكل شهر تعيين مختار</value></data>
-  <data name="Page_AiAssistant" xml:space="preserve"><value>المساعد الذكي</value></data>
-  <data name="Page_AiAssistantSub" xml:space="preserve"><value>اسأل أي شيء عن بيانات القوى العاملة</value></data>
-  <data name="Page_AiUsage" xml:space="preserve"><value>استخدام الذكاء الاصطناعي</value></data>
-  <data name="Page_AiUsageSub" xml:space="preserve"><value>استهلاك المساعد الذكي — الحدود، عدد الأسئلة، التوكنز، والتكلفة التقديرية</value></data>
 
   <!-- AI Assistant -->
   <data name="AI_NewChat" xml:space="preserve"><value>محادثة جديدة</value></data>
@@ -245,24 +239,6 @@
   <data name="AI_LimitReached" xml:space="preserve"><value>وصلت لأقصى عدد أسئلة مسموح بيها النهاردة.</value></data>
 
   <!-- AI Usage -->
-  <data name="AU_DailyLimit" xml:space="preserve"><value>الحد اليومي للأسئلة</value></data>
-  <data name="AU_DailyLimitSub" xml:space="preserve"><value>أقصى عدد أسئلة مسموح بيها لكل مستخدم في اليوم</value></data>
-  <data name="AU_CostRates" xml:space="preserve"><value>أسعار التكلفة</value></data>
-  <data name="AU_CostRatesSub" xml:space="preserve"><value>أسعار Gemini API المستخدمة لتقدير التكلفة</value></data>
-  <data name="AU_InputPrice" xml:space="preserve"><value>سعر الإدخال $/مليون</value></data>
-  <data name="AU_OutputPrice" xml:space="preserve"><value>سعر الإخراج $/مليون</value></data>
-  <data name="AU_SaveRates" xml:space="preserve"><value>حفظ الأسعار</value></data>
-  <data name="AU_UsageTrend" xml:space="preserve"><value>اتجاه الاستخدام</value></data>
-  <data name="AU_UsageTrendSub" xml:space="preserve"><value>الأسئلة والتوكنز خلال آخر 30 يوم</value></data>
-  <data name="AU_TopUsers" xml:space="preserve"><value>أكتر المستخدمين (آخر 30 يوم)</value></data>
-  <data name="AU_Email" xml:space="preserve"><value>البريد الإلكتروني</value></data>
-  <data name="AU_Questions" xml:space="preserve"><value>الأسئلة</value></data>
-  <data name="AU_Tokens" xml:space="preserve"><value>التوكنز</value></data>
-  <data name="AU_EstCost" xml:space="preserve"><value>التكلفة التقديرية</value></data>
-  <data name="AU_Action" xml:space="preserve"><value>إجراء</value></data>
-  <data name="AU_ResetTooltip" xml:space="preserve"><value>إعادة تصفير عدّاد اليوم</value></data>
-  <data name="AU_ResetBtn" xml:space="preserve"><value>تصفير</value></data>
-  <data name="AU_NoUsage" xml:space="preserve"><value>مفيش استخدام مسجل لسه.</value></data>
   <data name="Common_Saved" xml:space="preserve"><value>تم الحفظ</value></data>
 
   <data name="Page_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>

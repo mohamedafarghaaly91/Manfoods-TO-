@@ -15,7 +15,6 @@ public class AppDbContext : DbContext
     public DbSet<ExitInterview> ExitInterviews { get; set; }
     public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
     public DbSet<AppSetting> AppSettings { get; set; }
-    public DbSet<AiUsageDaily> AiUsageDaily { get; set; }
     public DbSet<StoreActionPlan> StoreActionPlans { get; set; }
     public DbSet<ActionPlanRecommendation> ActionPlanRecommendations { get; set; }
     public DbSet<ActionPlanNote> ActionPlanNotes { get; set; }
@@ -24,8 +23,6 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
-        modelBuilder.Entity<AiUsageDaily>().HasKey(a => new { a.UserId, a.UsageDate });
-
         // Only one Active plan per store. This config only takes effect for a
         // fresh EnsureCreated() database (e.g. local/test) — the real schema
         // change for the existing production database is scripts/migrate.sql,

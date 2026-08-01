@@ -61,15 +61,6 @@
             <a href="@__areaPrefix/dashboard/exitinterviews" class="admin-nav-link @(IsActive("ExitInterviews") ? "active" : "")">
                 <i class="bi bi-chat-square-text-fill"></i><span>@L["Nav_ExitInterviews"]</span>
             </a>
-            <a href="@__areaPrefix/dashboard/aiassistant" class="admin-nav-link @(IsActive("AiAssistant") ? "active" : "")">
-                <i class="bi bi-stars"></i><span>@L["Nav_AiAssistant"]</span>
-            </a>
-            @if (userRole == "Admin")
-            {
-                <a href="/admin/dashboard/aiusage" class="admin-nav-link @(IsActive("AiUsage") ? "active" : "")">
-                    <i class="bi bi-cpu-fill"></i><span>@L["Nav_AiUsage"]</span>
-                </a>
-            }
             <a href="@__areaPrefix/dashboard/earlywarning" class="admin-nav-link @(IsActive("EarlyWarning") ? "active" : "")">
                 <i class="bi bi-exclamation-diamond-fill"></i><span>@L["Nav_EarlyWarning"]</span>
             </a>

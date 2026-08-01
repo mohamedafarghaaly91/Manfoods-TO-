@@ -37,8 +37,6 @@ public class DashboardController : Controller
 
     public IActionResult NinetyDayTurnover() => View();
 
-    public IActionResult AiAssistant() => View();
-
     public IActionResult EarlyWarning() => View();
 
     public IActionResult Scorecard() => View();

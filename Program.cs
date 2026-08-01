@@ -90,9 +90,6 @@ builder.Services.AddScoped<IEarlyWarningService, EarlyWarningService>();
 builder.Services.AddScoped<IScorecardService, ScorecardService>();
 builder.Services.AddScoped<IStoreActionPlanService, StoreActionPlanService>();
 builder.Services.AddScoped<IReportService, ReportService>();
-builder.Services.AddScoped<IAiUsageService, AiUsageService>();
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<IGeminiService, GeminiService>();
 
 var app = builder.Build();
 app.UseForwardedHeaders(new ForwardedHeadersOptions
