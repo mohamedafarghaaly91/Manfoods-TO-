@@ -61,7 +61,8 @@ public class StoreActionPlanApiController : ControllerBase
 
     /// <summary>
     /// Admin-only: runs detection for every period that has uploaded data.
-    /// Fills store_action_plans for periods uploaded before this feature existed.
+    /// Returns immediately (202 Accepted) and processes in the background so
+    /// the request never times out regardless of how many periods/stores exist.
     /// </summary>
     [HttpPost("run-detection")]
     public async Task<IActionResult> RunDetectionAllPeriods()
@@ -70,12 +71,20 @@ public class StoreActionPlanApiController : ControllerBase
         if (role != "Admin") return Forbid();
 
         var periods = await _dashboard.GetAvailablePeriodsAsync();
-        if (periods.Count == 0) return Ok(new { ran = 0, message = "No periods found." });
+        if (periods.Count == 0) return Accepted(new { status = "no_periods", message = "No periods found." });
 
-        foreach (var p in periods)
-            await _actionPlans.RunDetectionForPeriodAsync(p.Month, p.Year);
+        // Fire-and-forget: respond immediately so the browser doesn't time out,
+        // then process every period in the background.
+        _ = Task.Run(async () =>
+        {
+            foreach (var p in periods)
+            {
+                try { await _actionPlans.RunDetectionForPeriodAsync(p.Month, p.Year); }
+                catch { /* individual period failure should not stop the rest */ }
+            }
+        });
 
-        return Ok(new { ran = periods.Count, message = $"Detection ran for {periods.Count} period(s)." });
+        return Accepted(new { status = "started", periods = periods.Count });
     }
 
     public class AddNoteRequest
