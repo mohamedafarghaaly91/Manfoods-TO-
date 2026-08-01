@@ -54,6 +54,52 @@
   <data name="SAP_NoteRequired" xml:space="preserve"><value>Please enter a note.</value></data>
   <data name="SAP_NoteAddFailed" xml:space="preserve"><value>Could not add note.</value></data>
   <data name="SAP_NoteAddFailedRetry" xml:space="preserve"><value>Could not add note. Please try again.</value></data>
+
+  <!-- Action Plan — signal categories -->
+  <data name="SAP_Cat_Retention" xml:space="preserve"><value>Retention</value></data>
+  <data name="SAP_Cat_Onboarding" xml:space="preserve"><value>Onboarding</value></data>
+  <data name="SAP_Cat_Leadership" xml:space="preserve"><value>Leadership</value></data>
+  <data name="SAP_Cat_Culture" xml:space="preserve"><value>Culture</value></data>
+  <data name="SAP_Cat_Compensation" xml:space="preserve"><value>Compensation</value></data>
+  <data name="SAP_Cat_Workload" xml:space="preserve"><value>Workload</value></data>
+  <data name="SAP_Cat_Management" xml:space="preserve"><value>Management</value></data>
+  <data name="SAP_Cat_Monitoring" xml:space="preserve"><value>Monitoring</value></data>
+  <data name="SAP_Cat_General" xml:space="preserve"><value>General</value></data>
+  <data name="SAP_Cat_Other" xml:space="preserve"><value>Other</value></data>
+
+  <!-- Action Plan — recommendations per signal (SignalCode_Category_Index) -->
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_0" xml:space="preserve"><value>Review overall staffing stability and scheduling fairness.</value></data>
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_1" xml:space="preserve"><value>Conduct stay-interviews with current team members.</value></data>
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_2" xml:space="preserve"><value>Assess workload distribution relative to store volume.</value></data>
+
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_0" xml:space="preserve"><value>Improve onboarding process for new hires.</value></data>
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_1" xml:space="preserve"><value>Assign a mentor/buddy and follow up with new hires during their first 90 days.</value></data>
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2" xml:space="preserve"><value>Review Store Leader coaching on new-hire integration.</value></data>
+
+  <data name="SAP_Rec_LOW_RETENTION_6M_Retention_0" xml:space="preserve"><value>Review engagement for employees in the 3-6 month tenure range.</value></data>
+  <data name="SAP_Rec_LOW_RETENTION_6M_Retention_1" xml:space="preserve"><value>Check for consistent scheduling and growth opportunities before the 1-year mark.</value></data>
+
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0" xml:space="preserve"><value>Review Store Leader coaching and support.</value></data>
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_1" xml:space="preserve"><value>Ensure operational continuity during leadership transitions.</value></data>
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_2" xml:space="preserve"><value>Assess whether additional Head Manager oversight is needed.</value></data>
+
+  <data name="SAP_Rec_LOW_EXIT_SENTIMENT_Culture_0" xml:space="preserve"><value>Conduct stay-interviews with current team to catch issues early.</value></data>
+  <data name="SAP_Rec_LOW_EXIT_SENTIMENT_Culture_1" xml:space="preserve"><value>Review recent management/culture incidents reported at exit.</value></data>
+
+  <data name="SAP_Rec_REASON_CONCENTRATION_Compensation_0" xml:space="preserve"><value>Review pay competitiveness against the local market.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Compensation_1" xml:space="preserve"><value>Check for pay-equity issues within the store.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Workload_0" xml:space="preserve"><value>Review staffing levels against sales volume.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Workload_1" xml:space="preserve"><value>Audit shift scheduling fairness.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Management_0" xml:space="preserve"><value>Coach the Store Leader on people management.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Management_1" xml:space="preserve"><value>Review recent complaints or incidents.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_0" xml:space="preserve"><value>Improve onboarding process for new hires.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_1" xml:space="preserve"><value>Review Store Leader coaching on new-hire integration.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Other_0" xml:space="preserve"><value>Review the dominant resignation reason with the Store Leader and plan a targeted response.</value></data>
+
+  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_0" xml:space="preserve"><value>Proactively check in with employees flagged as at-risk.</value></data>
+  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1" xml:space="preserve"><value>Review the early-warning watchlist with the Store Leader.</value></data>
+
+  <data name="SAP_Rec_NO_DOMINANT_DRIVER_General_0" xml:space="preserve"><value>No single cause stands out — recommend a manual review of recent exits with the Store Leader.</value></data>
   <data name="SAP_NoStoreSelected" xml:space="preserve"><value>No store selected. Go back and choose a store.</value></data>
   <data name="SAP_NoAccessOrNotFound" xml:space="preserve"><value>You do not have access to this store, or it could not be found.</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>Data Management</value></data>

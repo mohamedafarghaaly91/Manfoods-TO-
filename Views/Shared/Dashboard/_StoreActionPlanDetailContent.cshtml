@@ -58,6 +58,48 @@
 
 <script src="~/js/store-action-plan.js" asp-append-version="true"></script>
 <script>
+/* Localized lookup: key = "SignalCode_Category_Index", value = translated text.
+   Falls back to the stored English text if a key is missing. */
+const SAP_REC_TEXTS = {
+  "@Html.Raw("SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_0")": "@Html.Raw(L["SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_1")": "@Html.Raw(L["SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_2")": "@Html.Raw(L["SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_2"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_EARLY_TURNOVER_90D_Onboarding_0")": "@Html.Raw(L["SAP_Rec_EARLY_TURNOVER_90D_Onboarding_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_EARLY_TURNOVER_90D_Onboarding_1")": "@Html.Raw(L["SAP_Rec_EARLY_TURNOVER_90D_Onboarding_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2")": "@Html.Raw(L["SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LOW_RETENTION_6M_Retention_0")": "@Html.Raw(L["SAP_Rec_LOW_RETENTION_6M_Retention_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LOW_RETENTION_6M_Retention_1")": "@Html.Raw(L["SAP_Rec_LOW_RETENTION_6M_Retention_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0")": "@Html.Raw(L["SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_1")": "@Html.Raw(L["SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_2")": "@Html.Raw(L["SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_2"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LOW_EXIT_SENTIMENT_Culture_0")": "@Html.Raw(L["SAP_Rec_LOW_EXIT_SENTIMENT_Culture_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_LOW_EXIT_SENTIMENT_Culture_1")": "@Html.Raw(L["SAP_Rec_LOW_EXIT_SENTIMENT_Culture_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Compensation_0")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Compensation_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Compensation_1")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Compensation_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Workload_0")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Workload_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Workload_1")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Workload_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Management_0")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Management_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Management_1")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Management_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Onboarding_0")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Onboarding_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Onboarding_1")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Onboarding_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_REASON_CONCENTRATION_Other_0")": "@Html.Raw(L["SAP_Rec_REASON_CONCENTRATION_Other_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_0")": "@Html.Raw(L["SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_0"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1")": "@Html.Raw(L["SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1"].Value.Replace("\"","\\\""))",
+  "@Html.Raw("SAP_Rec_NO_DOMINANT_DRIVER_General_0")": "@Html.Raw(L["SAP_Rec_NO_DOMINANT_DRIVER_General_0"].Value.Replace("\"","\\\""))",
+};
+const SAP_CAT_TEXTS = {
+  "Retention":    "@Html.Raw(L["SAP_Cat_Retention"].Value)",
+  "Onboarding":   "@Html.Raw(L["SAP_Cat_Onboarding"].Value)",
+  "Leadership":   "@Html.Raw(L["SAP_Cat_Leadership"].Value)",
+  "Culture":      "@Html.Raw(L["SAP_Cat_Culture"].Value)",
+  "Compensation": "@Html.Raw(L["SAP_Cat_Compensation"].Value)",
+  "Workload":     "@Html.Raw(L["SAP_Cat_Workload"].Value)",
+  "Management":   "@Html.Raw(L["SAP_Cat_Management"].Value)",
+  "Monitoring":   "@Html.Raw(L["SAP_Cat_Monitoring"].Value)",
+  "General":      "@Html.Raw(L["SAP_Cat_General"].Value)",
+  "Other":        "@Html.Raw(L["SAP_Cat_Other"].Value)",
+};
+
 /* Store Action Plan detail — one store's plan, recommendations and notes.
    Store comes from the ?store= query string (same convention the Turnover
    page uses when linked from the Stores page), not a route segment, since
@@ -127,16 +169,28 @@ function sapdRender(data) {
     </div>`;
 
     const recs = data.recommendations || [];
+    // Assign per-signal-category index for localization lookup
+    const sigCatCount = {};
+    const recsWithIdx = recs.map(r => {
+        const key = r.signalCode + '_' + r.category;
+        const idx = sigCatCount[key] ?? 0;
+        sigCatCount[key] = idx + 1;
+        return { ...r, _idx: idx };
+    });
     html += `<div class="card-dark mb-4">
         <h6 class="fw-bold mb-3">${sapEscape(d.recommendations)}</h6>
-        ${recs.length === 0 ? `<p class="text-muted-custom mb-0">${sapEscape(d.noRecommendations)}</p>` : `
+        ${recsWithIdx.length === 0 ? `<p class="text-muted-custom mb-0">${sapEscape(d.noRecommendations)}</p>` : `
         <div class="d-flex flex-column gap-2">
-            ${recs.map(r => `
+            ${recsWithIdx.map(r => {
+                const lookupKey = 'SAP_Rec_' + r.signalCode + '_' + r.category + '_' + r._idx;
+                const text = SAP_REC_TEXTS[lookupKey] || r.recommendationText;
+                const cat  = SAP_CAT_TEXTS[r.category]  || r.category;
+                return `
                 <div class="sap-rec-item">
-                    <div class="sap-rec-category">${sapEscape(r.category)}</div>
-                    <div style="font-size:13.5px;margin-top:2px">${sapEscape(r.recommendationText)}</div>
-                </div>
-            `).join('')}
+                    <div class="sap-rec-category">${sapEscape(cat)}</div>
+                    <div style="font-size:13.5px;margin-top:2px">${sapEscape(text)}</div>
+                </div>`;
+            }).join('')}
         </div>`}
     </div>`;
 

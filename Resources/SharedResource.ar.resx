@@ -54,6 +54,52 @@
   <data name="SAP_NoteRequired" xml:space="preserve"><value>الرجاء إدخال ملاحظة.</value></data>
   <data name="SAP_NoteAddFailed" xml:space="preserve"><value>تعذّرت إضافة الملاحظة.</value></data>
   <data name="SAP_NoteAddFailedRetry" xml:space="preserve"><value>تعذّرت إضافة الملاحظة. الرجاء المحاولة مرة أخرى.</value></data>
+
+  <!-- Action Plan — تصنيفات الإشارات -->
+  <data name="SAP_Cat_Retention" xml:space="preserve"><value>الاستبقاء</value></data>
+  <data name="SAP_Cat_Onboarding" xml:space="preserve"><value>التهيئة والاستقطاب</value></data>
+  <data name="SAP_Cat_Leadership" xml:space="preserve"><value>القيادة</value></data>
+  <data name="SAP_Cat_Culture" xml:space="preserve"><value>ثقافة العمل</value></data>
+  <data name="SAP_Cat_Compensation" xml:space="preserve"><value>الرواتب والتعويضات</value></data>
+  <data name="SAP_Cat_Workload" xml:space="preserve"><value>عبء العمل</value></data>
+  <data name="SAP_Cat_Management" xml:space="preserve"><value>الإدارة</value></data>
+  <data name="SAP_Cat_Monitoring" xml:space="preserve"><value>المراقبة</value></data>
+  <data name="SAP_Cat_General" xml:space="preserve"><value>عام</value></data>
+  <data name="SAP_Cat_Other" xml:space="preserve"><value>أخرى</value></data>
+
+  <!-- Action Plan — توصيات كل إشارة (SignalCode_Category_Index) -->
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_0" xml:space="preserve"><value>راجع استقرار الطاقم البشري وعدالة جداول العمل.</value></data>
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_1" xml:space="preserve"><value>أجرِ مقابلات بقاء مع أعضاء الفريق الحاليين.</value></data>
+  <data name="SAP_Rec_HIGH_OVERALL_TURNOVER_Retention_2" xml:space="preserve"><value>قيّم توزيع عبء العمل نسبةً لحجم المبيعات.</value></data>
+
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_0" xml:space="preserve"><value>طوّر برنامج الاستقبال والتهيئة للموظفين الجدد.</value></data>
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_1" xml:space="preserve"><value>خصّص مرافقاً للموظف الجديد وتابعه خلال أول 90 يوماً.</value></data>
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2" xml:space="preserve"><value>راجع دور قائد الفرع في دعم الموظفين الجدد.</value></data>
+
+  <data name="SAP_Rec_LOW_RETENTION_6M_Retention_0" xml:space="preserve"><value>راجع مستوى الانخراط الوظيفي للموظفين في مرحلة 3-6 أشهر.</value></data>
+  <data name="SAP_Rec_LOW_RETENTION_6M_Retention_1" xml:space="preserve"><value>تأكد من ثبات جداول العمل وتوافر فرص النمو قبل إتمام السنة الأولى.</value></data>
+
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0" xml:space="preserve"><value>راجع دعم قائد الفرع الحالي وخطط تطويره.</value></data>
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_1" xml:space="preserve"><value>احرص على الاستمرارية التشغيلية خلال فترات التغيير القيادي.</value></data>
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_2" xml:space="preserve"><value>قيّم ما إذا كانت الحاجة تستدعي متابعة إضافية من مدير المنطقة.</value></data>
+
+  <data name="SAP_Rec_LOW_EXIT_SENTIMENT_Culture_0" xml:space="preserve"><value>أجرِ مقابلات بقاء مع الفريق الحالي للكشف المبكر عن المشكلات.</value></data>
+  <data name="SAP_Rec_LOW_EXIT_SENTIMENT_Culture_1" xml:space="preserve"><value>راجع الحوادث المتعلقة بالإدارة والبيئة الوظيفية التي ذُكرت في مقابلات الخروج.</value></data>
+
+  <data name="SAP_Rec_REASON_CONCENTRATION_Compensation_0" xml:space="preserve"><value>راجع تنافسية الرواتب في السوق المحلي.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Compensation_1" xml:space="preserve"><value>افحص عدالة الرواتب داخل الفرع.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Workload_0" xml:space="preserve"><value>راجع مستويات التوظيف نسبةً لحجم المبيعات.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Workload_1" xml:space="preserve"><value>افحص عدالة توزيع الورديات.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Management_0" xml:space="preserve"><value>درّب قائد الفرع على إدارة الأفراد.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Management_1" xml:space="preserve"><value>راجع الشكاوى والحوادث الأخيرة.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_0" xml:space="preserve"><value>طوّر برنامج الاستقبال والتهيئة للموظفين الجدد.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_1" xml:space="preserve"><value>راجع دور قائد الفرع في دعم الموظفين الجدد.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Other_0" xml:space="preserve"><value>راجع سبب الاستقالة الأكثر شيوعاً مع قائد الفرع وضع استجابة مستهدفة.</value></data>
+
+  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_0" xml:space="preserve"><value>تواصل باستباقية مع الموظفين المصنّفين كمخاطر عالية.</value></data>
+  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1" xml:space="preserve"><value>راجع قائمة الإنذار المبكر مع قائد الفرع.</value></data>
+
+  <data name="SAP_Rec_NO_DOMINANT_DRIVER_General_0" xml:space="preserve"><value>لا يوجد سبب محدد بارز — يُنصح بمراجعة يدوية لحالات الخروج الأخيرة مع قائد الفرع.</value></data>
   <data name="SAP_NoStoreSelected" xml:space="preserve"><value>لم يتم اختيار فرع. الرجاء الرجوع واختيار فرع.</value></data>
   <data name="SAP_NoAccessOrNotFound" xml:space="preserve"><value>لا تملك صلاحية الوصول لهذا الفرع، أو أنه غير موجود.</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>إدارة البيانات</value></data>
