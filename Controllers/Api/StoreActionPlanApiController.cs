@@ -11,10 +11,12 @@ namespace MvcApp.Controllers.Api;
 public class StoreActionPlanApiController : ControllerBase
 {
     private readonly IStoreActionPlanService _actionPlans;
+    private readonly IDashboardService _dashboard;
 
-    public StoreActionPlanApiController(IStoreActionPlanService actionPlans)
+    public StoreActionPlanApiController(IStoreActionPlanService actionPlans, IDashboardService dashboard)
     {
         _actionPlans = actionPlans;
+        _dashboard = dashboard;
     }
 
     [HttpGet]
@@ -55,6 +57,25 @@ public class StoreActionPlanApiController : ControllerBase
         if (!success) return BadRequest(message);
 
         return Ok(note);
+    }
+
+    /// <summary>
+    /// Admin-only: runs detection for every period that has uploaded data.
+    /// Fills store_action_plans for periods uploaded before this feature existed.
+    /// </summary>
+    [HttpPost("run-detection")]
+    public async Task<IActionResult> RunDetectionAllPeriods()
+    {
+        var role = HttpContext.Session.GetRole();
+        if (role != "Admin") return Forbid();
+
+        var periods = await _dashboard.GetAvailablePeriodsAsync();
+        if (periods.Count == 0) return Ok(new { ran = 0, message = "No periods found." });
+
+        foreach (var p in periods)
+            await _actionPlans.RunDetectionForPeriodAsync(p.Month, p.Year);
+
+        return Ok(new { ran = periods.Count, message = $"Detection ran for {periods.Count} period(s)." });
     }
 
     public class AddNoteRequest
