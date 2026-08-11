@@ -307,6 +307,8 @@
                     <!-- period columns injected by JS -->
                     <th class="px-3 py-2 text-center" style="min-width:70px;cursor:pointer;background:oklch(0.5 0.18 25 / .08)" data-mcol="avg"
                         onclick="mxSort('avg')">AVG <i id="mxi-avg" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="px-3 py-2 text-center" style="min-width:70px;cursor:pointer;background:oklch(0.5 0.18 25 / .08)" data-mcol="total"
+                        onclick="mxSort('total')">TOTAL <i id="mxi-total" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                 </tr>
             </thead>
             <tbody id="matrixBody">
@@ -670,6 +672,17 @@ function mxRateCell(rate) {
     </td>`;
 }
 
+// Total = sum of this row's already-displayed monthly turnover-rate values
+// (not a KPI/pooled rate) — reuses the same periodRates used for the monthly
+// cells, treating a missing month (—) as 0 rather than skipping the row.
+function mxTotalRate(row) {
+    return mxData.periods.reduce((sum, pk) => sum + (row.periodRates[pk] ?? 0), 0);
+}
+
+function mxTotalCell(rate) {
+    return `<td class="px-2 py-2 text-center fw-semibold" style="background:oklch(0.5 0.18 25 / .06)">${rate.toFixed(1)}%</td>`;
+}
+
 function mxBuildHeader(periods) {
     const tr = document.querySelector('#matrixHead tr');
     const avgTh = tr.querySelector('[data-mcol="avg"]');
@@ -700,6 +713,7 @@ function mxRender() {
         if (mxSortCol === 'store') { va = a.storeName; vb = b.storeName; }
         else if (mxSortCol === 'oc') { va = a.operationConsultant || ''; vb = b.operationConsultant || ''; }
         else if (mxSortCol === 'avg') { va = a.avgRate ?? -1; vb = b.avgRate ?? -1; }
+        else if (mxSortCol === 'total') { va = mxTotalRate(a); vb = mxTotalRate(b); }
         else {
             va = a.periodRates[mxSortCol.replace('p-', '')] ?? -1;
             vb = b.periodRates[mxSortCol.replace('p-', '')] ?? -1;
@@ -708,7 +722,7 @@ function mxRender() {
         return mxSortAsc ? va - vb : vb - va;
     });
 
-    const colSpan = 2 + mxData.periods.length + 1;
+    const colSpan = 2 + mxData.periods.length + 2;
     if (!rows.length) {
         document.getElementById('matrixBody').innerHTML =
             `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">No matching stores.</td></tr>`;
@@ -720,11 +734,13 @@ function mxRender() {
         const avgCell = r.avgRate !== null && r.avgRate !== undefined
             ? mxRateCell(r.avgRate).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"')
             : `<td class="px-2 py-2 text-center text-muted" style="background:oklch(0.5 0.18 25 / .06)">—</td>`;
+        const totalCell = mxTotalCell(mxTotalRate(r));
         return `<tr>
             <td class="px-3 py-2" style="color:oklch(0.5 0.03 258);white-space:nowrap">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 fw-semibold" style="white-space:nowrap"><a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${r.storeName}</a></td>
             ${periodCells}
             ${avgCell}
+            ${totalCell}
         </tr>`;
     }).join('');
 }
