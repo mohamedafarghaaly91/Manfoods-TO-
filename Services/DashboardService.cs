@@ -280,22 +280,63 @@ public class DashboardService : IDashboardService
         return buckets.Select(kv => new ChartDataItem { Label = kv.Key, Value = kv.Value }).ToList();
     }
 
+    // Averages a per-category active-employee count across the resolved periods,
+    // instead of a single snapshot month — so a multi-month range on Turnover/
+    // Workforce doesn't silently collapse the Gender/Headcount composition
+    // charts down to the latest month while every other chart on the page
+    // honors the full range. Averaging (rather than summing) avoids double-
+    // counting the same still-employed person across multiple monthly snapshots.
+    private async Task<List<ChartDataItem>> AverageBreakdownAsync(
+        List<(int Month, int Year)> periods, List<string>? accessible, List<string>? stores, List<string>? omOcStores,
+        Func<ActiveEmployee, string> keySelector, bool excludeEmptyKey)
+    {
+        var totals = new Dictionary<string, int>();
+        foreach (var p in periods)
+        {
+            var q = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year);
+            if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+            if (stores != null) q = q.Where(e => stores.Contains(e.Store));
+            else if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
+
+            var rows = await q.ToListAsync();
+            foreach (var group in rows.GroupBy(keySelector))
+            {
+                if (excludeEmptyKey && string.IsNullOrEmpty(group.Key)) continue;
+                totals[group.Key] = totals.GetValueOrDefault(group.Key) + group.Count();
+            }
+        }
+
+        var periodCount = periods.Count > 0 ? periods.Count : 1;
+        return totals
+            .Select(kv => new ChartDataItem { Label = kv.Key, Value = (int)Math.Round(kv.Value / (double)periodCount) })
+            .ToList();
+    }
+
     public async Task<List<ChartDataItem>> GetGenderBreakdownAsync(int? month, int? year, string? store, string role, string? assignedName,
-        string? om = null, string? oc = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
-        var q = _db.ActiveEmployees.AsQueryable();
-        if (month.HasValue) q = q.Where(e => e.Month == month);
-        if (year.HasValue) q = q.Where(e => e.Year == year);
-        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
-        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
-        else if (month.HasValue && year.HasValue && await GetStoresForOmOcAsync(month.Value, year.Value, om, oc) is { } omOcStores)
-            q = q.Where(e => omOcStores.Contains(e.Store));
+        var stores = MultiValueFilter.Split(store);
 
-        return await q.GroupBy(e => e.Gender)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+        if (!month.HasValue || !year.HasValue)
+        {
+            var qAll = _db.ActiveEmployees.AsQueryable();
+            if (accessible != null) qAll = qAll.Where(e => accessible.Contains(e.Store));
+            if (stores != null) qAll = qAll.Where(e => stores.Contains(e.Store));
+            return await qAll.GroupBy(e => e.Gender)
+                .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+                .OrderBy(c => c.Label)
+                .ToListAsync();
+        }
+
+        fromMonth ??= month; fromYear ??= year;
+        var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
+        var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
+        var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc) : null;
+
+        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.Gender, excludeEmptyKey: false))
             .OrderBy(c => c.Label)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<List<PeriodItem>> GetAvailablePeriodsAsync()
@@ -703,7 +744,8 @@ public class DashboardService : IDashboardService
         var rows = allStores.Select(store =>
         {
             var periodRates = new Dictionary<string, double?>();
-            var nonNullRates = new List<double>();
+            var pooledResignations = 0;
+            var pooledHeadcounts = new List<int>();
 
             foreach (var pk in periodKeys)
             {
@@ -713,7 +755,8 @@ public class DashboardService : IDashboardService
                     var res  = resLookup.TryGetValue(key, out var rc) ? rc : 0;
                     var rate = MetricsCalculationService.RatePercent(res, hc);
                     periodRates[pk] = rate;
-                    nonNullRates.Add(rate);
+                    pooledResignations += res;
+                    pooledHeadcounts.Add(hc);
                 }
                 else
                 {
@@ -727,8 +770,12 @@ public class DashboardService : IDashboardService
                 OperationConsultant = ocByStore.TryGetValue(store, out var ocVal) ? ocVal : "",
                 OperationManager    = omByStore.TryGetValue(store, out var omVal) ? omVal : "",
                 PeriodRates         = periodRates,
-                AvgRate             = nonNullRates.Count > 0
-                                        ? Math.Round(nonNullRates.Average(), 1)
+                // Same pooled definition as Store Comparison: SUM(resignations)
+                // / AVERAGE(headcount) across the shown periods — not a mean of
+                // each period's own rate — so the two tables never disagree on
+                // what "this store's average rate" means for the same periods.
+                AvgRate             = pooledHeadcounts.Count > 0
+                                        ? MetricsCalculationService.RatePercent(pooledResignations, pooledHeadcounts.Average())
                                         : null
             };
         }).ToList();
@@ -741,76 +788,119 @@ public class DashboardService : IDashboardService
     // methods above which describe who resigned.
 
     public async Task<List<ChartDataItem>> GetHeadcountByJobTitleAsync(int? month, int? year, string? store, string role, string? assignedName,
-        string? om = null, string? oc = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
-        var q = _db.ActiveEmployees.AsQueryable();
-        if (month.HasValue) q = q.Where(e => e.Month == month);
-        if (year.HasValue) q = q.Where(e => e.Year == year);
-        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
-        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
-        else if (month.HasValue && year.HasValue && await GetStoresForOmOcAsync(month.Value, year.Value, om, oc) is { } omOcStores)
-            q = q.Where(e => omOcStores.Contains(e.Store));
+        var stores = MultiValueFilter.Split(store);
 
-        return await q.GroupBy(e => e.JobTitle)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
-            .OrderByDescending(x => x.Value)
-            .ToListAsync();
+        if (!month.HasValue || !year.HasValue)
+        {
+            var qAll = _db.ActiveEmployees.AsQueryable();
+            if (accessible != null) qAll = qAll.Where(e => accessible.Contains(e.Store));
+            if (stores != null) qAll = qAll.Where(e => stores.Contains(e.Store));
+            return await qAll.GroupBy(e => e.JobTitle)
+                .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+                .OrderByDescending(x => x.Value)
+                .ToListAsync();
+        }
+
+        fromMonth ??= month; fromYear ??= year;
+        var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
+        var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
+        var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc) : null;
+
+        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.JobTitle, excludeEmptyKey: false))
+            .OrderByDescending(c => c.Value)
+            .ToList();
     }
 
     public async Task<List<ChartDataItem>> GetHeadcountByPayrollGroupAsync(int? month, int? year, string? store, string role, string? assignedName,
-        string? om = null, string? oc = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
-        var q = _db.ActiveEmployees.AsQueryable();
-        if (month.HasValue) q = q.Where(e => e.Month == month);
-        if (year.HasValue) q = q.Where(e => e.Year == year);
-        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
-        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
-        else if (month.HasValue && year.HasValue && await GetStoresForOmOcAsync(month.Value, year.Value, om, oc) is { } omOcStores)
-            q = q.Where(e => omOcStores.Contains(e.Store));
+        var stores = MultiValueFilter.Split(store);
 
-        return await q.Where(e => e.PayrollGroup != "")
-            .GroupBy(e => e.PayrollGroup)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
-            .OrderByDescending(x => x.Value)
-            .ToListAsync();
+        if (!month.HasValue || !year.HasValue)
+        {
+            var qAll = _db.ActiveEmployees.Where(e => e.PayrollGroup != "");
+            if (accessible != null) qAll = qAll.Where(e => accessible.Contains(e.Store));
+            if (stores != null) qAll = qAll.Where(e => stores.Contains(e.Store));
+            return await qAll.GroupBy(e => e.PayrollGroup)
+                .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+                .OrderByDescending(x => x.Value)
+                .ToListAsync();
+        }
+
+        fromMonth ??= month; fromYear ??= year;
+        var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
+        var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
+        var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc) : null;
+
+        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.PayrollGroup, excludeEmptyKey: true))
+            .OrderByDescending(c => c.Value)
+            .ToList();
     }
 
+    private static readonly (string Label, int Min, int Max)[] HeadcountTenureBuckets =
+    {
+        ("< 3 months", 0, 90),
+        ("3–6 months", 90, 180),
+        ("6–12 months", 180, 365),
+        ("1–2 years", 365, 730),
+        ("2+ years", 730, int.MaxValue),
+    };
+
     public async Task<List<ChartDataItem>> GetHeadcountByTenureAsync(int? month, int? year, string? store, string role, string? assignedName,
-        string? om = null, string? oc = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
-        var q = _db.ActiveEmployees.Where(e => e.HireDate != null);
-        if (month.HasValue) q = q.Where(e => e.Month == month);
-        if (year.HasValue) q = q.Where(e => e.Year == year);
-        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
-        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
-        else if (month.HasValue && year.HasValue && await GetStoresForOmOcAsync(month.Value, year.Value, om, oc) is { } omOcStores)
-            q = q.Where(e => omOcStores.Contains(e.Store));
+        var stores = MultiValueFilter.Split(store);
 
-        var hireDates = await q.Select(e => e.HireDate!.Value).ToListAsync();
-        if (hireDates.Count == 0) return new List<ChartDataItem>();
-
-        var asOfYear  = year ?? DateTime.Now.Year;
-        var asOfMonth = month ?? DateTime.Now.Month;
-        var asOf = new DateOnly(asOfYear, asOfMonth, DateTime.DaysInMonth(asOfYear, asOfMonth));
-
-        var buckets = new (string Label, int Min, int Max)[]
+        List<(int Month, int Year)> periods;
+        if (month.HasValue && year.HasValue)
         {
-            ("< 3 months", 0, 90),
-            ("3–6 months", 90, 180),
-            ("6–12 months", 180, 365),
-            ("1–2 years", 365, 730),
-            ("2+ years", 730, int.MaxValue),
-        };
+            fromMonth ??= month; fromYear ??= year;
+            periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
+        }
+        else
+        {
+            var latest = await _db.ActiveEmployees
+                .OrderByDescending(e => e.Year).ThenByDescending(e => e.Month)
+                .Select(e => new { e.Month, e.Year }).FirstOrDefaultAsync();
+            if (latest == null) return new List<ChartDataItem>();
+            periods = new List<(int Month, int Year)> { (latest.Month, latest.Year) };
+        }
 
-        return buckets
-            .Select(b => new ChartDataItem
+        var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
+        var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc) : null;
+
+        // Tenure buckets are computed per period (as-of that period's month end)
+        // then averaged across periods — the same "average across the selected
+        // range" treatment as the other composition breakdowns above, rather
+        // than anchoring on a single (e.g. latest) month.
+        var totals = new Dictionary<string, int>();
+        foreach (var p in periods)
+        {
+            var q = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year && e.HireDate != null);
+            if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+            if (stores != null) q = q.Where(e => stores.Contains(e.Store));
+            else if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
+
+            var hireDates = await q.Select(e => e.HireDate!.Value).ToListAsync();
+            if (hireDates.Count == 0) continue;
+
+            var asOf = new DateOnly(p.Year, p.Month, DateTime.DaysInMonth(p.Year, p.Month));
+            foreach (var b in HeadcountTenureBuckets)
             {
-                Label = b.Label,
-                Value = hireDates.Count(hd => (asOf.DayNumber - hd.DayNumber) >= b.Min && (asOf.DayNumber - hd.DayNumber) < b.Max)
-            })
+                var count = hireDates.Count(hd => (asOf.DayNumber - hd.DayNumber) >= b.Min && (asOf.DayNumber - hd.DayNumber) < b.Max);
+                if (count > 0) totals[b.Label] = totals.GetValueOrDefault(b.Label) + count;
+            }
+        }
+
+        var periodCount = periods.Count > 0 ? periods.Count : 1;
+        return HeadcountTenureBuckets
+            .Where(b => totals.ContainsKey(b.Label))
+            .Select(b => new ChartDataItem { Label = b.Label, Value = (int)Math.Round(totals[b.Label] / (double)periodCount) })
             .Where(c => c.Value > 0)
             .ToList();
     }

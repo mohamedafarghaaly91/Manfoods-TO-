@@ -13,52 +13,6 @@
 [dir="rtl"] .wf-select { padding:0 14px 0 34px; }
 [dir="rtl"] .wf-select-wrap i { right:auto; left:12px; }
 
-.wf-multiselect { position:relative; }
-.wf-multiselect-trigger {
-    display:flex; align-items:center; gap:10px; justify-content:space-between;
-    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
-    border-radius:var(--radius-sm); font-size:13.5px; font-weight:600;
-    height:42px; padding:0 12px 0 14px; min-width:190px;
-    box-shadow:var(--shadow-sm); cursor:pointer;
-}
-.wf-multiselect-trigger:hover { border-color:var(--card-border-h); }
-.wf-multiselect-trigger i { font-size:11px; color:var(--text-3); flex-shrink:0; }
-.wf-multiselect-chips { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.wf-multiselect-panel {
-    display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:50;
-    background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    box-shadow:var(--shadow-lg); min-width:230px; padding:8px; max-height:280px; overflow-y:auto;
-}
-.wf-multiselect-panel.open { display:block; }
-[dir="rtl"] .wf-multiselect-panel { left:auto; right:0; }
-.wf-multiselect-actions { display:flex; gap:6px; padding:2px 4px 8px; border-bottom:1px solid var(--card-border); margin-bottom:6px; }
-.wf-ms-action {
-    flex:1; background:var(--card-bg-2); border:1px solid var(--card-border); color:var(--red);
-    border-radius:6px; font-size:11.5px; font-weight:700; padding:6px 8px; cursor:pointer;
-}
-.wf-ms-action:hover { background:var(--red-light); }
-.wf-ms-option { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:var(--text-2); }
-.wf-ms-option:hover { background:var(--card-bg-2); }
-.wf-ms-option input { accent-color:var(--red); width:15px; height:15px; cursor:pointer; }
-
-.wf-combobox { position:relative; }
-.wf-combobox-input {
-    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
-    border-radius:var(--radius-sm); font-size:13.5px; font-weight:500;
-    height:42px; padding:0 14px; min-width:190px; width:100%;
-    box-shadow:var(--shadow-sm);
-}
-.wf-combobox-input:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-light); }
-.wf-combobox-panel {
-    display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:50;
-    background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    box-shadow:var(--shadow-lg); max-height:260px; overflow-y:auto; padding:6px;
-}
-.wf-combobox-panel.open { display:block; }
-.wf-combo-option { padding:8px 10px; border-radius:6px; font-size:13px; color:var(--text-2); cursor:pointer; }
-.wf-combo-option:hover { background:var(--card-bg-2); }
-.wf-combo-option.active { color:var(--red); font-weight:700; background:var(--red-light); }
-
 .wf-gender-body { display:flex; align-items:center; gap:18px; height:220px; }
 .wf-gender-canvas-wrap { flex:0 0 44%; height:100%; position:relative; }
 .wf-gender-list { flex:1; display:flex; flex-direction:column; gap:10px; }
@@ -83,34 +37,11 @@
         <p class="page-subtitle">@L["Page_WorkforceSub"]</p>
     </div>
     <div class="d-flex gap-2 flex-wrap align-items-end">
-        <div class="wf-select-wrap"><select id="wfYearSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
-
-        <div class="wf-multiselect" id="wfMonthsMultiselect" data-label-select="@L["Common_SelectMonths"]" data-label-all="@L["Common_AllMonths"]">
-            <button type="button" class="wf-multiselect-trigger" id="wfMonthsTrigger">
-                <span class="wf-multiselect-chips" id="wfMonthsChips">@L["Common_AllMonths"]</span>
-                <i class="bi bi-chevron-down"></i>
-            </button>
-            <div class="wf-multiselect-panel" id="wfMonthsPanel">
-                <div class="wf-multiselect-actions">
-                    <button type="button" class="wf-ms-action" id="wfMonthsSelectAll">@L["Common_SelectAll"]</button>
-                    <button type="button" class="wf-ms-action" id="wfMonthsClearAll">@L["Common_ClearAll"]</button>
-                </div>
-                <div id="wfMonthsOptions"></div>
-            </div>
-        </div>
-
-        <div class="wf-combobox" id="wfStoreCombo">
-            <input type="text" class="wf-combobox-input" id="wfStoreInput" placeholder="@L["Common_AllStores"]" autocomplete="off">
-            <div class="wf-combobox-panel" id="wfStorePanel"></div>
-        </div>
-        <div class="wf-combobox" id="wfOmCombo">
-            <input type="text" class="wf-combobox-input" id="wfOmInput" placeholder="@L["Common_AllOperationManagers"]" autocomplete="off">
-            <div class="wf-combobox-panel" id="wfOmPanel"></div>
-        </div>
-        <div class="wf-combobox" id="wfOcCombo">
-            <input type="text" class="wf-combobox-input" id="wfOcInput" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
-            <div class="wf-combobox-panel" id="wfOcPanel"></div>
-        </div>
+        <div class="wf-select-wrap"><select id="fromPeriodSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
+        <div class="wf-select-wrap"><select id="periodSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
+        <div class="wf-select-wrap"><select id="storeSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
+        <div class="wf-select-wrap"><select id="omSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
+        <div class="wf-select-wrap"><select id="ocSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
     </div>
 </div>
 
@@ -242,161 +173,7 @@
    loadKpis() (via the overridden buildQuery below) for the top KPI cards,
    but does NOT use its loadCharts() (that one is resignation-based) —
    this page renders its own active-headcount composition charts instead. */
-let wfYear = null;
-let wfMonths = [];
-let wfYearMonthsMap = {};
-
 function wfMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
-function wfAnchorMonth() { return wfMonths.length ? Math.max(...wfMonths) : null; }
-
-function buildQuery() {
-    const p = new URLSearchParams();
-    if (wfYear) p.set('year', wfYear);
-    if (wfMonths.length) { p.set('months', wfMonths.join(',')); p.set('month', wfAnchorMonth()); }
-    if (storeFilter) p.set('store', storeFilter);
-    if (omFilter)    p.set('om', omFilter);
-    if (ocFilter)    p.set('oc', ocFilter);
-    return p.toString();
-}
-
-/* Generic searchable single-select combobox ---------------------------- */
-function wfCreateCombobox({ inputId, panelId, onSelect }) {
-    const input = document.getElementById(inputId);
-    const panel = document.getElementById(panelId);
-    const allLabel = input.placeholder;
-    let options = [];
-    let value = '';
-
-    function render(filterText) {
-        const ft = (filterText || '').toLowerCase();
-        const filtered = options.filter(o => o.toLowerCase().includes(ft));
-        let html = `<div class="wf-combo-option${value === '' ? ' active' : ''}" data-value="">${allLabel}</div>`;
-        html += filtered.map(o => `<div class="wf-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('');
-        panel.innerHTML = html;
-    }
-    function open() { panel.classList.add('open'); render(''); input.select(); }
-    function close() { panel.classList.remove('open'); input.value = value; }
-
-    panel.addEventListener('mousedown', (e) => {
-        const opt = e.target.closest('.wf-combo-option');
-        if (!opt) return;
-        e.preventDefault();
-        value = opt.dataset.value;
-        input.value = value;
-        panel.classList.remove('open');
-        onSelect(value);
-    });
-    input.addEventListener('focus', open);
-    input.addEventListener('input', () => render(input.value));
-    input.addEventListener('blur', () => setTimeout(close, 150));
-
-    return { setOptions(list) { options = list || []; }, setValue(v) { value = v || ''; input.value = value; } };
-}
-
-const wfStoreCombo = wfCreateCombobox({ inputId: 'wfStoreInput', panelId: 'wfStorePanel', onSelect: v => { storeFilter = v; loadAll(); } });
-const wfOmCombo    = wfCreateCombobox({ inputId: 'wfOmInput',    panelId: 'wfOmPanel',    onSelect: v => { omFilter    = v; loadAll(); } });
-const wfOcCombo    = wfCreateCombobox({ inputId: 'wfOcInput',    panelId: 'wfOcPanel',    onSelect: v => { ocFilter    = v; loadAll(); } });
-
-/* Months multi-select ---------------------------------------------------- */
-function wfBuildMonthsOptions() {
-    const container = document.getElementById('wfMonthsOptions');
-    const available = (wfYearMonthsMap[wfYear] || []).slice().sort((a, b) => a - b);
-    container.innerHTML = available.map(m => `
-        <label class="wf-ms-option">
-            <input type="checkbox" value="${m}" ${wfMonths.includes(m) ? 'checked' : ''}>
-            <span>${monthName(m, wfYear)}</span>
-        </label>`).join('');
-    container.querySelectorAll('input[type=checkbox]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const m = parseInt(cb.value);
-            if (cb.checked) { if (!wfMonths.includes(m)) wfMonths.push(m); }
-            else { wfMonths = wfMonths.filter(x => x !== m); }
-            wfMonths.sort((a, b) => a - b);
-            wfRenderMonthsChips();
-            wfOnMonthsChanged();
-        });
-    });
-}
-
-function wfRenderMonthsChips() {
-    const chipsEl = document.getElementById('wfMonthsChips');
-    const labels = document.getElementById('wfMonthsMultiselect').dataset;
-    const available = wfYearMonthsMap[wfYear] || [];
-    if (!wfMonths.length) { chipsEl.textContent = labels.labelSelect; return; }
-    if (wfMonths.length === available.length) { chipsEl.textContent = labels.labelAll; return; }
-    const names = wfMonths.map(wfMonthShortName);
-    chipsEl.textContent = names.length <= 2 ? names.join('، ') : `${names[0]}، ${names[1]} +${names.length - 2}`;
-}
-
-let wfMonthsDebounce;
-function wfOnMonthsChanged() {
-    clearTimeout(wfMonthsDebounce);
-    wfMonthsDebounce = setTimeout(async () => {
-        if (!wfMonths.length) return;
-        await wfLoadDependentLists();
-        await loadAll();
-    }, 250);
-}
-
-document.getElementById('wfMonthsSelectAll').addEventListener('click', () => {
-    wfMonths = (wfYearMonthsMap[wfYear] || []).slice().sort((a, b) => a - b);
-    wfBuildMonthsOptions(); wfRenderMonthsChips(); wfOnMonthsChanged();
-});
-document.getElementById('wfMonthsClearAll').addEventListener('click', () => {
-    wfMonths = [];
-    wfBuildMonthsOptions(); wfRenderMonthsChips(); wfOnMonthsChanged();
-});
-document.getElementById('wfMonthsTrigger').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('wfMonthsPanel').classList.toggle('open');
-});
-document.addEventListener('click', (e) => {
-    if (!document.getElementById('wfMonthsMultiselect').contains(e.target))
-        document.getElementById('wfMonthsPanel').classList.remove('open');
-});
-
-document.getElementById('wfYearSelect').addEventListener('change', async function () {
-    wfYear = parseInt(this.value);
-    wfMonths = (wfYearMonthsMap[wfYear] || []).slice().sort((a, b) => a - b);
-    storeFilter = ''; omFilter = ''; ocFilter = '';
-    wfStoreCombo.setValue(''); wfOmCombo.setValue(''); wfOcCombo.setValue('');
-    wfBuildMonthsOptions(); wfRenderMonthsChips();
-    await wfLoadDependentLists();
-    await loadAll();
-});
-
-async function wfLoadDependentLists() {
-    const anchor = wfAnchorMonth();
-    if (!anchor || !wfYear) return;
-    const [stores, oms, ocs] = await Promise.all([
-        fetchJson(`/api/dashboard/stores?month=${anchor}&year=${wfYear}`),
-        fetchJson(`/api/dashboard/operation-managers?month=${anchor}&year=${wfYear}`),
-        fetchJson(`/api/dashboard/operation-consultants?month=${anchor}&year=${wfYear}`)
-    ]);
-    wfStoreCombo.setOptions(stores.map(s => s.storeName));
-    wfOmCombo.setOptions(oms);
-    wfOcCombo.setOptions(ocs);
-}
-
-async function wfInit() {
-    const periods = await fetchJson('/api/dashboard/available-periods');
-    if (!periods.length) return;
-
-    wfYearMonthsMap = {};
-    periods.forEach(p => { (wfYearMonthsMap[p.year] = wfYearMonthsMap[p.year] || []).push(p.month); });
-    const years = Object.keys(wfYearMonthsMap).map(Number).sort((a, b) => b - a);
-    const yearSel = document.getElementById('wfYearSelect');
-    yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-    wfYear = years[0];
-    yearSel.value = wfYear;
-
-    wfMonths = (wfYearMonthsMap[wfYear] || []).slice().sort((a, b) => a - b);
-    wfBuildMonthsOptions();
-    wfRenderMonthsChips();
-
-    await wfLoadDependentLists();
-    await loadAll();
-}
 
 /* ── Composition charts ──────────────────────────────────────────── */
 let wfJobTitleChart, wfPayrollChart, wfTenureChart, wfGenderChart;
@@ -463,7 +240,7 @@ async function wfLoadHeadcountTrend() {
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
-    if (wfYear)      q.set('sinceYear', wfYear);
+    if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
     const data = await fetchJson(`/api/dashboard/headcount-trend?${q.toString()}`);
     const fmt = pk => { const [y, m] = pk.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' }); };
     wfHeadcountTrendChart = mkChart(wfHeadcountTrendChart, 'wfHeadcountTrendChart', {
@@ -497,9 +274,8 @@ function wfRenderStoreTable(rows) {
 }
 
 async function wfLoadStoreTable() {
-    const anchor = wfAnchorMonth();
-    if (!anchor || !wfYear) return;
-    const q = new URLSearchParams({ month: anchor, year: wfYear });
+    if (!periodMonth || !periodYear) return;
+    const q = new URLSearchParams({ month: periodMonth, year: periodYear });
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
     const data = await fetchJson(`/api/dashboard/store-headcount-breakdown?${q.toString()}`);
@@ -523,15 +299,19 @@ function wfRenderOcOmTable(tbodyId, rows) {
 }
 
 async function wfLoadOcOm() {
-    if (!wfYear || !wfMonths.length) return;
+    if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/oc-om-analysis?${buildQuery()}`);
     wfRenderOcOmTable('ocTableBody', data.ocRows);
     wfRenderOcOmTable('omTableBody', data.omRows);
 }
 
-/* dashboard.js's own #periodSelect/#storeSelect wiring safely no-ops here
-   (those elements don't exist), and its loadCharts() is never called —
-   only loadKpis() is reused, via loadAll below. */
+/* Uses dashboard.js's shared #periodSelect/#fromPeriodSelect/#storeSelect/
+   #omSelect/#ocSelect filter bar (periodMonth/periodYear/fromPeriodMonth/
+   fromPeriodYear/storeFilter/omFilter/ocFilter/buildQuery()) — the same
+   continuous From→To range used on every other page. dashboard.js's own
+   loadCharts() (resignation-based) is not used here; only loadKpis() is
+   reused, via loadAll below, which dashboard.js's loadPeriods() (called at
+   the bottom of dashboard.js) will invoke once periods are loaded. */
 loadAll = async function () {
     await Promise.all([
         loadKpis(),
@@ -544,6 +324,4 @@ loadAll = async function () {
         wfLoadOcOm()
     ]);
 };
-
-wfInit();
 </script>

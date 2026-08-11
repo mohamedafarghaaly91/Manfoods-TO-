@@ -306,8 +306,6 @@
   <data name="Page_DataMgmtSub" xml:space="preserve"><value>رفع ملفات Excel الشهرية لاستيراد بيانات القوى العاملة</value></data>
   <data name="Page_ChangePassword" xml:space="preserve"><value>تغيير كلمة المرور</value></data>
   <data name="Page_ChangePasswordSub" xml:space="preserve"><value>تحديث كلمة مرور حسابك</value></data>
-  <data name="Page_StoreProfile" xml:space="preserve"><value>العودة لتحليل الدوران</value></data>
-  <data name="Page_VsNetwork" xml:space="preserve"><value>مقارنة بمتوسط الشبكة</value></data>
 
   <!-- Charts -->
   <data name="Chart_TurnoverTrend" xml:space="preserve"><value>اتجاه الدوران</value></data>

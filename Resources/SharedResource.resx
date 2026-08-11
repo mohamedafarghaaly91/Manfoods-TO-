@@ -306,8 +306,6 @@
   <data name="Page_DataMgmtSub" xml:space="preserve"><value>Upload monthly Excel files to import workforce data</value></data>
   <data name="Page_ChangePassword" xml:space="preserve"><value>Change Password</value></data>
   <data name="Page_ChangePasswordSub" xml:space="preserve"><value>Update your account password</value></data>
-  <data name="Page_StoreProfile" xml:space="preserve"><value>Back to Turnover Analysis</value></data>
-  <data name="Page_VsNetwork" xml:space="preserve"><value>Vs. Network Average</value></data>
 
   <!-- Charts -->
   <data name="Chart_TurnoverTrend" xml:space="preserve"><value>Turnover Trend</value></data>

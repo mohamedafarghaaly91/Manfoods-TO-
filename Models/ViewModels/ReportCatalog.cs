@@ -73,7 +73,7 @@ public static class ReportCatalog
             Id = "scorecard", Section = "Deep Analytics", Title = "Scorecard",
             Description = "KPI rankings for Store Leaders, Operation Consultants, and Operation Managers — Turnover, 90-Day, Retention, and Exit Sentiment.",
             Icon = "bi-award-fill", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesOmOc = true,
+            UsesYear = true, UsesMonths = true, UsesOmOc = true,
         },
         new ReportDefinition
         {

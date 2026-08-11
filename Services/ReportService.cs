@@ -364,9 +364,9 @@ public class ReportService : IReportService
     }
 
     // ── Scorecard ───────────────────────────────────────────
-    private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null)
+    private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
     {
-        var rows = await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc);
+        var rows = await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, months, year);
         var ws = AddSheet(wb, sheetName);
         StyleHeader(ws, new[] { nameHeader, "Stores", "Headcount", "Turnover Rate", "90-Day Early Leave", "180-Day Retention", "Exit Sentiment", "Exit Responses" });
         for (int i = 0; i < rows.Count; i++)
@@ -385,17 +385,17 @@ public class ReportService : IReportService
         Finalize(ws);
     }
 
-    private async Task AddScorecardSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null)
+    private async Task AddScorecardSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
     {
-        await AddScorecardSheetAsync(wb, "leader", "Scorecard Store Leaders", "Store Leader", role, assignedName, om, oc);
-        await AddScorecardSheetAsync(wb, "oc", "Scorecard Op. Consultants", "Operation Consultant", role, assignedName, om, oc);
-        await AddScorecardSheetAsync(wb, "om", "Scorecard Op. Managers", "Operation Manager", role, assignedName, om, oc);
+        await AddScorecardSheetAsync(wb, "leader", "Scorecard Store Leaders", "Store Leader", role, assignedName, om, oc, months, year);
+        await AddScorecardSheetAsync(wb, "oc", "Scorecard Op. Consultants", "Operation Consultant", role, assignedName, om, oc, months, year);
+        await AddScorecardSheetAsync(wb, "om", "Scorecard Op. Managers", "Operation Manager", role, assignedName, om, oc, months, year);
     }
 
-    public async Task<XLWorkbook> BuildScorecardReportAsync(string role, string? assignedName, string? om = null, string? oc = null)
+    public async Task<XLWorkbook> BuildScorecardReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
     {
         var wb = new XLWorkbook();
-        await AddScorecardSheetsAsync(wb, role, assignedName, om, oc);
+        await AddScorecardSheetsAsync(wb, role, assignedName, om, oc, months, year);
         return wb;
     }
 

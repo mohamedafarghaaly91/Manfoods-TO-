@@ -58,11 +58,11 @@ public class DashboardApiController : ControllerBase
 
     [HttpGet("gender-breakdown")]
     public async Task<IActionResult> GenderBreakdown([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] string? om, [FromQuery] string? oc)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, om, oc));
+        return Ok(await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
     [HttpGet("available-periods")]
@@ -136,29 +136,29 @@ public class DashboardApiController : ControllerBase
 
     [HttpGet("headcount-by-job-title")]
     public async Task<IActionResult> HeadcountByJobTitle([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] string? om, [FromQuery] string? oc)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, om, oc));
+        return Ok(await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
     [HttpGet("headcount-by-payroll-group")]
     public async Task<IActionResult> HeadcountByPayrollGroup([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] string? om, [FromQuery] string? oc)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, om, oc));
+        return Ok(await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
     [HttpGet("headcount-by-tenure")]
     public async Task<IActionResult> HeadcountByTenure([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] string? om, [FromQuery] string? oc)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, om, oc));
+        return Ok(await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
     }
 
     [HttpGet("headcount-trend")]

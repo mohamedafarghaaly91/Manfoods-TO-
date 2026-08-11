@@ -21,58 +21,6 @@
 [dir="rtl"] .tv-select { padding:0 14px 0 34px; }
 [dir="rtl"] .tv-select-wrap i { right:auto; left:12px; }
 
-/* Months multi-select */
-.tv-multiselect { position:relative; }
-.tv-multiselect-trigger {
-    display:flex; align-items:center; gap:10px; justify-content:space-between;
-    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
-    border-radius:var(--radius-sm); font-size:13.5px; font-weight:600;
-    height:42px; padding:0 12px 0 14px; min-width:190px;
-    box-shadow:var(--shadow-sm); cursor:pointer; transition:border-color .15s, box-shadow .15s;
-}
-.tv-multiselect-trigger:hover { border-color:var(--card-border-h); }
-.tv-multiselect-trigger i { font-size:11px; color:var(--text-3); flex-shrink:0; }
-.tv-multiselect-chips { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tv-multiselect-panel {
-    display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:50;
-    background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    box-shadow:var(--shadow-lg); min-width:230px; padding:8px; max-height:280px; overflow-y:auto;
-}
-.tv-multiselect-panel.open { display:block; }
-[dir="rtl"] .tv-multiselect-panel { left:auto; right:0; }
-.tv-multiselect-actions { display:flex; gap:6px; padding:2px 4px 8px; border-bottom:1px solid var(--card-border); margin-bottom:6px; }
-.tv-ms-action {
-    flex:1; background:var(--card-bg-2); border:1px solid var(--card-border); color:var(--red);
-    border-radius:6px; font-size:11.5px; font-weight:700; padding:6px 8px; cursor:pointer; transition:background .15s;
-}
-.tv-ms-action:hover { background:var(--red-light); }
-.tv-ms-option {
-    display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:6px; cursor:pointer;
-    font-size:13px; color:var(--text-2); transition:background .12s;
-}
-.tv-ms-option:hover { background:var(--card-bg-2); }
-.tv-ms-option input { accent-color:var(--red); width:15px; height:15px; cursor:pointer; }
-
-/* Searchable single-select combobox (Store / OM / OC) */
-.tv-combobox { position:relative; }
-.tv-combobox-input {
-    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
-    border-radius:var(--radius-sm); font-size:13.5px; font-weight:500;
-    height:42px; padding:0 14px; min-width:190px; width:100%;
-    box-shadow:var(--shadow-sm); transition:border-color .15s, box-shadow .15s;
-}
-.tv-combobox-input:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-light); }
-.tv-combobox-panel {
-    display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:50;
-    background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-sm);
-    box-shadow:var(--shadow-lg); max-height:260px; overflow-y:auto; padding:6px;
-}
-.tv-combobox-panel.open { display:block; }
-.tv-combo-option { padding:8px 10px; border-radius:6px; font-size:13px; color:var(--text-2); cursor:pointer; }
-.tv-combo-option:hover { background:var(--card-bg-2); }
-.tv-combo-option.active { color:var(--red); font-weight:700; background:var(--red-light); }
-.tv-combo-empty { padding:10px; font-size:12.5px; color:var(--text-3); text-align:center; }
-
 /* Mini "top driver" callout inside a chart card header */
 .tv-stat-callout { font-size:12.5px; color:var(--text-2); margin-top:4px; }
 .tv-stat-callout .tv-stat-highlight { color:var(--red); font-weight:700; }
@@ -104,51 +52,42 @@
     </div>
     <div class="tv-filterbar">
         <div class="tv-filter-group">
-            <span class="tv-filter-label">@L["Common_Year"]</span>
+            <span class="tv-filter-label">From</span>
             <div class="tv-select-wrap">
-                <select id="tvYearSelect" class="tv-select"></select>
+                <select id="fromPeriodSelect" class="tv-select"></select>
                 <i class="bi bi-chevron-down"></i>
             </div>
         </div>
 
         <div class="tv-filter-group">
-            <span class="tv-filter-label">@L["Common_SelectMonths"]</span>
-            <div class="tv-multiselect" id="tvMonthsMultiselect" data-label-select="@L["Common_SelectMonths"]" data-label-all="@L["Common_AllMonths"]">
-                <button type="button" class="tv-multiselect-trigger" id="tvMonthsTrigger">
-                    <span class="tv-multiselect-chips" id="tvMonthsChips">@L["Common_AllMonths"]</span>
-                    <i class="bi bi-chevron-down"></i>
-                </button>
-                <div class="tv-multiselect-panel" id="tvMonthsPanel">
-                    <div class="tv-multiselect-actions">
-                        <button type="button" class="tv-ms-action" id="tvMonthsSelectAll">@L["Common_SelectAll"]</button>
-                        <button type="button" class="tv-ms-action" id="tvMonthsClearAll">@L["Common_ClearAll"]</button>
-                    </div>
-                    <div id="tvMonthsOptions"></div>
-                </div>
+            <span class="tv-filter-label">To</span>
+            <div class="tv-select-wrap">
+                <select id="periodSelect" class="tv-select"></select>
+                <i class="bi bi-chevron-down"></i>
             </div>
         </div>
 
         <div class="tv-filter-group">
             <span class="tv-filter-label">@L["Common_StoreName"]</span>
-            <div class="tv-combobox" id="tvStoreCombo">
-                <input type="text" class="tv-combobox-input" id="tvStoreInput" placeholder="@L["Common_AllStores"]" autocomplete="off">
-                <div class="tv-combobox-panel" id="tvStorePanel"></div>
+            <div class="tv-select-wrap">
+                <select id="storeSelect" class="tv-select"></select>
+                <i class="bi bi-chevron-down"></i>
             </div>
         </div>
 
         <div class="tv-filter-group">
             <span class="tv-filter-label">@L["Common_OperationManager"]</span>
-            <div class="tv-combobox" id="tvOmCombo">
-                <input type="text" class="tv-combobox-input" id="tvOmInput" placeholder="@L["Common_AllOperationManagers"]" autocomplete="off">
-                <div class="tv-combobox-panel" id="tvOmPanel"></div>
+            <div class="tv-select-wrap">
+                <select id="omSelect" class="tv-select"></select>
+                <i class="bi bi-chevron-down"></i>
             </div>
         </div>
 
         <div class="tv-filter-group">
             <span class="tv-filter-label">@L["Common_OperationConsultant"]</span>
-            <div class="tv-combobox" id="tvOcCombo">
-                <input type="text" class="tv-combobox-input" id="tvOcInput" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
-                <div class="tv-combobox-panel" id="tvOcPanel"></div>
+            <div class="tv-select-wrap">
+                <select id="ocSelect" class="tv-select"></select>
+                <i class="bi bi-chevron-down"></i>
             </div>
         </div>
     </div>
@@ -385,194 +324,47 @@
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 <script>
-/* ── Turnover Analytics — filters (Year + discrete Months multi-select
-   + searchable single-select combos for Store/OM/OC) ─────────────────
-   dashboard.js's own #periodSelect/#fromPeriodSelect/#storeSelect/#omSelect/
-   #ocSelect wiring no-ops here (those elements don't exist on this page),
-   so this page owns buildQuery()/loadAll() end-to-end. storeFilter/omFilter/
-   ocFilter globals are declared by dashboard.js and reused as-is. */
-let tvYear = null;
-let tvMonths = [];
-let tvYearMonthsMap = {};
+/* ── Turnover Analytics — uses dashboard.js's shared continuous From→To
+   period filter (#periodSelect/#fromPeriodSelect/#storeSelect/#omSelect/
+   #ocSelect + periodMonth/periodYear/fromPeriodMonth/fromPeriodYear/
+   storeFilter/omFilter/ocFilter/buildQuery()) instead of a page-specific
+   discrete Year+Months picker, so the same range filter behaves identically
+   across every page. dashboard.js's own loadPeriods() (called at the bottom
+   of dashboard.js) drives initial load. */
 
 function tvMonthShortName(m) {
     return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' });
 }
 
-/* Overrides dashboard.js's buildQuery(): discrete year+months instead of a
-   continuous from/to range. "month" is also sent (= latest selected month)
-   so endpoints that only understand a single period (e.g. gender-breakdown)
-   still get a sensible value. */
-function buildQuery() {
-    const p = new URLSearchParams();
-    if (tvYear) p.set('year', tvYear);
-    if (tvMonths.length) {
-        p.set('months', tvMonths.join(','));
-        p.set('month', Math.max(...tvMonths));
+/* Expands the selected From→To range into an ordered list of {month, year}. */
+function tvExpandRange(fromM, fromY, toM, toY) {
+    if (!fromM || !fromY || !toM || !toY) return [];
+    let m = fromM, y = fromY;
+    if (y > toY || (y === toY && m > toM)) { [m, y, toM, toY] = [toM, toY, m, y]; }
+    const out = [];
+    while (y < toY || (y === toY && m <= toM)) {
+        out.push({ month: m, year: y });
+        m++; if (m > 12) { m = 1; y++; }
     }
-    if (storeFilter) p.set('store', storeFilter);
-    if (omFilter)    p.set('om', omFilter);
-    if (ocFilter)    p.set('oc', ocFilter);
-    return p.toString();
+    return out;
 }
 
-function tvAnchorMonth() { return tvMonths.length ? Math.max(...tvMonths) : null; }
+const __AREA_PREFIX = '@__areaPrefix';
 
-/* ── Generic searchable single-select combobox (Store / OM / OC) ────── */
-function tvCreateCombobox({ inputId, panelId, onSelect }) {
-    const input = document.getElementById(inputId);
-    const panel = document.getElementById(panelId);
-    const allLabel = input.placeholder;
-    let options = [];
-    let value = '';
+// Deep link from the Stores page cards: /turnover?store=Downtown. Set before
+// dashboard.js's in-flight loadPeriods()/loadStores() resume (single-threaded
+// JS: this synchronous code runs before those awaited continuations do).
+const __urlStore = new URLSearchParams(window.location.search).get('store');
+if (__urlStore) storeFilter = __urlStore;
 
-    function render(filterText) {
-        const ft = (filterText || '').toLowerCase();
-        const filtered = options.filter(o => o.toLowerCase().includes(ft));
-        let html = `<div class="tv-combo-option${value === '' ? ' active' : ''}" data-value="">${allLabel}</div>`;
-        html += filtered.map(o => `<div class="tv-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('');
-        panel.innerHTML = html;
+const _tvOrigLoadStores = loadStores;
+loadStores = async function () {
+    await _tvOrigLoadStores();
+    if (storeFilter) {
+        const sel = document.getElementById('storeSelect');
+        if (sel) sel.value = storeFilter;
     }
-
-    function open() { panel.classList.add('open'); render(''); input.select(); }
-    function close() { panel.classList.remove('open'); input.value = value; }
-
-    panel.addEventListener('mousedown', (e) => {
-        const opt = e.target.closest('.tv-combo-option');
-        if (!opt) return;
-        e.preventDefault();
-        value = opt.dataset.value;
-        input.value = value;
-        panel.classList.remove('open');
-        onSelect(value);
-    });
-    input.addEventListener('focus', open);
-    input.addEventListener('input', () => render(input.value));
-    input.addEventListener('blur', () => setTimeout(close, 150));
-
-    return {
-        setOptions(list) { options = list || []; },
-        setValue(v) { value = v || ''; input.value = value; }
-    };
-}
-
-const tvStoreCombo = tvCreateCombobox({ inputId: 'tvStoreInput', panelId: 'tvStorePanel', onSelect: v => { storeFilter = v; loadAll(); } });
-const tvOmCombo    = tvCreateCombobox({ inputId: 'tvOmInput',    panelId: 'tvOmPanel',    onSelect: v => { omFilter    = v; loadAll(); } });
-const tvOcCombo    = tvCreateCombobox({ inputId: 'tvOcInput',    panelId: 'tvOcPanel',    onSelect: v => { ocFilter    = v; loadAll(); } });
-
-/* ── Months multi-select ─────────────────────────────────────────── */
-function tvBuildMonthsOptions() {
-    const container = document.getElementById('tvMonthsOptions');
-    const available = (tvYearMonthsMap[tvYear] || []).slice().sort((a, b) => a - b);
-    container.innerHTML = available.map(m => `
-        <label class="tv-ms-option">
-            <input type="checkbox" value="${m}" ${tvMonths.includes(m) ? 'checked' : ''}>
-            <span>${monthName(m, tvYear)}</span>
-        </label>`).join('');
-    container.querySelectorAll('input[type=checkbox]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            const m = parseInt(cb.value);
-            if (cb.checked) { if (!tvMonths.includes(m)) tvMonths.push(m); }
-            else { tvMonths = tvMonths.filter(x => x !== m); }
-            tvMonths.sort((a, b) => a - b);
-            tvRenderMonthsChips();
-            tvOnMonthsChanged();
-        });
-    });
-}
-
-function tvRenderMonthsChips() {
-    const chipsEl = document.getElementById('tvMonthsChips');
-    const available = tvYearMonthsMap[tvYear] || [];
-    const labels = document.getElementById('tvMonthsMultiselect').dataset;
-    if (!tvMonths.length) { chipsEl.textContent = labels.labelSelect; return; }
-    if (tvMonths.length === available.length) { chipsEl.textContent = labels.labelAll; return; }
-    const names = tvMonths.map(tvMonthShortName);
-    chipsEl.textContent = names.length <= 2 ? names.join('، ') : `${names[0]}، ${names[1]} +${names.length - 2}`;
-}
-
-let tvMonthsDebounce;
-function tvOnMonthsChanged() {
-    clearTimeout(tvMonthsDebounce);
-    tvMonthsDebounce = setTimeout(async () => {
-        if (!tvMonths.length) return;
-        await tvLoadDependentLists();
-        await loadAll();
-    }, 250);
-}
-
-document.getElementById('tvMonthsSelectAll').addEventListener('click', () => {
-    tvMonths = (tvYearMonthsMap[tvYear] || []).slice().sort((a, b) => a - b);
-    tvBuildMonthsOptions(); tvRenderMonthsChips(); tvOnMonthsChanged();
-});
-document.getElementById('tvMonthsClearAll').addEventListener('click', () => {
-    tvMonths = [];
-    tvBuildMonthsOptions(); tvRenderMonthsChips(); tvOnMonthsChanged();
-});
-document.getElementById('tvMonthsTrigger').addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.getElementById('tvMonthsPanel').classList.toggle('open');
-});
-document.addEventListener('click', (e) => {
-    if (!document.getElementById('tvMonthsMultiselect').contains(e.target))
-        document.getElementById('tvMonthsPanel').classList.remove('open');
-});
-
-/* ── Year select ──────────────────────────────────────────────────── */
-document.getElementById('tvYearSelect').addEventListener('change', async function () {
-    tvYear = parseInt(this.value);
-    tvMonths = (tvYearMonthsMap[tvYear] || []).slice().sort((a, b) => a - b);
-    storeFilter = ''; omFilter = ''; ocFilter = '';
-    tvStoreCombo.setValue(''); tvOmCombo.setValue(''); tvOcCombo.setValue('');
-    tvBuildMonthsOptions();
-    tvRenderMonthsChips();
-    await tvLoadDependentLists();
-    await loadAll();
-});
-
-/* ── Store / OM / OC option lists (scoped to the latest selected month) ── */
-async function tvLoadDependentLists() {
-    const anchor = tvAnchorMonth();
-    if (!anchor || !tvYear) return;
-    const [stores, oms, ocs] = await Promise.all([
-        fetchJson(`/api/dashboard/stores?month=${anchor}&year=${tvYear}`),
-        fetchJson(`/api/dashboard/operation-managers?month=${anchor}&year=${tvYear}`),
-        fetchJson(`/api/dashboard/operation-consultants?month=${anchor}&year=${tvYear}`)
-    ]);
-    tvStoreCombo.setOptions(stores.map(s => s.storeName));
-    tvOmCombo.setOptions(oms);
-    tvOcCombo.setOptions(ocs);
-}
-
-/* ── Initial load ─────────────────────────────────────────────────── */
-async function tvInitFilters() {
-    const periods = await fetchJson('/api/dashboard/available-periods');
-    if (!periods.length) return;
-
-    tvYearMonthsMap = {};
-    periods.forEach(p => { (tvYearMonthsMap[p.year] = tvYearMonthsMap[p.year] || []).push(p.month); });
-
-    const years = Object.keys(tvYearMonthsMap).map(Number).sort((a, b) => b - a);
-    const yearSel = document.getElementById('tvYearSelect');
-    yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
-    tvYear = years[0];
-    yearSel.value = tvYear;
-
-    tvMonths = (tvYearMonthsMap[tvYear] || []).slice().sort((a, b) => a - b);
-    tvBuildMonthsOptions();
-    tvRenderMonthsChips();
-
-    await tvLoadDependentLists();
-
-    // Deep link from the Stores page cards: /turnover?store=Downtown
-    const urlStore = new URLSearchParams(window.location.search).get('store');
-    if (urlStore) {
-        storeFilter = urlStore;
-        tvStoreCombo.setValue(urlStore);
-    }
-
-    await loadAll();
-}
+};
 
 /* ── Extra sections (Smart Insights, Store Comparison, OC/OM, Payroll chart) ── */
 let tvStoreData = [], tvSortCol = 'turnoverRate', tvSortAsc = false;
@@ -610,7 +402,7 @@ function tvRenderStoreTable() {
         const c = tvRateColor(r.turnoverRate);
         const rateBadge = `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.turnoverRate.toFixed(1)}%</span>`;
         return `<tr>
-            <td class="px-3 py-2 fw-semibold"><a href="/admin/dashboard/storeprofile?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${r.storeName}</a></td>
+            <td class="px-3 py-2 fw-semibold"><a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${r.storeName}</a></td>
             <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationManager    || '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
@@ -622,7 +414,7 @@ function tvRenderStoreTable() {
 }
 
 async function tvLoadStoreComparison() {
-    if (!tvYear || !tvMonths.length) return;
+    if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/store-comparison?${buildQuery()}`);
     tvStoreData = data || [];
     tvRenderStoreTable();
@@ -650,7 +442,7 @@ function tvRenderOcOmTable(tbodyId, rows) {
 }
 
 async function tvLoadOcOmAnalysis() {
-    if (!tvYear || !tvMonths.length) return;
+    if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/oc-om-analysis?${buildQuery()}`);
     tvRenderOcOmTable('ocTableBody', data.ocRows);
     tvRenderOcOmTable('omTableBody', data.omRows);
@@ -658,7 +450,7 @@ async function tvLoadOcOmAnalysis() {
 
 /* Smart Insights ------------------------------------------- */
 async function tvLoadSmartInsights() {
-    if (!tvYear || !tvMonths.length) return;
+    if (!periodMonth || !periodYear) return;
     const items     = await fetchJson(`/api/dashboard/smart-insights?${buildQuery()}`);
     const container = document.getElementById('insightsContainer');
 
@@ -757,10 +549,11 @@ async function tvLoadGenderStats() {
    independently as resignations ÷ headcount for that single month. ------ */
 let turnoverByMonthChart;
 async function tvLoadTurnoverByMonthChart() {
-    if (!tvYear || !tvMonths.length) return;
-    const sortedMonths = tvMonths.slice().sort((a, b) => a - b);
-    const results = await Promise.all(sortedMonths.map(m => {
-        const q = new URLSearchParams({ year: tvYear, months: m, month: m });
+    if (!periodMonth || !periodYear) return;
+    const monthsInRange = tvExpandRange(fromPeriodMonth, fromPeriodYear, periodMonth, periodYear);
+    if (!monthsInRange.length) return;
+    const results = await Promise.all(monthsInRange.map(({ month, year }) => {
+        const q = new URLSearchParams({ year: year, months: month, month: month });
         if (storeFilter) q.set('store', storeFilter);
         if (omFilter)    q.set('om', omFilter);
         if (ocFilter)    q.set('oc', ocFilter);
@@ -770,7 +563,7 @@ async function tvLoadTurnoverByMonthChart() {
     turnoverByMonthChart = mkChart(turnoverByMonthChart, 'turnoverByMonthChart', {
         type: 'bar',
         data: {
-            labels: sortedMonths.map(tvMonthShortName),
+            labels: monthsInRange.map(({ month, year }) => `${tvMonthShortName(month)} ${String(year).slice(-2)}`),
             datasets: [{
                 label: 'Turnover %',
                 data: results.map(r => r.turnoverRate || 0),
@@ -795,15 +588,23 @@ async function tvLoadTurnoverByMonthChart() {
 
 /* Reasons for Leaving — all resignations in the selected period, from
    exit interviews (unlike the 90-Day page's version, not restricted to
-   early leavers). Reuses the existing /api/exit-interviews/reasons
-   endpoint with this page's own Year/Months/Store/OM/OC filter state. */
+   early leavers). Reuses the existing /api/exit-interviews/reasons endpoint,
+   which only understands year + a discrete months list (not a continuous
+   range) — translate the selected From→To range into that shape when it
+   fits within a single year; otherwise fall back to the undated/all pool
+   below, same as when the exit-interview data itself lacks parsed dates. */
 let reasonsChartInstance;
 async function tvLoadReasonsChart() {
     const ctx = document.getElementById('reasonsChart');
     if (!ctx) return;
     if (reasonsChartInstance) reasonsChartInstance.destroy();
-    if (!tvYear || !tvMonths.length) return;
-    const q = new URLSearchParams({ year: tvYear, months: tvMonths.join(',') });
+    if (!periodMonth || !periodYear) return;
+    const q = new URLSearchParams();
+    if (fromPeriodYear === periodYear) {
+        const monthsInRange = tvExpandRange(fromPeriodMonth, fromPeriodYear, periodMonth, periodYear).map(p => p.month);
+        q.set('year', periodYear);
+        q.set('months', monthsInRange.join(','));
+    }
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
@@ -921,7 +722,7 @@ function mxRender() {
             : `<td class="px-2 py-2 text-center text-muted" style="background:oklch(0.5 0.18 25 / .06)">—</td>`;
         return `<tr>
             <td class="px-3 py-2" style="color:oklch(0.5 0.03 258);white-space:nowrap">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2 fw-semibold" style="white-space:nowrap"><a href="/admin/dashboard/storeprofile?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${r.storeName}</a></td>
+            <td class="px-3 py-2 fw-semibold" style="white-space:nowrap"><a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${r.storeName}</a></td>
             ${periodCells}
             ${avgCell}
         </tr>`;
@@ -944,7 +745,7 @@ async function tvLoadTrendMatrix() {
     const q = new URLSearchParams();
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
-    if (tvYear)   q.set('sinceYear', tvYear);
+    if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
     mxData = await fetchJson(`/api/dashboard/trend-matrix?${q.toString()}`);
     if (!mxData || !mxData.rows || !mxData.rows.length) {
         body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No data available.</td></tr>';
@@ -1008,6 +809,4 @@ function tvRenderTrendChart() {
         }
     });
 }
-
-tvInitFilters();
 </script>
