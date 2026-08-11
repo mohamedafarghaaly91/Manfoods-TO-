@@ -224,17 +224,25 @@ public class RetentionService : IRetentionService
             .OrderBy(p => p.CohortYear).ThenBy(p => p.CohortMonth)
             .ToList();
 
+        var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<RetentionTrendPoint>();
         foreach (var (month, year) in periods)
         {
             var cohortRows = cohorts.Where(c => c.CohortMonth == month && c.CohortYear == year).ToList();
-            var total = cohortRows.Count;
-            if (total == 0) continue;
+            if (cohortRows.Count == 0) continue;
 
             var point = new RetentionTrendPoint { Label = new DateOnly(year, month, 1).ToString("MMM yy") };
             foreach (var (days, label) in Milestones)
             {
-                point.Rates[label] = MetricsCalculationService.RatePercent(cohortRows.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, days)), total);
+                // Same eligibility rule as GetMilestonesAsync/GetSurvivalCurveAsync:
+                // a still-active member whose tenure hasn't yet reached this milestone
+                // has an undetermined outcome and must not be counted as "retained" —
+                // exclude them from both numerator and denominator instead of assuming
+                // they'll survive to a milestone they haven't had time to reach.
+                var eligible = cohortRows.Where(c => MetricsCalculationService.IsEligibleForMilestone(c.HireDate, c.TenureDays, days, asOf)).ToList();
+                point.Rates[label] = eligible.Count == 0
+                    ? null
+                    : MetricsCalculationService.RatePercent(eligible.Count(c => MetricsCalculationService.IsRetainedAtMilestone(c.TenureDays, days)), eligible.Count);
                 point.Provisional[label] = !CohortReaches(month, year, days);
             }
             result.Add(point);

@@ -514,32 +514,41 @@ public class StoreActionPlanService : IStoreActionPlanService
         return metrics;
     }
 
+    /// <summary>
+    /// ReasonForLeaving is stored verbatim from the Arabic Microsoft Forms export
+    /// (see UploadService.Get(row, "برجاء اختيار سبب ترك العمل")) — never English —
+    /// so category matching must be done on Arabic keywords, not English ones.
+    /// The exact fixed option list used by the Form is external to this repo, so
+    /// these are conservative, common Arabic terms for each category (root forms
+    /// like "معامل" deliberately match "معاملة"/"المعاملة"). Expand this list once
+    /// the authoritative Form option list is confirmed with the business.
+    /// </summary>
     private static (string Category, List<string> Recommendations) MapReasonToRecommendations(string label)
     {
-        var l = (label ?? "").ToLowerInvariant();
+        var l = label ?? "";
 
-        if (l.Contains("pay") || l.Contains("compensat") || l.Contains("salary") || l.Contains("wage"))
+        if (l.Contains("راتب") || l.Contains("مرتب") || l.Contains("أجر") || l.Contains("اجر") || l.Contains("بدل"))
             return ("Compensation", new List<string>
             {
                 "Review pay competitiveness against the local market.",
                 "Check for pay-equity issues within the store.",
             });
 
-        if (l.Contains("workload") || l.Contains("hour") || l.Contains("schedul") || l.Contains("pressure"))
+        if (l.Contains("ضغط") || l.Contains("ساعات") || l.Contains("جدول") || l.Contains("دوام") || l.Contains("وردي"))
             return ("Workload", new List<string>
             {
                 "Review staffing levels against sales volume.",
                 "Audit shift scheduling fairness.",
             });
 
-        if (l.Contains("treat") || l.Contains("manage") || l.Contains("respect") || l.Contains("fair"))
+        if (l.Contains("معامل") || l.Contains("إدارة") || l.Contains("اداره") || l.Contains("احترام") || l.Contains("عادل") || l.Contains("عدل"))
             return ("Management", new List<string>
             {
                 "Coach the Store Leader on people management.",
                 "Review recent complaints or incidents.",
             });
 
-        if (l.Contains("train") || l.Contains("onboard"))
+        if (l.Contains("تدريب") || l.Contains("تأهيل") || l.Contains("تاهيل"))
             return ("Onboarding", new List<string>
             {
                 "Improve onboarding process for new hires.",

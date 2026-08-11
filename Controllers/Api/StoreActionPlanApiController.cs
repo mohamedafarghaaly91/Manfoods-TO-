@@ -73,11 +73,18 @@ public class StoreActionPlanApiController : ControllerBase
         var periods = await _dashboard.GetAvailablePeriodsAsync();
         if (periods.Count == 0) return Accepted(new { status = "no_periods", message = "No periods found." });
 
+        // GetAvailablePeriodsAsync returns newest-first (correct for UI period
+        // dropdowns, which this call also depends on elsewhere) — but detection's
+        // HealthyStreakCount/LastEvaluatedMonth/auto-resolve logic requires
+        // sequential, chronological (oldest→newest) processing per store. Reorder
+        // the local copy only; do not touch GetAvailablePeriodsAsync itself.
+        var orderedPeriods = periods.OrderBy(p => p.Year).ThenBy(p => p.Month).ToList();
+
         // Fire-and-forget: respond immediately so the browser doesn't time out,
         // then process every period in the background.
         _ = Task.Run(async () =>
         {
-            foreach (var p in periods)
+            foreach (var p in orderedPeriods)
             {
                 try { await _actionPlans.RunDetectionForPeriodAsync(p.Month, p.Year); }
                 catch { /* individual period failure should not stop the rest */ }
