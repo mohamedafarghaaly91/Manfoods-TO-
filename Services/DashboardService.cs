@@ -744,8 +744,7 @@ public class DashboardService : IDashboardService
         var rows = allStores.Select(store =>
         {
             var periodRates = new Dictionary<string, double?>();
-            var pooledResignations = 0;
-            var pooledHeadcounts = new List<int>();
+            var nonNullRates = new List<double>();
 
             foreach (var pk in periodKeys)
             {
@@ -755,8 +754,7 @@ public class DashboardService : IDashboardService
                     var res  = resLookup.TryGetValue(key, out var rc) ? rc : 0;
                     var rate = MetricsCalculationService.RatePercent(res, hc);
                     periodRates[pk] = rate;
-                    pooledResignations += res;
-                    pooledHeadcounts.Add(hc);
+                    nonNullRates.Add(rate);
                 }
                 else
                 {
@@ -770,13 +768,10 @@ public class DashboardService : IDashboardService
                 OperationConsultant = ocByStore.TryGetValue(store, out var ocVal) ? ocVal : "",
                 OperationManager    = omByStore.TryGetValue(store, out var omVal) ? omVal : "",
                 PeriodRates         = periodRates,
-                // Same pooled definition as Store Comparison: SUM(resignations)
-                // / AVERAGE(headcount) across the shown periods — not a mean of
-                // each period's own rate — so the two tables never disagree on
-                // what "this store's average rate" means for the same periods.
-                AvgRate             = pooledHeadcounts.Count > 0
-                                        ? MetricsCalculationService.RatePercent(pooledResignations, pooledHeadcounts.Average())
-                                        : null
+                // Mean of each shown period's own rate, matching the TOTAL
+                // column (sum of the same displayed rates) so AVG = TOTAL /
+                // number of periods with data.
+                AvgRate             = nonNullRates.Count > 0 ? Math.Round(nonNullRates.Average(), 1) : null
             };
         }).ToList();
 
