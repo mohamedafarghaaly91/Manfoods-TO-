@@ -38,4 +38,16 @@ public class StoreReference
 
     [Column("head_manager_email")]
     public string HeadManagerEmail { get; set; } = "";
+
+    [Column("senior_operation_consultant")]
+    public string SeniorOperationConsultant { get; set; } = "";
+
+    [Column("senior_operation_consultant_email")]
+    public string SeniorOperationConsultantEmail { get; set; } = "";
+
+    [Column("operation_director")]
+    public string OperationDirector { get; set; } = "";
+
+    [Column("operation_director_email")]
+    public string OperationDirectorEmail { get; set; } = "";
 }

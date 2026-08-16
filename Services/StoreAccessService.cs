@@ -21,6 +21,8 @@ public class StoreAccessService : IStoreAccessService
         ["Operation_Manager"] = s => s.OperationManagerEmail,
         ["Operation_Consultant"] = s => s.OperationConsultantEmail,
         ["Head_Manager"] = s => s.HeadManagerEmail,
+        ["Senior_Operation_Consultant"] = s => s.SeniorOperationConsultantEmail,
+        ["Operation_Director"] = s => s.OperationDirectorEmail,
     };
 
     public IReadOnlyList<string> RestrictedRoles { get; } = RoleEmailColumns.Keys.ToList();

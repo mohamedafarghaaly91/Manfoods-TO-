@@ -163,6 +163,10 @@ public class UploadService : IUploadService
                 OperationConsultantEmail = Col(row, ws, "Operation Consultant Email", "OperationConsultantEmail", "OC Email", "Consultant Email").Trim().ToLowerInvariant(),
                 HeadManager = Col(row, ws, "Head Manager", "HeadManager", "HM"),
                 HeadManagerEmail = Col(row, ws, "Head Manager Email", "HeadManagerEmail", "HM Email").Trim().ToLowerInvariant(),
+                SeniorOperationConsultant = Col(row, ws, "Senior Operation Consultant", "SeniorOperationConsultant", "Senior OC"),
+                SeniorOperationConsultantEmail = Col(row, ws, "Senior Operation Consultant Email", "SeniorOperationConsultantEmail", "Senior OC Email").Trim().ToLowerInvariant(),
+                OperationDirector = Col(row, ws, "Operation Director", "OperationDirector", "OD"),
+                OperationDirectorEmail = Col(row, ws, "Operation Director Email", "OperationDirectorEmail", "OD Email").Trim().ToLowerInvariant(),
             });
         }
         return records;
@@ -548,7 +552,7 @@ public class UploadService : IUploadService
     {
         using var wb = new XLWorkbook();
         var ws = wb.Worksheets.Add("Store Reference");
-        string[] headers = ["Store Name", "Store Leader", "Operation Consultant", "Operation Manager", "Operation Consultant Email", "Operation Manager Email", "Head Manager", "Head Manager Email"];
+        string[] headers = ["Store Name", "Store Leader", "Operation Consultant", "Operation Manager", "Operation Consultant Email", "Operation Manager Email", "Head Manager", "Head Manager Email", "Senior Operation Consultant", "Senior Operation Consultant Email", "Operation Director", "Operation Director Email"];
         for (int i = 0; i < headers.Length; i++) ws.Cell(1, i + 1).Value = headers[i];
         ws.Row(1).Style.Font.Bold = true;
         for (int r = 0; r < rows.Count; r++)
@@ -562,6 +566,10 @@ public class UploadService : IUploadService
             ws.Cell(row, 6).Value = e.OperationManagerEmail;
             ws.Cell(row, 7).Value = e.HeadManager;
             ws.Cell(row, 8).Value = e.HeadManagerEmail;
+            ws.Cell(row, 9).Value = e.SeniorOperationConsultant;
+            ws.Cell(row, 10).Value = e.SeniorOperationConsultantEmail;
+            ws.Cell(row, 11).Value = e.OperationDirector;
+            ws.Cell(row, 12).Value = e.OperationDirectorEmail;
         }
         ws.Columns().AdjustToContents();
         using var ms = new MemoryStream(); wb.SaveAs(ms); return ms.ToArray();

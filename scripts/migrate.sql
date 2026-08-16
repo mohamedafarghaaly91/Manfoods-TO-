@@ -101,6 +101,10 @@ ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_manager_email TEX
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager TEXT NOT NULL DEFAULT '';
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager_email TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS senior_operation_consultant TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS senior_operation_consultant_email TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_director TEXT NOT NULL DEFAULT '';
+ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_director_email TEXT NOT NULL DEFAULT '';
 
 -- ── exit_interviews ────────────────────────────
 -- One row per Microsoft Forms exit-interview submission. No name / national
