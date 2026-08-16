@@ -19,4 +19,11 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MvcApp.Tests/**/*.cs" />
+    <Content Remove="MvcApp.Tests/**/*" />
+    <EmbeddedResource Remove="MvcApp.Tests/**/*" />
+    <None Remove="MvcApp.Tests/**/*" />
+  </ItemGroup>
+
 </Project>
