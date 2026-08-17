@@ -45,6 +45,8 @@ body.admin-theme {
     --info-bg:       oklch(0.65 0.15 190 / .1);
 
     --header-h:      64px;
+    --global-header-h: 132px;
+    --global-logo-h:   112px;
     --sidebar-w:     260px;
     --radius:        12px;
     --radius-sm:     8px;
@@ -231,29 +233,53 @@ body.admin-theme .upload-drop-icon { color: var(--red); filter: none; }
 body.admin-theme .empty-state { color: var(--text-3); }
 
 /* ══ Sidebar shell (replaces the old fixed topnav) ══════════ */
-.admin-shell { display: flex; min-height: 100vh; }
+.admin-shell { display: flex; flex-direction: column; min-height: 100vh; }
 
+/* ── Global header: full-width white bar, brand text on one side, the
+   McDonald's logo pinned to the physical top-right corner (absolute,
+   not flex order) so it stays right in both LTR and RTL. ── */
+.admin-global-header {
+    position: sticky; top: 0; z-index: 300;
+    height: var(--global-header-h);
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+}
+/* Both pinned with physical (not logical) left/right so the text stays
+   top-left and the logo stays top-right regardless of LTR/RTL. */
+.admin-global-brand {
+    position: absolute; top: 50%; left: 32px; transform: translateY(-50%);
+    display: flex; flex-direction: column; justify-content: center;
+    text-decoration: none;
+}
+.admin-global-brand-main {
+    font-size: 21px; font-weight: 700; color: var(--text);
+    font-family: 'Space Grotesk', sans-serif; letter-spacing: -.01em;
+}
+.admin-global-brand-sub { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+.admin-global-logo {
+    position: absolute; top: 50%; right: 32px; transform: translateY(-50%);
+    display: flex; align-items: center; justify-content: center;
+}
+.admin-global-logo img { height: var(--global-logo-h); width: auto; object-fit: contain; }
+
+.admin-body { display: flex; flex: 1; min-height: 0; gap: 20px; }
+
+/* ── Sidebar: a floating card — gap above (below the header), below
+   (before the viewport edge), and on its outer side — not flush
+   against the header or the bottom of the page. ── */
 .admin-sidebar {
     width: var(--sidebar-w);
     flex-shrink: 0;
     background: var(--nav-bg);
-    border-right: 1px solid var(--nav-border);
+    border: 1px solid var(--nav-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     display: flex; flex-direction: column;
-    position: sticky; top: 0; height: 100vh; z-index: 200;
+    position: sticky; top: calc(var(--global-header-h) + 16px);
+    height: calc(100vh - var(--global-header-h) - 32px);
+    margin-block: 16px; margin-inline-start: 24px;
+    z-index: 200; overflow: hidden;
 }
-.admin-sidebar-brand {
-    display: flex; align-items: center; gap: 10px;
-    padding: 18px 20px; border-bottom: 1px solid var(--nav-border);
-}
-.admin-sidebar-logo {
-    width: 36px; height: 36px; border-radius: var(--radius-sm);
-    background: #fff;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; overflow: hidden;
-}
-.admin-sidebar-logo img { width: 28px; height: 28px; object-fit: contain; }
-.admin-sidebar-brand-main { font-size: 14px; font-weight: 700; color: var(--text); font-family: 'Space Grotesk', sans-serif; }
-.admin-sidebar-brand-sub { font-size: 11px; color: var(--text-3); }
 
 .admin-sidebar-nav { padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; flex: 1; overflow-y: auto; }
 .admin-nav-link {
@@ -299,7 +325,7 @@ body.admin-theme .admin-nav-link {
     height: var(--header-h);
     border-bottom: 1px solid var(--nav-border);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 28px; position: sticky; top: 0; z-index: 90;
+    padding: 0 28px; position: sticky; top: var(--global-header-h); z-index: 90;
     background: var(--bg);
 }
 .admin-topbar-title { font-size: 13.5px; font-weight: 600; color: var(--text-2); }
@@ -311,9 +337,17 @@ body.admin-theme .admin-nav-link {
 .admin-content { padding: 26px 32px 60px; flex: 1; }
 
 @media (max-width: 992px) {
+    body.admin-theme { --global-header-h: 88px; --global-logo-h: 64px; }
+    .admin-global-brand { left: 18px; }
+    .admin-global-brand-main { font-size: 17px; }
+    .admin-global-logo { right: 18px; }
+
     .admin-sidebar {
-        position: fixed; left: 0; top: 0; transform: translateX(-100%);
-        transition: transform .25s ease; box-shadow: var(--shadow-lg);
+        position: fixed; left: 0; top: var(--global-header-h);
+        height: calc(100vh - var(--global-header-h));
+        margin: 0; border-radius: 0; box-shadow: var(--shadow-lg);
+        transform: translateX(-100%);
+        transition: transform .25s ease;
     }
     .admin-sidebar.open { transform: translateX(0); }
     .admin-hamburger { display: flex; }

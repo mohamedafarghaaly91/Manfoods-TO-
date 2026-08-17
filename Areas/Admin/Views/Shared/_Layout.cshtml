@@ -32,16 +32,18 @@
 <script>document.body.setAttribute('data-theme', localStorage.getItem('mf-theme') || 'light');</script>
 
 <div class="admin-shell">
+    <!-- ══ GLOBAL HEADER — full-width, brand left, logo pinned top-right ══ -->
+    <header class="admin-global-header">
+        <a class="admin-global-brand" href="@__areaPrefix/dashboard/turnover" style="text-decoration:none">
+            <div class="admin-global-brand-main">Workforce Intelligence</div>
+            <div class="admin-global-brand-sub">@(userRole == "Admin" ? L["Layout_AdminPortal"] : L["Layout_EmployeePortal"])</div>
+        </a>
+        <div class="admin-global-logo"><img src="/images/mclogo.png" alt="McDonald's"/></div>
+    </header>
+
+    <div class="admin-body">
     <!-- ══ SIDEBAR ════════════════════════════════════════ -->
     <aside class="admin-sidebar" id="adminSidebar">
-        <a class="admin-sidebar-brand" href="@__areaPrefix/dashboard/turnover" style="text-decoration:none">
-            <div class="admin-sidebar-logo"><img src="/images/mclogo.png" alt="WI"/></div>
-            <div>
-                <div class="admin-sidebar-brand-main">Workforce Intelligence</div>
-                <div class="admin-sidebar-brand-sub">@(userRole == "Admin" ? L["Layout_AdminPortal"] : L["Layout_EmployeePortal"])</div>
-            </div>
-        </a>
-
         <nav class="admin-sidebar-nav">
             <a href="@__areaPrefix/dashboard/workforce" class="admin-nav-link @(IsActive("Workforce") ? "active" : "")">
                 <i class="bi bi-people-fill"></i><span>@L["Nav_Workforce"]</span>
@@ -144,6 +146,7 @@
                 @RenderBody()
             </div>
         </main>
+    </div>
     </div>
 </div>
 
