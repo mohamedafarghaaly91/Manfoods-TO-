@@ -45,8 +45,8 @@ body.admin-theme {
     --info-bg:       oklch(0.65 0.15 190 / .1);
 
     --header-h:      64px;
-    --global-header-h: 132px;
-    --global-logo-h:   112px;
+    --global-header-h: 76px;
+    --global-logo-h:   52px;
     --sidebar-w:     260px;
     --radius:        12px;
     --radius-sm:     8px;
@@ -61,6 +61,11 @@ body.admin-theme {
     background: var(--bg);
     color: var(--text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    /* Requested default: the whole portal renders as if the browser were
+       zoomed to 80% — same visual effect as Chrome's page-zoom setting,
+       just baked in so it's the default instead of a per-user tweak. */
+    zoom: 0.8;
 }
 
 body.admin-theme[data-theme="dark"] {
@@ -337,9 +342,9 @@ body.admin-theme .admin-nav-link {
 .admin-content { padding: 26px 32px 60px; flex: 1; }
 
 @media (max-width: 992px) {
-    body.admin-theme { --global-header-h: 88px; --global-logo-h: 64px; }
+    body.admin-theme { --global-header-h: 64px; --global-logo-h: 40px; }
     .admin-global-brand { left: 18px; }
-    .admin-global-brand-main { font-size: 17px; }
+    .admin-global-brand-main { font-size: 16px; }
     .admin-global-logo { right: 18px; }
 
     .admin-sidebar {
