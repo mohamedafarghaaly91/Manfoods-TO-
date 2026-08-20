@@ -245,7 +245,7 @@ public class DashboardController : Controller
         {
             fileName = "Template_Store_Reference.xlsx";
             var ws = wb.AddWorksheet("Store Reference");
-            var headers = new[] { "Store Name", "Store Leader", "Operation Consultant", "Operation Manager", "Operation Consultant Email", "Operation Manager Email", "Head Manager", "Head Manager Email", "Senior Operation Consultant", "Senior Operation Consultant Email", "Operation Director", "Operation Director Email" };
+            var headers = new[] { "Store Name", "Store Leader", "Head Manager", "Head Manager Email", "Operation Consultant", "Operation Consultant Email", "Senior Operation Consultant", "Senior Operation Consultant Email", "Operation Manager", "Operation Manager Email", "Operation Director", "Operation Director Email" };
             for (int i = 0; i < headers.Length; i++)
             {
                 var cell = ws.Cell(1, i + 1);
@@ -256,22 +256,22 @@ public class DashboardController : Controller
                 cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             }
             ws.Cell(2, 1).Value = "Store 1"; ws.Cell(2, 2).Value = "Khaled Ibrahim";
-            ws.Cell(2, 3).Value = "Ahmed Samy"; ws.Cell(2, 4).Value = "Mohamed Nour";
-            ws.Cell(2, 5).Value = "ahmed.samy@manfoods.com"; ws.Cell(2, 6).Value = "mohamed.nour@manfoods.com";
-            ws.Cell(2, 7).Value = "Youssef Adel"; ws.Cell(2, 8).Value = "youssef.adel@manfoods.com";
-            ws.Cell(2, 9).Value = "Karim Fathy"; ws.Cell(2, 10).Value = "karim.fathy@manfoods.com";
+            ws.Cell(2, 3).Value = "Youssef Adel"; ws.Cell(2, 4).Value = "youssef.adel@manfoods.com";
+            ws.Cell(2, 5).Value = "Ahmed Samy"; ws.Cell(2, 6).Value = "ahmed.samy@manfoods.com";
+            ws.Cell(2, 7).Value = "Karim Fathy"; ws.Cell(2, 8).Value = "karim.fathy@manfoods.com";
+            ws.Cell(2, 9).Value = "Mohamed Nour"; ws.Cell(2, 10).Value = "mohamed.nour@manfoods.com";
             ws.Cell(2, 11).Value = "Hany Zaki"; ws.Cell(2, 12).Value = "hany.zaki@manfoods.com";
             ws.Cell(3, 1).Value = "Store 2"; ws.Cell(3, 2).Value = "Sara Hassan";
-            ws.Cell(3, 3).Value = "Mona Ali"; ws.Cell(3, 4).Value = "Mohamed Nour";
-            ws.Cell(3, 5).Value = "mona.ali@manfoods.com"; ws.Cell(3, 6).Value = "mohamed.nour@manfoods.com";
-            ws.Cell(3, 7).Value = "Youssef Adel"; ws.Cell(3, 8).Value = "youssef.adel@manfoods.com";
-            ws.Cell(3, 9).Value = "Karim Fathy"; ws.Cell(3, 10).Value = "karim.fathy@manfoods.com";
+            ws.Cell(3, 3).Value = "Youssef Adel"; ws.Cell(3, 4).Value = "youssef.adel@manfoods.com";
+            ws.Cell(3, 5).Value = "Mona Ali"; ws.Cell(3, 6).Value = "mona.ali@manfoods.com";
+            ws.Cell(3, 7).Value = "Karim Fathy"; ws.Cell(3, 8).Value = "karim.fathy@manfoods.com";
+            ws.Cell(3, 9).Value = "Mohamed Nour"; ws.Cell(3, 10).Value = "mohamed.nour@manfoods.com";
             ws.Cell(3, 11).Value = "Hany Zaki"; ws.Cell(3, 12).Value = "hany.zaki@manfoods.com";
             ws.Cell(4, 1).Value = "Store 3"; ws.Cell(4, 2).Value = "Omar Tarek";
-            ws.Cell(4, 3).Value = "Ahmed Samy"; ws.Cell(4, 4).Value = "Fatma Reda";
-            ws.Cell(4, 5).Value = "ahmed.samy@manfoods.com"; ws.Cell(4, 6).Value = "fatma.reda@manfoods.com";
-            ws.Cell(4, 7).Value = "Youssef Adel"; ws.Cell(4, 8).Value = "youssef.adel@manfoods.com";
-            ws.Cell(4, 9).Value = "Karim Fathy"; ws.Cell(4, 10).Value = "karim.fathy@manfoods.com";
+            ws.Cell(4, 3).Value = "Youssef Adel"; ws.Cell(4, 4).Value = "youssef.adel@manfoods.com";
+            ws.Cell(4, 5).Value = "Ahmed Samy"; ws.Cell(4, 6).Value = "ahmed.samy@manfoods.com";
+            ws.Cell(4, 7).Value = "Karim Fathy"; ws.Cell(4, 8).Value = "karim.fathy@manfoods.com";
+            ws.Cell(4, 9).Value = "Fatma Reda"; ws.Cell(4, 10).Value = "fatma.reda@manfoods.com";
             ws.Cell(4, 11).Value = "Hany Zaki"; ws.Cell(4, 12).Value = "hany.zaki@manfoods.com";
             ws.Columns().AdjustToContents();
         }
