@@ -325,7 +325,7 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="Month" id="dmUpdateMonth"/>
                 <input type="hidden" name="Year" id="dmUpdateYear"/>
-                <input type="hidden" name="FileType" id="dmUpdateFileType" value="active_employees"/>
+                <input type="hidden" name="FileType" id="dmUpdateFileTypeInput" value="active_employees"/>
                 <div class="modal-body px-4 py-3">
                     <p class="text-muted-custom small mb-3">
                         @L["DM_UpdateFileSub"]
@@ -427,7 +427,7 @@ const changeLabel = '@L["DM_ChangeFile"]';
 const dropzoneHint = '@L["DM_DropzoneHint"]';
 
 function dmUpdateFileType(val) {
-    document.getElementById('dmUpdateFileType').value = val;
+    document.getElementById('dmUpdateFileTypeInput').value = val;
     // reset file selection when type changes
     dmUpdateInput.value = '';
     dmUpdateZone.classList.remove('has-file');
@@ -465,7 +465,7 @@ function dmOpenUpdateModal(month, year, periodLabel) {
     document.getElementById('dmUpdatePeriodLabel').textContent = periodLabel;
     // reset form state
     document.getElementById('dmFtActive').checked = true;
-    document.getElementById('dmUpdateFileType').value = 'active_employees';
+    document.getElementById('dmUpdateFileTypeInput').value = 'active_employees';
     dmUpdateInput.value = '';
     dmUpdateZone.classList.remove('has-file');
     dmUpdateZoneHint.innerHTML = dropzoneHint;
