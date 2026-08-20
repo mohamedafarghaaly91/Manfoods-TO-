@@ -376,3 +376,9 @@ body.admin-theme .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(220p
     box-shadow: var(--shadow-sm);
 }
 .reset-filters-btn:hover { color: var(--red); border-color: var(--red); }
+
+/* Bootstrap's .modal-backdrop is sized in raw 100vw/100vh, which — like every
+   other vh/vw use in this file — doesn't rescale with the body's CSS zoom, so
+   it only covers 80% of the screen and leaves the rest unshaded. Compensate
+   it the same way the rest of the shell already does. */
+body.admin-theme .modal-backdrop { width: calc(100vw / var(--portal-zoom)); height: calc(100vh / var(--portal-zoom)); }
