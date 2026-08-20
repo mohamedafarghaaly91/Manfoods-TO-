@@ -97,6 +97,10 @@
                 <div id="scMonthsOptions"></div>
             </div>
         </div>
+
+        <button type="button" class="reset-filters-btn" onclick="scResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
     </div>
 </div>
 
@@ -323,6 +327,14 @@ document.getElementById('scYearSelect').addEventListener('change', async functio
     scBuildMonthsOptions(); scRenderMonthsChips();
     await scLoadAll();
 });
+
+async function scResetFilters() {
+    const yearSel = document.getElementById('scYearSelect');
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
+}
 
 /* Generic searchable single-select combobox ------------------------------ */
 function scCreateCombobox({ inputId, panelId, onSelect }) {

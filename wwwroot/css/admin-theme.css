@@ -367,3 +367,12 @@ body.admin-theme .admin-nav-link {
 }
 
 body.admin-theme .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* ── Shared "Reset Filters" button (used on every filter bar) ───────── */
+.reset-filters-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 42px; padding: 0 16px;
+    background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-3);
+    border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+.reset-filters-btn:hover { color: var(--red); border-color: var(--red); }

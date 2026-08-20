@@ -10,6 +10,9 @@
     <div class="d-flex gap-2 flex-wrap align-items-center">
         <input type="text" id="sapSearch" class="form-control form-control-dark form-control-sm"
                placeholder="&#xF52A; @L["Common_SearchStore"]" style="width:220px;border-radius:20px">
+        <button type="button" class="reset-filters-btn" onclick="sapResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
         @if (string.Equals(__area, "Admin", StringComparison.OrdinalIgnoreCase))
         {
             <button id="sapRunDetectionBtn" type="button" class="btn-primary btn-sm"
@@ -85,6 +88,11 @@ async function sapLoadStores() {
 }
 
 document.getElementById('sapSearch').addEventListener('input', sapRenderCards);
+
+function sapResetFilters() {
+    document.getElementById('sapSearch').value = '';
+    sapRenderCards();
+}
 sapLoadStores();
 
 async function sapRunDetection() {

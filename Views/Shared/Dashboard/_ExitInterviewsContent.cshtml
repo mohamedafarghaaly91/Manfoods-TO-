@@ -106,6 +106,10 @@
             <input type="text" class="ei-combobox-input" id="eiOmInput" placeholder="@L["Common_AllOperationManagers"]" autocomplete="off">
             <div class="ei-combobox-panel" id="eiOmPanel"></div>
         </div>
+
+        <button type="button" class="reset-filters-btn" onclick="eiResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
     </div>
 </div>
 
@@ -325,6 +329,16 @@ document.getElementById('eiYearSelect').addEventListener('change', async functio
     eiBuildMonthsOptions(); eiRenderMonthsChips();
     await eiLoadAll();
 });
+
+async function eiResetFilters() {
+    eiStoreFilter = ''; eiLeaderFilter = ''; eiOcFilter = ''; eiOmFilter = '';
+    eiStoreCombo.setValue(''); eiLeaderCombo.setValue(''); eiOcCombo.setValue(''); eiOmCombo.setValue('');
+    const yearSel = document.getElementById('eiYearSelect');
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
+}
 
 /* Initial filter load ------------------------------------------------------ */
 async function eiLoadFilters() {

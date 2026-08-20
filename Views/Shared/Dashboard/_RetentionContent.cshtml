@@ -107,6 +107,10 @@
             <input type="text" class="rt-combobox-input" id="rtOcInput" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
             <div class="rt-combobox-panel" id="rtOcPanel"></div>
         </div>
+
+        <button type="button" class="reset-filters-btn" onclick="rtResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
     </div>
 </div>
 
@@ -315,6 +319,14 @@ document.getElementById('rtYearSelect').addEventListener('change', async functio
     rtBuildMonthsOptions(); rtRenderMonthsChips();
     await rtLoadAll();
 });
+
+async function rtResetFilters() {
+    const yearSel = document.getElementById('rtYearSelect');
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
+}
 
 /* Initial filter load ------------------------------------------------------ */
 async function rtLoadFilters() {

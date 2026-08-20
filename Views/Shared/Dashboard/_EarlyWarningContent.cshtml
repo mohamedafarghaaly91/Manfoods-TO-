@@ -100,6 +100,10 @@
             <input type="text" class="ew-combobox-input" id="ewStoreInput" placeholder="@L["Common_AllStores"]" autocomplete="off">
             <div class="ew-combobox-panel" id="ewStorePanel"></div>
         </div>
+
+        <button type="button" class="reset-filters-btn" onclick="ewResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
     </div>
 </div>
 
@@ -339,6 +343,16 @@ document.getElementById('ewYearSelect').addEventListener('change', async functio
     ewBuildMonthsOptions(); ewRenderMonthsChips();
     await ewLoadAll();
 });
+
+async function ewResetFilters() {
+    ewStoreFilter = '';
+    ewStoreCombo.setValue('');
+    const yearSel = document.getElementById('ewYearSelect');
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
+}
 
 /* Initial filter load ------------------------------------------------------ */
 async function ewLoadFilters() {

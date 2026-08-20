@@ -243,6 +243,7 @@
   <data name="Common_AllMonths" xml:space="preserve"><value>كل الشهور</value></data>
   <data name="Common_SelectAll" xml:space="preserve"><value>اختيار الكل</value></data>
   <data name="Common_ClearAll" xml:space="preserve"><value>إلغاء التحديد</value></data>
+  <data name="Common_ResetFilters" xml:space="preserve"><value>إعادة تعيين الفلاتر</value></data>
   <data name="Common_Search" xml:space="preserve"><value>بحث…</value></data>
   <data name="Common_MonthsSelected" xml:space="preserve"><value>شهر محدد</value></data>
 

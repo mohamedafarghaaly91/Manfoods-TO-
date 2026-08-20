@@ -158,6 +158,15 @@ async function loadCharts() {
 
 async function loadAll() { await Promise.all([loadKpis(), loadCharts()]); }
 
+async function resetFilters() {
+    storeFilter = ''; omFilter = ''; ocFilter = '';
+    const stSel = document.getElementById('storeSelect'); if (stSel) stSel.value = '';
+    const omSel = document.getElementById('omSelect');    if (omSel) omSel.value = '';
+    const ocSel = document.getElementById('ocSelect');    if (ocSel) ocSel.value = '';
+    const search = document.getElementById('storeCardSearch'); if (search) search.value = '';
+    await loadPeriods();
+}
+
 const periodSel = document.getElementById('periodSelect');
 if (periodSel) {
     periodSel.addEventListener('change', async function() {

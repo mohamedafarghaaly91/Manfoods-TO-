@@ -128,6 +128,10 @@
             <input type="text" class="ntd-combobox-input" id="ntdOcInput" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
             <div class="ntd-combobox-panel" id="ntdOcPanel"></div>
         </div>
+
+        <button type="button" class="reset-filters-btn" onclick="ntdResetFilters()">
+            <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+        </button>
     </div>
 </div>
 
@@ -515,6 +519,17 @@ document.getElementById('ntdYearSelect').addEventListener('change', function () 
     ntdRenderMonthsChips();
     ntdLoadAll();
 });
+
+function ntdResetFilters() {
+    ntdStoreFilter = ''; ntdOmFilter = ''; ntdOcFilter = '';
+    ntdStoreCombo.setValue(''); ntdOmCombo.setValue(''); ntdOcCombo.setValue('');
+    const yearSel = document.getElementById('ntdYearSelect');
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
+    ntdLoadTrendMatrix();
+}
 
 /* Initial filter load ------------------------------------------------------ */
 async function ntdLoadFilters() {

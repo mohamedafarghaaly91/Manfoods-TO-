@@ -90,6 +90,9 @@ else
             <i class="bi bi-funnel-fill" style="color:@rep.IconColor"></i>
             <span class="fw-semibold" style="font-size:14px">Filters</span>
             <span class="text-muted-custom small">— leave a filter empty for "all"</span>
+            <button type="button" class="reset-filters-btn ms-auto" onclick="rdResetFilters()">
+                <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+            </button>
         </div>
         <div class="row g-3 align-items-end">
             @if (rep.UsesPeriod)
@@ -293,6 +296,14 @@ function rdUpdateMonthsMultiselect() {
         `<label class="rd-ms-option"><input type="checkbox" value="${m}" data-label="${RD_MONTH_NAMES[m - 1]}"><span>${RD_MONTH_NAMES[m - 1]}</span></label>`
     ).join('');
     rdMonthsMs.setOptionsHtml(html);
+}
+
+function rdResetFilters() {
+    const yearEl = document.getElementById('rd-year');
+    if (yearEl) { yearEl.selectedIndex = 0; rdUpdateMonths(); }
+    const sinceYearEl = document.getElementById('rd-since-year');
+    if (sinceYearEl) { sinceYearEl.selectedIndex = 0; rdUpdateMonthsMultiselect(); }
+    ['months', 'store', 'om', 'oc'].forEach(p => document.getElementById(`rd-${p}-clearall`)?.click());
 }
 
 function rdDownload() {
