@@ -111,42 +111,6 @@
 </div>
 
 <div id="scContent">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <div class="d-flex align-items-center gap-2">
-            <div class="section-accent"></div>
-            <h5 class="mb-0 fw-bold">@L["SC_Ranking"]</h5>
-        </div>
-        <div class="d-flex gap-2 flex-wrap" role="group">
-            <button class="btn btn-sm sc-dim-btn active" data-dim="leader">@L["SC_StoreLeaders"]</button>
-            <button class="btn btn-sm sc-dim-btn" data-dim="oc">@L["Common_OperationConsultants"]</button>
-            <button class="btn btn-sm sc-dim-btn" data-dim="om">@L["Common_OperationManagers"]</button>
-        </div>
-    </div>
-    <p class="text-muted-custom" style="font-size:13px;margin-top:-8px">@L["SC_RankingSub"]</p>
-
-    <div class="chart-card mb-4 p-0" style="overflow:hidden">
-        <div class="table-responsive" style="max-height:600px;overflow-y:auto">
-            <table class="table table-hover mb-0" style="font-size:13px">
-                <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
-                    <tr>
-                        <th class="px-3 py-2" id="scNameHeader">Store Leader</th>
-                        <th class="px-3 py-2 text-center">@L["Common_StoreName"]</th>
-                        <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
-                        <th class="px-3 py-2 text-center">@L["SC_TurnoverRate"]</th>
-                        <th class="px-3 py-2 text-center">@L["SC_EarlyLeave"]</th>
-                        <th class="px-3 py-2 text-center">@L["SC_180Retention"]</th>
-                        <th class="px-3 py-2 text-center">@L["SC_ExitSentiment"]</th>
-                    </tr>
-                </thead>
-                <tbody id="scBody">
-                    <tr><td colspan="7" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
-                    </td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
         <h5 class="mb-0 fw-bold">@L["SC_TrackLeader"]</h5>
@@ -188,6 +152,42 @@
     </div>
     <div id="scLeaderEmpty" class="text-muted text-center py-4" style="font-size:13px"
          data-no-selection-text="@L["SC_NoLeaderSelected"]" data-empty-text="@L["SC_LeaderHistoryEmpty"]">@L["SC_NoLeaderSelected"]</div>
+
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <div class="section-accent"></div>
+            <h5 class="mb-0 fw-bold">@L["SC_Ranking"]</h5>
+        </div>
+        <div class="d-flex gap-2 flex-wrap" role="group">
+            <button class="btn btn-sm sc-dim-btn active" data-dim="leader">@L["SC_StoreLeaders"]</button>
+            <button class="btn btn-sm sc-dim-btn" data-dim="oc">@L["Common_OperationConsultants"]</button>
+            <button class="btn btn-sm sc-dim-btn" data-dim="om">@L["Common_OperationManagers"]</button>
+        </div>
+    </div>
+    <p class="text-muted-custom" style="font-size:13px;margin-top:-8px">@L["SC_RankingSub"]</p>
+
+    <div class="chart-card mb-4 p-0" style="overflow:hidden">
+        <div class="table-responsive" style="max-height:600px;overflow-y:auto">
+            <table class="table table-hover mb-0" style="font-size:13px">
+                <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                    <tr>
+                        <th class="px-3 py-2" id="scNameHeader">Store Leader</th>
+                        <th class="px-3 py-2 text-center">@L["Common_StoreName"]</th>
+                        <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
+                        <th class="px-3 py-2 text-center">@L["SC_TurnoverRate"]</th>
+                        <th class="px-3 py-2 text-center">@L["SC_EarlyLeave"]</th>
+                        <th class="px-3 py-2 text-center">@L["SC_180Retention"]</th>
+                        <th class="px-3 py-2 text-center">@L["SC_ExitSentiment"]</th>
+                    </tr>
+                </thead>
+                <tbody id="scBody">
+                    <tr><td colspan="7" class="text-center py-4 text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
@@ -345,7 +345,7 @@ function scCreateCombobox({ inputId, panelId, onSelect }) {
 
     function render(filterText) {
         const ft = (filterText || '').toLowerCase();
-        const filtered = options.filter(o => o.toLowerCase().includes(ft));
+        const filtered = options.filter(o => o.toLowerCase().startsWith(ft));
         panel.innerHTML = filtered.map(o => `<div class="sc-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('')
             || '<div class="sc-combo-option text-muted">No matches</div>';
     }
