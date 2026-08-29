@@ -21,7 +21,7 @@ public class DashboardController : Controller
         _reports = reports;
     }
 
-    public IActionResult Index() => RedirectToAction("Turnover");
+    public IActionResult Index() => RedirectToAction("Workforce");
 
     public IActionResult Turnover() => View();
 
