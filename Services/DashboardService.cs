@@ -422,8 +422,10 @@ public class DashboardService : IDashboardService
                     NewHires            = nh,
                     Resignations        = res,
                     TurnoverRate        = MetricsCalculationService.RatePercent(res, h.AvgCount),
-                    OperationConsultant = sr?.OperationConsultant ?? "",
-                    OperationManager    = sr?.OperationManager    ?? ""
+                    OperationConsultant        = sr?.OperationConsultant        ?? "",
+                    OperationManager           = sr?.OperationManager           ?? "",
+                    SeniorOperationConsultant  = sr?.SeniorOperationConsultant  ?? "",
+                    OperationDirector          = sr?.OperationDirector          ?? ""
                 };
             });
 
@@ -462,7 +464,21 @@ public class DashboardService : IDashboardService
             .OrderByDescending(r => r.AvgTurnoverRate)
             .ToList();
 
-        return new OcOmAnalysisResult { OcRows = ocRows, OmRows = omRows };
+        var socRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.SeniorOperationConsultant))
+            .GroupBy(s => s.SeniorOperationConsultant)
+            .Select(g => ToRow(g, "SOC"))
+            .OrderByDescending(r => r.AvgTurnoverRate)
+            .ToList();
+
+        var odRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.OperationDirector))
+            .GroupBy(s => s.OperationDirector)
+            .Select(g => ToRow(g, "OD"))
+            .OrderByDescending(r => r.AvgTurnoverRate)
+            .ToList();
+
+        return new OcOmAnalysisResult { OcRows = ocRows, OmRows = omRows, SocRows = socRows, OdRows = odRows };
     }
 
     public async Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string role, string? assignedName,

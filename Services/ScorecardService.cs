@@ -23,6 +23,8 @@ public class ScorecardService : IScorecardService
         "leader" => s.StoreLeader,
         "oc" => s.OperationConsultant,
         "om" => s.OperationManager,
+        "soc" => s.SeniorOperationConsultant,
+        "od" => s.OperationDirector,
         _ => "",
     };
 
@@ -33,6 +35,8 @@ public class ScorecardService : IScorecardService
         public int TotalResignations;
         public string LatestOc = "";
         public string LatestOm = "";
+        public string LatestSoc = "";
+        public string LatestOd = "";
     }
 
     /// <summary>
@@ -94,6 +98,8 @@ public class ScorecardService : IScorecardService
             agg.TotalResignations += res;
             agg.LatestOc = sr.OperationConsultant;
             agg.LatestOm = sr.OperationManager;
+            agg.LatestSoc = sr.SeniorOperationConsultant;
+            agg.LatestOd = sr.OperationDirector;
         }
         return result;
     }
@@ -284,7 +290,7 @@ public class ScorecardService : IScorecardService
         {
             var avgHeadcount = kv.Value.PeriodHeadcount.Count > 0 ? kv.Value.PeriodHeadcount.Values.Average() : 0;
             var rate = avgHeadcount > 0 ? kv.Value.TotalResignations * 100.0 / avgHeadcount : 0;
-            return (Name: kv.Key, Rate: rate, Oc: kv.Value.LatestOc, Om: kv.Value.LatestOm);
+            return (Name: kv.Key, Rate: rate, Oc: kv.Value.LatestOc, Om: kv.Value.LatestOm, Soc: kv.Value.LatestSoc, Od: kv.Value.LatestOd);
         }).ToList();
 
         var average = leaderRates.Average(l => l.Rate);
@@ -304,10 +310,24 @@ public class ScorecardService : IScorecardService
             .OrderByDescending(r => r.FlaggedPercent)
             .ToList();
 
+        result.BySeniorOperationConsultant = leaderRates
+            .Where(l => !string.IsNullOrWhiteSpace(l.Soc))
+            .GroupBy(l => l.Soc)
+            .Select(g => BuildRollupRow(g.Key, g.ToList(), average))
+            .OrderByDescending(r => r.FlaggedPercent)
+            .ToList();
+
+        result.ByOperationDirector = leaderRates
+            .Where(l => !string.IsNullOrWhiteSpace(l.Od))
+            .GroupBy(l => l.Od)
+            .Select(g => BuildRollupRow(g.Key, g.ToList(), average))
+            .OrderByDescending(r => r.FlaggedPercent)
+            .ToList();
+
         return result;
     }
 
-    private static RollupRow BuildRollupRow(string name, List<(string Name, double Rate, string Oc, string Om)> leaders, double average)
+    private static RollupRow BuildRollupRow(string name, List<(string Name, double Rate, string Oc, string Om, string Soc, string Od)> leaders, double average)
     {
         var flagged = leaders.Count(l => l.Rate > average);
         return new RollupRow

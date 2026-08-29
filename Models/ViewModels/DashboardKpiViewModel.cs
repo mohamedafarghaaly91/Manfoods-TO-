@@ -36,6 +36,8 @@ public class StoreComparisonRow
     public string StoreName { get; set; } = "";
     public string OperationConsultant { get; set; } = "";
     public string OperationManager { get; set; } = "";
+    public string SeniorOperationConsultant { get; set; } = "";
+    public string OperationDirector { get; set; } = "";
     public int Headcount { get; set; }
     public int NewHires { get; set; }
     public int Resignations { get; set; }
@@ -56,6 +58,8 @@ public class OcOmAnalysisResult
 {
     public List<OcOmRow> OcRows { get; set; } = new();
     public List<OcOmRow> OmRows { get; set; } = new();
+    public List<OcOmRow> SocRows { get; set; } = new();
+    public List<OcOmRow> OdRows { get; set; } = new();
 }
 
 public class SmartInsightItem

@@ -323,6 +323,66 @@
             </div>
         </div>
     </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card p-0 h-100" style="overflow:hidden">
+                <div class="chart-header d-flex align-items-center gap-2">
+                    <i class="bi bi-person-vcard" style="color:oklch(0.55 0.2 300);font-size:16px"></i>
+                    <div>
+                        <h6 class="mb-0">Senior Operation Consultants</h6>
+                        <p class="mb-0">Ranked by average 90-day rate</p>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Hires</th>
+                                <th class="px-3 py-2 text-center">Early Leavers</th>
+                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ntdSocTableBody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card p-0 h-100" style="overflow:hidden">
+                <div class="chart-header d-flex align-items-center gap-2">
+                    <i class="bi bi-person-workspace" style="color:oklch(0.5 0.18 250);font-size:16px"></i>
+                    <div>
+                        <h6 class="mb-0">Operation Directors</h6>
+                        <p class="mb-0">Ranked by average 90-day rate</p>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Hires</th>
+                                <th class="px-3 py-2 text-center">Early Leavers</th>
+                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ntdOdTableBody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ── Full Data Table (90-Day Trend Matrix) — one row per store, one column
          per hire-cohort month, showing the 90-day early-leave rate ── -->
@@ -851,10 +911,15 @@ function ntdRenderOcOmTable(tbodyId, rows) {
 }
 
 async function ntdLoadOcOmAnalysis() {
-    if (!ntdMonths.length) { ntdRenderOcOmTable('ntdOcTableBody', []); ntdRenderOcOmTable('ntdOmTableBody', []); return; }
-    const data = await ntdFetch('oc-om-analysis') || { ocRows: [], omRows: [] };
+    if (!ntdMonths.length) {
+        ['ntdOcTableBody', 'ntdOmTableBody', 'ntdSocTableBody', 'ntdOdTableBody'].forEach(id => ntdRenderOcOmTable(id, []));
+        return;
+    }
+    const data = await ntdFetch('oc-om-analysis') || { ocRows: [], omRows: [], socRows: [], odRows: [] };
     ntdRenderOcOmTable('ntdOcTableBody', data.ocRows);
     ntdRenderOcOmTable('ntdOmTableBody', data.omRows);
+    ntdRenderOcOmTable('ntdSocTableBody', data.socRows);
+    ntdRenderOcOmTable('ntdOdTableBody', data.odRows);
 }
 
 /* Smart Insights ---------------------------------------------------------- */

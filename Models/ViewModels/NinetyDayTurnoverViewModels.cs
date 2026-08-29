@@ -37,6 +37,8 @@ public class NinetyDayStoreRow
     public string StoreName { get; set; } = "";
     public string OperationConsultant { get; set; } = "";
     public string OperationManager { get; set; } = "";
+    public string SeniorOperationConsultant { get; set; } = "";
+    public string OperationDirector { get; set; } = "";
     public int TotalHires { get; set; }
     public int EarlyLeavers { get; set; }
     public double Rate { get; set; }
@@ -56,4 +58,6 @@ public class NinetyDayOcOmAnalysisResult
 {
     public List<NinetyDayOcOmRow> OcRows { get; set; } = new();
     public List<NinetyDayOcOmRow> OmRows { get; set; } = new();
+    public List<NinetyDayOcOmRow> SocRows { get; set; } = new();
+    public List<NinetyDayOcOmRow> OdRows { get; set; } = new();
 }

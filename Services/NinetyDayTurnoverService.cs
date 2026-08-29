@@ -243,12 +243,14 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             latestRefByStore.TryGetValue(store, out var sr);
             rows.Add(new NinetyDayStoreRow
             {
-                StoreName           = store,
-                OperationConsultant = sr?.OperationConsultant ?? "",
-                OperationManager    = sr?.OperationManager ?? "",
-                TotalHires          = kpi.TotalHires,
-                EarlyLeavers        = kpi.EarlyLeavers,
-                Rate                = kpi.Rate,
+                StoreName                  = store,
+                OperationConsultant        = sr?.OperationConsultant ?? "",
+                OperationManager           = sr?.OperationManager ?? "",
+                SeniorOperationConsultant  = sr?.SeniorOperationConsultant ?? "",
+                OperationDirector          = sr?.OperationDirector ?? "",
+                TotalHires                 = kpi.TotalHires,
+                EarlyLeavers               = kpi.EarlyLeavers,
+                Rate                       = kpi.Rate,
             });
         }
         return rows.OrderByDescending(r => r.Rate).ToList();
@@ -283,7 +285,21 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .OrderByDescending(r => r.AvgRate)
             .ToList();
 
-        return new NinetyDayOcOmAnalysisResult { OcRows = ocRows, OmRows = omRows };
+        var socRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.SeniorOperationConsultant))
+            .GroupBy(s => s.SeniorOperationConsultant)
+            .Select(g => ToRow(g, "SOC"))
+            .OrderByDescending(r => r.AvgRate)
+            .ToList();
+
+        var odRows = stores
+            .Where(s => !string.IsNullOrEmpty(s.OperationDirector))
+            .GroupBy(s => s.OperationDirector)
+            .Select(g => ToRow(g, "OD"))
+            .OrderByDescending(r => r.AvgRate)
+            .ToList();
+
+        return new NinetyDayOcOmAnalysisResult { OcRows = ocRows, OmRows = omRows, SocRows = socRows, OdRows = odRows };
     }
 
     public async Task<List<EarlyLeaverRow>> GetEarlyLeaversAsync(int month, int year, string? store, string role, string? assignedName,

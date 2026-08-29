@@ -166,6 +166,58 @@
         </div>
     </div>
 </div>
+<div class="row g-3 mt-1">
+    <div class="col-lg-6">
+        <div class="chart-card p-0 h-100" style="overflow:hidden">
+            <div class="chart-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-vcard" style="color:oklch(0.55 0.2 300);font-size:16px"></i>
+                <div><h6 class="mb-0">Senior Operation Consultants</h6><p class="mb-0">Headcount &amp; turnover by senior consultant</p></div>
+            </div>
+            <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                    <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                        <tr>
+                            <th class="px-3 py-2">Name</th>
+                            <th class="px-3 py-2 text-center">Stores</th>
+                            <th class="px-3 py-2 text-center">Headcount</th>
+                            <th class="px-3 py-2 text-center">Turnover%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="socTableBody">
+                        <tr><td colspan="4" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="chart-card p-0 h-100" style="overflow:hidden">
+            <div class="chart-header d-flex align-items-center gap-2">
+                <i class="bi bi-person-workspace" style="color:oklch(0.5 0.18 250);font-size:16px"></i>
+                <div><h6 class="mb-0">Operation Directors</h6><p class="mb-0">Headcount &amp; turnover by director</p></div>
+            </div>
+            <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                    <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                        <tr>
+                            <th class="px-3 py-2">Name</th>
+                            <th class="px-3 py-2 text-center">Stores</th>
+                            <th class="px-3 py-2 text-center">Headcount</th>
+                            <th class="px-3 py-2 text-center">Turnover%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="odTableBody">
+                        <tr><td colspan="4" class="text-center py-3 text-muted">
+                            <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
@@ -306,6 +358,8 @@ async function wfLoadOcOm() {
     const data = await fetchJson(`/api/dashboard/oc-om-analysis?${buildQuery()}`);
     wfRenderOcOmTable('ocTableBody', data.ocRows);
     wfRenderOcOmTable('omTableBody', data.omRows);
+    wfRenderOcOmTable('socTableBody', data.socRows);
+    wfRenderOcOmTable('odTableBody', data.odRows);
 }
 
 /* Uses dashboard.js's shared #periodSelect/#fromPeriodSelect/#storeSelect/

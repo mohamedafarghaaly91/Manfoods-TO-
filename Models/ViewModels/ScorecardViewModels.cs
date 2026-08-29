@@ -37,4 +37,6 @@ public class ScorecardRollupResult
     public double AverageTurnoverRate { get; set; }
     public List<RollupRow> ByOperationConsultant { get; set; } = new();
     public List<RollupRow> ByOperationManager { get; set; } = new();
+    public List<RollupRow> BySeniorOperationConsultant { get; set; } = new();
+    public List<RollupRow> ByOperationDirector { get; set; } = new();
 }
