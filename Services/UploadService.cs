@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MvcApp.Data;
@@ -15,18 +16,24 @@ public class UploadService : IUploadService
     private readonly IStoreAccessService _storeAccess;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IBackgroundJobTracker _jobTracker;
+    private readonly IMemoryCache _cache;
     private readonly ILogger<UploadService> _logger;
 
     private static readonly HashSet<string> PeriodFileTypes = new() { "active_employees", "resignations", "store_reference" };
 
-    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, IBackgroundJobTracker jobTracker, ILogger<UploadService> logger)
+    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, IBackgroundJobTracker jobTracker, IMemoryCache cache, ILogger<UploadService> logger)
     {
         _db = db;
         _storeAccess = storeAccess;
         _scopeFactory = scopeFactory;
         _jobTracker = jobTracker;
+        _cache = cache;
         _logger = logger;
     }
+
+    // ActiveEmployees/Resignations changed — the Scorecard historical-records
+    // cache (ScorecardService.LoadHistoricalRecordsAsync) is now stale.
+    private void InvalidateScorecardHistoricalCache() => _cache.Remove(ScorecardService.HistoricalRecordsCacheKey);
 
     // Runs detection in its own DI scope on a background task instead of on the
     // request thread: the request-scoped DbContext/services would be disposed as
@@ -242,6 +249,7 @@ public class UploadService : IUploadService
 
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
+        InvalidateScorecardHistoricalCache();
 
         FireAndForgetDetection(month, year, $"Monthly Data — {new DateTime(year, month, 1):MMMM yyyy}");
 
@@ -677,6 +685,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "active_employees", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+                InvalidateScorecardHistoricalCache();
                 FireAndForgetDetection(month, year, $"Active Employees — {new DateTime(year, month, 1):MMMM yyyy}");
                 return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.");
 
@@ -688,6 +697,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "resignations", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
+                InvalidateScorecardHistoricalCache();
                 FireAndForgetDetection(month, year, $"Resignations — {new DateTime(year, month, 1):MMMM yyyy}");
                 return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.");
 
@@ -721,6 +731,7 @@ public class UploadService : IUploadService
             await _db.Resignations.Where(r => r.Month == log.Month && r.Year == log.Year).ExecuteDeleteAsync();
             await _db.StoreReferences.Where(s => s.Month == log.Month && s.Year == log.Year).ExecuteDeleteAsync();
             await _db.UploadLogs.Where(l => PeriodFileTypes.Contains(l.FileType) && l.Month == log.Month && l.Year == log.Year).ExecuteDeleteAsync();
+            InvalidateScorecardHistoricalCache();
             return;
         }
 

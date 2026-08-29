@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
@@ -7,15 +8,22 @@ namespace MvcApp.Services;
 
 public class ScorecardService : IScorecardService
 {
+    // Shared with UploadService, which invalidates this key whenever it writes
+    // to ActiveEmployees or Resignations (upload, single-file update, delete) —
+    // so a fresh Excel import is reflected immediately with no stale window.
+    public const string HistoricalRecordsCacheKey = "scorecard:historical-records";
+
     private readonly AppDbContext _db;
     private readonly IExitInterviewService _exitInterviews;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IMemoryCache _cache;
 
-    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess)
+    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess, IMemoryCache cache)
     {
         _db = db;
         _exitInterviews = exitInterviews;
         _storeAccess = storeAccess;
+        _cache = cache;
     }
 
     private static string Pick(StoreReference s, string dimension) => dimension switch
@@ -118,6 +126,14 @@ public class ScorecardService : IScorecardService
 
     private async Task<List<HistoricalRecord>> LoadHistoricalRecordsAsync()
     {
+        // This query has no parameters — it returns the same rows regardless of
+        // dimension/year/months (those are applied afterward by the caller) — so
+        // it's cached whole rather than re-read from Postgres on every Scorecard
+        // interaction (dimension click, year/month change). See UploadService for
+        // the write-side invalidation of HistoricalRecordsCacheKey.
+        if (_cache.TryGetValue(HistoricalRecordsCacheKey, out List<HistoricalRecord>? cached) && cached != null)
+            return cached;
+
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
             .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
@@ -150,7 +166,9 @@ public class ScorecardService : IScorecardService
                 HireDateKey = r.HireDate!.Value.Year * 100 + r.HireDate!.Value.Month,
             };
         }
-        return byEmployee.Values.ToList();
+        var records = byEmployee.Values.ToList();
+        _cache.Set(HistoricalRecordsCacheKey, records, TimeSpan.FromHours(6));
+        return records;
     }
 
     public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
