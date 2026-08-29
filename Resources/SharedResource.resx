@@ -139,6 +139,11 @@
   <data name="DM_UpdateFileType" xml:space="preserve"><value>Which file do you want to update?</value></data>
   <data name="DM_UpdateFileSubmit" xml:space="preserve"><value>Upload Updated File</value></data>
   <data name="DM_Uploading" xml:space="preserve"><value>Uploading...</value></data>
+  <data name="DM_BackgroundJobs" xml:space="preserve"><value>Background Jobs</value></data>
+  <data name="DM_NoJobs" xml:space="preserve"><value>No background jobs yet.</value></data>
+  <data name="DM_JobRunning" xml:space="preserve"><value>Running</value></data>
+  <data name="DM_JobSucceeded" xml:space="preserve"><value>Succeeded</value></data>
+  <data name="DM_JobFailed" xml:space="preserve"><value>Failed</value></data>
   <data name="DM_UpdateFileConfirm" xml:space="preserve"><value>Update file for</value></data>
   <data name="DM_DeleteConfirmPeriod" xml:space="preserve"><value>Delete this month's data? This removes all three files (Active Employees, Resignations, Store Reference) and their data from the database.</value></data>
   <data name="DM_DeleteConfirmExit" xml:space="preserve"><value>Delete this exit-interview upload log? (The responses themselves stay in the system.)</value></data>

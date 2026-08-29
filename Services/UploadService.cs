@@ -14,15 +14,17 @@ public class UploadService : IUploadService
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly IBackgroundJobTracker _jobTracker;
     private readonly ILogger<UploadService> _logger;
 
     private static readonly HashSet<string> PeriodFileTypes = new() { "active_employees", "resignations", "store_reference" };
 
-    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, ILogger<UploadService> logger)
+    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, IBackgroundJobTracker jobTracker, ILogger<UploadService> logger)
     {
         _db = db;
         _storeAccess = storeAccess;
         _scopeFactory = scopeFactory;
+        _jobTracker = jobTracker;
         _logger = logger;
     }
 
@@ -31,8 +33,11 @@ public class UploadService : IUploadService
     // soon as the HTTP response is sent, and detection loops over every store for
     // the period (slow for large datasets) — keeping it inline made uploads look
     // stuck/unresponsive and let a detection failure masquerade as an upload failure.
-    private void FireAndForgetDetection(int month, int year)
+    // The job is registered with the tracker so the admin UI can poll its
+    // running/succeeded/failed status.
+    private void FireAndForgetDetection(int month, int year, string label)
     {
+        var jobId = _jobTracker.Start(label);
         _ = Task.Run(async () =>
         {
             try
@@ -40,10 +45,12 @@ public class UploadService : IUploadService
                 using var scope = _scopeFactory.CreateScope();
                 var actionPlans = scope.ServiceProvider.GetRequiredService<IStoreActionPlanService>();
                 await actionPlans.RunDetectionForPeriodAsync(month, year);
+                _jobTracker.Succeed(jobId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Action plan detection failed for period {Month}/{Year}", month, year);
+                _jobTracker.Fail(jobId, ex.Message);
             }
         });
     }
@@ -236,7 +243,7 @@ public class UploadService : IUploadService
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
 
-        FireAndForgetDetection(month, year);
+        FireAndForgetDetection(month, year, $"Monthly Data — {new DateTime(year, month, 1):MMMM yyyy}");
 
         var counts = new Dictionary<string, int>
         {
@@ -670,7 +677,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "active_employees", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                FireAndForgetDetection(month, year);
+                FireAndForgetDetection(month, year, $"Active Employees — {new DateTime(year, month, 1):MMMM yyyy}");
                 return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.");
 
             case "resignations":
@@ -681,7 +688,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "resignations", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                FireAndForgetDetection(month, year);
+                FireAndForgetDetection(month, year, $"Resignations — {new DateTime(year, month, 1):MMMM yyyy}");
                 return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.");
 
             case "store_reference":
@@ -692,7 +699,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "store_reference", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                FireAndForgetDetection(month, year);
+                FireAndForgetDetection(month, year, $"Store Reference — {new DateTime(year, month, 1):MMMM yyyy}");
                 return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.");
 
             default:

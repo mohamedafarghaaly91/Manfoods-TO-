@@ -111,6 +111,34 @@
 .page-link-dm { background:var(--card-bg); border-color:var(--card-border); color:var(--text-2); border-radius:6px !important; }
 .page-link-dm:hover { background:var(--bg-2); color:var(--text); }
 .page-item.active .page-link-dm { background:oklch(0.5 0.18 25); border-color:oklch(0.5 0.18 25); color:#fff; }
+
+/* Background-jobs status panel */
+.dm-jobs-wrap { position:relative; }
+.dm-jobs-btn {
+    position:relative; display:inline-flex; align-items:center; gap:6px;
+    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text-2);
+    border-radius:8px; font-size:12px; font-weight:600; padding:7px 13px; cursor:pointer;
+}
+.dm-jobs-btn:hover { border-color:oklch(0.55 0.19 250); color:oklch(0.48 0.18 250); }
+.dm-jobs-btn .dm-jobs-dot {
+    width:7px; height:7px; border-radius:50%; background:oklch(0.75 0.16 75);
+    animation:dmPulse 1.4s ease-in-out infinite;
+}
+@@keyframes dmPulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+.dm-jobs-panel {
+    position:absolute; top:calc(100% + 8px); right:0; width:320px; max-height:380px; overflow-y:auto;
+    background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-sm);
+    box-shadow:var(--shadow-md, 0 8px 24px rgba(0,0,0,.15)); z-index:50;
+}
+[dir="rtl"] .dm-jobs-panel { right:auto; left:0; }
+.dm-jobs-panel-header { font-size:12.5px; font-weight:700; color:var(--text); padding:10px 14px; border-bottom:1px solid var(--card-border); }
+.dm-jobs-empty { padding:20px 14px; text-align:center; font-size:12.5px; color:var(--text-3); }
+.dm-jobs-item { display:flex; gap:10px; padding:10px 14px; border-bottom:1px solid var(--card-border); }
+.dm-jobs-item:last-child { border-bottom:none; }
+.dm-jobs-item-icon { font-size:15px; margin-top:1px; flex-shrink:0; }
+.dm-jobs-item-label { font-size:12.5px; font-weight:600; color:var(--text); }
+.dm-jobs-item-meta { font-size:11px; color:var(--text-3); margin-top:2px; }
+.dm-jobs-item-error { font-size:11px; color:oklch(0.55 0.2 22); margin-top:3px; word-break:break-word; }
 </style>
 
 <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -118,11 +146,21 @@
         <h1 class="page-title">@L["Page_DataManagement"]</h1>
         <p class="page-subtitle">@L["Page_DataManagementSub"]</p>
     </div>
-    <div class="d-flex flex-wrap gap-2">
+    <div class="d-flex flex-wrap gap-2 align-items-start">
         <a href="/admin/dashboard/download-template?type=active_employees" class="dm-template-btn"><i class="bi bi-file-earmark-arrow-down"></i>@L["UL_TemplateActiveEmployees"]</a>
         <a href="/admin/dashboard/download-template?type=resignations" class="dm-template-btn"><i class="bi bi-file-earmark-arrow-down"></i>@L["UL_TemplateResignations"]</a>
         <a href="/admin/dashboard/download-template?type=store_reference" class="dm-template-btn"><i class="bi bi-file-earmark-arrow-down"></i>@L["UL_TemplateStoreRef"]</a>
         <a href="/admin/dashboard/download-template?type=exit_interviews" class="dm-template-btn"><i class="bi bi-file-earmark-arrow-down"></i>@L["UL_SampleExitInterviews"]</a>
+        <div class="dm-jobs-wrap">
+            <button type="button" class="dm-jobs-btn" id="dmJobsBtn" onclick="dmToggleJobsPanel()">
+                <i class="bi bi-activity"></i>@L["DM_BackgroundJobs"]
+                <span class="dm-jobs-dot" id="dmJobsDot" hidden></span>
+            </button>
+            <div class="dm-jobs-panel" id="dmJobsPanel" hidden>
+                <div class="dm-jobs-panel-header">@L["DM_BackgroundJobs"]</div>
+                <div id="dmJobsList"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -471,6 +509,70 @@ function dmLockSubmit(form, btn, busyLabel) {
 dmLockSubmit(document.getElementById('dmPeriodForm'), document.querySelector('#dmPeriodForm .dm-btn-submit'), '@L["DM_Uploading"]');
 dmLockSubmit(document.getElementById('dmExitForm'), document.querySelector('#dmExitForm .dm-btn-submit'), '@L["DM_Uploading"]');
 dmLockSubmit(document.getElementById('dmUpdateForm'), dmUpdateSubmitBtn, '@L["DM_Uploading"]');
+
+/* ── Background-jobs status panel ───────────────────── */
+const dmJobLabels = { Running: '@L["DM_JobRunning"]', Succeeded: '@L["DM_JobSucceeded"]', Failed: '@L["DM_JobFailed"]' };
+const dmJobIcons = {
+    Running: '<span class="spinner-border spinner-border-sm" style="color:oklch(0.75 0.16 75)"></span>',
+    Succeeded: '<i class="bi bi-check-circle-fill" style="color:oklch(0.62 0.15 155)"></i>',
+    Failed: '<i class="bi bi-x-circle-fill" style="color:oklch(0.55 0.2 22)"></i>'
+};
+
+function dmEsc(s) {
+    const d = document.createElement('div');
+    d.textContent = s ?? '';
+    return d.innerHTML;
+}
+
+function dmRelativeTime(iso) {
+    const diffSec = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+    if (diffSec < 60) return Math.max(1, Math.floor(diffSec)) + 's';
+    if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm';
+    return Math.floor(diffSec / 3600) + 'h';
+}
+
+async function dmFetchJobs() {
+    let jobs;
+    try {
+        const res = await fetch('/admin/dashboard/background-jobs');
+        if (!res.ok) return;
+        jobs = await res.json();
+    } catch { return; }
+
+    const runningCount = jobs.filter(j => j.status === 'Running').length;
+    document.getElementById('dmJobsDot').hidden = runningCount === 0;
+
+    const list = document.getElementById('dmJobsList');
+    if (jobs.length === 0) {
+        list.innerHTML = `<div class="dm-jobs-empty">@L["DM_NoJobs"]</div>`;
+        return;
+    }
+    list.innerHTML = jobs.map(j => `
+        <div class="dm-jobs-item">
+            <div class="dm-jobs-item-icon">${dmJobIcons[j.status] || ''}</div>
+            <div>
+                <div class="dm-jobs-item-label">${dmEsc(j.label)}</div>
+                <div class="dm-jobs-item-meta">${dmJobLabels[j.status] || j.status} · ${dmRelativeTime(j.startedAt)}</div>
+                ${j.status === 'Failed' && j.errorMessage ? `<div class="dm-jobs-item-error">${dmEsc(j.errorMessage)}</div>` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function dmToggleJobsPanel() {
+    const panel = document.getElementById('dmJobsPanel');
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) dmFetchJobs();
+}
+
+document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.dm-jobs-wrap');
+    const panel = document.getElementById('dmJobsPanel');
+    if (wrap && !panel.hidden && !wrap.contains(e.target)) panel.hidden = true;
+});
+
+dmFetchJobs();
+setInterval(dmFetchJobs, 4000);
 
 function dmOpenUpdateModal(month, year, periodLabel) {
     document.getElementById('dmUpdateMonth').value = month;

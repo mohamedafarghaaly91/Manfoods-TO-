@@ -16,9 +16,10 @@ public class DashboardController : Controller
     private readonly IStoreService _stores;
     private readonly IOtpService _otp;
     private readonly IReportService _reports;
+    private readonly IBackgroundJobTracker _jobTracker;
     private readonly ILogger<DashboardController> _logger;
 
-    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports, ILogger<DashboardController> logger)
+    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports, IBackgroundJobTracker jobTracker, ILogger<DashboardController> logger)
     {
         _uploads = uploads;
         _users = users;
@@ -26,8 +27,12 @@ public class DashboardController : Controller
         _stores = stores;
         _otp = otp;
         _reports = reports;
+        _jobTracker = jobTracker;
         _logger = logger;
     }
+
+    [HttpGet("admin/dashboard/background-jobs")]
+    public IActionResult BackgroundJobs() => Json(_jobTracker.GetRecent(20));
 
     public IActionResult Turnover() => View();
 

@@ -139,6 +139,11 @@
   <data name="DM_UpdateFileType" xml:space="preserve"><value>إيه الملف اللي عايز تحدثه؟</value></data>
   <data name="DM_UpdateFileSubmit" xml:space="preserve"><value>رفع الملف المحدّث</value></data>
   <data name="DM_Uploading" xml:space="preserve"><value>جاري الرفع...</value></data>
+  <data name="DM_BackgroundJobs" xml:space="preserve"><value>عمليات في الخلفية</value></data>
+  <data name="DM_NoJobs" xml:space="preserve"><value>لا توجد عمليات حتى الآن.</value></data>
+  <data name="DM_JobRunning" xml:space="preserve"><value>جارية</value></data>
+  <data name="DM_JobSucceeded" xml:space="preserve"><value>نجحت</value></data>
+  <data name="DM_JobFailed" xml:space="preserve"><value>فشلت</value></data>
   <data name="DM_UpdateFileConfirm" xml:space="preserve"><value>تحديث ملف لشهر</value></data>
   <data name="DM_DeleteConfirmPeriod" xml:space="preserve"><value>حذف بيانات الشهر ده؟ ده هيمسح الثلاث ملفات (الأكتيف ليست، الاستقالات، مرجع الفروع) وبياناتهم من الداتا بيز.</value></data>
   <data name="DM_DeleteConfirmExit" xml:space="preserve"><value>حذف سجل رفع مقابلات الخروج ده؟ (الردود نفسها هتفضل موجودة في النظام)</value></data>
