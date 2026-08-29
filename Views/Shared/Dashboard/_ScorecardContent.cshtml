@@ -362,7 +362,7 @@ function scCreateCombobox({ inputId, panelId, onSelect }) {
         onSelect(value);
     });
     input.addEventListener('focus', open);
-    input.addEventListener('input', () => render(input.value));
+    input.addEventListener('input', open);
     input.addEventListener('blur', () => setTimeout(close, 150));
 
     return { setOptions(list) { options = list || []; }, setValue(v) { value = v || ''; input.value = value; } };
