@@ -1,6 +1,8 @@
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
@@ -11,15 +13,39 @@ public class UploadService : IUploadService
 {
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
-    private readonly IStoreActionPlanService _actionPlans;
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<UploadService> _logger;
 
     private static readonly HashSet<string> PeriodFileTypes = new() { "active_employees", "resignations", "store_reference" };
 
-    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IStoreActionPlanService actionPlans)
+    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, ILogger<UploadService> logger)
     {
         _db = db;
         _storeAccess = storeAccess;
-        _actionPlans = actionPlans;
+        _scopeFactory = scopeFactory;
+        _logger = logger;
+    }
+
+    // Runs detection in its own DI scope on a background task instead of on the
+    // request thread: the request-scoped DbContext/services would be disposed as
+    // soon as the HTTP response is sent, and detection loops over every store for
+    // the period (slow for large datasets) — keeping it inline made uploads look
+    // stuck/unresponsive and let a detection failure masquerade as an upload failure.
+    private void FireAndForgetDetection(int month, int year)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var actionPlans = scope.ServiceProvider.GetRequiredService<IStoreActionPlanService>();
+                await actionPlans.RunDetectionForPeriodAsync(month, year);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Action plan detection failed for period {Month}/{Year}", month, year);
+            }
+        });
     }
 
     private static string Norm(IXLCell cell) => cell.GetString().Trim();
@@ -210,9 +236,7 @@ public class UploadService : IUploadService
         await _db.SaveChangesAsync();
         await tx.CommitAsync();
 
-        // Runs after commit, outside the upload's own transaction, so a plan
-        // creation/evaluation failure here can't roll back an otherwise-good upload.
-        await _actionPlans.RunDetectionForPeriodAsync(month, year);
+        FireAndForgetDetection(month, year);
 
         var counts = new Dictionary<string, int>
         {
@@ -646,7 +670,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "active_employees", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                await _actionPlans.RunDetectionForPeriodAsync(month, year);
+                FireAndForgetDetection(month, year);
                 return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.");
 
             case "resignations":
@@ -657,7 +681,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "resignations", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                await _actionPlans.RunDetectionForPeriodAsync(month, year);
+                FireAndForgetDetection(month, year);
                 return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.");
 
             case "store_reference":
@@ -668,7 +692,7 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "store_reference", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                await _actionPlans.RunDetectionForPeriodAsync(month, year);
+                FireAndForgetDetection(month, year);
                 return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.");
 
             default:

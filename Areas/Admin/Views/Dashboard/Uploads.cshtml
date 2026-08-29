@@ -196,7 +196,7 @@
         <i class="bi bi-info-circle-fill"></i>
         <span>@L["UL_ExitInterviewsNote"]</span>
     </div>
-    <form asp-area="Admin" asp-controller="Dashboard" asp-action="UploadExitInterviews" method="post" enctype="multipart/form-data" data-change-label="@L["DM_ChangeFile"]">
+    <form id="dmExitForm" asp-area="Admin" asp-controller="Dashboard" asp-action="UploadExitInterviews" method="post" enctype="multipart/form-data" data-change-label="@L["DM_ChangeFile"]">
         @Html.AntiForgeryToken()
         <div class="dm-dropzone-grid" style="grid-template-columns:1fr;max-width:360px">
             <div class="dm-dropzone" id="dmZoneExit" data-title="@L["UL_ExitInterviews"]">
@@ -458,6 +458,19 @@ dmUpdateZone.addEventListener('drop', (e) => {
         dmRenderUpdateFile();
     }
 });
+
+/* Lock a submit button on click so a slow request can't look "stuck" and
+   invite a manual page refresh mid-upload (which then races the in-flight POST). */
+function dmLockSubmit(form, btn, busyLabel) {
+    form.addEventListener('submit', function (e) {
+        if (e.defaultPrevented || btn.disabled) return;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>${busyLabel}`;
+    });
+}
+dmLockSubmit(document.getElementById('dmPeriodForm'), document.querySelector('#dmPeriodForm .dm-btn-submit'), '@L["DM_Uploading"]');
+dmLockSubmit(document.getElementById('dmExitForm'), document.querySelector('#dmExitForm .dm-btn-submit'), '@L["DM_Uploading"]');
+dmLockSubmit(document.getElementById('dmUpdateForm'), dmUpdateSubmitBtn, '@L["DM_Uploading"]');
 
 function dmOpenUpdateModal(month, year, periodLabel) {
     document.getElementById('dmUpdateMonth').value = month;

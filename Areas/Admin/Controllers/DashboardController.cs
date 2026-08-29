@@ -16,8 +16,9 @@ public class DashboardController : Controller
     private readonly IStoreService _stores;
     private readonly IOtpService _otp;
     private readonly IReportService _reports;
+    private readonly ILogger<DashboardController> _logger;
 
-    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports)
+    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports, ILogger<DashboardController> logger)
     {
         _uploads = uploads;
         _users = users;
@@ -25,6 +26,7 @@ public class DashboardController : Controller
         _stores = stores;
         _otp = otp;
         _reports = reports;
+        _logger = logger;
     }
 
     public IActionResult Turnover() => View();
@@ -150,7 +152,7 @@ public class DashboardController : Controller
             var (_, msg, _) = await _uploads.UploadPeriodDataAsync(vm.ActiveEmployeesFile, vm.ResignationsFile, vm.StoreReferenceFile, vm.Month, vm.Year, email);
             TempData["Success"] = msg;
         }
-        catch { TempData["Error"] = "Upload failed. Please check the file format and try again."; }
+        catch (Exception ex) { _logger.LogError(ex, "Period data upload failed for {Month}/{Year}", vm.Month, vm.Year); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
         return RedirectToAction("Uploads");
     }
 
@@ -169,7 +171,7 @@ public class DashboardController : Controller
             var (_, msg) = await _uploads.UpdateSingleFileAsync(vm.FileType, vm.Month, vm.Year, vm.File, email);
             TempData["Success"] = msg;
         }
-        catch { TempData["Error"] = "Upload failed. Please check the file format and try again."; }
+        catch (Exception ex) { _logger.LogError(ex, "Single file update failed for {FileType} {Month}/{Year}", vm.FileType, vm.Month, vm.Year); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
         return RedirectToAction("Uploads");
     }
 
@@ -178,7 +180,7 @@ public class DashboardController : Controller
     {
         if (!ModelState.IsValid || vm.File == null) { TempData["Error"] = "Please select a file."; return RedirectToAction("Uploads"); }
         try { var email = HttpContext.Session.GetEmail(); var (_, msg, _) = await _uploads.UploadExitInterviewsAsync(vm.File, email); TempData["Success"] = msg; }
-        catch { TempData["Error"] = "Upload failed. Please check the file format and try again."; }
+        catch (Exception ex) { _logger.LogError(ex, "Exit interviews upload failed"); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
         return RedirectToAction("Uploads");
     }
 
