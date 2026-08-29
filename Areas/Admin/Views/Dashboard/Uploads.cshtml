@@ -136,9 +136,15 @@
 .dm-jobs-item { display:flex; gap:10px; padding:10px 14px; border-bottom:1px solid var(--card-border); }
 .dm-jobs-item:last-child { border-bottom:none; }
 .dm-jobs-item-icon { font-size:15px; margin-top:1px; flex-shrink:0; }
+.dm-jobs-item-body { flex:1; min-width:0; }
 .dm-jobs-item-label { font-size:12.5px; font-weight:600; color:var(--text); }
 .dm-jobs-item-meta { font-size:11px; color:var(--text-3); margin-top:2px; }
 .dm-jobs-item-error { font-size:11px; color:oklch(0.55 0.2 22); margin-top:3px; word-break:break-word; }
+.dm-jobs-item-close {
+    flex-shrink:0; background:none; border:none; color:var(--text-3); cursor:pointer;
+    font-size:14px; line-height:1; padding:2px; align-self:flex-start;
+}
+.dm-jobs-item-close:hover { color:oklch(0.55 0.2 22); }
 </style>
 
 <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -550,13 +556,25 @@ async function dmFetchJobs() {
     list.innerHTML = jobs.map(j => `
         <div class="dm-jobs-item">
             <div class="dm-jobs-item-icon">${dmJobIcons[j.status] || ''}</div>
-            <div>
+            <div class="dm-jobs-item-body">
                 <div class="dm-jobs-item-label">${dmEsc(j.label)}</div>
                 <div class="dm-jobs-item-meta">${dmJobLabels[j.status] || j.status} · ${dmRelativeTime(j.startedAt)}</div>
                 ${j.status === 'Failed' && j.errorMessage ? `<div class="dm-jobs-item-error">${dmEsc(j.errorMessage)}</div>` : ''}
             </div>
+            <button type="button" class="dm-jobs-item-close" title="@L["Common_Cancel"]" onclick="dmDismissJob('${j.id}')"><i class="bi bi-x-lg"></i></button>
         </div>
     `).join('');
+}
+
+async function dmDismissJob(id) {
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    try {
+        await fetch(`/admin/dashboard/background-jobs/${id}/dismiss`, {
+            method: 'POST',
+            headers: token ? { 'RequestVerificationToken': token } : {}
+        });
+    } catch { /* ignore */ }
+    dmFetchJobs();
 }
 
 function dmToggleJobsPanel() {

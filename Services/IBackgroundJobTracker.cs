@@ -22,5 +22,6 @@ public interface IBackgroundJobTracker
     string Start(string label);
     void Succeed(string id);
     void Fail(string id, string error);
+    void Dismiss(string id);
     List<BackgroundJobStatus> GetRecent(int count = 20);
 }

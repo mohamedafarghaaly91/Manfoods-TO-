@@ -48,6 +48,15 @@ public class BackgroundJobTracker : IBackgroundJobTracker
         }
     }
 
+    public void Dismiss(string id)
+    {
+        lock (_orderLock)
+        {
+            _order.Remove(id);
+        }
+        _jobs.TryRemove(id, out _);
+    }
+
     public List<BackgroundJobStatus> GetRecent(int count = 20)
     {
         lock (_orderLock)

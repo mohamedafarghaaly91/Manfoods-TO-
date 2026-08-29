@@ -34,6 +34,13 @@ public class DashboardController : Controller
     [HttpGet("admin/dashboard/background-jobs")]
     public IActionResult BackgroundJobs() => Json(_jobTracker.GetRecent(20));
 
+    [HttpPost("admin/dashboard/background-jobs/{id}/dismiss"), ValidateAntiForgeryToken]
+    public IActionResult DismissBackgroundJob(string id)
+    {
+        _jobTracker.Dismiss(id);
+        return Ok();
+    }
+
     public IActionResult Turnover() => View();
 
     public IActionResult Comparisons() => View();
