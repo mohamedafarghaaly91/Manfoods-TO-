@@ -58,7 +58,7 @@ public class ScorecardService : IScorecardService
     // following each person across whichever store(s) they were assigned to in each
     // period — instead of only looking at the single latest period's assignment.
     private async Task<Dictionary<string, NameAggregate>> BuildNameAggregatesAsync(
-        string dimension, string role, string? assignedName, string? om, string? oc, string? months, int? year)
+        string dimension, string role, string? assignedName, string? om, string? oc, string? soc, string? od, string? months, int? year)
     {
         var periods = DashboardService.ResolvePeriods(null, year, null, null, months);
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
@@ -71,6 +71,8 @@ public class ScorecardService : IScorecardService
         if (accessible != null) storeRefs = storeRefs.Where(s => accessible.Contains(s.StoreName)).ToList();
         if (MultiValueFilter.Split(om) is { } oms) storeRefs = storeRefs.Where(s => oms.Contains(s.OperationManager)).ToList();
         if (MultiValueFilter.Split(oc) is { } ocs) storeRefs = storeRefs.Where(s => ocs.Contains(s.OperationConsultant)).ToList();
+        if (MultiValueFilter.Split(soc) is { } socs) storeRefs = storeRefs.Where(s => socs.Contains(s.SeniorOperationConsultant)).ToList();
+        if (MultiValueFilter.Split(od) is { } ods) storeRefs = storeRefs.Where(s => ods.Contains(s.OperationDirector)).ToList();
 
         var headcountMap = (await _db.ActiveEmployees.Where(e => periodKeys.Contains(e.Year * 100 + e.Month))
             .GroupBy(e => new { e.Store, e.Month, e.Year })
@@ -151,13 +153,13 @@ public class ScorecardService : IScorecardService
         return byEmployee.Values.ToList();
     }
 
-    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
+    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
         // Resolve once so both aggregates and the historical period window use
         // the same effective year (latest data year when caller passes no year).
         var effectiveYear = await ResolveEffectiveYearAsync(year);
 
-        var aggregates = await BuildNameAggregatesAsync(dimension, role, assignedName, om, oc, months, effectiveYear);
+        var aggregates = await BuildNameAggregatesAsync(dimension, role, assignedName, om, oc, soc, od, months, effectiveYear);
         if (aggregates.Count == 0) return new List<ScorecardRow>();
 
         var historical = await LoadHistoricalRecordsAsync();
@@ -283,7 +285,7 @@ public class ScorecardService : IScorecardService
     public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? months = null, int? year = null)
     {
         var result = new ScorecardRollupResult();
-        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, null, null, months, year);
+        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, null, null, null, null, months, year);
         if (leaderAggregates.Count == 0) return result;
 
         var leaderRates = leaderAggregates.Select(kv =>

@@ -21,11 +21,11 @@ public class ScorecardApiController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string dimension = "leader", [FromQuery] string? om = null,
-        [FromQuery] string? oc = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
+        [FromQuery] string? oc = null, [FromQuery] string? soc = null, [FromQuery] string? od = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         if (!ValidDimensions.Contains(dimension)) return BadRequest(new { error = "Invalid dimension." });
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, months, year));
+        return Ok(await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, soc, od, months, year));
     }
 
     [HttpGet("leaders")]

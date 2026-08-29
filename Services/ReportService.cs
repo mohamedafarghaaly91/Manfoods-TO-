@@ -156,9 +156,9 @@ public class ReportService : IReportService
     }
 
     // ── Store Comparison ────────────────────────────────────
-    private async Task AddStoreComparisonSheetAsync(XLWorkbook wb, int month, int year, string role, string? assignedName, string? om = null, string? oc = null)
+    private async Task AddStoreComparisonSheetAsync(XLWorkbook wb, int month, int year, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
-        var rows = await _dashboard.GetStoreComparisonAsync(month, year, role, assignedName, om: om, oc: oc);
+        var rows = await _dashboard.GetStoreComparisonAsync(month, year, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var ws = AddSheet(wb, "Store Comparison");
         StyleHeader(ws, new[] { "Store", "OC", "OM", "Headcount", "New Hires", "Resignations", "Turnover Rate" });
         for (int r = 0; r < rows.Count; r++)
@@ -175,10 +175,10 @@ public class ReportService : IReportService
         Finalize(ws);
     }
 
-    public async Task<XLWorkbook> BuildStoreComparisonReportAsync(int month, int year, string role, string? assignedName, string? om = null, string? oc = null)
+    public async Task<XLWorkbook> BuildStoreComparisonReportAsync(int month, int year, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var wb = new XLWorkbook();
-        await AddStoreComparisonSheetAsync(wb, month, year, role, assignedName, om, oc);
+        await AddStoreComparisonSheetAsync(wb, month, year, role, assignedName, om, oc, soc, od);
         return wb;
     }
 
@@ -364,9 +364,9 @@ public class ReportService : IReportService
     }
 
     // ── Scorecard ───────────────────────────────────────────
-    private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
+    private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
-        var rows = await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, months, year);
+        var rows = await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, soc, od, months, year);
         var ws = AddSheet(wb, sheetName);
         StyleHeader(ws, new[] { nameHeader, "Stores", "Headcount", "Turnover Rate", "90-Day Early Leave", "180-Day Retention", "Exit Sentiment", "Exit Responses" });
         for (int i = 0; i < rows.Count; i++)
@@ -385,17 +385,17 @@ public class ReportService : IReportService
         Finalize(ws);
     }
 
-    private async Task AddScorecardSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
+    private async Task AddScorecardSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
-        await AddScorecardSheetAsync(wb, "leader", "Scorecard Store Leaders", "Store Leader", role, assignedName, om, oc, months, year);
-        await AddScorecardSheetAsync(wb, "oc", "Scorecard Op. Consultants", "Operation Consultant", role, assignedName, om, oc, months, year);
-        await AddScorecardSheetAsync(wb, "om", "Scorecard Op. Managers", "Operation Manager", role, assignedName, om, oc, months, year);
+        await AddScorecardSheetAsync(wb, "leader", "Scorecard Store Leaders", "Store Leader", role, assignedName, om, oc, soc, od, months, year);
+        await AddScorecardSheetAsync(wb, "oc", "Scorecard Op. Consultants", "Operation Consultant", role, assignedName, om, oc, soc, od, months, year);
+        await AddScorecardSheetAsync(wb, "om", "Scorecard Op. Managers", "Operation Manager", role, assignedName, om, oc, soc, od, months, year);
     }
 
-    public async Task<XLWorkbook> BuildScorecardReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null)
+    public async Task<XLWorkbook> BuildScorecardReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
         var wb = new XLWorkbook();
-        await AddScorecardSheetsAsync(wb, role, assignedName, om, oc, months, year);
+        await AddScorecardSheetsAsync(wb, role, assignedName, om, oc, soc, od, months, year);
         return wb;
     }
 
@@ -468,24 +468,24 @@ public class ReportService : IReportService
         Finalize(ws);
     }
 
-    private async Task AddTrendMatrixSheetAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, int? sinceYear = null, string? months = null)
+    private async Task AddTrendMatrixSheetAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null)
     {
-        var result = await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, sinceYear, months);
+        var result = await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, sinceYear, months);
         WriteTrendMatrixSheet(wb, "Turnover Trend Matrix", result);
     }
 
-    public async Task<XLWorkbook> BuildTrendMatrixReportAsync(string role, string? assignedName, string? om = null, string? oc = null, int? sinceYear = null, string? months = null)
+    public async Task<XLWorkbook> BuildTrendMatrixReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null)
     {
         var wb = new XLWorkbook();
-        await AddTrendMatrixSheetAsync(wb, role, assignedName, om, oc, sinceYear, months);
+        await AddTrendMatrixSheetAsync(wb, role, assignedName, om, oc, soc, od, sinceYear, months);
         return wb;
     }
 
     // ── 90-Day Trend Matrix ────────────────────────────────────
-    public async Task<XLWorkbook> BuildNinetyDayTrendMatrixReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? sinceYear = null)
+    public async Task<XLWorkbook> BuildNinetyDayTrendMatrixReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null)
     {
         var wb = new XLWorkbook();
-        var result = await _ninetyDay.GetTrendMatrixAsync(role, assignedName, om, oc, months, sinceYear);
+        var result = await _ninetyDay.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, months, sinceYear);
         WriteTrendMatrixSheet(wb, "90-Day Trend Matrix", result);
         return wb;
     }

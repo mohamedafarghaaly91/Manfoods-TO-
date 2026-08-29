@@ -14,6 +14,8 @@
     var stores      = (ViewBag.Stores              as List<string>) ?? new List<string>();
     var oms         = (ViewBag.OperationManagers   as List<string>) ?? new List<string>();
     var ocs         = (ViewBag.OperationConsultants as List<string>) ?? new List<string>();
+    var socs        = (ViewBag.SeniorOperationConsultants as List<string>) ?? new List<string>();
+    var ods         = (ViewBag.OperationDirectors  as List<string>) ?? new List<string>();
     var monthNames  = new[] { "January","February","March","April","May","June",
                                "July","August","September","October","November","December" };
     var latest      = Model?.OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).FirstOrDefault();
@@ -210,6 +212,48 @@ else
                         </div>
                     </div>
                 </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small text-muted-custom mb-1">@L["Common_SeniorOperationConsultants"]</label>
+                    <div class="rd-multiselect" id="rd-soc-ms" data-all-label="@L["Common_SeniorOperationConsultants"]">
+                        <button type="button" class="rd-multiselect-trigger" id="rd-soc-trigger">
+                            <span class="rd-multiselect-chips" id="rd-soc-chips">@L["Common_SeniorOperationConsultants"]</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="rd-multiselect-panel" id="rd-soc-panel">
+                            <div class="rd-multiselect-actions">
+                                <button type="button" class="rd-ms-action" id="rd-soc-selectall">@L["Common_SelectAll"]</button>
+                                <button type="button" class="rd-ms-action" id="rd-soc-clearall">@L["Common_ClearAll"]</button>
+                            </div>
+                            <div id="rd-soc-options">
+                                @foreach (var sc in socs)
+                                {
+                                    <label class="rd-ms-option"><input type="checkbox" value="@sc"><span>@sc</span></label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <label class="form-label small text-muted-custom mb-1">@L["Common_OperationDirectors"]</label>
+                    <div class="rd-multiselect" id="rd-od-ms" data-all-label="@L["Common_OperationDirectors"]">
+                        <button type="button" class="rd-multiselect-trigger" id="rd-od-trigger">
+                            <span class="rd-multiselect-chips" id="rd-od-chips">@L["Common_OperationDirectors"]</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="rd-multiselect-panel" id="rd-od-panel">
+                            <div class="rd-multiselect-actions">
+                                <button type="button" class="rd-ms-action" id="rd-od-selectall">@L["Common_SelectAll"]</button>
+                                <button type="button" class="rd-ms-action" id="rd-od-clearall">@L["Common_ClearAll"]</button>
+                            </div>
+                            <div id="rd-od-options">
+                                @foreach (var d in ods)
+                                {
+                                    <label class="rd-ms-option"><input type="checkbox" value="@d"><span>@d</span></label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     </div>
@@ -280,6 +324,8 @@ function rdCreateMultiselect(prefix) {
 const rdStoreMs  = rdCreateMultiselect('store');
 const rdOmMs     = rdCreateMultiselect('om');
 const rdOcMs     = rdCreateMultiselect('oc');
+const rdSocMs    = rdCreateMultiselect('soc');
+const rdOdMs     = rdCreateMultiselect('od');
 const rdMonthsMs = rdCreateMultiselect('months');
 
 const RD_MONTH_NAMES = ["January","February","March","April","May","June",
@@ -303,7 +349,7 @@ function rdResetFilters() {
     if (yearEl) { yearEl.selectedIndex = 0; rdUpdateMonths(); }
     const sinceYearEl = document.getElementById('rd-since-year');
     if (sinceYearEl) { sinceYearEl.selectedIndex = 0; rdUpdateMonthsMultiselect(); }
-    ['months', 'store', 'om', 'oc'].forEach(p => document.getElementById(`rd-${p}-clearall`)?.click());
+    ['months', 'store', 'om', 'oc', 'soc', 'od'].forEach(p => document.getElementById(`rd-${p}-clearall`)?.click());
 }
 
 function rdDownload() {
@@ -324,6 +370,12 @@ function rdDownload() {
 
     const selectedOcs = rdOcMs.getSelected();
     if (selectedOcs.length) p.set('oc', selectedOcs.join(','));
+
+    const selectedSocs = rdSocMs.getSelected();
+    if (selectedSocs.length) p.set('soc', selectedSocs.join(','));
+
+    const selectedOds = rdOdMs.getSelected();
+    if (selectedOds.length) p.set('od', selectedOds.join(','));
 
     const selectedMonths = rdMonthsMs.getSelected();
     if (selectedMonths.length) p.set('months', selectedMonths.join(','));

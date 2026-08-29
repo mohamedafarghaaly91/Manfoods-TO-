@@ -17,38 +17,38 @@ public class NoOpNinetyDayTurnoverService : INinetyDayTurnoverService
     public Task<List<PeriodItem>> GetCohortPeriodsAsync() => Task.FromResult(new List<PeriodItem>());
     public Task<List<string>> GetStoreListAsync(string role, string? assignedName) => Task.FromResult(new List<string>());
     public Task<NinetyDayKpiViewModel> GetKpiAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new NinetyDayKpiViewModel());
-    public Task<List<RateTrendItem>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null) =>
+    public Task<List<RateTrendItem>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
         Task.FromResult(new List<RateTrendItem>());
     public Task<List<ChartDataItem>> GetByStoreAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<NinetyDayStoreRow>> GetStoreComparisonAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<NinetyDayStoreRow>());
     public Task<NinetyDayOcOmAnalysisResult> GetOcOmAnalysisAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new NinetyDayOcOmAnalysisResult());
     public Task<List<EarlyLeaverRow>> GetEarlyLeaversAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<EarlyLeaverRow>());
     public Task<List<ChartDataItem>> GetEarlyLeaverReasonsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<ChartDataItem>> GetEarlyLeaverJobTitlesAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<ChartDataItem>> GetEarlyLeaverPayrollGroupsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<ChartDataItem>> GetEarlyLeaverGenderBreakdownAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
-    public Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? sinceYear = null) =>
+    public Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null) =>
         Task.FromResult(new TrendMatrixResult());
     public Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<SmartInsightItem>());
 }
 
@@ -56,22 +56,22 @@ public class NoOpRetentionService : IRetentionService
 {
     public Task<List<string>> GetStoreListAsync(string role, string? assignedName) => Task.FromResult(new List<string>());
     public Task<List<RetentionMilestoneItem>> GetMilestonesAsync(string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<RetentionMilestoneItem>());
     public Task<List<SurvivalPoint>> GetSurvivalCurveAsync(string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<SurvivalPoint>());
-    public Task<List<RetentionTrendPoint>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, int? sinceYear = null) =>
+    public Task<List<RetentionTrendPoint>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null) =>
         Task.FromResult(new List<RetentionTrendPoint>());
     public Task<List<ChartDataItem>> GetStoreLeaderboardAsync(string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
-    public Task<List<ChartDataItem>> GetTenureDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, int? month = null, int? year = null) =>
+    public Task<List<ChartDataItem>> GetTenureDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
         Task.FromResult(new List<ChartDataItem>());
-    public Task<List<StoreTenureRow>> GetTenureDistributionByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, int? month = null, int? year = null) =>
+    public Task<List<StoreTenureRow>> GetTenureDistributionByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
         Task.FromResult(new List<StoreTenureRow>());
     public Task<List<SmartInsightItem>> GetInsightsAsync(string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? months = null) =>
+        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<SmartInsightItem>());
 }
 

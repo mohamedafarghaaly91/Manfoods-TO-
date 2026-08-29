@@ -1,7 +1,7 @@
 /* Shared dashboard chart logic — Admin & Home areas */
 Chart.defaults.color = '#5B5875';
 
-let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '';
+let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '', socFilter = '', odFilter = '';
 let jobTitleChart, tenureChart, genderChart;
 
 async function fetchJson(url) {
@@ -22,6 +22,8 @@ function buildQuery() {
     if (storeFilter)     p.set('store',     storeFilter);
     if (omFilter)        p.set('om',        omFilter);
     if (ocFilter)        p.set('oc',        ocFilter);
+    if (socFilter)       p.set('soc',       socFilter);
+    if (odFilter)        p.set('od',        odFilter);
     return p.toString();
 }
 
@@ -56,6 +58,8 @@ async function loadPeriods() {
         if (document.getElementById('storeSelect')) await loadStores();
         if (document.getElementById('omSelect'))    await loadOperationManagers();
         if (document.getElementById('ocSelect'))    await loadOperationConsultants();
+        if (document.getElementById('socSelect'))   await loadSeniorOperationConsultants();
+        if (document.getElementById('odSelect'))    await loadOperationDirectors();
         await loadAll();
     }
 }
@@ -100,6 +104,38 @@ async function loadOperationConsultants() {
     const cur = sel.value;
     sel.innerHTML = '<option value="">All Operation Consultants</option>';
     consultants.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+}
+
+async function loadSeniorOperationConsultants() {
+    if (!periodMonth || !periodYear) return;
+    const socs = await fetchJson(`/api/dashboard/senior-operation-consultants?month=${periodMonth}&year=${periodYear}`);
+    const sel = document.getElementById('socSelect');
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Senior Operation Consultants</option>';
+    socs.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+}
+
+async function loadOperationDirectors() {
+    if (!periodMonth || !periodYear) return;
+    const ods = await fetchJson(`/api/dashboard/operation-directors?month=${periodMonth}&year=${periodYear}`);
+    const sel = document.getElementById('odSelect');
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Operation Directors</option>';
+    ods.forEach(name => {
         const opt = document.createElement('option');
         opt.value = name;
         opt.textContent = name;
@@ -159,10 +195,12 @@ async function loadCharts() {
 async function loadAll() { await Promise.all([loadKpis(), loadCharts()]); }
 
 async function resetFilters() {
-    storeFilter = ''; omFilter = ''; ocFilter = '';
+    storeFilter = ''; omFilter = ''; ocFilter = ''; socFilter = ''; odFilter = '';
     const stSel = document.getElementById('storeSelect'); if (stSel) stSel.value = '';
     const omSel = document.getElementById('omSelect');    if (omSel) omSel.value = '';
     const ocSel = document.getElementById('ocSelect');    if (ocSel) ocSel.value = '';
+    const socSel = document.getElementById('socSelect');  if (socSel) socSel.value = '';
+    const odSel = document.getElementById('odSelect');    if (odSel) odSel.value = '';
     const search = document.getElementById('storeCardSearch'); if (search) search.value = '';
     await loadPeriods();
 }
@@ -183,6 +221,8 @@ if (periodSel) {
         if (stSel) { storeFilter = ''; stSel.value = ''; await loadStores(); }
         if (document.getElementById('omSelect')) await loadOperationManagers();
         if (document.getElementById('ocSelect')) await loadOperationConsultants();
+        if (document.getElementById('socSelect')) await loadSeniorOperationConsultants();
+        if (document.getElementById('odSelect')) await loadOperationDirectors();
         await loadAll();
     });
 }
@@ -217,6 +257,22 @@ const ocSel = document.getElementById('ocSelect');
 if (ocSel) {
     ocSel.addEventListener('change', async function() {
         ocFilter = this.value || '';
+        await loadAll();
+    });
+}
+
+const socSel = document.getElementById('socSelect');
+if (socSel) {
+    socSel.addEventListener('change', async function() {
+        socFilter = this.value || '';
+        await loadAll();
+    });
+}
+
+const odSel = document.getElementById('odSelect');
+if (odSel) {
+    odSel.addEventListener('change', async function() {
+        odFilter = this.value || '';
         await loadAll();
     });
 }

@@ -9,7 +9,7 @@ public interface IScorecardService
     /// following each person across store reassignments within that window —
     /// combined with all-time early-leaver, retention, and exit-interview
     /// sentiment. Ranked worst turnover first.</summary>
-    Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? year = null);
+    Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null);
 
     /// <summary>Distinct Store Leader names (all-time) for the leader-search combobox.</summary>
     Task<List<string>> GetLeaderNamesAsync(string role, string? assignedName);

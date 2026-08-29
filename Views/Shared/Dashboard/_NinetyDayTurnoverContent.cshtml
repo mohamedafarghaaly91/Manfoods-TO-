@@ -128,6 +128,14 @@
             <input type="text" class="ntd-combobox-input" id="ntdOcInput" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
             <div class="ntd-combobox-panel" id="ntdOcPanel"></div>
         </div>
+        <div class="ntd-combobox" id="ntdSocCombo">
+            <input type="text" class="ntd-combobox-input" id="ntdSocInput" placeholder="@L["Common_SeniorOperationConsultants"]" autocomplete="off">
+            <div class="ntd-combobox-panel" id="ntdSocPanel"></div>
+        </div>
+        <div class="ntd-combobox" id="ntdOdCombo">
+            <input type="text" class="ntd-combobox-input" id="ntdOdInput" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
+            <div class="ntd-combobox-panel" id="ntdOdPanel"></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="ntdResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -459,7 +467,7 @@
    global (not period-scoped) since the underlying API already returns
    them unscoped. */
 let ntdYear = null, ntdMonths = [], ntdYearMonthsMap = {};
-let ntdStoreFilter = '', ntdOmFilter = '', ntdOcFilter = '';
+let ntdStoreFilter = '', ntdOmFilter = '', ntdOcFilter = '', ntdSocFilter = '', ntdOdFilter = '';
 
 function ntdMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function ntdMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -472,6 +480,8 @@ function ntdBuildQuery(extra) {
     if (ntdStoreFilter) q.set('store', ntdStoreFilter);
     if (ntdOmFilter)    q.set('om', ntdOmFilter);
     if (ntdOcFilter)    q.set('oc', ntdOcFilter);
+    if (ntdSocFilter)   q.set('soc', ntdSocFilter);
+    if (ntdOdFilter)    q.set('od', ntdOdFilter);
     return q;
 }
 
@@ -517,6 +527,8 @@ function ntdCreateCombobox({ inputId, panelId, onSelect }) {
 const ntdStoreCombo = ntdCreateCombobox({ inputId: 'ntdStoreInput', panelId: 'ntdStorePanel', onSelect: v => { ntdStoreFilter = v; ntdLoadAll(); } });
 const ntdOmCombo    = ntdCreateCombobox({ inputId: 'ntdOmInput',    panelId: 'ntdOmPanel',    onSelect: v => { ntdOmFilter    = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
 const ntdOcCombo    = ntdCreateCombobox({ inputId: 'ntdOcInput',    panelId: 'ntdOcPanel',    onSelect: v => { ntdOcFilter    = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
+const ntdSocCombo   = ntdCreateCombobox({ inputId: 'ntdSocInput',   panelId: 'ntdSocPanel',   onSelect: v => { ntdSocFilter   = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
+const ntdOdCombo    = ntdCreateCombobox({ inputId: 'ntdOdInput',    panelId: 'ntdOdPanel',    onSelect: v => { ntdOdFilter    = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
 
 /* Months multi-select ---------------------------------------------------- */
 function ntdBuildMonthsOptions() {
@@ -581,8 +593,8 @@ document.getElementById('ntdYearSelect').addEventListener('change', function () 
 });
 
 function ntdResetFilters() {
-    ntdStoreFilter = ''; ntdOmFilter = ''; ntdOcFilter = '';
-    ntdStoreCombo.setValue(''); ntdOmCombo.setValue(''); ntdOcCombo.setValue('');
+    ntdStoreFilter = ''; ntdOmFilter = ''; ntdOcFilter = ''; ntdSocFilter = ''; ntdOdFilter = '';
+    ntdStoreCombo.setValue(''); ntdOmCombo.setValue(''); ntdOcCombo.setValue(''); ntdSocCombo.setValue(''); ntdOdCombo.setValue('');
     const yearSel = document.getElementById('ntdYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -593,11 +605,13 @@ function ntdResetFilters() {
 
 /* Initial filter load ------------------------------------------------------ */
 async function ntdLoadFilters() {
-    const [periods, stores, managers, consultants] = await Promise.all([
+    const [periods, stores, managers, consultants, seniorConsultants, directors] = await Promise.all([
         ntdFetch('cohort-periods'),
         fetch('/api/ninety-day-turnover/stores').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/operation-managers').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/operation-consultants').then(r => r.ok ? r.json() : []),
+        fetch('/api/ninety-day-turnover/senior-operation-consultants').then(r => r.ok ? r.json() : []),
+        fetch('/api/ninety-day-turnover/operation-directors').then(r => r.ok ? r.json() : []),
     ]);
     const cohortPeriods = periods || [];
 
@@ -620,6 +634,8 @@ async function ntdLoadFilters() {
     ntdStoreCombo.setOptions(stores || []);
     ntdOmCombo.setOptions(managers || []);
     ntdOcCombo.setOptions(consultants || []);
+    ntdSocCombo.setOptions(seniorConsultants || []);
+    ntdOdCombo.setOptions(directors || []);
     return true;
 }
 
@@ -648,6 +664,8 @@ async function ntdLoadTrend() {
     if (ntdStoreFilter) q.set('store', ntdStoreFilter);
     if (ntdOmFilter)    q.set('om', ntdOmFilter);
     if (ntdOcFilter)    q.set('oc', ntdOcFilter);
+    if (ntdSocFilter)   q.set('soc', ntdSocFilter);
+    if (ntdOdFilter)    q.set('od', ntdOdFilter);
     const r = await fetch(`/api/ninety-day-turnover/trend?${q.toString()}`);
     const data = r.ok ? await r.json() : [];
     const ctx = document.getElementById('ntdTrendChart');
@@ -691,6 +709,8 @@ async function ntdLoadByCohort() {
         if (ntdStoreFilter) q.set('store', ntdStoreFilter);
         if (ntdOmFilter)    q.set('om', ntdOmFilter);
         if (ntdOcFilter)    q.set('oc', ntdOcFilter);
+        if (ntdSocFilter)   q.set('soc', ntdSocFilter);
+        if (ntdOdFilter)    q.set('od', ntdOdFilter);
         return fetch(`/api/ninety-day-turnover/kpi?${q.toString()}`).then(r => r.ok ? r.json() : null);
     }));
     ntdByCohortInstance = new Chart(ctx.getContext('2d'), {
@@ -1080,6 +1100,8 @@ async function ntdLoadTrendMatrix() {
     const q = new URLSearchParams();
     if (ntdOmFilter) q.set('om', ntdOmFilter);
     if (ntdOcFilter) q.set('oc', ntdOcFilter);
+    if (ntdSocFilter) q.set('soc', ntdSocFilter);
+    if (ntdOdFilter) q.set('od', ntdOdFilter);
     const r = await fetch(`/api/ninety-day-turnover/trend-matrix?${q.toString()}`);
     ndMxData = r.ok ? await r.json() : null;
     if (!ndMxData || !ndMxData.rows || !ndMxData.rows.length) {

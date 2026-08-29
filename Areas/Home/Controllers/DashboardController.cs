@@ -63,6 +63,8 @@ public class DashboardController : Controller
         ViewBag.Stores = stores.Select(s => s.StoreName).Distinct().OrderBy(s => s).ToList();
         ViewBag.OperationManagers = await _dashboard.GetOperationManagersAsync(null, null, role, assignedName);
         ViewBag.OperationConsultants = await _dashboard.GetOperationConsultantsAsync(null, null, role, assignedName);
+        ViewBag.SeniorOperationConsultants = await _dashboard.GetSeniorOperationConsultantsAsync(null, null, role, assignedName);
+        ViewBag.OperationDirectors = await _dashboard.GetOperationDirectorsAsync(null, null, role, assignedName);
         ViewBag.ReportType = reportType;
         return View(periods);
     }
@@ -83,20 +85,22 @@ public class DashboardController : Controller
     // calls) so the shared Reports view's download buttons work under the Home area too.
     [HttpGet("home/dashboard/export")]
     public async Task<IActionResult> Export(int month, int year, string reportType = "summary",
-        string? store = null, string? om = null, string? oc = null, string? months = null)
+        string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
         store = string.IsNullOrWhiteSpace(store) ? null : store;
         om = string.IsNullOrWhiteSpace(om) ? null : om;
         oc = string.IsNullOrWhiteSpace(oc) ? null : oc;
+        soc = string.IsNullOrWhiteSpace(soc) ? null : soc;
+        od = string.IsNullOrWhiteSpace(od) ? null : od;
         months = string.IsNullOrWhiteSpace(months) ? null : months;
 
         switch (reportType)
         {
             case "stores":
                 return await DownloadWorkbookAsync(
-                    await _reports.BuildStoreComparisonReportAsync(month, year, role, assignedName, om, oc),
+                    await _reports.BuildStoreComparisonReportAsync(month, year, role, assignedName, om, oc, soc, od),
                     $"Store_Comparison_{year}_{month:D2}.xlsx");
             case "ninety-day":
                 return await DownloadWorkbookAsync(await _reports.BuildNinetyDayReportAsync(role, assignedName, store), "90_Day_Turnover_Report.xlsx");
@@ -105,16 +109,16 @@ public class DashboardController : Controller
             case "exit-interviews":
                 return await DownloadWorkbookAsync(await _reports.BuildExitInterviewReportAsync(role, assignedName, store, om, oc), "Exit_Interview_Report.xlsx");
             case "scorecard":
-                return await DownloadWorkbookAsync(await _reports.BuildScorecardReportAsync(role, assignedName, om, oc, months, year > 0 ? year : null), "Scorecard_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildScorecardReportAsync(role, assignedName, om, oc, soc, od, months, year > 0 ? year : null), "Scorecard_Report.xlsx");
             case "early-warning":
                 return await DownloadWorkbookAsync(await _reports.BuildEarlyWarningReportAsync(role, assignedName, store), "Early_Warning_Report.xlsx");
             case "trend-matrix":
                 return await DownloadWorkbookAsync(
-                    await _reports.BuildTrendMatrixReportAsync(role, assignedName, om, oc, year > 0 ? year : null, months),
+                    await _reports.BuildTrendMatrixReportAsync(role, assignedName, om, oc, soc, od, year > 0 ? year : null, months),
                     $"Turnover_Trend_Matrix_{year}.xlsx");
             case "ninety-day-trend-matrix":
                 return await DownloadWorkbookAsync(
-                    await _reports.BuildNinetyDayTrendMatrixReportAsync(role, assignedName, om, oc, months, year > 0 ? year : null),
+                    await _reports.BuildNinetyDayTrendMatrixReportAsync(role, assignedName, om, oc, soc, od, months, year > 0 ? year : null),
                     "90_Day_Trend_Matrix_Report.xlsx");
             default:
                 return await DownloadWorkbookAsync(

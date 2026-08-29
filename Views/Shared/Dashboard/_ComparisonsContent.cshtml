@@ -170,6 +170,24 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-4">
+                    <div class="cmp-field">
+                        <span class="cmp-field-label">@L["Common_SeniorOperationConsultants"]</span>
+                        <div class="cmp-combobox" id="cmpSocComboA">
+                            <input type="text" class="cmp-combobox-input" id="cmpSocInputA" placeholder="@L["Common_SeniorOperationConsultants"]" autocomplete="off">
+                            <div class="cmp-combobox-panel" id="cmpSocPanelA"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="cmp-field">
+                        <span class="cmp-field-label">@L["Common_OperationDirectors"]</span>
+                        <div class="cmp-combobox" id="cmpOdComboA">
+                            <input type="text" class="cmp-combobox-input" id="cmpOdInputA" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
+                            <div class="cmp-combobox-panel" id="cmpOdPanelA"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -227,6 +245,24 @@
                         <div class="cmp-combobox" id="cmpOcComboB">
                             <input type="text" class="cmp-combobox-input" id="cmpOcInputB" placeholder="@L["Common_AllOperationConsultants"]" autocomplete="off">
                             <div class="cmp-combobox-panel" id="cmpOcPanelB"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="cmp-field">
+                        <span class="cmp-field-label">@L["Common_SeniorOperationConsultants"]</span>
+                        <div class="cmp-combobox" id="cmpSocComboB">
+                            <input type="text" class="cmp-combobox-input" id="cmpSocInputB" placeholder="@L["Common_SeniorOperationConsultants"]" autocomplete="off">
+                            <div class="cmp-combobox-panel" id="cmpSocPanelB"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="cmp-field">
+                        <span class="cmp-field-label">@L["Common_OperationDirectors"]</span>
+                        <div class="cmp-combobox" id="cmpOdComboB">
+                            <input type="text" class="cmp-combobox-input" id="cmpOdInputB" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
+                            <div class="cmp-combobox-panel" id="cmpOdPanelB"></div>
                         </div>
                     </div>
                 </div>
@@ -294,8 +330,8 @@
    #periodSelect etc. which don't exist here, so they safely no-op). */
 
 const panels = {
-    A: { year: null, months: [], store: '', om: '', oc: '', yearMonthsMap: {} },
-    B: { year: null, months: [], store: '', om: '', oc: '', yearMonthsMap: {} }
+    A: { year: null, months: [], store: '', om: '', oc: '', soc: '', od: '', yearMonthsMap: {} },
+    B: { year: null, months: [], store: '', om: '', oc: '', soc: '', od: '', yearMonthsMap: {} }
 };
 
 function cmpMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
@@ -310,6 +346,8 @@ function cmpBuildQuery(side) {
     if (p.store) q.set('store', p.store);
     if (p.om)    q.set('om', p.om);
     if (p.oc)    q.set('oc', p.oc);
+    if (p.soc)   q.set('soc', p.soc);
+    if (p.od)    q.set('od', p.od);
     return q.toString();
 }
 
@@ -362,6 +400,8 @@ const combos = {};
     combos[`store${side}`] = cmpCreateCombobox({ inputId: `cmpStoreInput${side}`, panelId: `cmpStorePanel${side}`, onSelect: v => { panels[side].store = v; cmpRefreshAll(); } });
     combos[`om${side}`]    = cmpCreateCombobox({ inputId: `cmpOmInput${side}`,    panelId: `cmpOmPanel${side}`,    onSelect: v => { panels[side].om    = v; cmpRefreshAll(); } });
     combos[`oc${side}`]    = cmpCreateCombobox({ inputId: `cmpOcInput${side}`,    panelId: `cmpOcPanel${side}`,    onSelect: v => { panels[side].oc    = v; cmpRefreshAll(); } });
+    combos[`soc${side}`]   = cmpCreateCombobox({ inputId: `cmpSocInput${side}`,   panelId: `cmpSocPanel${side}`,   onSelect: v => { panels[side].soc   = v; cmpRefreshAll(); } });
+    combos[`od${side}`]    = cmpCreateCombobox({ inputId: `cmpOdInput${side}`,    panelId: `cmpOdPanel${side}`,    onSelect: v => { panels[side].od    = v; cmpRefreshAll(); } });
 });
 
 /* Months multi-select ---------------------------------------------------- */
@@ -435,8 +475,8 @@ document.addEventListener('click', (e) => {
         const p = panels[side];
         p.year = parseInt(this.value);
         p.months = (p.yearMonthsMap[p.year] || []).slice().sort((a, b) => a - b);
-        p.store = ''; p.om = ''; p.oc = '';
-        combos[`store${side}`].setValue(''); combos[`om${side}`].setValue(''); combos[`oc${side}`].setValue('');
+        p.store = ''; p.om = ''; p.oc = ''; p.soc = ''; p.od = '';
+        combos[`store${side}`].setValue(''); combos[`om${side}`].setValue(''); combos[`oc${side}`].setValue(''); combos[`soc${side}`].setValue(''); combos[`od${side}`].setValue('');
         cmpBuildMonthsOptions(side); cmpRenderMonthsChips(side);
         await cmpLoadDependentLists(side);
         await cmpRefreshAll();
@@ -452,8 +492,8 @@ document.getElementById('cmpCopyToLastYear').addEventListener('click', async () 
     document.getElementById('cmpYearB').value = targetYear;
     const availableB = b.yearMonthsMap[targetYear] || [];
     b.months = a.months.filter(m => availableB.includes(m));
-    b.store = a.store; b.om = a.om; b.oc = a.oc;
-    combos.storeB.setValue(a.store); combos.omB.setValue(a.om); combos.ocB.setValue(a.oc);
+    b.store = a.store; b.om = a.om; b.oc = a.oc; b.soc = a.soc; b.od = a.od;
+    combos.storeB.setValue(a.store); combos.omB.setValue(a.om); combos.ocB.setValue(a.oc); combos.socB.setValue(a.soc); combos.odB.setValue(a.od);
     cmpBuildMonthsOptions('B'); cmpRenderMonthsChips('B');
     await cmpLoadDependentLists('B');
     await cmpRefreshAll();
@@ -464,14 +504,18 @@ async function cmpLoadDependentLists(side) {
     const anchor = cmpAnchor(side);
     const p = panels[side];
     if (!anchor || !p.year) return;
-    const [stores, oms, ocs] = await Promise.all([
+    const [stores, oms, ocs, socs, ods] = await Promise.all([
         fetchJson(`/api/dashboard/stores?month=${anchor}&year=${p.year}`),
         fetchJson(`/api/dashboard/operation-managers?month=${anchor}&year=${p.year}`),
-        fetchJson(`/api/dashboard/operation-consultants?month=${anchor}&year=${p.year}`)
+        fetchJson(`/api/dashboard/operation-consultants?month=${anchor}&year=${p.year}`),
+        fetchJson(`/api/dashboard/senior-operation-consultants?month=${anchor}&year=${p.year}`),
+        fetchJson(`/api/dashboard/operation-directors?month=${anchor}&year=${p.year}`)
     ]);
     combos[`store${side}`].setOptions(stores.map(s => s.storeName));
     combos[`om${side}`].setOptions(oms);
     combos[`oc${side}`].setOptions(ocs);
+    combos[`soc${side}`].setOptions(socs);
+    combos[`od${side}`].setOptions(ods);
 }
 
 /* Initial load ------------------------------------------------------------ */

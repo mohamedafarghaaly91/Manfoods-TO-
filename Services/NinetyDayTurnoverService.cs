@@ -62,15 +62,17 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
     // Stores whose latest-known Operation Manager / Operation Consultant match the filter.
     // Returns null when no OM/OC filter is set.
-    private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc)
+    private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc, string? soc = null, string? od = null)
     {
-        if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc)) return null;
+        if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
         var refs = await _db.StoreReferences.ToListAsync();
         var latestByStore = refs.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         return latestByStore.Values
             .Where(s => (string.IsNullOrEmpty(om) || s.OperationManager == om)
-                     && (string.IsNullOrEmpty(oc) || s.OperationConsultant == oc))
+                     && (string.IsNullOrEmpty(oc) || s.OperationConsultant == oc)
+                     && (string.IsNullOrEmpty(soc) || s.SeniorOperationConsultant == soc)
+                     && (string.IsNullOrEmpty(od) || s.OperationDirector == od))
             .Select(s => s.StoreName)
             .ToList();
     }
@@ -142,23 +144,23 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<NinetyDayKpiViewModel> GetKpiAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return ComputeKpi(activeHires, resTenures, keys, anchor.Month, anchor.Year, MultiValueFilter.Split(store), omOcStores, accessible);
     }
 
-    public async Task<List<RateTrendItem>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null)
+    public async Task<List<RateTrendItem>> GetTrendAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
@@ -186,14 +188,14 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<ChartDataItem>> GetByStoreAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
         var stores = activeHires.Where(a => keys.Contains(a.Year * 100 + a.Month)).Select(a => a.Store)
@@ -214,14 +216,14 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<NinetyDayStoreRow>> GetStoreComparisonAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
         var stores = activeHires.Where(a => keys.Contains(a.Year * 100 + a.Month)).Select(a => a.Store)
@@ -257,9 +259,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<NinetyDayOcOmAnalysisResult> GetOcOmAnalysisAsync(int month, int year, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
-        var stores = await GetStoreComparisonAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var stores = await GetStoreComparisonAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
 
         NinetyDayOcOmRow ToRow(IGrouping<string, NinetyDayStoreRow> g, string type) => new()
         {
@@ -303,12 +305,12 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<EarlyLeaverRow>> GetEarlyLeaversAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var resTenures = await LoadResignationTenuresAsync();
         var keys = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months)
             .Select(p => p.Year * 100 + p.Month).ToHashSet();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return resTenures
@@ -332,12 +334,12 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     // Early leavers (TenureDays <= 90) whose hire cohort and store fall within
     // the resolved filter — shared by every "early leaver breakdown" chart.
     private async Task<List<ResignationTenure>> EarlyLeaversAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth, int? fromYear, string? om, string? oc, string? months)
+        int? fromMonth, int? fromYear, string? om, string? oc, string? soc, string? od, string? months)
     {
         var resTenures = await LoadResignationTenuresAsync();
         var keys = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months)
             .Select(p => p.Year * 100 + p.Month).ToHashSet();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return resTenures
@@ -349,9 +351,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<ChartDataItem>> GetEarlyLeaverJobTitlesAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
-        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
         return leavers
             .Where(r => !string.IsNullOrWhiteSpace(r.JobTitle))
             .GroupBy(r => r.JobTitle)
@@ -361,9 +363,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<ChartDataItem>> GetEarlyLeaverPayrollGroupsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
-        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
         return leavers
             .Where(r => !string.IsNullOrWhiteSpace(r.PayrollGroup))
             .GroupBy(r => r.PayrollGroup)
@@ -373,9 +375,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<ChartDataItem>> GetEarlyLeaverGenderBreakdownAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
-        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
         return leavers
             .Where(r => !string.IsNullOrWhiteSpace(r.Gender))
             .GroupBy(r => r.Gender)
@@ -385,9 +387,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<ChartDataItem>> GetEarlyLeaverReasonsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
-        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var leavers = await EarlyLeaversAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
         var earlyLeaverIds = leavers
             .Select(r => r.EmployeeId)
             .Where(id => !string.IsNullOrWhiteSpace(id))
@@ -408,11 +410,11 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .ToList();
     }
 
-    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? months = null, int? sinceYear = null)
+    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         var monthFilter = MultiValueFilter.Split(months)?.Select(int.Parse).ToHashSet();
 
@@ -475,13 +477,13 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     public async Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? months = null)
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var insights = new List<SmartInsightItem>();
 
         // 1. Recent vs. prior 90-day rate trend (up to 3 complete cohorts each
         // side, full history — not limited to the page's cohort-month filter).
-        var trend = await GetTrendAsync(store, role, assignedName, om, oc);
+        var trend = await GetTrendAsync(store, role, assignedName, om, oc, soc, od);
         var complete = trend.Where(t => !t.IsProvisional).ToList();
         if (complete.Count >= 2)
         {
@@ -507,7 +509,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         // 2. Best/worst store for the selected cohort months (only meaningful company-wide).
         if (store == null)
         {
-            var byStore = await GetStoreComparisonAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, months);
+            var byStore = await GetStoreComparisonAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
             if (byStore.Count > 1)
             {
                 var best = byStore.OrderBy(s => s.Rate).First();

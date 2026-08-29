@@ -21,48 +21,48 @@ public class DashboardApiController : ControllerBase
 
     [HttpGet("kpis")]
     public async Task<IActionResult> Kpis([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        var result = await _dashboard.GetKpisAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months);
+        var result = await _dashboard.GetKpisAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
         return Ok(result);
     }
 
     [HttpGet("turnover-by-job-title")]
     public async Task<IActionResult> TurnoverByJobTitle([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetTurnoverByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetTurnoverByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("turnover-by-tenure")]
     public async Task<IActionResult> TurnoverByTenure([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetTurnoverByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetTurnoverByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("turnover-by-payroll-group")]
     public async Task<IActionResult> TurnoverByPayrollGroup([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetTurnoverByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetTurnoverByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("gender-breakdown")]
     public async Task<IActionResult> GenderBreakdown([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("available-periods")]
@@ -98,83 +98,99 @@ public class DashboardApiController : ControllerBase
 
     [HttpGet("store-comparison")]
     public async Task<IActionResult> StoreComparison([FromQuery] int? month, [FromQuery] int? year,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
-        return Ok(await _dashboard.GetStoreComparisonAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetStoreComparisonAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("oc-om-analysis")]
     public async Task<IActionResult> OcOmAnalysis([FromQuery] int? month, [FromQuery] int? year,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
-        return Ok(await _dashboard.GetOcOmAnalysisAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetOcOmAnalysisAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("smart-insights")]
     public async Task<IActionResult> SmartInsights([FromQuery] int? month, [FromQuery] int? year,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
         var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
-        return Ok(await _dashboard.GetSmartInsightsAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetSmartInsightsAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("trend-matrix")]
-    public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] int? sinceYear, [FromQuery] string? months)
+    public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? sinceYear, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, sinceYear, months));
+        return Ok(await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, sinceYear, months));
     }
 
     [HttpGet("headcount-by-job-title")]
     public async Task<IActionResult> HeadcountByJobTitle([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("headcount-by-payroll-group")]
     public async Task<IActionResult> HeadcountByPayrollGroup([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("headcount-by-tenure")]
     public async Task<IActionResult> HeadcountByTenure([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? months)
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, months));
+        return Ok(await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
     [HttpGet("headcount-trend")]
-    public async Task<IActionResult> HeadcountTrend([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] int? sinceYear)
+    public async Task<IActionResult> HeadcountTrend([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? sinceYear)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetHeadcountTrendAsync(store, role, assignedName, om, oc, sinceYear));
+        return Ok(await _dashboard.GetHeadcountTrendAsync(store, role, assignedName, om, oc, soc, od, sinceYear));
     }
 
     [HttpGet("store-headcount-breakdown")]
-    public async Task<IActionResult> StoreHeadcountBreakdown([FromQuery] int month, [FromQuery] int year, [FromQuery] string? om, [FromQuery] string? oc)
+    public async Task<IActionResult> StoreHeadcountBreakdown([FromQuery] int month, [FromQuery] int year, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
-        return Ok(await _dashboard.GetStoreHeadcountBreakdownAsync(month, year, role, assignedName, om, oc));
+        return Ok(await _dashboard.GetStoreHeadcountBreakdownAsync(month, year, role, assignedName, om, oc, soc, od));
+    }
+
+    [HttpGet("senior-operation-consultants")]
+    public async Task<IActionResult> SeniorOperationConsultants([FromQuery] int? month, [FromQuery] int? year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetSeniorOperationConsultantsAsync(month, year, role, assignedName));
+    }
+
+    [HttpGet("operation-directors")]
+    public async Task<IActionResult> OperationDirectors([FromQuery] int? month, [FromQuery] int? year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetOperationDirectorsAsync(month, year, role, assignedName));
     }
 
 }
