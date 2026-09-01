@@ -273,8 +273,9 @@ public class UploadService : IUploadService
         };
 
         var message = $"Uploaded {activeRecords.Count} active employees, {resignRecords.Count} resignations, and {storeRecords.Count} store references.";
+        // Logged for diagnostics only — not shown in the portal, per admin request.
         var unmatchedWarning = await BuildUnmatchedRoleEmailWarningAsync(storeRecords);
-        if (unmatchedWarning != null) message += " " + unmatchedWarning;
+        if (unmatchedWarning != null) _logger.LogWarning("{Warning}", unmatchedWarning);
 
         return (true, message, counts);
     }
