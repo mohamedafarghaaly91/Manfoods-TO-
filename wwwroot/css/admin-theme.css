@@ -265,16 +265,11 @@ body.admin-theme .empty-state { color: var(--text-3); }
     text-decoration: none;
 }
 .admin-global-brand-line1 {
-    font-size: 12px; font-weight: 600; color: var(--text-3);
+    font-size: 12px; font-weight: 600; color: var(--red);
     font-family: 'Inter', sans-serif; letter-spacing: .02em;
 }
-.admin-global-brand-line2 {
-    font-size: 12px; font-weight: 500; color: var(--text-3);
-    font-family: 'Inter', sans-serif;
-    margin-top: 1px;
-}
 .admin-global-brand-main {
-    font-size: 20px; font-weight: 600; color: var(--text-3);
+    font-size: 17px; font-weight: 600; color: var(--red);
     font-family: 'Inter', sans-serif; letter-spacing: -.01em;
     margin-top: 3px;
 }
