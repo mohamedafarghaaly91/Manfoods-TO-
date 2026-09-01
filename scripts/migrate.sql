@@ -1,15 +1,18 @@
 -- =============================================
 -- Manfoods McDonald's — DB Migration Script (SQL Server / MonsterASP)
--- شغّل: sqlcmd -S <server> -d <database> -U <user> -P <password> -i scripts/migrate.sql
+-- شغّل: bash scripts/db-update.sh (uses Tools/DbMigrator — no sqlcmd needed),
+-- أو يدويًا: sqlcmd -S <server> -d <database> -U <user> -P <password> -i scripts/migrate.sql
 --
 -- Ported from the original PostgreSQL/Neon version of this script. T-SQL has
 -- no "IF NOT EXISTS" shorthand for CREATE TABLE/ADD COLUMN/CREATE INDEX, so
 -- every such statement below is wrapped in an explicit existence check
 -- instead — this keeps the same "safe to re-run on every deploy" guarantee
 -- the original script had. TEXT columns became NVARCHAR (never VARCHAR) to
--- keep storing Arabic text correctly; NVARCHAR(MAX) except where a column
--- needs a PRIMARY KEY / UNIQUE constraint, which SQL Server cannot place on
--- a MAX-length column.
+-- keep storing Arabic text correctly; NVARCHAR(MAX) except where a column is
+-- used as a PRIMARY KEY or as an indexed column (plain or unique/filtered
+-- index), since SQL Server cannot place any index on a MAX-length column —
+-- users.email, app_settings.key, exit_interviews.forms_response_id, and
+-- store_action_plans.store_name are all bounded for this reason.
 -- =============================================
 
 -- ── users ─────────────────────────────────────
@@ -256,7 +259,7 @@ IF OBJECT_ID('dbo.store_action_plans', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.store_action_plans (
         id INT IDENTITY(1,1) PRIMARY KEY,
-        store_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store_name NVARCHAR(450) NOT NULL DEFAULT '',
         status NVARCHAR(MAX) NOT NULL DEFAULT 'Active',
         created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         created_month INT NOT NULL DEFAULT 0,
@@ -280,6 +283,12 @@ IF COL_LENGTH('dbo.store_action_plans', 'last_evaluated_month') IS NULL
     ALTER TABLE dbo.store_action_plans ADD last_evaluated_month INT NULL;
 IF COL_LENGTH('dbo.store_action_plans', 'last_evaluated_year') IS NULL
     ALTER TABLE dbo.store_action_plans ADD last_evaluated_year INT NULL;
+-- CREATE TABLE ... IF NOT EXISTS above is a no-op on a table that was already
+-- created (e.g. by an earlier run of this script before store_name was
+-- bounded to NVARCHAR(450) below) — fix it explicitly so the filtered index
+-- further down can actually be created on it. Safe to re-run: narrowing an
+-- already-450-or-narrower column is a no-op.
+ALTER TABLE dbo.store_action_plans ALTER COLUMN store_name NVARCHAR(450) NOT NULL;
 
 -- Only one Active plan per store — a filtered unique index rather than a
 -- plain one, since Resolved plans for the same store must coexist historically.
