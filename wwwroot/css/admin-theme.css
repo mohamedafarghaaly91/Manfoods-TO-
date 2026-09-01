@@ -299,7 +299,7 @@ body.admin-theme .empty-state { color: var(--text-3); }
     padding: 9px 12px; border-radius: 9px;
     font-size: 16px; font-weight: 500;
     text-decoration: none;
-    transition: background .15s, color .15s;
+    transition: background .15s, color .15s, transform .12s, box-shadow .12s;
 }
 /* [data-theme="light"] a { color: var(--red) } outranks the plain class
    rule above (attribute+tag beats a single class) — reassert McDonald's
@@ -307,11 +307,12 @@ body.admin-theme .empty-state { color: var(--text-3); }
 body.admin-theme .admin-nav-link {
     color: var(--text);
 }
-.admin-nav-link i { font-size: 20px; width: 23px; text-align: center; color: oklch(0.58 0.11 250); transition: color .15s; }
-.admin-nav-link:hover { background: var(--bg-2); color: var(--text); }
-.admin-nav-link:hover i { color: oklch(0.5 0.14 250); }
+.admin-nav-link i { font-size: 20px; width: 23px; text-align: center; color: var(--text-2); transition: color .15s; }
+.admin-nav-link:hover { background: var(--card-bg); color: var(--text); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.admin-nav-link:hover i { color: var(--text); }
 .admin-nav-link.active { background: var(--red-light); color: var(--red); font-weight: 600; }
 .admin-nav-link.active i { color: var(--red); }
+.admin-nav-link.active:hover { transform: none; box-shadow: none; }
 .admin-nav-badge {
     margin-left: auto; font-size: 9px; font-weight: 700;
     background: var(--red); color: #fff; padding: 2px 6px; border-radius: 20px;
