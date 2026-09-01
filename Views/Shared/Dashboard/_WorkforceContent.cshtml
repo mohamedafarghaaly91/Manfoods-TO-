@@ -101,10 +101,11 @@
                     <th class="px-3 py-2">@L["Common_StoreName"]</th>
                     <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
                     <th class="px-3 py-2">Gender Mix</th>
+                    <th class="px-3 py-2">Payroll Group Mix</th>
                 </tr>
             </thead>
             <tbody id="wfStoreTableBody">
-                <tr><td colspan="3" class="text-center py-4 text-muted">
+                <tr><td colspan="4" class="text-center py-4 text-muted">
                     <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
                 </td></tr>
             </tbody>
@@ -220,11 +221,26 @@
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 <script>
 /* ── Workforce page — Year + discrete Months multi-select, same filter
-   components as Turnover/Comparisons/90-Day pages. Reuses dashboard.js's
-   loadKpis() (via the overridden buildQuery below) for the top KPI cards,
-   but does NOT use its loadCharts() (that one is resignation-based) —
-   this page renders its own active-headcount composition charts instead. */
+   components as Turnover/Comparisons/90-Day pages. Has its own KPI cards
+   (wfLoadKpis, below) rather than reusing dashboard.js's loadKpis(), and
+   does NOT use dashboard.js's loadCharts() (that one is resignation-based)
+   — this page renders its own active-headcount composition charts instead. */
 function wfMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
+
+/* Workforce's own KPI cards: Total Headcount / New Hires / Resignations only
+   (no Turnover Rate — that belongs on the Turnover page). Uses its own
+   endpoint because, on this page, a From→To period range sums each period's
+   numbers instead of snapshotting the latest one. */
+async function wfLoadKpis() {
+    const kpiEl = document.getElementById('kpiCards');
+    if (!kpiEl) return;
+    const data = await fetchJson('/api/dashboard/workforce-kpis?' + buildQuery());
+    kpiEl.innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">Total Headcount</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">New Hires</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
+    `;
+}
 
 /* ── Composition charts ──────────────────────────────────────────── */
 let wfJobTitleChart, wfPayrollChart, wfTenureChart, wfGenderChart;
@@ -241,9 +257,11 @@ async function wfLoadJobTitleChart() {
 
 async function wfLoadPayrollChart() {
     const data = await fetchJson(`/api/dashboard/headcount-by-payroll-group?${buildQuery()}`);
+    const labels = data.map(d => d.label);
+    const colors = ChartColors.colorsByLabel(labels, null);
     wfPayrollChart = mkChart(wfPayrollChart, 'wfPayrollChart', {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: '#5B3FE0', borderRadius: 4 }] },
+        data: { labels, datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderRadius: 4 }] },
         options: { indexAxis: 'y', plugins: { legend: { display: false } },
             scales: { x: { grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } }, y: { grid: { display: false }, ticks: { color: '#5B5875' } } } }
     });
@@ -251,10 +269,12 @@ async function wfLoadPayrollChart() {
 
 async function wfLoadTenureChart() {
     const data = await fetchJson(`/api/dashboard/headcount-by-tenure?${buildQuery()}`);
+    const labels = data.map(d => d.label);
+    const colors = ChartColors.colorsByLabel(labels, null);
     wfTenureChart = mkChart(wfTenureChart, 'wfTenureChart', {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: '#A78BFA', borderRadius: 4 }] },
-        options: { plugins: { legend: { display: false } },
+        data: { labels, datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderRadius: 4 }] },
+        options: { plugins: { legend: { display: false }, tooltip: { enabled: true, callbacks: { label: c => ` ${c.formattedValue} employees` } } },
             scales: { x: { grid: { display: false }, ticks: { color: '#5B5875' } }, y: { grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } } } }
     });
 }
@@ -298,28 +318,41 @@ async function wfLoadHeadcountTrend() {
         type: 'line',
         data: {
             labels: data.map(d => fmt(d.label)),
-            datasets: [{ data: data.map(d => d.value), borderColor: 'oklch(0.5 0.18 25)', backgroundColor: 'oklch(0.5 0.18 25 / .12)', tension: 0.35, fill: true, pointRadius: 3 }]
+            datasets: [{ data: data.map(d => d.value), borderColor: 'oklch(0.5 0.18 25)', backgroundColor: 'oklch(0.5 0.18 25 / .12)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 6 }]
         },
-        options: { plugins: { legend: { display: false } },
-            scales: { x: { grid: { display: false }, ticks: { color: '#5B5875' } }, y: { grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } } } }
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true, callbacks: { label: c => ` ${c.formattedValue} employees` } }
+            },
+            // beginAtZero so a modest real change in headcount doesn't read as a
+            // dramatic climb just because the axis auto-scaled to a narrow range.
+            scales: { x: { grid: { display: false }, ticks: { color: '#5B5875' } }, y: { beginAtZero: true, grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } } }
+        }
     });
 }
 
 /* Headcount by store, with a simple gender mix per store -------------- */
+function wfRenderMixChips(breakdown, colorFor) {
+    const total = Object.values(breakdown).reduce((s, v) => s + v, 0) || 1;
+    return Object.entries(breakdown).map(([label, value]) => {
+        const pct = Math.round(value / total * 100);
+        return `<span><span class="wf-store-gender-dot" style="background:${colorFor(label)}"></span>${label} ${pct}%</span>`;
+    }).join(' ');
+}
+
 function wfRenderStoreTable(rows) {
     const tbody = document.getElementById('wfStoreTableBody');
-    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-muted">No data for this period.</td></tr>'; return; }
+    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No data for this period.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
-        const total = Object.values(r.genderBreakdown).reduce((s, v) => s + v, 0) || 1;
-        const genderHtml = Object.entries(r.genderBreakdown).map(([label, value]) => {
-            const pct = Math.round(value / total * 100);
-            const color = ChartColors.GENDER_COLORS[label] || ChartColors.hashColor(label);
-            return `<span><span class="wf-store-gender-dot" style="background:${color}"></span>${label} ${pct}%</span>`;
-        }).join(' ');
+        const genderHtml  = wfRenderMixChips(r.genderBreakdown, l => ChartColors.GENDER_COLORS[l] || ChartColors.hashColor(l));
+        const payrollHtml = wfRenderMixChips(r.payrollGroupBreakdown || {}, l => ChartColors.hashColor(l));
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2"><div class="wf-store-gender-mini">${genderHtml}</div></td>
+            <td class="px-3 py-2"><div class="wf-store-gender-mini">${payrollHtml || '—'}</div></td>
         </tr>`;
     }).join('');
 }
@@ -362,12 +395,13 @@ async function wfLoadOcOm() {
    #omSelect/#ocSelect filter bar (periodMonth/periodYear/fromPeriodMonth/
    fromPeriodYear/storeFilter/omFilter/ocFilter/buildQuery()) — the same
    continuous From→To range used on every other page. dashboard.js's own
-   loadCharts() (resignation-based) is not used here; only loadKpis() is
-   reused, via loadAll below, which dashboard.js's loadPeriods() (called at
-   the bottom of dashboard.js) will invoke once periods are loaded. */
+   loadCharts() and loadKpis() are not used here — this page has its own
+   versions of both — invoked via loadAll below, which dashboard.js's
+   loadPeriods() (called at the bottom of dashboard.js) triggers once
+   periods are loaded. */
 loadAll = async function () {
     await Promise.all([
-        loadKpis(),
+        wfLoadKpis(),
         wfLoadJobTitleChart(),
         wfLoadPayrollChart(),
         wfLoadTenureChart(),

@@ -233,6 +233,77 @@ public class DashboardService : IDashboardService
         return result;
     }
 
+    // Workforce page's own KPI cards (Total Headcount / New Hires / Resignations
+    // — no Turnover Rate). Deliberately separate from GetKpisAsync above rather
+    // than a shared code path: on that page, selecting a From→To period range is
+    // meant to ADD UP each period's numbers (e.g. Jan+Feb headcount), whereas
+    // GetKpisAsync's TotalHeadcount is a snapshot of the latest period in the
+    // range (the definition every other page — Turnover, Comparisons, etc. —
+    // still relies on). Changing GetKpisAsync itself would silently change
+    // those other pages' headcount too.
+    public async Task<DashboardKpiViewModel> GetWorkforceKpisAsync(int? month, int? year, string? store, string role, string? assignedName,
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
+    {
+        if (!month.HasValue || !year.HasValue)
+        {
+            var latest = await _db.ActiveEmployees
+                .OrderByDescending(e => e.Year).ThenByDescending(e => e.Month)
+                .Select(e => new { e.Month, e.Year })
+                .FirstOrDefaultAsync();
+            month ??= latest?.Month ?? DateTime.Now.Month;
+            year ??= latest?.Year ?? DateTime.Now.Year;
+        }
+        fromMonth ??= month; fromYear ??= year;
+
+        var cacheKey = $"wfkpi_{fromMonth}_{fromYear}_{month}_{year}_{store}_{om}_{oc}_{soc}_{od}_{months}_{role}_{assignedName}";
+        if (_cache.TryGetValue(cacheKey, out DashboardKpiViewModel? cached) && cached != null)
+            return cached;
+
+        var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
+        var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
+
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, anchor.Month, anchor.Year);
+        var omOcStores = await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od);
+        var stores = MultiValueFilter.Split(store);
+
+        var totalHeadcount = 0;
+        var totalResignations = 0;
+
+        foreach (var p in periods)
+        {
+            var empQ = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year);
+            if (accessible != null) empQ = empQ.Where(e => accessible.Contains(e.Store));
+            if (stores != null) empQ = empQ.Where(e => stores.Contains(e.Store));
+            else if (omOcStores != null) empQ = empQ.Where(e => omOcStores.Contains(e.Store));
+            totalHeadcount += await empQ.CountAsync();
+
+            var resQ = _db.Resignations.Where(r => r.Month == p.Month && r.Year == p.Year);
+            if (accessible != null) resQ = resQ.Where(r => accessible.Contains(r.Store));
+            if (stores != null) resQ = resQ.Where(r => stores.Contains(r.Store));
+            else if (omOcStores != null) resQ = resQ.Where(r => omOcStores.Contains(r.Store));
+            totalResignations += await resQ.CountAsync();
+        }
+
+        var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToList();
+        var newHireQ = NewHiresQuery(periodKeys);
+        if (accessible != null) newHireQ = newHireQ.Where(e => accessible.Contains(e.Store));
+        if (stores != null) newHireQ = newHireQ.Where(e => stores.Contains(e.Store));
+        else if (omOcStores != null) newHireQ = newHireQ.Where(e => omOcStores.Contains(e.Store));
+        var totalNewHires = await newHireQ.CountAsync();
+
+        var result = new DashboardKpiViewModel
+        {
+            TotalHeadcount = totalHeadcount,
+            NewHires = totalNewHires,
+            TotalResignations = totalResignations,
+            Month = anchor.Month,
+            Year = anchor.Year
+        };
+
+        _cache.Set(cacheKey, result, CacheDuration);
+        return result;
+    }
+
     public async Task<List<ChartDataItem>> GetTurnoverByJobTitleAsync(int? month, int? year, string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
@@ -1012,18 +1083,25 @@ public class DashboardService : IDashboardService
         if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
         if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
 
-        // Group by (Store, Gender) server-side and only pull the per-pair counts
-        // — one row per store/gender combination — instead of every matching
-        // ActiveEmployee row. Same final shape, far fewer rows over the wire.
-        var grouped = await q.GroupBy(e => new { e.Store, e.Gender })
+        // Group by (Store, Gender) and (Store, PayrollGroup) server-side and only
+        // pull the per-pair counts — instead of every matching ActiveEmployee row.
+        // Same final shape, far fewer rows over the wire.
+        var genderGrouped = await q.GroupBy(e => new { e.Store, e.Gender })
             .Select(g => new { g.Key.Store, g.Key.Gender, Count = g.Count() })
             .ToListAsync();
-        return grouped.GroupBy(r => r.Store)
+        var payrollGrouped = await q.Where(e => e.PayrollGroup != "").GroupBy(e => new { e.Store, e.PayrollGroup })
+            .Select(g => new { g.Key.Store, g.Key.PayrollGroup, Count = g.Count() })
+            .ToListAsync();
+        var payrollByStore = payrollGrouped.GroupBy(r => r.Store)
+            .ToDictionary(g => g.Key, g => g.OrderBy(x => x.PayrollGroup).ToDictionary(x => x.PayrollGroup, x => x.Count));
+
+        return genderGrouped.GroupBy(r => r.Store)
             .Select(g => new StoreHeadcountRow
             {
-                StoreName       = g.Key,
-                Headcount       = g.Sum(x => x.Count),
-                GenderBreakdown = g.OrderBy(x => x.Gender).ToDictionary(x => x.Gender, x => x.Count)
+                StoreName             = g.Key,
+                Headcount             = g.Sum(x => x.Count),
+                GenderBreakdown       = g.OrderBy(x => x.Gender).ToDictionary(x => x.Gender, x => x.Count),
+                PayrollGroupBreakdown = payrollByStore.TryGetValue(g.Key, out var pg) ? pg : new Dictionary<string, int>(),
             })
             .OrderByDescending(r => r.Headcount)
             .ToList();

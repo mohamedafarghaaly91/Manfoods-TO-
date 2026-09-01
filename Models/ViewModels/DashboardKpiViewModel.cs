@@ -90,4 +90,5 @@ public class StoreHeadcountRow
     public string StoreName { get; set; } = "";
     public int Headcount { get; set; }
     public Dictionary<string, int> GenderBreakdown { get; set; } = new();
+    public Dictionary<string, int> PayrollGroupBreakdown { get; set; } = new();
 }
