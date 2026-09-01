@@ -274,8 +274,8 @@
     <div class="row g-3 mb-4">
         <div class="col-lg-6">
             <div class="chart-card p-0 h-100" style="overflow:hidden">
-                <div class="chart-header d-flex align-items-center gap-2">
-                    <i class="bi bi-person-badge" style="color:oklch(0.6 0.22 22);font-size:16px"></i>
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.22 22)"><i class="bi bi-person-badge"></i></span>
                     <div>
                         <h6 class="mb-0">Operation Consultants</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
@@ -301,18 +301,45 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="chart-card p-0 h-100" style="overflow:hidden">
-                <div class="chart-header d-flex align-items-center gap-2">
-                    <i class="bi bi-person-gear" style="color:oklch(0.6 0.16 25);font-size:16px"></i>
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
+                    <div>
+                        <h6 class="mb-0">Operation Directors</h6>
+                        <p class="mb-0">Ranked by average 90-day rate</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255)">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Hires</th>
+                                <th class="px-3 py-2 text-center">Early Leavers</th>
+                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ntdOdTableBody">
+                            <tr><td colspan="5" class="text-center py-3 text-muted">
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
                     <div>
                         <h6 class="mb-0">Operation Managers</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
-                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+                        <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
                                 <th class="px-3 py-2">Name</th>
                                 <th class="px-3 py-2 text-center">Stores</th>
@@ -329,21 +356,17 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="chart-card p-0 h-100" style="overflow:hidden">
-                <div class="chart-header d-flex align-items-center gap-2">
-                    <i class="bi bi-person-vcard" style="color:oklch(0.55 0.2 300);font-size:16px"></i>
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
                     <div>
                         <h6 class="mb-0">Senior Operation Consultants</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
+                <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
-                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+                        <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
                                 <th class="px-3 py-2">Name</th>
                                 <th class="px-3 py-2 text-center">Stores</th>
@@ -355,35 +378,6 @@
                         <tbody id="ntdSocTableBody">
                             <tr><td colspan="5" class="text-center py-3 text-muted">
                                 <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...
-                            </td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="chart-card p-0 h-100" style="overflow:hidden">
-                <div class="chart-header d-flex align-items-center gap-2">
-                    <i class="bi bi-person-workspace" style="color:oklch(0.5 0.18 250);font-size:16px"></i>
-                    <div>
-                        <h6 class="mb-0">Operation Directors</h6>
-                        <p class="mb-0">Ranked by average 90-day rate</p>
-                    </div>
-                </div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
-                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
-                            <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Hires</th>
-                                <th class="px-3 py-2 text-center">Early Leavers</th>
-                                <th class="px-3 py-2 text-center">90-Day Rate</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ntdOdTableBody">
-                            <tr><td colspan="5" class="text-center py-3 text-muted">
-                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...
                             </td></tr>
                         </tbody>
                     </table>

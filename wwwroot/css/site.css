@@ -458,6 +458,26 @@ html, body {
 .chart-body    { height: 280px; position: relative; }
 .chart-body-sm { height: 220px; }
 
+/* Professional card-header variant: icon in a tinted rounded badge instead
+   of a bare glyph, with a divider under the title block. --icon-color sets
+   both the glyph and its badge tint. Used by the OC/OM/SOC/OD breakdown
+   cards across the dashboard pages. */
+.stat-card-header {
+    display: flex; align-items: center; gap: 13px;
+    padding: 16px 18px !important;
+    border-bottom: 1px solid var(--card-border);
+    margin: 0 !important;
+}
+.stat-card-header .stat-card-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+    background: color-mix(in oklch, var(--icon-color) 15%, transparent);
+    color: var(--icon-color);
+    font-size: 17px;
+}
+.stat-card-header h6 { margin: 0 0 1px; }
+.stat-card-header p  { margin: 0; }
+
 /* ══ GENERAL CARDS ════════════════════════════════════ */
 .card-dark {
     background: var(--card-bg);
