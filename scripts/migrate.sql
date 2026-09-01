@@ -286,9 +286,33 @@ IF COL_LENGTH('dbo.store_action_plans', 'last_evaluated_year') IS NULL
 -- CREATE TABLE ... IF NOT EXISTS above is a no-op on a table that was already
 -- created (e.g. by an earlier run of this script before store_name was
 -- bounded to NVARCHAR(450) below) — fix it explicitly so the filtered index
--- further down can actually be created on it. Safe to re-run: narrowing an
--- already-450-or-narrower column is a no-op.
-ALTER TABLE dbo.store_action_plans ALTER COLUMN store_name NVARCHAR(450) NOT NULL;
+-- further down can actually be created on it. Guarded on the column's actual
+-- current width (max_length = -1 means NVARCHAR(MAX)) so this whole block is
+-- a no-op once store_name is already NVARCHAR(450). ALTER COLUMN cannot run
+-- while a DEFAULT constraint is attached to the column (SQL Server error:
+-- "object ... is dependent on column"), so the inline DEFAULT '' from the
+-- CREATE TABLE above — which got an auto-generated constraint name — has to
+-- be located and dropped first, then re-added afterward with an explicit
+-- name so it doesn't collide with itself if this ever needs to run again.
+IF EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('dbo.store_action_plans') AND name = 'store_name' AND max_length = -1
+)
+BEGIN
+    DECLARE @storeNameDefaultConstraint NVARCHAR(200);
+    SELECT @storeNameDefaultConstraint = dc.name
+    FROM sys.default_constraints dc
+    JOIN sys.columns c ON c.object_id = dc.parent_object_id AND c.column_id = dc.parent_column_id
+    WHERE dc.parent_object_id = OBJECT_ID('dbo.store_action_plans') AND c.name = 'store_name';
+
+    IF @storeNameDefaultConstraint IS NOT NULL
+        EXEC('ALTER TABLE dbo.store_action_plans DROP CONSTRAINT [' + @storeNameDefaultConstraint + ']');
+
+    ALTER TABLE dbo.store_action_plans ALTER COLUMN store_name NVARCHAR(450) NOT NULL;
+
+    ALTER TABLE dbo.store_action_plans
+        ADD CONSTRAINT DF_store_action_plans_store_name DEFAULT '' FOR store_name;
+END
 
 -- Only one Active plan per store — a filtered unique index rather than a
 -- plain one, since Resolved plans for the same store must coexist historically.
