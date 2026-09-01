@@ -1,98 +1,127 @@
 -- =============================================
--- Manfoods McDonald's — DB Migration Script
--- شغّل: psql "$NEON_DATABASE_URL" -f scripts/migrate.sql
+-- Manfoods McDonald's — DB Migration Script (SQL Server / MonsterASP)
+-- شغّل: sqlcmd -S <server> -d <database> -U <user> -P <password> -i scripts/migrate.sql
+--
+-- Ported from the original PostgreSQL/Neon version of this script. T-SQL has
+-- no "IF NOT EXISTS" shorthand for CREATE TABLE/ADD COLUMN/CREATE INDEX, so
+-- every such statement below is wrapped in an explicit existence check
+-- instead — this keeps the same "safe to re-run on every deploy" guarantee
+-- the original script had. TEXT columns became NVARCHAR (never VARCHAR) to
+-- keep storing Arabic text correctly; NVARCHAR(MAX) except where a column
+-- needs a PRIMARY KEY / UNIQUE constraint, which SQL Server cannot place on
+-- a MAX-length column.
 -- =============================================
 
 -- ── users ─────────────────────────────────────
 -- password_hash is nullable: bulk-created accounts start "pending" (no
 -- password) until the OTP self-activation flow sets one.
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    email TEXT NOT NULL UNIQUE,
-    phone TEXT NOT NULL DEFAULT '',
-    password_hash TEXT,
-    role TEXT NOT NULL DEFAULT '',
-    assigned_name TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
--- CREATE TABLE IF NOT EXISTS is a no-op on a pre-existing table, so backfill
--- explicitly for databases that already had the old shape.
-ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '';
-ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+IF OBJECT_ID('dbo.users', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.users (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        email NVARCHAR(450) NOT NULL UNIQUE,
+        phone NVARCHAR(MAX) NOT NULL DEFAULT '',
+        password_hash NVARCHAR(MAX) NULL,
+        role NVARCHAR(MAX) NOT NULL DEFAULT '',
+        assigned_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+-- CREATE TABLE ... IF NOT EXISTS above is a no-op on a pre-existing table, so
+-- backfill explicitly for databases that already had the old shape.
+IF COL_LENGTH('dbo.users', 'phone') IS NULL
+    ALTER TABLE dbo.users ADD phone NVARCHAR(MAX) NOT NULL DEFAULT '';
+ALTER TABLE dbo.users ALTER COLUMN password_hash NVARCHAR(MAX) NULL;
 
 -- One-time historical cleanup (already applied): Admin_Full/Admin_Read were
 -- folded into Admin, and Viewer into User. Operation_Manager/Operation_Consultant
 -- are valid role values again (per-store access restriction) — do NOT add a
 -- rewrite-to-User statement here, since this script is re-run on every deploy
 -- and would silently wipe out live OM/OC role assignments.
-UPDATE users SET role = 'Admin' WHERE role IN ('Admin_Full', 'Admin_Read');
-UPDATE users SET role = 'User' WHERE role = 'Viewer';
+UPDATE dbo.users SET role = 'Admin' WHERE role IN ('Admin_Full', 'Admin_Read');
+UPDATE dbo.users SET role = 'User' WHERE role = 'Viewer';
 
 -- ── password_reset_otps ────────────────────────
 -- OTPs for the self-service "forgot password" flow (User accounts only —
 -- Admin accounts use the separate master-key recovery flow). 4h expiry,
 -- single use, invalidated after 5 failed attempts.
-CREATE TABLE IF NOT EXISTS password_reset_otps (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    otp_code TEXT NOT NULL DEFAULT '',
-    expires_at TIMESTAMPTZ NOT NULL,
-    is_used BOOLEAN NOT NULL DEFAULT FALSE,
-    failed_attempts INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+IF OBJECT_ID('dbo.password_reset_otps', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.password_reset_otps (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES dbo.users(id) ON DELETE CASCADE,
+        otp_code NVARCHAR(MAX) NOT NULL DEFAULT '',
+        expires_at DATETIME2 NOT NULL,
+        is_used BIT NOT NULL DEFAULT 0,
+        failed_attempts INT NOT NULL DEFAULT 0,
+        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
 
 -- ── app_settings ───────────────────────────────
 -- Small key/value store for config that isn't tied to any entity — right
 -- now just the admin recovery key hash (bcrypt, same as passwords). Not an
 -- env var/Secret: this way there is nothing extra to configure outside the
 -- database, and it can be rotated later from within the app if needed.
-CREATE TABLE IF NOT EXISTS app_settings (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL DEFAULT ''
-);
+IF OBJECT_ID('dbo.app_settings', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.app_settings (
+        [key] NVARCHAR(200) PRIMARY KEY,
+        value NVARCHAR(MAX) NOT NULL DEFAULT ''
+    );
+END
 -- Seeds the recovery key hash for the key already generated and handed to
--- the admin — ON CONFLICT DO NOTHING so re-running this script never
--- silently resets a key that's since been rotated.
-INSERT INTO app_settings (key, value)
-VALUES ('admin_recovery_key_hash', '$2b$11$24/KLaFMtFEfWIHLPFgbsudQs/B1SN/EVztSlE7u4ff0QAMiMS.sC')
-ON CONFLICT (key) DO NOTHING;
+-- the admin — guarded by an existence check so re-running this script never
+-- silently resets a key that's since been rotated (same intent as the
+-- original ON CONFLICT DO NOTHING).
+IF NOT EXISTS (SELECT 1 FROM dbo.app_settings WHERE [key] = 'admin_recovery_key_hash')
+    INSERT INTO dbo.app_settings ([key], value)
+    VALUES ('admin_recovery_key_hash', '$2b$11$24/KLaFMtFEfWIHLPFgbsudQs/B1SN/EVztSlE7u4ff0QAMiMS.sC');
 
 -- ── active_employees ──────────────────────────
-CREATE TABLE IF NOT EXISTS active_employees (
-    id SERIAL PRIMARY KEY,
-    employee_id TEXT NOT NULL DEFAULT '',
-    name TEXT NOT NULL DEFAULT '',
-    store TEXT NOT NULL DEFAULT '',
-    job_title TEXT NOT NULL DEFAULT '',
-    gender TEXT NOT NULL DEFAULT '',
-    hire_date DATE,
-    month INTEGER NOT NULL DEFAULT 0,
-    year INTEGER NOT NULL DEFAULT 0
-);
+IF OBJECT_ID('dbo.active_employees', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.active_employees (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        employee_id NVARCHAR(MAX) NOT NULL DEFAULT '',
+        name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store NVARCHAR(MAX) NOT NULL DEFAULT '',
+        job_title NVARCHAR(MAX) NOT NULL DEFAULT '',
+        gender NVARCHAR(MAX) NOT NULL DEFAULT '',
+        hire_date DATE NULL,
+        month INT NOT NULL DEFAULT 0,
+        year INT NOT NULL DEFAULT 0
+    );
+END
 
 -- ── resignations ──────────────────────────────
-CREATE TABLE IF NOT EXISTS resignations (
-    id SERIAL PRIMARY KEY,
-    employee_id TEXT NOT NULL DEFAULT '',
-    name TEXT NOT NULL DEFAULT '',
-    store TEXT NOT NULL DEFAULT '',
-    job_title TEXT NOT NULL DEFAULT '',
-    gender TEXT NOT NULL DEFAULT '',
-    hire_date DATE,
-    resignation_date DATE,
-    tenure_months INTEGER NOT NULL DEFAULT 0,
-    month INTEGER NOT NULL DEFAULT 0,
-    year INTEGER NOT NULL DEFAULT 0
-);
+IF OBJECT_ID('dbo.resignations', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.resignations (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        employee_id NVARCHAR(MAX) NOT NULL DEFAULT '',
+        name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store NVARCHAR(MAX) NOT NULL DEFAULT '',
+        job_title NVARCHAR(MAX) NOT NULL DEFAULT '',
+        gender NVARCHAR(MAX) NOT NULL DEFAULT '',
+        hire_date DATE NULL,
+        resignation_date DATE NULL,
+        tenure_months INT NOT NULL DEFAULT 0,
+        month INT NOT NULL DEFAULT 0,
+        year INT NOT NULL DEFAULT 0
+    );
+END
 
 -- ── store_references ──────────────────────────
-CREATE TABLE IF NOT EXISTS store_references (
-    id SERIAL PRIMARY KEY,
-    store_name TEXT NOT NULL DEFAULT '',
-    region TEXT NOT NULL DEFAULT '',
-    is_active BOOLEAN NOT NULL DEFAULT TRUE
-);
+IF OBJECT_ID('dbo.store_references', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.store_references (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        region NVARCHAR(MAX) NOT NULL DEFAULT '',
+        is_active BIT NOT NULL DEFAULT 1
+    );
+END
 
 -- The actual table backing Models/StoreReference.cs is "store_reference"
 -- (singular) — unrelated to "store_references" above. EnsureCreated() only
@@ -100,95 +129,121 @@ CREATE TABLE IF NOT EXISTS store_references (
 -- database that already had other tables (e.g. this one), it silently
 -- never created this table. Create it explicitly so this script is the
 -- real source of truth for it, matching this app's other tables.
-CREATE TABLE IF NOT EXISTS store_reference (
-    id SERIAL PRIMARY KEY,
-    month INTEGER NOT NULL DEFAULT 0,
-    year INTEGER NOT NULL DEFAULT 0,
-    store_name TEXT NOT NULL DEFAULT '',
-    store_leader TEXT NOT NULL DEFAULT '',
-    operation_consultant TEXT NOT NULL DEFAULT '',
-    operation_manager TEXT NOT NULL DEFAULT ''
-);
+IF OBJECT_ID('dbo.store_reference', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.store_reference (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        month INT NOT NULL DEFAULT 0,
+        year INT NOT NULL DEFAULT 0,
+        store_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store_leader NVARCHAR(MAX) NOT NULL DEFAULT '',
+        operation_consultant NVARCHAR(MAX) NOT NULL DEFAULT '',
+        operation_manager NVARCHAR(MAX) NOT NULL DEFAULT ''
+    );
+END
 
 -- Backfill the OM/OC email columns used for per-store access restriction.
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS head_manager_email TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS senior_operation_consultant TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS senior_operation_consultant_email TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_director TEXT NOT NULL DEFAULT '';
-ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_director_email TEXT NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'operation_manager_email') IS NULL
+    ALTER TABLE dbo.store_reference ADD operation_manager_email NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'operation_consultant_email') IS NULL
+    ALTER TABLE dbo.store_reference ADD operation_consultant_email NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'head_manager') IS NULL
+    ALTER TABLE dbo.store_reference ADD head_manager NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'head_manager_email') IS NULL
+    ALTER TABLE dbo.store_reference ADD head_manager_email NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'senior_operation_consultant') IS NULL
+    ALTER TABLE dbo.store_reference ADD senior_operation_consultant NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'senior_operation_consultant_email') IS NULL
+    ALTER TABLE dbo.store_reference ADD senior_operation_consultant_email NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'operation_director') IS NULL
+    ALTER TABLE dbo.store_reference ADD operation_director NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.store_reference', 'operation_director_email') IS NULL
+    ALTER TABLE dbo.store_reference ADD operation_director_email NVARCHAR(MAX) NOT NULL DEFAULT '';
 
 -- ── exit_interviews ────────────────────────────
 -- One row per Microsoft Forms exit-interview submission. No name / national
 -- ID is stored — employee_id is kept only to resolve store/leader/OC/OM at
 -- upload time and must never be surfaced in any view or API response.
-CREATE TABLE IF NOT EXISTS exit_interviews (
-    id SERIAL PRIMARY KEY,
-    forms_response_id TEXT NOT NULL DEFAULT '',
-    employee_id TEXT NOT NULL DEFAULT '',
-    store TEXT NOT NULL DEFAULT '',
-    store_leader TEXT NOT NULL DEFAULT '',
-    operation_consultant TEXT NOT NULL DEFAULT '',
-    operation_manager TEXT NOT NULL DEFAULT '',
-    job_title TEXT NOT NULL DEFAULT '',
-    month INTEGER NOT NULL DEFAULT 0,
-    year INTEGER NOT NULL DEFAULT 0,
-    submitted_at TIMESTAMPTZ,
+IF OBJECT_ID('dbo.exit_interviews', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.exit_interviews (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        forms_response_id NVARCHAR(450) NOT NULL DEFAULT '',
+        employee_id NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store NVARCHAR(MAX) NOT NULL DEFAULT '',
+        store_leader NVARCHAR(MAX) NOT NULL DEFAULT '',
+        operation_consultant NVARCHAR(MAX) NOT NULL DEFAULT '',
+        operation_manager NVARCHAR(MAX) NOT NULL DEFAULT '',
+        job_title NVARCHAR(MAX) NOT NULL DEFAULT '',
+        month INT NOT NULL DEFAULT 0,
+        year INT NOT NULL DEFAULT 0,
+        submitted_at DATETIME2 NULL,
 
-    reason_for_leaving TEXT NOT NULL DEFAULT '',
-    would_return TEXT NOT NULL DEFAULT '',
-    overall_experience TEXT NOT NULL DEFAULT '',
-    workload_condition TEXT NOT NULL DEFAULT '',
-    fair_treatment TEXT NOT NULL DEFAULT '',
-    encourage_opinions TEXT NOT NULL DEFAULT '',
-    complaints_handling TEXT NOT NULL DEFAULT '',
-    benefits_match TEXT NOT NULL DEFAULT '',
-    teamwork TEXT NOT NULL DEFAULT '',
-    communication TEXT NOT NULL DEFAULT '',
-    task_fit TEXT NOT NULL DEFAULT '',
-    training TEXT NOT NULL DEFAULT '',
-    feedback TEXT NOT NULL DEFAULT '',
-    use_personal_abilities TEXT NOT NULL DEFAULT '',
+        reason_for_leaving NVARCHAR(MAX) NOT NULL DEFAULT '',
+        would_return NVARCHAR(MAX) NOT NULL DEFAULT '',
+        overall_experience NVARCHAR(MAX) NOT NULL DEFAULT '',
+        workload_condition NVARCHAR(MAX) NOT NULL DEFAULT '',
+        fair_treatment NVARCHAR(MAX) NOT NULL DEFAULT '',
+        encourage_opinions NVARCHAR(MAX) NOT NULL DEFAULT '',
+        complaints_handling NVARCHAR(MAX) NOT NULL DEFAULT '',
+        benefits_match NVARCHAR(MAX) NOT NULL DEFAULT '',
+        teamwork NVARCHAR(MAX) NOT NULL DEFAULT '',
+        communication NVARCHAR(MAX) NOT NULL DEFAULT '',
+        task_fit NVARCHAR(MAX) NOT NULL DEFAULT '',
+        training NVARCHAR(MAX) NOT NULL DEFAULT '',
+        feedback NVARCHAR(MAX) NOT NULL DEFAULT '',
+        use_personal_abilities NVARCHAR(MAX) NOT NULL DEFAULT '',
 
-    reason_other_text TEXT,
-    work_pressure_reason_text TEXT,
-    what_would_change_text TEXT,
-    what_learned_text TEXT,
-    final_comments_text TEXT
-);
-CREATE UNIQUE INDEX IF NOT EXISTS ux_exit_interviews_forms_response_id
-    ON exit_interviews (forms_response_id) WHERE forms_response_id <> '';
+        reason_other_text NVARCHAR(MAX) NULL,
+        work_pressure_reason_text NVARCHAR(MAX) NULL,
+        what_would_change_text NVARCHAR(MAX) NULL,
+        what_learned_text NVARCHAR(MAX) NULL,
+        final_comments_text NVARCHAR(MAX) NULL
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_exit_interviews_forms_response_id' AND object_id = OBJECT_ID('dbo.exit_interviews'))
+    CREATE UNIQUE INDEX ux_exit_interviews_forms_response_id
+        ON dbo.exit_interviews (forms_response_id) WHERE forms_response_id <> '';
 
 -- ── upload_logs ───────────────────────────────
-CREATE TABLE IF NOT EXISTS upload_logs (
-    id SERIAL PRIMARY KEY,
-    file_type TEXT NOT NULL DEFAULT '',
-    file_name TEXT NOT NULL DEFAULT '',
-    month INTEGER NOT NULL DEFAULT 0,
-    year INTEGER NOT NULL DEFAULT 0,
-    upload_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    uploaded_by TEXT NOT NULL DEFAULT '',
-    file_content BYTEA,
-    content_type TEXT
-);
+IF OBJECT_ID('dbo.upload_logs', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.upload_logs (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        file_type NVARCHAR(MAX) NOT NULL DEFAULT '',
+        file_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        month INT NOT NULL DEFAULT 0,
+        year INT NOT NULL DEFAULT 0,
+        upload_date DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        uploaded_by NVARCHAR(MAX) NOT NULL DEFAULT '',
+        file_content VARBINARY(MAX) NULL,
+        content_type NVARCHAR(MAX) NULL
+    );
+END
 
--- CREATE TABLE IF NOT EXISTS is a no-op on a table that already exists with
--- an older shape, so columns added after the table's first deploy (like
--- these two) never land on existing databases. Backfill them explicitly.
-ALTER TABLE upload_logs ADD COLUMN IF NOT EXISTS file_content BYTEA;
-ALTER TABLE upload_logs ADD COLUMN IF NOT EXISTS content_type TEXT;
+-- CREATE TABLE ... IF NOT EXISTS above is a no-op on a table that already
+-- exists with an older shape, so columns added after the table's first
+-- deploy (like these two) never land on existing databases. Backfill them
+-- explicitly.
+IF COL_LENGTH('dbo.upload_logs', 'file_content') IS NULL
+    ALTER TABLE dbo.upload_logs ADD file_content VARBINARY(MAX) NULL;
+IF COL_LENGTH('dbo.upload_logs', 'content_type') IS NULL
+    ALTER TABLE dbo.upload_logs ADD content_type NVARCHAR(MAX) NULL;
 
 -- ── ai_usage_daily ────────────────────────────
-CREATE TABLE IF NOT EXISTS ai_usage_daily (
-    user_id INTEGER NOT NULL,
-    usage_date DATE NOT NULL,
-    question_count INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, usage_date)
-);
-ALTER TABLE ai_usage_daily ADD COLUMN IF NOT EXISTS prompt_tokens BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE ai_usage_daily ADD COLUMN IF NOT EXISTS completion_tokens BIGINT NOT NULL DEFAULT 0;
+IF OBJECT_ID('dbo.ai_usage_daily', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ai_usage_daily (
+        user_id INT NOT NULL,
+        usage_date DATE NOT NULL,
+        question_count INT NOT NULL DEFAULT 0,
+        PRIMARY KEY (user_id, usage_date)
+    );
+END
+IF COL_LENGTH('dbo.ai_usage_daily', 'prompt_tokens') IS NULL
+    ALTER TABLE dbo.ai_usage_daily ADD prompt_tokens BIGINT NOT NULL DEFAULT 0;
+IF COL_LENGTH('dbo.ai_usage_daily', 'completion_tokens') IS NULL
+    ALTER TABLE dbo.ai_usage_daily ADD completion_tokens BIGINT NOT NULL DEFAULT 0;
 
 -- ── store_action_plans / recommendations / notes ──────────────────────────
 -- Store Action Plan feature. No EF Migrations in this app (Program.cs uses
@@ -197,67 +252,86 @@ ALTER TABLE ai_usage_daily ADD COLUMN IF NOT EXISTS completion_tokens BIGINT NOT
 -- Store is the permission/ownership unit: StoreReference remains the single
 -- source of truth for who's responsible for a store, so these tables never
 -- store a user-store assignment of their own.
-CREATE TABLE IF NOT EXISTS store_action_plans (
-    id SERIAL PRIMARY KEY,
-    store_name TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'Active',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    created_month INTEGER NOT NULL DEFAULT 0,
-    created_year INTEGER NOT NULL DEFAULT 0,
-    resolved_at TIMESTAMPTZ,
-    resolved_reason TEXT,
-    baseline_turnover_rate DOUBLE PRECISION,
-    baseline_early_leaver_rate DOUBLE PRECISION,
-    baseline_retention_rate DOUBLE PRECISION,
-    detected_issues_summary TEXT NOT NULL DEFAULT '',
-    healthy_streak_count INTEGER NOT NULL DEFAULT 0,
-    -- Not part of the originally-specified column list — needed so detection
-    -- can be re-run safely for a period that was already evaluated (e.g. after
-    -- a single-file re-upload correction) without double-counting a monthly
-    -- cycle toward the 2-consecutive-healthy-cycle auto-resolve rule.
-    last_evaluated_month INTEGER,
-    last_evaluated_year INTEGER
-);
-ALTER TABLE store_action_plans ADD COLUMN IF NOT EXISTS last_evaluated_month INTEGER;
-ALTER TABLE store_action_plans ADD COLUMN IF NOT EXISTS last_evaluated_year INTEGER;
+IF OBJECT_ID('dbo.store_action_plans', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.store_action_plans (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        status NVARCHAR(MAX) NOT NULL DEFAULT 'Active',
+        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        created_month INT NOT NULL DEFAULT 0,
+        created_year INT NOT NULL DEFAULT 0,
+        resolved_at DATETIME2 NULL,
+        resolved_reason NVARCHAR(MAX) NULL,
+        baseline_turnover_rate FLOAT NULL,
+        baseline_early_leaver_rate FLOAT NULL,
+        baseline_retention_rate FLOAT NULL,
+        detected_issues_summary NVARCHAR(MAX) NOT NULL DEFAULT '',
+        healthy_streak_count INT NOT NULL DEFAULT 0,
+        -- Not part of the originally-specified column list — needed so detection
+        -- can be re-run safely for a period that was already evaluated (e.g. after
+        -- a single-file re-upload correction) without double-counting a monthly
+        -- cycle toward the 2-consecutive-healthy-cycle auto-resolve rule.
+        last_evaluated_month INT NULL,
+        last_evaluated_year INT NULL
+    );
+END
+IF COL_LENGTH('dbo.store_action_plans', 'last_evaluated_month') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD last_evaluated_month INT NULL;
+IF COL_LENGTH('dbo.store_action_plans', 'last_evaluated_year') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD last_evaluated_year INT NULL;
 
--- Only one Active plan per store — a partial unique index rather than a
+-- Only one Active plan per store — a filtered unique index rather than a
 -- plain one, since Resolved plans for the same store must coexist historically.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_store_action_plans_active_store
-    ON store_action_plans (store_name)
-    WHERE status = 'Active';
-CREATE INDEX IF NOT EXISTS ix_store_action_plans_store_name ON store_action_plans (store_name);
+-- SQL Server supports filtered indexes natively with the same WHERE syntax
+-- Postgres partial indexes use, so this ports over unchanged.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_store_action_plans_active_store' AND object_id = OBJECT_ID('dbo.store_action_plans'))
+    CREATE UNIQUE INDEX ux_store_action_plans_active_store
+        ON dbo.store_action_plans (store_name)
+        WHERE status = 'Active';
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_store_action_plans_store_name' AND object_id = OBJECT_ID('dbo.store_action_plans'))
+    CREATE INDEX ix_store_action_plans_store_name ON dbo.store_action_plans (store_name);
 
-CREATE TABLE IF NOT EXISTS action_plan_recommendations (
-    id SERIAL PRIMARY KEY,
-    store_action_plan_id INTEGER NOT NULL REFERENCES store_action_plans (id) ON DELETE CASCADE,
-    signal_code TEXT NOT NULL DEFAULT '',
-    category TEXT NOT NULL DEFAULT '',
-    recommendation_text TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_action_plan_recommendations_plan_id ON action_plan_recommendations (store_action_plan_id);
+IF OBJECT_ID('dbo.action_plan_recommendations', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.action_plan_recommendations (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_action_plan_id INT NOT NULL REFERENCES dbo.store_action_plans (id) ON DELETE CASCADE,
+        signal_code NVARCHAR(MAX) NOT NULL DEFAULT '',
+        category NVARCHAR(MAX) NOT NULL DEFAULT '',
+        recommendation_text NVARCHAR(MAX) NOT NULL DEFAULT '',
+        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_action_plan_recommendations_plan_id' AND object_id = OBJECT_ID('dbo.action_plan_recommendations'))
+    CREATE INDEX ix_action_plan_recommendations_plan_id ON dbo.action_plan_recommendations (store_action_plan_id);
 
 -- Manager notes are append-only in V1 — no update/delete path in the app,
 -- and author_name/author_role are snapshotted per row at write time so a
 -- historical note keeps its original author even if that user account's
 -- role or assigned name changes later.
-CREATE TABLE IF NOT EXISTS action_plan_notes (
-    id SERIAL PRIMARY KEY,
-    store_action_plan_id INTEGER NOT NULL REFERENCES store_action_plans (id) ON DELETE CASCADE,
-    author_user_id INTEGER NOT NULL,
-    author_name TEXT NOT NULL DEFAULT '',
-    author_role TEXT NOT NULL DEFAULT '',
-    note_text TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_action_plan_notes_plan_id ON action_plan_notes (store_action_plan_id);
+IF OBJECT_ID('dbo.action_plan_notes', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.action_plan_notes (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_action_plan_id INT NOT NULL REFERENCES dbo.store_action_plans (id) ON DELETE CASCADE,
+        author_user_id INT NOT NULL,
+        author_name NVARCHAR(MAX) NOT NULL DEFAULT '',
+        author_role NVARCHAR(MAX) NOT NULL DEFAULT '',
+        note_text NVARCHAR(MAX) NOT NULL DEFAULT '',
+        created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_action_plan_notes_plan_id' AND object_id = OBJECT_ID('dbo.action_plan_notes'))
+    CREATE INDEX ix_action_plan_notes_plan_id ON dbo.action_plan_notes (store_action_plan_id);
 
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal
-INSERT INTO users (email, phone, password_hash, role, created_at)
-VALUES
-    ('admin@mcd.com', '+201000000000', '$2a$11$4dMAuH6DiUfgnniQT39r1uof2UmVIJQ2vslu8qs8OwOJ7EUM1i/n6', 'Admin', NOW()),
-    ('user@mcd.com',  '+201000000001', '$2a$11$4dMAuH6DiUfgnniQT39r1uof2UmVIJQ2vslu8qs8OwOJ7EUM1i/n6', 'User',  NOW())
-ON CONFLICT (email) DO NOTHING;
+INSERT INTO dbo.users (email, phone, password_hash, role, created_at)
+SELECT v.email, v.phone, v.password_hash, v.role, SYSUTCDATETIME()
+FROM (VALUES
+    ('admin@mcd.com', '+201000000000', '$2a$11$4dMAuH6DiUfgnniQT39r1uof2UmVIJQ2vslu8qs8OwOJ7EUM1i/n6', 'Admin'),
+    ('user@mcd.com',  '+201000000001', '$2a$11$4dMAuH6DiUfgnniQT39r1uof2UmVIJQ2vslu8qs8OwOJ7EUM1i/n6', 'User')
+) AS v(email, phone, password_hash, role)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.users u WHERE u.email = v.email);

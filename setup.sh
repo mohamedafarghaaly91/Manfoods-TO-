@@ -10,11 +10,11 @@ echo ""
 echo "[1/4] Checking configuration..."
 
 DB_OK=false
-if [ -n "$NEON_DATABASE_URL" ]; then
-  echo "  ✅ NEON_DATABASE_URL is set — using Neon database."
+if [ -n "$SQLSERVER_CONNECTION_STRING" ]; then
+  echo "  ✅ SQLSERVER_CONNECTION_STRING is set — using it directly."
   DB_OK=true
-elif [ -n "$PGHOST" ] && [ -n "$PGUSER" ]; then
-  echo "  ✅ PGHOST/PGUSER are set — using Replit PostgreSQL."
+elif [ -n "$MSSQL_HOST" ] && [ -n "$MSSQL_USER" ]; then
+  echo "  ✅ MSSQL_HOST/MSSQL_USER are set — using MonsterASP SQL Server."
   DB_OK=true
 elif [ -n "$DATABASE_URL" ]; then
   echo "  ✅ DATABASE_URL is set."
@@ -23,8 +23,9 @@ fi
 
 if [ "$DB_OK" = false ]; then
   echo ""
-  echo "  ❌ ERROR: No database URL found."
-  echo "     Please set NEON_DATABASE_URL in Configurations (Secrets tab)."
+  echo "  ❌ ERROR: No SQL Server connection info found."
+  echo "     Please set SQLSERVER_CONNECTION_STRING (or MSSQL_HOST/MSSQL_PORT/"
+  echo "     MSSQL_DATABASE/MSSQL_USER/MSSQL_PASSWORD) in Configurations (Secrets tab)."
   exit 1
 fi
 

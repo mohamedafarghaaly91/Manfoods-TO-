@@ -74,7 +74,7 @@ builder.Services.AddSession(options =>
 var connectionString = BuildConnectionString();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -216,93 +216,48 @@ using (var scope = app.Services.CreateScope())
 app.Run();
 
 
+// Resolution order mirrors the previous Neon/Postgres setup's fallback chain, adapted
+// for SQL Server: a full connection string first (what MonsterASP hands you directly
+// from its control panel), then discrete parts assembled safely via
+// SqlConnectionStringBuilder (handles escaping of special characters in the password),
+// then a local-dev-only fallback so `dotnet run` still works with no secrets configured.
+// No credentials are hardcoded anywhere below except that local/dev fallback, which uses
+// SQL Server's Trusted_Connection (no username/password at all) rather than a literal
+// credential.
 static string BuildConnectionString()
 {
-    var neonUrl = Environment.GetEnvironmentVariable("NEON_DATABASE_URL");
+    var fullConnectionString = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING");
+    if (!string.IsNullOrEmpty(fullConnectionString))
+        return fullConnectionString;
 
-    if (!string.IsNullOrEmpty(neonUrl) &&
-        (neonUrl.StartsWith("postgresql://") ||
-         neonUrl.StartsWith("postgres://")))
+    var mssqlHost = Environment.GetEnvironmentVariable("MSSQL_HOST");
+    var mssqlPort = Environment.GetEnvironmentVariable("MSSQL_PORT") ?? "1433";
+    var mssqlDatabase = Environment.GetEnvironmentVariable("MSSQL_DATABASE");
+    var mssqlUser = Environment.GetEnvironmentVariable("MSSQL_USER");
+    var mssqlPassword = Environment.GetEnvironmentVariable("MSSQL_PASSWORD");
+
+    if (!string.IsNullOrEmpty(mssqlHost) && !string.IsNullOrEmpty(mssqlUser))
     {
-        return ParsePostgresUrl(neonUrl);
-    }
-
-
-    var pgHost = Environment.GetEnvironmentVariable("PGHOST");
-    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
-    var pgUser = Environment.GetEnvironmentVariable("PGUSER");
-    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
-    var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
-
-
-    if (!string.IsNullOrEmpty(pgHost) &&
-        !string.IsNullOrEmpty(pgUser))
-    {
-        return
-            $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword}";
-    }
-
-
-    var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
-    if (!string.IsNullOrEmpty(dbUrl) &&
-        (dbUrl.StartsWith("postgresql://") ||
-         dbUrl.StartsWith("postgres://")))
-    {
-        return ParsePostgresUrl(dbUrl);
-    }
-
-
-    return "Host=localhost;Port=5432;Database=manfoods;Username=postgres;Password=postgres";
-}
-
-
-static string ParsePostgresUrl(string url)
-{
-    try
-    {
-        var uri = new Uri(url);
-
-        var host = uri.Host;
-
-        var dbPort = uri.Port > 0 ? uri.Port : 5432;
-
-        var db = uri.AbsolutePath.TrimStart('/').Split('?')[0];
-
-        var userInfo = uri.UserInfo.Split(':');
-
-        var user = Uri.UnescapeDataString(userInfo[0]);
-
-        var pass = userInfo.Length > 1
-            ? Uri.UnescapeDataString(userInfo[1])
-            : "";
-
-
-        var cs =
-            $"Host={host};Port={dbPort};Database={db};Username={user};Password={pass}";
-
-
-        var query = uri.Query.TrimStart('?');
-
-        if (!string.IsNullOrEmpty(query))
+        var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder
         {
-            foreach (var pair in query.Split('&'))
-            {
-                var kv = pair.Split('=');
-
-                if (kv.Length == 2 &&
-                    kv[0] == "sslmode" &&
-                    !string.IsNullOrEmpty(kv[1]))
-                {
-                    cs += $";SslMode={char.ToUpper(kv[1][0]) + kv[1][1..]}";
-                }
-            }
-        }
-
-        return cs;
+            DataSource = $"{mssqlHost},{mssqlPort}",
+            InitialCatalog = mssqlDatabase,
+            UserID = mssqlUser,
+            Password = mssqlPassword,
+            Encrypt = true,
+            TrustServerCertificate = Environment.GetEnvironmentVariable("MSSQL_TRUST_SERVER_CERTIFICATE") == "true",
+        };
+        return builder.ConnectionString;
     }
-    catch
-    {
-        return url;
-    }
+
+    // A generic DATABASE_URL, if set, is treated as an already-complete
+    // connection string (unlike the old Postgres setup, there's no widely-used
+    // URI scheme for SQL Server connection strings to parse).
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    if (!string.IsNullOrEmpty(databaseUrl))
+        return databaseUrl;
+
+    // Local-dev-only fallback: SQL Server LocalDB with a trusted (Windows-integrated)
+    // connection, so no credential is ever hardcoded here.
+    return @"Server=(localdb)\MSSQLLocalDB;Database=manfoods;Trusted_Connection=True;TrustServerCertificate=True;";
 }

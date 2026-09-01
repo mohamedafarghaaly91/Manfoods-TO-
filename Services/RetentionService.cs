@@ -92,7 +92,7 @@ public class RetentionService : IRetentionService
     // This query has no request-specific parameters — it returns the same merged
     // active/resignation rows regardless of role/period/om/oc filters (those are
     // applied afterward by LoadEmployeeCohortsAsync) — so it's cached whole rather
-    // than re-read from Postgres on every Retention page interaction. See
+    // than re-read from the database on every Retention page interaction. See
     // UploadService for the write-side invalidation of EmployeeCohortsCacheKey.
     private async Task<List<EmployeeCohort>> LoadAllEmployeeCohortsAsync()
     {

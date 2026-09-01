@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MvcApp.Models;
 
 namespace MvcApp.Data;
@@ -32,5 +33,31 @@ public class AppDbContext : DbContext
             .IsUnique()
             .HasFilter("status = 'Active'")
             .HasDatabaseName("ux_store_action_plans_active_store");
+
+        // SQL Server's DATETIME2 (unlike Npgsql's TIMESTAMPTZ) has no concept of
+        // DateTimeKind — every DateTime read back from it comes back as Kind=
+        // Unspecified. Every DateTime column in this app is always written as
+        // DateTime.UtcNow, so tag every value read back as Kind=Utc explicitly;
+        // otherwise JSON responses (e.g. ExitInterview.SubmittedAt, UploadLog.
+        // UploadDate) would serialize without the "Z"/UTC suffix, which
+        // JavaScript's Date parsing on the frontend would misread as local time
+        // instead of UTC — a real behavior change the Npgsql provider never had.
+        var utcConverter = new ValueConverter<DateTime, DateTime>(
+            v => v,
+            v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+        var nullableUtcConverter = new ValueConverter<DateTime?, DateTime?>(
+            v => v,
+            v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                    property.SetValueConverter(utcConverter);
+                else if (property.ClrType == typeof(DateTime?))
+                    property.SetValueConverter(nullableUtcConverter);
+            }
+        }
     }
 }

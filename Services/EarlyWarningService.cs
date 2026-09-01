@@ -61,7 +61,7 @@ public class EarlyWarningService : IEarlyWarningService
     private async Task<List<HistoricalRecord>> LoadHistoricalRecordsAsync()
     {
         // This query has no request-specific parameters — same rows regardless of
-        // filters — so it's cached whole rather than re-read from Postgres on every
+        // filters — so it's cached whole rather than re-read from the database on every
         // call. See UploadService for the write-side invalidation of
         // HistoricalRecordsCacheKey.
         if (_cache.TryGetValue(HistoricalRecordsCacheKey, out List<HistoricalRecord>? cachedRecords) && cachedRecords != null)

@@ -12,14 +12,14 @@
 
 | المتغير | الوصف | الحالة |
 |---------|-------|--------|
-| `PGHOST` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | قاعدة بيانات PostgreSQL | ✅ مُدار تلقائياً من Replit |
+| `SQLSERVER_CONNECTION_STRING` أو `MSSQL_HOST`/`MSSQL_PORT`/`MSSQL_DATABASE`/`MSSQL_USER`/`MSSQL_PASSWORD` | قاعدة بيانات SQL Server (MonsterASP) | ⚠️ يجب ضبطها في Replit Secrets |
 | `Gemini_API_Key` | مفتاح Google Gemini للمساعد الذكي | ✅ مُضبوط في Secrets |
 | `SESSION_SECRET` | مفتاح تشفير الجلسات | ✅ مُضبوط في Secrets |
 
 ## التقنيات
 
 - **إطار العمل**: ASP.NET Core 9 MVC (C#)
-- **قاعدة البيانات**: PostgreSQL عبر Entity Framework Core + Npgsql
+- **قاعدة البيانات**: SQL Server (MonsterASP) عبر Entity Framework Core + Microsoft.EntityFrameworkCore.SqlServer
 - **واجهة المستخدم**: Razor Views + Bootstrap 5
 - **الذكاء الاصطناعي**: Google Gemini API (`gemini-2.0-flash-lite`)
 - **اللغات**: عربي / إنجليزي (Localization بـ .resx)

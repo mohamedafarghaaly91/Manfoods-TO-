@@ -43,7 +43,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     {
         // This query has no request-specific parameters (the go-live threshold is a
         // fixed cutoff, not a per-call filter), so it's cached whole rather than
-        // re-read from Postgres on every call — see UploadService for the
+        // re-read from the database on every call — see UploadService for the
         // write-side invalidation of ActiveHiresCacheKey.
         if (_cache.TryGetValue(ActiveHiresCacheKey, out List<(string EmployeeId, string Store, int Month, int Year)>? cached) && cached != null)
             return cached;

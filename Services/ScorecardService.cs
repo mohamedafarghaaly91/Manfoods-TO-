@@ -128,7 +128,7 @@ public class ScorecardService : IScorecardService
     {
         // This query has no parameters — it returns the same rows regardless of
         // dimension/year/months (those are applied afterward by the caller) — so
-        // it's cached whole rather than re-read from Postgres on every Scorecard
+        // it's cached whole rather than re-read from the database on every Scorecard
         // interaction (dimension click, year/month change). See UploadService for
         // the write-side invalidation of HistoricalRecordsCacheKey.
         if (_cache.TryGetValue(HistoricalRecordsCacheKey, out List<HistoricalRecord>? cached) && cached != null)
