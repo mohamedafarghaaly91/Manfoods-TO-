@@ -5,17 +5,21 @@ let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', 
 let jobTitleChart, tenureChart, genderChart;
 
 /* Small badge shown next to a chart/table title, telling the user whether
-   the currently selected From→To period range is reflected in THAT
+   the currently selected multi-period filter is reflected in THAT
    particular chart/table, or whether it always shows just the latest
-   period regardless of the range. Only rendered once an actual multi-month
-   range is selected — a single-period selection has nothing to clarify. */
+   period regardless of the range. Only rendered once an actual multi-period
+   selection is active — a single-period selection has nothing to clarify.
+   `isRangeActive` is passed in explicitly (rather than assumed) because not
+   every page uses the continuous From→To filter — the 90-Day page's
+   discrete Year+Months picker computes its own "more than one month
+   selected" condition and passes it here instead. */
 function isPeriodRangeActive() {
     return !!(fromPeriodMonth && fromPeriodYear && periodMonth && periodYear
         && (fromPeriodMonth !== periodMonth || fromPeriodYear !== periodYear));
 }
 
-function rangeFilterBadge(affected) {
-    if (!isPeriodRangeActive()) return '';
+function rangeFilterBadge(isRangeActive, affected) {
+    if (!isRangeActive) return '';
     return affected
         ? '<span class="range-filter-badge range-filter-badge-on"><i class="bi bi-check-circle-fill"></i>Reflects selected range</span>'
         : '<span class="range-filter-badge range-filter-badge-off"><i class="bi bi-dash-circle"></i>Latest period only</span>';

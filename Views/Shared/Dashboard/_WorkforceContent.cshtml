@@ -236,7 +236,7 @@ function wfSetTitleBadge(id, affected) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!(id in wfTitleBase)) wfTitleBase[id] = el.textContent;
-    el.innerHTML = wfTitleBase[id] + ' ' + rangeFilterBadge(affected);
+    el.innerHTML = wfTitleBase[id] + ' ' + rangeFilterBadge(isPeriodRangeActive(), affected);
 }
 
 /* Workforce's own KPI cards: same shared /api/dashboard/kpis endpoint as
@@ -253,7 +253,7 @@ async function wfLoadKpis() {
         <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
     `;
     const noteEl = document.getElementById('wfKpiRangeNote');
-    if (noteEl) noteEl.innerHTML = isPeriodRangeActive() ? rangeFilterBadge(true) + ' — the 3 cards above add up every period in the selected range.' : '';
+    if (noteEl) noteEl.innerHTML = isPeriodRangeActive() ? rangeFilterBadge(true, true) + ' — the 3 cards above add up every period in the selected range.' : '';
 }
 
 /* ── Composition charts ──────────────────────────────────────────── */

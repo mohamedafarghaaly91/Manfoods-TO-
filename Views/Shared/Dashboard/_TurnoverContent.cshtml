@@ -119,6 +119,7 @@
         <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
     </div>
 </div>
+<p id="tvKpiRangeNote" class="text-muted-custom small mb-3" style="margin-top:-10px"></p>
 
 <!-- ── Smart Insights ─────────────────────────────────────── -->
 <div class="d-flex align-items-center gap-2 mb-3">
@@ -136,7 +137,7 @@
 <!-- ── Turnover Rate by Month (per-month formula, selected months only) ── -->
 <div class="chart-card mb-4" style="border-radius:14px">
     <div class="chart-header">
-        <h6>@L["Chart_TurnoverByMonth"]</h6>
+        <h6 id="tvByMonthTitle">@L["Chart_TurnoverByMonth"]</h6>
         <p>@L["Chart_TurnoverByMonthSub"]</p>
     </div>
     <div class="chart-body"><canvas id="turnoverByMonthChart" style="max-height:240px"></canvas></div>
@@ -146,25 +147,25 @@
 <div class="charts-grid mb-4">
     <div class="chart-card">
         <div class="chart-header">
-            <h6>@L["Chart_TurnoverByJobTitle"]</h6>
+            <h6 id="tvJobTitleTitle">@L["Chart_TurnoverByJobTitle"]</h6>
             <p>@L["Chart_TurnoverByJobTitleSub"]</p>
             <div id="jobTitleTopStat" class="tv-stat-callout"></div>
         </div>
         <div class="chart-body"><canvas id="jobTitleChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_TurnoverByTenure"]</h6><p>@L["Chart_TurnoverByTenureSub"]</p></div>
+        <div class="chart-header"><h6 id="tvTenureTitle">@L["Chart_TurnoverByTenure"]</h6><p>@L["Chart_TurnoverByTenureSub"]</p></div>
         <div class="chart-body"><canvas id="tenureChart"></canvas></div>
     </div>
     <div class="chart-card">
         <div class="chart-header">
-            <h6>@L["Chart_TurnoverByPayroll"]</h6><p>Resignations grouped by payroll group</p>
+            <h6 id="tvPayrollTitle">@L["Chart_TurnoverByPayroll"]</h6><p>Resignations grouped by payroll group</p>
             <div id="payrollTopStat" class="tv-stat-callout"></div>
         </div>
         <div class="chart-body"><canvas id="payrollGroupChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_GenderBreakdown"]</h6><p>@L["Chart_GenderBreakdownSub"]</p></div>
+        <div class="chart-header"><h6 id="tvGenderTitle">@L["Chart_GenderBreakdown"]</h6><p>@L["Chart_GenderBreakdownSub"]</p></div>
         <div class="tv-gender-body">
             <div class="tv-gender-canvas-wrap"><canvas id="genderChart"></canvas></div>
             <div class="tv-gender-list" id="genderStatsList"></div>
@@ -174,7 +175,7 @@
 
 <!-- ── Reasons for Leaving (all resignations in the selected period) ── -->
 <div class="chart-card mb-4">
-    <div class="chart-header"><h6>Reasons for Leaving</h6><p>From exit interviews submitted for the selected period</p></div>
+    <div class="chart-header"><h6 id="tvReasonsTitle">Reasons for Leaving</h6><p>From exit interviews submitted for the selected period</p></div>
     <div class="chart-body"><canvas id="reasonsChart" style="max-height:260px"></canvas></div>
 </div>
 
@@ -182,7 +183,7 @@
 <div class="chart-card mb-4" style="border-radius:14px">
     <div class="chart-header d-flex align-items-center justify-content-between">
         <div>
-            <h6>@L["Chart_MonthlyTrend"]</h6>
+            <h6 id="tvTrendTitle">@L["Chart_MonthlyTrend"]</h6>
             <p id="trendChartSubtitle">@L["Chart_MonthlyTrendSub"]</p>
         </div>
         <a href="@__areaPrefix/dashboard/reports" class="btn btn-sm" style="background:rgba(218,41,28,.12);color:oklch(0.5 0.18 25);border:1px solid rgba(218,41,28,.3);font-size:12px;border-radius:7px">
@@ -196,7 +197,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <div class="d-flex align-items-center gap-2">
         <div style="width:4px;height:22px;background:linear-gradient(135deg,oklch(0.44 0.18 25),oklch(0.6 0.16 25));border-radius:2px"></div>
-        <h5 class="mb-0 fw-bold">Store Comparison</h5>
+        <h5 class="mb-0 fw-bold" id="tvStoreComparisonTitle">Store Comparison</h5>
         <span id="storeCountBadge" class="badge" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px"></span>
     </div>
     <input type="text" id="storeSearch" class="form-control form-control-sm"
@@ -250,7 +251,7 @@
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.22 22)"><i class="bi bi-person-badge"></i></span>
                 <div>
-                    <h6 class="mb-0">Operation Consultants</h6>
+                    <h6 class="mb-0" id="tvOcTitle">Operation Consultants</h6>
                     <p class="mb-0">Ranked by weighted turnover rate</p>
                 </div>
             </div>
@@ -279,7 +280,7 @@
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
                 <div>
-                    <h6 class="mb-0">Operation Directors</h6>
+                    <h6 class="mb-0" id="tvOdTitle">Operation Directors</h6>
                     <p class="mb-0">Ranked by weighted turnover rate</p>
                 </div>
             </div>
@@ -306,7 +307,7 @@
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
                 <div>
-                    <h6 class="mb-0">Operation Managers</h6>
+                    <h6 class="mb-0" id="tvOmTitle">Operation Managers</h6>
                     <p class="mb-0">Ranked by weighted turnover rate</p>
                 </div>
             </div>
@@ -333,7 +334,7 @@
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
                 <div>
-                    <h6 class="mb-0">Senior Operation Consultants</h6>
+                    <h6 class="mb-0" id="tvSocTitle">Senior Operation Consultants</h6>
                     <p class="mb-0">Ranked by weighted turnover rate</p>
                 </div>
             </div>
@@ -363,7 +364,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
     <div class="d-flex align-items-center gap-2">
         <div style="width:4px;height:22px;background:linear-gradient(135deg,oklch(0.44 0.18 25),oklch(0.6 0.16 25));border-radius:2px"></div>
-        <h5 class="mb-0 fw-bold">Full Data Table</h5>
+        <h5 class="mb-0 fw-bold" id="tvTrendMatrixTitle">Full Data Table</h5>
         <span class="badge ms-1" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px">All Periods · Turnover %</span>
     </div>
     <input type="text" id="matrixSearch" class="form-control form-control-sm"
@@ -410,6 +411,17 @@
 
 function tvMonthShortName(m) {
     return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' });
+}
+
+/* Same title-badge helper as the Workforce page (rangeFilterBadge lives in
+   dashboard.js) — captures each title's original text once, so repeated
+   loadAll() calls on filter change don't stack badges. */
+const tvTitleBase = {};
+function tvSetTitleBadge(id, affected) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!(id in tvTitleBase)) tvTitleBase[id] = el.textContent;
+    el.innerHTML = tvTitleBase[id] + ' ' + rangeFilterBadge(isPeriodRangeActive(), affected);
 }
 
 /* Expands the selected From→To range into an ordered list of {month, year}. */
@@ -490,6 +502,7 @@ function tvRenderStoreTable() {
 }
 
 async function tvLoadStoreComparison() {
+    tvSetTitleBadge('tvStoreComparisonTitle', true);
     if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/store-comparison?${buildQuery()}`);
     tvStoreData = data || [];
@@ -518,6 +531,10 @@ function tvRenderOcOmTable(tbodyId, rows) {
 }
 
 async function tvLoadOcOmAnalysis() {
+    tvSetTitleBadge('tvOcTitle', true);
+    tvSetTitleBadge('tvOdTitle', true);
+    tvSetTitleBadge('tvOmTitle', true);
+    tvSetTitleBadge('tvSocTitle', true);
     if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/oc-om-analysis?${buildQuery()}`);
     tvRenderOcOmTable('ocTableBody', data.ocRows);
@@ -595,6 +612,7 @@ async function tvLoadJobTitleStat() {
 /* Payroll Group chart --------------------------------------- */
 let payrollGroupChart;
 async function tvLoadPayrollGroupChart() {
+    tvSetTitleBadge('tvPayrollTitle', true);
     const data = await fetchJson(`/api/dashboard/turnover-by-payroll-group?${buildQuery()}`);
     payrollGroupChart = mkChart(payrollGroupChart, 'payrollGroupChart', {
         type: 'bar',
@@ -627,6 +645,7 @@ async function tvLoadGenderStats() {
    independently as resignations ÷ headcount for that single month. ------ */
 let turnoverByMonthChart;
 async function tvLoadTurnoverByMonthChart() {
+    tvSetTitleBadge('tvByMonthTitle', true);
     if (!periodMonth || !periodYear) return;
     const monthsInRange = tvExpandRange(fromPeriodMonth, fromPeriodYear, periodMonth, periodYear);
     if (!monthsInRange.length) return;
@@ -673,6 +692,7 @@ async function tvLoadTurnoverByMonthChart() {
    below, same as when the exit-interview data itself lacks parsed dates. */
 let reasonsChartInstance;
 async function tvLoadReasonsChart() {
+    tvSetTitleBadge('tvReasonsTitle', true);
     const ctx = document.getElementById('reasonsChart');
     if (!ctx) return;
     if (reasonsChartInstance) reasonsChartInstance.destroy();
@@ -711,6 +731,13 @@ async function tvLoadReasonsChart() {
 const _tvOrigLoadAll = loadAll;
 loadAll = async function () {
     await _tvOrigLoadAll();
+    tvSetTitleBadge('tvJobTitleTitle', true);
+    tvSetTitleBadge('tvTenureTitle', true);
+    tvSetTitleBadge('tvGenderTitle', true);
+    tvSetTitleBadge('tvTrendTitle', false);
+    tvSetTitleBadge('tvTrendMatrixTitle', false);
+    const kpiNote = document.getElementById('tvKpiRangeNote');
+    if (kpiNote) kpiNote.innerHTML = isPeriodRangeActive() ? rangeFilterBadge(true, true) + ' — cards above add up every period in the selected range.' : '';
     await Promise.all([
         tvLoadSmartInsights(),
         tvLoadStoreComparison(),
