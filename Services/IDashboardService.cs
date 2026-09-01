@@ -6,11 +6,6 @@ public interface IDashboardService
 {
     Task<DashboardKpiViewModel> GetKpisAsync(int? month, int? year, string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
-    /// <summary>Workforce page's own Total Headcount/New Hires/Resignations —
-    /// sums each period in the selected range instead of GetKpisAsync's
-    /// latest-period snapshot for headcount.</summary>
-    Task<DashboardKpiViewModel> GetWorkforceKpisAsync(int? month, int? year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
     Task<List<ChartDataItem>> GetTurnoverByJobTitleAsync(int? month, int? year, string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
     Task<List<ChartDataItem>> GetTurnoverByTenureAsync(int? month, int? year, string? store, string role, string? assignedName,

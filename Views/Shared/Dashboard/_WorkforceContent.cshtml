@@ -55,23 +55,24 @@
         <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
     </div>
 </div>
+<p id="wfKpiRangeNote" class="text-muted-custom small mb-3" style="margin-top:-10px"></p>
 
 <!-- ── Headcount composition ──────────────────────────────────────── -->
 <div class="charts-grid mb-4">
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_HeadcountByJobTitle"]</h6><p>@L["Chart_HeadcountByJobTitleSub"]</p></div>
+        <div class="chart-header"><h6 id="wfJobTitleTitle">@L["Chart_HeadcountByJobTitle"]</h6><p>@L["Chart_HeadcountByJobTitleSub"]</p></div>
         <div class="chart-body"><canvas id="wfJobTitleChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_HeadcountByTenure"]</h6><p>@L["Chart_HeadcountByTenureSub"]</p></div>
+        <div class="chart-header"><h6 id="wfTenureTitle">@L["Chart_HeadcountByTenure"]</h6><p>@L["Chart_HeadcountByTenureSub"]</p></div>
         <div class="chart-body"><canvas id="wfTenureChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_HeadcountByPayroll"]</h6><p>@L["Chart_HeadcountByPayrollSub"]</p></div>
+        <div class="chart-header"><h6 id="wfPayrollTitle">@L["Chart_HeadcountByPayroll"]</h6><p>@L["Chart_HeadcountByPayrollSub"]</p></div>
         <div class="chart-body"><canvas id="wfPayrollChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_HeadcountGender"]</h6><p>@L["Chart_HeadcountGenderSub"]</p></div>
+        <div class="chart-header"><h6 id="wfGenderTitle">@L["Chart_HeadcountGender"]</h6><p>@L["Chart_HeadcountGenderSub"]</p></div>
         <div class="wf-gender-body">
             <div class="wf-gender-canvas-wrap"><canvas id="wfGenderChart"></canvas></div>
             <div class="wf-gender-list" id="wfGenderStatsList"></div>
@@ -82,7 +83,7 @@
 <!-- ── Headcount trend (always full history from the selected year onward) ── -->
 <div class="chart-card mb-4" style="border-radius:14px">
     <div class="chart-header">
-        <h6>@L["Chart_HeadcountTrend"]</h6>
+        <h6 id="wfTrendTitle">@L["Chart_HeadcountTrend"]</h6>
         <p>@L["Chart_HeadcountTrendSub"]</p>
     </div>
     <div class="chart-body"><canvas id="wfHeadcountTrendChart" style="max-height:260px"></canvas></div>
@@ -91,7 +92,7 @@
 <!-- ── Headcount by store ─────────────────────────────────────────── -->
 <div class="d-flex align-items-center gap-2 mb-3">
     <div class="section-accent"></div>
-    <h5 class="mb-0 fw-bold">@L["Workforce_StoreBreakdown"]</h5>
+    <h5 class="mb-0 fw-bold" id="wfStoreBreakdownTitle">@L["Workforce_StoreBreakdown"]</h5>
 </div>
 <div class="chart-card mb-4 p-0" style="overflow:hidden">
     <div class="table-responsive" style="max-height:400px;overflow-y:auto">
@@ -122,7 +123,7 @@
         <div class="chart-card p-0 h-100" style="overflow:hidden">
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 25)"><i class="bi bi-person-badge"></i></span>
-                <div><h6 class="mb-0">@L["Common_OperationConsultants"]</h6><p class="mb-0">@L["Common_Headcount"] &amp; @L["Common_TurnoverPct"] by consultant</p></div>
+                <div><h6 class="mb-0" id="wfOcTitle">@L["Common_OperationConsultants"]</h6><p class="mb-0">@L["Common_Headcount"] &amp; @L["Common_TurnoverPct"] by consultant</p></div>
             </div>
             <div class="table-responsive" style="max-height:400px;overflow-y:auto">
                 <table class="table table-hover table-sm mb-0" style="font-size:13px">
@@ -147,7 +148,7 @@
         <div class="chart-card p-0" style="overflow:hidden">
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
-                <div><h6 class="mb-0">Operation Directors</h6><p class="mb-0">Headcount &amp; turnover by director</p></div>
+                <div><h6 class="mb-0" id="wfOdTitle">Operation Directors</h6><p class="mb-0">Headcount &amp; turnover by director</p></div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm mb-0" style="font-size:13px">
@@ -170,7 +171,7 @@
         <div class="chart-card p-0" style="overflow:hidden">
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
-                <div><h6 class="mb-0">Operation Managers</h6><p class="mb-0">Headcount &amp; turnover by manager</p></div>
+                <div><h6 class="mb-0" id="wfOmTitle">Operation Managers</h6><p class="mb-0">Headcount &amp; turnover by manager</p></div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm mb-0" style="font-size:13px">
@@ -193,7 +194,7 @@
         <div class="chart-card p-0" style="overflow:hidden">
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
-                <div><h6 class="mb-0">Senior Operation Consultants</h6><p class="mb-0">Headcount &amp; turnover by senior consultant</p></div>
+                <div><h6 class="mb-0" id="wfSocTitle">Senior Operation Consultants</h6><p class="mb-0">Headcount &amp; turnover by senior consultant</p></div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm mb-0" style="font-size:13px">
@@ -227,25 +228,39 @@
    — this page renders its own active-headcount composition charts instead. */
 function wfMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 
-/* Workforce's own KPI cards: Total Headcount / New Hires / Resignations only
-   (no Turnover Rate — that belongs on the Turnover page). Uses its own
-   endpoint because, on this page, a From→To period range sums each period's
-   numbers instead of snapshotting the latest one. */
+/* Appends a rangeFilterBadge (dashboard.js) to a title element, without
+   losing the original text on repeated calls (loadAll runs again on every
+   filter change) — the original text is captured once, on first call. */
+const wfTitleBase = {};
+function wfSetTitleBadge(id, affected) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!(id in wfTitleBase)) wfTitleBase[id] = el.textContent;
+    el.innerHTML = wfTitleBase[id] + ' ' + rangeFilterBadge(affected);
+}
+
+/* Workforce's own KPI cards: same shared /api/dashboard/kpis endpoint as
+   every other page (Total Headcount/New Hires/Resignations sum across a
+   selected From→To range there too), just without the Turnover Rate card
+   — that one belongs on the Turnover page. */
 async function wfLoadKpis() {
     const kpiEl = document.getElementById('kpiCards');
     if (!kpiEl) return;
-    const data = await fetchJson('/api/dashboard/workforce-kpis?' + buildQuery());
+    const data = await fetchJson('/api/dashboard/kpis?' + buildQuery());
     kpiEl.innerHTML = `
         <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">Total Headcount</div></div>
         <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">New Hires</div></div>
         <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
     `;
+    const noteEl = document.getElementById('wfKpiRangeNote');
+    if (noteEl) noteEl.innerHTML = isPeriodRangeActive() ? rangeFilterBadge(true) + ' — the 3 cards above add up every period in the selected range.' : '';
 }
 
 /* ── Composition charts ──────────────────────────────────────────── */
 let wfJobTitleChart, wfPayrollChart, wfTenureChart, wfGenderChart;
 
 async function wfLoadJobTitleChart() {
+    wfSetTitleBadge('wfJobTitleTitle', true);
     const data = await fetchJson(`/api/dashboard/headcount-by-job-title?${buildQuery()}`);
     wfJobTitleChart = mkChart(wfJobTitleChart, 'wfJobTitleChart', {
         type: 'bar',
@@ -256,6 +271,7 @@ async function wfLoadJobTitleChart() {
 }
 
 async function wfLoadPayrollChart() {
+    wfSetTitleBadge('wfPayrollTitle', true);
     const data = await fetchJson(`/api/dashboard/headcount-by-payroll-group?${buildQuery()}`);
     const labels = data.map(d => d.label);
     const colors = ChartColors.colorsByLabel(labels, null);
@@ -268,6 +284,7 @@ async function wfLoadPayrollChart() {
 }
 
 async function wfLoadTenureChart() {
+    wfSetTitleBadge('wfTenureTitle', true);
     const data = await fetchJson(`/api/dashboard/headcount-by-tenure?${buildQuery()}`);
     const labels = data.map(d => d.label);
     const colors = ChartColors.colorsByLabel(labels, null);
@@ -280,6 +297,7 @@ async function wfLoadTenureChart() {
 }
 
 async function wfLoadGenderChart() {
+    wfSetTitleBadge('wfGenderTitle', true);
     const data = await fetchJson(`/api/dashboard/gender-breakdown?${buildQuery()}`);
     const genderLabels = data.map(d => d.label);
     const genderColors = ChartColors.colorsByLabel(genderLabels, ChartColors.GENDER_COLORS);
@@ -307,6 +325,7 @@ async function wfLoadGenderChart() {
    Monthly Trend chart). */
 let wfHeadcountTrendChart;
 async function wfLoadHeadcountTrend() {
+    wfSetTitleBadge('wfTrendTitle', false);
     const q = new URLSearchParams();
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
@@ -358,6 +377,7 @@ function wfRenderStoreTable(rows) {
 }
 
 async function wfLoadStoreTable() {
+    wfSetTitleBadge('wfStoreBreakdownTitle', false);
     if (!periodMonth || !periodYear) return;
     const q = new URLSearchParams({ month: periodMonth, year: periodYear });
     if (omFilter) q.set('om', omFilter);
@@ -383,6 +403,10 @@ function wfRenderOcOmTable(tbodyId, rows) {
 }
 
 async function wfLoadOcOm() {
+    wfSetTitleBadge('wfOcTitle', true);
+    wfSetTitleBadge('wfOdTitle', true);
+    wfSetTitleBadge('wfOmTitle', true);
+    wfSetTitleBadge('wfSocTitle', true);
     if (!periodMonth || !periodYear) return;
     const data = await fetchJson(`/api/dashboard/oc-om-analysis?${buildQuery()}`);
     wfRenderOcOmTable('ocTableBody', data.ocRows);

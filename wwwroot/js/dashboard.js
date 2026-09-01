@@ -4,6 +4,23 @@ Chart.defaults.color = '#5B5875';
 let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '', socFilter = '', odFilter = '';
 let jobTitleChart, tenureChart, genderChart;
 
+/* Small badge shown next to a chart/table title, telling the user whether
+   the currently selected From→To period range is reflected in THAT
+   particular chart/table, or whether it always shows just the latest
+   period regardless of the range. Only rendered once an actual multi-month
+   range is selected — a single-period selection has nothing to clarify. */
+function isPeriodRangeActive() {
+    return !!(fromPeriodMonth && fromPeriodYear && periodMonth && periodYear
+        && (fromPeriodMonth !== periodMonth || fromPeriodYear !== periodYear));
+}
+
+function rangeFilterBadge(affected) {
+    if (!isPeriodRangeActive()) return '';
+    return affected
+        ? '<span class="range-filter-badge range-filter-badge-on"><i class="bi bi-check-circle-fill"></i>Reflects selected range</span>'
+        : '<span class="range-filter-badge range-filter-badge-off"><i class="bi bi-dash-circle"></i>Latest period only</span>';
+}
+
 async function fetchJson(url) {
     const r = await fetch(url);
     return r.ok ? r.json() : [];

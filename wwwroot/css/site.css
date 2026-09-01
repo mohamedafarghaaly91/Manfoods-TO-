@@ -478,6 +478,17 @@ html, body {
 .stat-card-header h6 { margin: 0 0 1px; }
 .stat-card-header p  { margin: 0; }
 
+/* Tells the user, per chart/table, whether the selected From→To period
+   range is reflected there or not — only shown while a range is active. */
+.range-filter-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 10px;
+    margin-inline-start: 8px; white-space: nowrap; vertical-align: middle;
+}
+.range-filter-badge i { font-size: 10px; }
+.range-filter-badge-on  { background: color-mix(in oklch, var(--red, oklch(0.55 0.19 25)) 12%, transparent); color: var(--red, oklch(0.5 0.18 25)); }
+.range-filter-badge-off { background: var(--bg-2); color: var(--text-3); }
+
 /* ══ GENERAL CARDS ════════════════════════════════════ */
 .card-dark {
     background: var(--card-bg);

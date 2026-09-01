@@ -38,7 +38,11 @@ public class StoreComparisonRow
     public string OperationManager { get; set; } = "";
     public string SeniorOperationConsultant { get; set; } = "";
     public string OperationDirector { get; set; } = "";
+    /// <summary>Displayed headcount — sum across the selected period range.</summary>
     public int Headcount { get; set; }
+    /// <summary>Average headcount across the range — the correct denominator
+    /// for turnover-rate math, kept separate from the summed display value.</summary>
+    public double AvgHeadcount { get; set; }
     public int NewHires { get; set; }
     public int Resignations { get; set; }
     public double TurnoverRate { get; set; }

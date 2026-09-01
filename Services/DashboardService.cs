@@ -182,7 +182,6 @@ public class DashboardService : IDashboardService
         var stores = MultiValueFilter.Split(store);
 
         var headcountsPerPeriod = new List<int>();
-        var toHeadcount = 0;
         var totalResignations = 0;
 
         foreach (var p in periods)
@@ -190,7 +189,6 @@ public class DashboardService : IDashboardService
             // Role-based store access is ALWAYS applied (never bypassed by an
             // explicit store/om/oc selection) — the explicit filter, when present,
             // narrows further on top of it. Final population = accessible ∩ explicit.
-            // Headcount is a snapshot: the active-employee count for this exact period.
             var empQ = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year);
             if (accessible != null) empQ = empQ.Where(e => accessible.Contains(e.Store));
             if (stores != null) empQ = empQ.Where(e => stores.Contains(e.Store));
@@ -198,7 +196,6 @@ public class DashboardService : IDashboardService
 
             var hc = await empQ.CountAsync();
             headcountsPerPeriod.Add(hc);
-            if (p.Month == anchor.Month && p.Year == anchor.Year) toHeadcount = hc;
 
             var resQ = _db.Resignations.Where(r => r.Month == p.Month && r.Year == p.Year);
             if (accessible != null) resQ = resQ.Where(r => accessible.Contains(r.Store));
@@ -216,86 +213,23 @@ public class DashboardService : IDashboardService
         else if (omOcStores != null) newHireQ = newHireQ.Where(e => omOcStores.Contains(e.Store));
         var totalNewHires = await newHireQ.CountAsync();
 
+        // Turnover Rate still divides by the AVERAGE headcount across the range
+        // (a rate needs a fair per-period denominator) — only the displayed
+        // Total Headcount below changes to a sum when a period range is selected.
         var avgHeadcount = headcountsPerPeriod.Count > 0 ? headcountsPerPeriod.Average() : 0;
         var turnoverRate = MetricsCalculationService.RatePercent(totalResignations, avgHeadcount, 2);
 
         var result = new DashboardKpiViewModel
         {
-            TotalHeadcount = toHeadcount,
+            // Selecting a From→To period range adds each period's headcount
+            // together (e.g. Jan + Feb) rather than showing only the latest
+            // period's snapshot — the same "range = sum" behavior as New Hires/
+            // Resignations below, applied consistently across every dashboard
+            // page that shows this card.
+            TotalHeadcount = headcountsPerPeriod.Sum(),
             NewHires = totalNewHires,
             TotalResignations = totalResignations,
             TurnoverRate = turnoverRate,
-            Month = anchor.Month,
-            Year = anchor.Year
-        };
-
-        _cache.Set(cacheKey, result, CacheDuration);
-        return result;
-    }
-
-    // Workforce page's own KPI cards (Total Headcount / New Hires / Resignations
-    // — no Turnover Rate). Deliberately separate from GetKpisAsync above rather
-    // than a shared code path: on that page, selecting a From→To period range is
-    // meant to ADD UP each period's numbers (e.g. Jan+Feb headcount), whereas
-    // GetKpisAsync's TotalHeadcount is a snapshot of the latest period in the
-    // range (the definition every other page — Turnover, Comparisons, etc. —
-    // still relies on). Changing GetKpisAsync itself would silently change
-    // those other pages' headcount too.
-    public async Task<DashboardKpiViewModel> GetWorkforceKpisAsync(int? month, int? year, string? store, string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
-    {
-        if (!month.HasValue || !year.HasValue)
-        {
-            var latest = await _db.ActiveEmployees
-                .OrderByDescending(e => e.Year).ThenByDescending(e => e.Month)
-                .Select(e => new { e.Month, e.Year })
-                .FirstOrDefaultAsync();
-            month ??= latest?.Month ?? DateTime.Now.Month;
-            year ??= latest?.Year ?? DateTime.Now.Year;
-        }
-        fromMonth ??= month; fromYear ??= year;
-
-        var cacheKey = $"wfkpi_{fromMonth}_{fromYear}_{month}_{year}_{store}_{om}_{oc}_{soc}_{od}_{months}_{role}_{assignedName}";
-        if (_cache.TryGetValue(cacheKey, out DashboardKpiViewModel? cached) && cached != null)
-            return cached;
-
-        var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
-        var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-
-        var accessible = await GetAccessibleStoresAsync(role, assignedName, anchor.Month, anchor.Year);
-        var omOcStores = await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od);
-        var stores = MultiValueFilter.Split(store);
-
-        var totalHeadcount = 0;
-        var totalResignations = 0;
-
-        foreach (var p in periods)
-        {
-            var empQ = _db.ActiveEmployees.Where(e => e.Month == p.Month && e.Year == p.Year);
-            if (accessible != null) empQ = empQ.Where(e => accessible.Contains(e.Store));
-            if (stores != null) empQ = empQ.Where(e => stores.Contains(e.Store));
-            else if (omOcStores != null) empQ = empQ.Where(e => omOcStores.Contains(e.Store));
-            totalHeadcount += await empQ.CountAsync();
-
-            var resQ = _db.Resignations.Where(r => r.Month == p.Month && r.Year == p.Year);
-            if (accessible != null) resQ = resQ.Where(r => accessible.Contains(r.Store));
-            if (stores != null) resQ = resQ.Where(r => stores.Contains(r.Store));
-            else if (omOcStores != null) resQ = resQ.Where(r => omOcStores.Contains(r.Store));
-            totalResignations += await resQ.CountAsync();
-        }
-
-        var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToList();
-        var newHireQ = NewHiresQuery(periodKeys);
-        if (accessible != null) newHireQ = newHireQ.Where(e => accessible.Contains(e.Store));
-        if (stores != null) newHireQ = newHireQ.Where(e => stores.Contains(e.Store));
-        else if (omOcStores != null) newHireQ = newHireQ.Where(e => omOcStores.Contains(e.Store));
-        var totalNewHires = await newHireQ.CountAsync();
-
-        var result = new DashboardKpiViewModel
-        {
-            TotalHeadcount = totalHeadcount,
-            NewHires = totalNewHires,
-            TotalResignations = totalResignations,
             Month = anchor.Month,
             Year = anchor.Year
         };
@@ -395,7 +329,10 @@ public class DashboardService : IDashboardService
     // charts down to the latest month while every other chart on the page
     // honors the full range. Averaging (rather than summing) avoids double-
     // counting the same still-employed person across multiple monthly snapshots.
-    private async Task<List<ChartDataItem>> AverageBreakdownAsync(
+    // Range = sum: selecting a From→To range adds each period's counts
+    // together (e.g. Jan + Feb headcount by gender), matching GetKpisAsync's
+    // Total Headcount/New Hires/Resignations behavior above.
+    private async Task<List<ChartDataItem>> SumBreakdownAsync(
         List<(int Month, int Year)> periods, List<string>? accessible, List<string>? stores, List<string>? omOcStores,
         Expression<Func<ActiveEmployee, string>> keySelector, bool excludeEmptyKey)
     {
@@ -423,9 +360,8 @@ public class DashboardService : IDashboardService
             }
         }
 
-        var periodCount = periods.Count > 0 ? periods.Count : 1;
         return totals
-            .Select(kv => new ChartDataItem { Label = kv.Key, Value = (int)Math.Round(kv.Value / (double)periodCount) })
+            .Select(kv => new ChartDataItem { Label = kv.Key, Value = kv.Value })
             .ToList();
     }
 
@@ -451,7 +387,7 @@ public class DashboardService : IDashboardService
         var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
-        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.Gender, excludeEmptyKey: false))
+        return (await SumBreakdownAsync(periods, accessible, stores, omOcStores, e => e.Gender, excludeEmptyKey: false))
             .OrderBy(c => c.Label)
             .ToList();
     }
@@ -494,10 +430,11 @@ public class DashboardService : IDashboardService
             .Select(g => new { g.Key.Store, Count = g.Count() })
             .ToListAsync();
 
-        // Average headcount per store across the resolved periods
+        // Sum (displayed headcount, range = sum) and average (turnover-rate
+        // denominator) per store across the resolved periods.
         var headcounts = headcountsByPeriod
             .GroupBy(x => x.Store)
-            .Select(g => new { Store = g.Key, AvgCount = g.Average(x => x.Count) })
+            .Select(g => new { Store = g.Key, SumCount = g.Sum(x => x.Count), AvgCount = g.Average(x => x.Count) })
             .ToList();
 
         var resQ = _db.Resignations.Where(r => keys.Contains(r.Year * 100 + r.Month));
@@ -538,12 +475,12 @@ public class DashboardService : IDashboardService
             {
                 var res        = resByStore.TryGetValue(h.Store, out var r) ? r : 0;
                 var nh         = newHiresByStore.TryGetValue(h.Store, out var n) ? n : 0;
-                var headcount  = (int)Math.Round(h.AvgCount);
                 storeRefs.TryGetValue(h.Store, out var sr);
                 return new StoreComparisonRow
                 {
                     StoreName           = h.Store,
-                    Headcount           = headcount,
+                    Headcount           = h.SumCount,
+                    AvgHeadcount        = h.AvgCount,
                     NewHires            = nh,
                     Resignations        = res,
                     TurnoverRate        = MetricsCalculationService.RatePercent(res, h.AvgCount),
@@ -576,7 +513,10 @@ public class DashboardService : IDashboardService
             StoreCount        = g.Count(),
             TotalResignations = g.Sum(s => s.Resignations),
             TotalHeadcount    = g.Sum(s => s.Headcount),
-            AvgTurnoverRate   = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
+            // Uses AvgHeadcount (per-store average across the range), not the
+            // summed display Headcount above — a turnover rate needs a fair
+            // per-period denominator, not one that inflates with a wider range.
+            AvgTurnoverRate   = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))
         };
 
         var ocRows = stores
@@ -663,7 +603,7 @@ public class DashboardService : IDashboardService
                 Icon        = "bi-exclamation-triangle-fill",
                 Color       = "danger",
                 Title       = $"Highest Turnover: {highest.StoreName}",
-                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {highest.Headcount} average employees."
+                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {Math.Round(highest.AvgHeadcount)} average employees."
             });
 
         // 2. Best performing store
@@ -703,8 +643,8 @@ public class DashboardService : IDashboardService
         {
             var currRes  = current.Sum(s => s.Resignations);
             var prevRes  = previous.Sum(s => s.Resignations);
-            var currHead = current.Sum(s => s.Headcount);
-            var prevHead = previous.Sum(s => s.Headcount);
+            var currHead = current.Sum(s => s.AvgHeadcount);
+            var prevHead = previous.Sum(s => s.AvgHeadcount);
 
             var currRate = MetricsCalculationService.RatePercent(currRes, currHead);
             var prevRate = MetricsCalculationService.RatePercent(prevRes, prevHead);
@@ -731,7 +671,7 @@ public class DashboardService : IDashboardService
                 StoreCount      = g.Count(),
                 TotalRes        = g.Sum(s => s.Resignations),
                 TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
+                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))
             })
             .OrderByDescending(g => g.AvgTurnoverRate)
             .FirstOrDefault();
@@ -755,7 +695,7 @@ public class DashboardService : IDashboardService
                 StoreCount      = g.Count(),
                 TotalRes        = g.Sum(s => s.Resignations),
                 TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.Headcount))
+                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))
             })
             .OrderByDescending(g => g.AvgTurnoverRate)
             .FirstOrDefault();
@@ -953,7 +893,7 @@ public class DashboardService : IDashboardService
         var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
-        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.JobTitle, excludeEmptyKey: false))
+        return (await SumBreakdownAsync(periods, accessible, stores, omOcStores, e => e.JobTitle, excludeEmptyKey: false))
             .OrderByDescending(c => c.Value)
             .ToList();
     }
@@ -980,7 +920,7 @@ public class DashboardService : IDashboardService
         var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
-        return (await AverageBreakdownAsync(periods, accessible, stores, omOcStores, e => e.PayrollGroup, excludeEmptyKey: true))
+        return (await SumBreakdownAsync(periods, accessible, stores, omOcStores, e => e.PayrollGroup, excludeEmptyKey: true))
             .OrderByDescending(c => c.Value)
             .ToList();
     }
@@ -1019,9 +959,9 @@ public class DashboardService : IDashboardService
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
         // Tenure buckets are computed per period (as-of that period's month end)
-        // then averaged across periods — the same "average across the selected
-        // range" treatment as the other composition breakdowns above, rather
-        // than anchoring on a single (e.g. latest) month.
+        // then SUMMED across periods — range = sum, same as the other
+        // composition breakdowns above, rather than anchoring on a single
+        // (e.g. latest) month.
         var totals = new Dictionary<string, int>();
         foreach (var p in periods)
         {
@@ -1041,10 +981,9 @@ public class DashboardService : IDashboardService
             }
         }
 
-        var periodCount = periods.Count > 0 ? periods.Count : 1;
         return HeadcountTenureBuckets
             .Where(b => totals.ContainsKey(b.Label))
-            .Select(b => new ChartDataItem { Label = b.Label, Value = (int)Math.Round(totals[b.Label] / (double)periodCount) })
+            .Select(b => new ChartDataItem { Label = b.Label, Value = totals[b.Label] })
             .Where(c => c.Value > 0)
             .ToList();
     }

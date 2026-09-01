@@ -29,16 +29,6 @@ public class DashboardApiController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("workforce-kpis")]
-    public async Task<IActionResult> WorkforceKpis([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
-        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
-    {
-        var role = HttpContext.Session.GetRole();
-        var assignedName = HttpContext.Session.GetEmail();
-        var result = await _dashboard.GetWorkforceKpisAsync(month, year, store, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
-        return Ok(result);
-    }
-
     [HttpGet("turnover-by-job-title")]
     public async Task<IActionResult> TurnoverByJobTitle([FromQuery] int? month, [FromQuery] int? year, [FromQuery] string? store,
         [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
