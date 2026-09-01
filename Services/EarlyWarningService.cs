@@ -14,6 +14,16 @@ public class EarlyWarningService : IEarlyWarningService
     public const string ResignedEmployeeIdsCacheKey = "early-warning:resigned-employee-ids";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
 
+    // Short-lived cache for the fully-scored watchlist itself, keyed by its
+    // request parameters (same convention as DashboardService.GetKpisAsync/
+    // GetStoreComparisonAsync). GetSummaryAsync recomputes the exact same
+    // watchlist internally (same store/role/assignedName/months/year every
+    // time it's called with the same filters), so without this every Early
+    // Warning page load ran the whole per-employee scoring pass — including a
+    // fresh, uncached pull of every active employee for the anchor period —
+    // twice: once for the watchlist request, once inside the summary request.
+    private static readonly TimeSpan WatchlistCacheDuration = TimeSpan.FromMinutes(5);
+
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
@@ -397,6 +407,10 @@ public class EarlyWarningService : IEarlyWarningService
     public async Task<List<EarlyWarningItem>> GetWatchlistAsync(
         string? store, string role, string? assignedName, string? months = null, int? year = null)
     {
+        var cacheKey = $"early-warning:watchlist_{store}_{role}_{assignedName}_{months}_{year}";
+        if (_cache.TryGetValue(cacheKey, out List<EarlyWarningItem>? cachedWatchlist) && cachedWatchlist != null)
+            return cachedWatchlist;
+
         // ── Load raw data ─────────────────────────────────────────────────────
         var historical = await LoadHistoricalRecordsAsync();
         var (candidatesRaw, anchorMonth, anchorYear) = await LoadActiveCandidatesAsync(months, year);
@@ -584,7 +598,9 @@ public class EarlyWarningService : IEarlyWarningService
             });
         }
 
-        return result.OrderByDescending(r => r.RiskScore).ThenBy(r => r.TenureDays).ToList();
+        var watchlist = result.OrderByDescending(r => r.RiskScore).ThenBy(r => r.TenureDays).ToList();
+        _cache.Set(cacheKey, watchlist, WatchlistCacheDuration);
+        return watchlist;
     }
 
     public async Task<EarlyWarningSummary> GetSummaryAsync(
