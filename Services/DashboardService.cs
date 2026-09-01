@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
@@ -325,7 +326,7 @@ public class DashboardService : IDashboardService
     // counting the same still-employed person across multiple monthly snapshots.
     private async Task<List<ChartDataItem>> AverageBreakdownAsync(
         List<(int Month, int Year)> periods, List<string>? accessible, List<string>? stores, List<string>? omOcStores,
-        Func<ActiveEmployee, string> keySelector, bool excludeEmptyKey)
+        Expression<Func<ActiveEmployee, string>> keySelector, bool excludeEmptyKey)
     {
         var totals = new Dictionary<string, int>();
         foreach (var p in periods)
@@ -335,11 +336,19 @@ public class DashboardService : IDashboardService
             if (stores != null) q = q.Where(e => stores.Contains(e.Store));
             else if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
 
-            var rows = await q.ToListAsync();
-            foreach (var group in rows.GroupBy(keySelector))
+            // Group and count server-side instead of pulling every matching
+            // ActiveEmployee row (all columns) over the wire just to group by
+            // one field in C# — same result, far less data transferred per
+            // period (was the single biggest source of slow page loads once
+            // Neon was swapped for a remote SQL Server with less network
+            // headroom: this one query alone was taking 6+ seconds).
+            var grouped = await q.GroupBy(keySelector)
+                .Select(g => new { Key = g.Key, Count = g.Count() })
+                .ToListAsync();
+            foreach (var group in grouped)
             {
                 if (excludeEmptyKey && string.IsNullOrEmpty(group.Key)) continue;
-                totals[group.Key] = totals.GetValueOrDefault(group.Key) + group.Count();
+                totals[group.Key] = totals.GetValueOrDefault(group.Key) + group.Count;
             }
         }
 
@@ -1003,13 +1012,18 @@ public class DashboardService : IDashboardService
         if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
         if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
 
-        var rows = await q.Select(e => new { e.Store, e.Gender }).ToListAsync();
-        return rows.GroupBy(r => r.Store)
+        // Group by (Store, Gender) server-side and only pull the per-pair counts
+        // — one row per store/gender combination — instead of every matching
+        // ActiveEmployee row. Same final shape, far fewer rows over the wire.
+        var grouped = await q.GroupBy(e => new { e.Store, e.Gender })
+            .Select(g => new { g.Key.Store, g.Key.Gender, Count = g.Count() })
+            .ToListAsync();
+        return grouped.GroupBy(r => r.Store)
             .Select(g => new StoreHeadcountRow
             {
                 StoreName       = g.Key,
-                Headcount       = g.Count(),
-                GenderBreakdown = g.GroupBy(x => x.Gender).OrderBy(gg => gg.Key).ToDictionary(gg => gg.Key, gg => gg.Count())
+                Headcount       = g.Sum(x => x.Count),
+                GenderBreakdown = g.OrderBy(x => x.Gender).ToDictionary(x => x.Gender, x => x.Count)
             })
             .OrderByDescending(r => r.Headcount)
             .ToList();
