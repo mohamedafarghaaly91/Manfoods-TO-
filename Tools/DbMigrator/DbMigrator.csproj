@@ -7,7 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DbMigrator</RootNamespace>
     <AssemblyName>DbMigrator</AssemblyName>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Microsoft.Data.SqlClient does not support Invariant Globalization Mode
+         (it throws "Globalization Invariant Mode is not supported" at
+         connection time) — do not re-add this setting. -->
   </PropertyGroup>
 
   <ItemGroup>
