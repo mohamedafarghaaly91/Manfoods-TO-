@@ -144,14 +144,25 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
-    public async Task<IActionResult> Uploads(int page = 1)
+    public async Task<IActionResult> Uploads(int page = 1) => await UploadsViewAsync(page);
+
+    // Renders the Uploads page directly in the same response — no redirect,
+    // no TempData/cookie round trip — so a Success/Error message set on
+    // ViewData right before calling this is guaranteed to actually reach the
+    // browser. The previous TempData+RedirectToAction("Uploads") pattern
+    // depended on a cookie surviving a redirect; when it didn't, the error
+    // banner silently never appeared even though the upload had genuinely
+    // failed (the admin only found out later, from Upload History staying
+    // empty). This app has a single admin user, so the exact exception
+    // message is shown as-is rather than a generic sanitized message.
+    private async Task<IActionResult> UploadsViewAsync(int page = 1)
     {
         const int pageSize = 10;
         var (items, total) = await _uploads.GetHistoryPagedAsync(page, pageSize);
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
         ViewBag.TotalCount = total;
-        return View(items);
+        return View("Uploads", items);
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
@@ -159,17 +170,21 @@ public class DashboardController : Controller
     {
         if (!ModelState.IsValid || vm.ActiveEmployeesFile == null || vm.ResignationsFile == null || vm.StoreReferenceFile == null)
         {
-            TempData["Error"] = "الرجاء رفع الثلاث ملفات (الأكتيف ليست، الاستقالات، ومرجع الفروع) مع تحديد الشهر والسنة — الثلاثة مطلوبين معًا.";
-            return RedirectToAction("Uploads");
+            ViewData["Error"] = "الرجاء رفع الثلاث ملفات (الأكتيف ليست، الاستقالات، ومرجع الفروع) مع تحديد الشهر والسنة — الثلاثة مطلوبين معًا.";
+            return await UploadsViewAsync();
         }
         try
         {
             var email = HttpContext.Session.GetEmail();
             var (_, msg, _) = await _uploads.UploadPeriodDataAsync(vm.ActiveEmployeesFile, vm.ResignationsFile, vm.StoreReferenceFile, vm.Month, vm.Year, email);
-            TempData["Success"] = msg;
+            ViewData["Success"] = msg;
         }
-        catch (Exception ex) { _logger.LogError(ex, "Period data upload failed for {Month}/{Year}", vm.Month, vm.Year); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
-        return RedirectToAction("Uploads");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Period data upload failed for {Month}/{Year}", vm.Month, vm.Year);
+            ViewData["Error"] = $"فشل رفع بيانات {vm.Month}/{vm.Year}: {ex.Message}";
+        }
+        return await UploadsViewAsync();
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
@@ -178,26 +193,39 @@ public class DashboardController : Controller
         var validTypes = new[] { "active_employees", "resignations", "store_reference" };
         if (!ModelState.IsValid || vm.File == null || !validTypes.Contains(vm.FileType))
         {
-            TempData["Error"] = "الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.";
-            return RedirectToAction("Uploads");
+            ViewData["Error"] = "الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.";
+            return await UploadsViewAsync();
         }
         try
         {
             var email = HttpContext.Session.GetEmail();
             var (_, msg) = await _uploads.UpdateSingleFileAsync(vm.FileType, vm.Month, vm.Year, vm.File, email);
-            TempData["Success"] = msg;
+            ViewData["Success"] = msg;
         }
-        catch (Exception ex) { _logger.LogError(ex, "Single file update failed for {FileType} {Month}/{Year}", vm.FileType, vm.Month, vm.Year); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
-        return RedirectToAction("Uploads");
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Single file update failed for {FileType} {Month}/{Year}", vm.FileType, vm.Month, vm.Year);
+            ViewData["Error"] = $"فشل تحديث ملف {vm.FileType} لـ {vm.Month}/{vm.Year}: {ex.Message}";
+        }
+        return await UploadsViewAsync();
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> UploadExitInterviews(MvcApp.Models.ViewModels.ExitInterviewUploadViewModel vm)
     {
-        if (!ModelState.IsValid || vm.File == null) { TempData["Error"] = "Please select a file."; return RedirectToAction("Uploads"); }
-        try { var email = HttpContext.Session.GetEmail(); var (_, msg, _) = await _uploads.UploadExitInterviewsAsync(vm.File, email); TempData["Success"] = msg; }
-        catch (Exception ex) { _logger.LogError(ex, "Exit interviews upload failed"); TempData["Error"] = "Upload failed. Please check the file format and try again."; }
-        return RedirectToAction("Uploads");
+        if (!ModelState.IsValid || vm.File == null) { ViewData["Error"] = "Please select a file."; return await UploadsViewAsync(); }
+        try
+        {
+            var email = HttpContext.Session.GetEmail();
+            var (_, msg, _) = await _uploads.UploadExitInterviewsAsync(vm.File, email);
+            ViewData["Success"] = msg;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exit interviews upload failed");
+            ViewData["Error"] = $"فشل رفع بيانات مقابلات الخروج: {ex.Message}";
+        }
+        return await UploadsViewAsync();
     }
 
     [HttpGet("admin/dashboard/download-template")]

@@ -130,16 +130,24 @@
         </header>
 
         <main class="admin-content">
-            @if (TempData["Success"] != null)
+            @{
+                // ViewData takes priority: pages that render their result directly
+                // (no redirect) use ViewData so the message can't be lost to a
+                // cookie/redirect round trip; other pages still use the classic
+                // TempData+RedirectToAction pattern.
+                var successMessage = ViewData["Success"] ?? TempData["Success"];
+                var errorMessage = ViewData["Error"] ?? TempData["Error"];
+            }
+            @if (successMessage != null)
             {
                 <div class="alert-banner alert-success-banner">
-                    <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                    <i class="bi bi-check-circle-fill me-2"></i>@successMessage
                 </div>
             }
-            @if (TempData["Error"] != null)
+            @if (errorMessage != null)
             {
                 <div class="alert-banner alert-error-banner">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMessage
                 </div>
             }
             <div class="page-content">
