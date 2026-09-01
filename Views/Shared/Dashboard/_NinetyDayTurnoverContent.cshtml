@@ -190,7 +190,7 @@
     </div>
 
     <div class="chart-card mb-4">
-        <div class="chart-header"><h6 id="ntdByStoreTitle">By Store</h6><p>Early-leaver rate for the selected cohort months</p></div>
+        <div class="chart-header"><h6 id="ntdByStoreTitle">By Store</h6><p>Top 10 stores by early-leaver rate for the selected cohort months — see the full comparison table below for all stores</p></div>
         <div class="chart-body"><canvas id="ntdByStoreChart"></canvas></div>
     </div>
 
@@ -428,15 +428,27 @@
     </div>
     <div class="chart-card p-0" style="overflow:hidden">
         <div class="table-responsive" style="max-height:480px;overflow-y:auto">
-            <table class="table table-hover mb-0" style="font-size:13px">
+            <table id="ntdLeaversTable" class="table table-hover mb-0" style="font-size:13px">
                 <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
                     <tr>
-                        <th class="px-3 py-2">Name</th>
-                        <th class="px-3 py-2">Store</th>
-                        <th class="px-3 py-2">Job Title</th>
-                        <th class="px-3 py-2">Hire Date</th>
-                        <th class="px-3 py-2">Resignation Date</th>
-                        <th class="px-3 py-2">Tenure (days)</th>
+                        <th class="ntd-sort px-3 py-2" data-col="name" style="cursor:pointer">
+                            Name <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                        </th>
+                        <th class="ntd-sort px-3 py-2" data-col="store" style="cursor:pointer">
+                            Store <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                        </th>
+                        <th class="ntd-sort px-3 py-2" data-col="jobTitle" style="cursor:pointer">
+                            Job Title <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                        </th>
+                        <th class="ntd-sort px-3 py-2" data-col="hireDate" style="cursor:pointer">
+                            Hire Date <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                        </th>
+                        <th class="ntd-sort px-3 py-2" data-col="resignationDate" style="cursor:pointer">
+                            Resignation Date <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                        </th>
+                        <th class="ntd-sort px-3 py-2" data-col="tenureDays" style="cursor:pointer">
+                            Tenure (days) <i class="bi bi-sort-up text-danger" style="font-size:10px"></i>
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="ntdLeaversBody">
@@ -722,14 +734,16 @@ async function ntdLoadByCohort() {
         if (ntdOdFilter)    q.set('od', ntdOdFilter);
         return fetch(`/api/ninety-day-turnover/kpi?${q.toString()}`).then(r => r.ok ? r.json() : null);
     }));
+    const cohortLabels = sortedMonths.map(ntdMonthShortName);
     ntdByCohortInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: sortedMonths.map(ntdMonthShortName),
-            datasets: [{ data: results.map(r => r?.rate || 0), backgroundColor: 'oklch(0.5 0.18 25)', borderRadius: 6, maxBarThickness: 46 }]
+            labels: cohortLabels,
+            datasets: [{ data: results.map(r => r?.rate || 0), backgroundColor: ChartColors.colorsByLabel(cohortLabels, null), borderRadius: 6, maxBarThickness: 46 }]
         },
         options: {
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.parsed.y.toFixed(1)}%` } }, datalabels: { anchor: 'end', align: 'top', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.parsed.y.toFixed(1)}% of hires left within 90 days` } }, datalabels: { anchor: 'end', align: 'top', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
             scales: {
                 x: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } },
                 y: { ticks: { color: 'oklch(0.5 0.03 258)', callback: v => v + '%' }, grid: { color: 'oklch(0.92 0.008 255)' } }
@@ -738,6 +752,9 @@ async function ntdLoadByCohort() {
     });
 }
 
+/* By Store — top 10 stores by early-leaver rate for the selected cohort
+   months, colored by severity (same thresholds as the Store Comparison
+   table below) so the chart reads consistently with the rest of the page. */
 let ntdByStoreInstance;
 async function ntdLoadByStore() {
     ntdSetTitleBadge('ntdByStoreTitle', true);
@@ -745,13 +762,19 @@ async function ntdLoadByStore() {
     if (!ctx) return;
     if (ntdByStoreInstance) ntdByStoreInstance.destroy();
     if (!ntdMonths.length) return;
-    const data = await ntdFetch('by-store') || [];
+    const all = await ntdFetch('by-store') || [];
+    const data = all.slice(0, 10);
     ntdByStoreInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: 'oklch(0.55 0.19 25)', borderRadius: 4, maxBarThickness: 26 }] },
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: data.map(d => ntdRateColor(d.value).bg), borderRadius: 4, maxBarThickness: 26 }] },
         options: {
             indexAxis: 'y',
-            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue}% of hires left within 90 days` } },
+                datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' }
+            },
             scales: {
                 x: { grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)', callback: v => v + '%' } },
                 y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } }
@@ -773,17 +796,26 @@ async function ntdLoadReasons() {
     ntdReasonsInstance = new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
         data: { labels: ntdReasonLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(ntdReasonLabels), borderWidth: 2, borderColor: 'oklch(1 0 0)' }] },
-        options: { cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: 'oklch(0.5 0.03 258)', boxWidth: 10, boxHeight: 10, padding: 12, font: { size: 11 } } }, datalabels: { color: '#fff', font: { size: 11, weight: '700' }, textShadowBlur: 4, textShadowColor: 'rgba(0,0,0,0.4)', formatter: (v, ctx) => { const t = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return t > 0 && v > 0 ? Math.round(v / t * 100) + '%' : ''; } } } }
+        options: { cutout: '60%', maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'oklch(0.5 0.03 258)', boxWidth: 10, boxHeight: 10, padding: 12, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue}` } }, datalabels: { color: '#fff', font: { size: 11, weight: '700' }, textShadowBlur: 4, textShadowColor: 'rgba(0,0,0,0.4)', formatter: (v, ctx) => { const t = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return t > 0 && v > 0 ? Math.round(v / t * 100) + '%' : ''; } } } }
     });
 }
 
+let ntdLeaversData = [], ntdLeaversSortCol = 'tenureDays', ntdLeaversSortAsc = true;
 async function ntdLoadLeavers() {
-    const tbody = document.getElementById('ntdLeaversBody');
     const badge = document.getElementById('ntdLeaversCountBadge');
-    if (!ntdMonths.length) { tbody.innerHTML = ''; badge.textContent = ''; return; }
-    const rows = await ntdFetch('early-leavers') || [];
-    badge.textContent = rows.length + ' early leavers';
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No early leavers in this cohort.</td></tr>'; return; }
+    if (!ntdMonths.length) { ntdLeaversData = []; document.getElementById('ntdLeaversBody').innerHTML = ''; badge.textContent = ''; return; }
+    ntdLeaversData = await ntdFetch('early-leavers') || [];
+    badge.textContent = ntdLeaversData.length + ' early leavers';
+    ntdRenderLeaversTable();
+}
+function ntdRenderLeaversTable() {
+    const tbody = document.getElementById('ntdLeaversBody');
+    if (!ntdLeaversData.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No early leavers in this cohort.</td></tr>'; return; }
+    const rows = ntdLeaversData.slice().sort((a, b) => {
+        const va = a[ntdLeaversSortCol], vb = b[ntdLeaversSortCol];
+        if (typeof va === 'string') return ntdLeaversSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return ntdLeaversSortAsc ? va - vb : vb - va;
+    });
     tbody.innerHTML = rows.map(r => `
         <tr>
             <td class="px-3 py-2 fw-semibold">${r.name}</td>
@@ -804,12 +836,14 @@ async function ntdLoadJobTitleChart() {
     if (ntdJobTitleInstance) ntdJobTitleInstance.destroy();
     if (!ntdMonths.length) return;
     const data = await ntdFetch('job-titles') || [];
+    const jobTitleLabels = data.map(d => d.label);
     ntdJobTitleInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: 'oklch(0.55 0.19 25)', borderRadius: 4, maxBarThickness: 26 }] },
+        data: { labels: jobTitleLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(jobTitleLabels, null), borderRadius: 4, maxBarThickness: 26 }] },
         options: {
             indexAxis: 'y',
-            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' } },
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} early leaver(s)` } }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' } },
             scales: {
                 x: { grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)' } },
                 y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } }
@@ -827,12 +861,14 @@ async function ntdLoadPayrollGroupChart() {
     if (ntdPayrollGroupInstance) ntdPayrollGroupInstance.destroy();
     if (!ntdMonths.length) return;
     const data = await ntdFetch('payroll-groups') || [];
+    const payrollLabels = data.map(d => d.label);
     ntdPayrollGroupInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: 'oklch(0.55 0.15 258)', borderRadius: 4, maxBarThickness: 26 }] },
+        data: { labels: payrollLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(payrollLabels, null), borderRadius: 4, maxBarThickness: 26 }] },
         options: {
             indexAxis: 'y',
-            plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' } },
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} early leaver(s)` } }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' } },
             scales: {
                 x: { grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)' } },
                 y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } }
@@ -857,7 +893,7 @@ async function ntdLoadGenderChart() {
     ntdGenderInstance = new Chart(ctx.getContext('2d'), {
         type: 'doughnut',
         data: { labels: ntdGenderLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ntdGenderColors, borderWidth: 2, borderColor: 'oklch(1 0 0)' }] },
-        options: { cutout: '60%', plugins: { legend: { display: false }, datalabels: { display: false } } }
+        options: { cutout: '60%', maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue}` } }, datalabels: { display: false } } }
     });
     if (list) {
         const total = data.reduce((s, d) => s + d.value, 0);
@@ -1138,6 +1174,19 @@ document.querySelectorAll('#ntdStoreTable .ntd-sort').forEach(th => {
     });
 });
 document.getElementById('ntdStoreTableSearch').addEventListener('input', ntdRenderStoreTable);
+
+/* Early Leavers table — sort headers ------------------------------------ */
+document.querySelectorAll('#ntdLeaversTable .ntd-sort').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (ntdLeaversSortCol === col) { ntdLeaversSortAsc = !ntdLeaversSortAsc; }
+        else { ntdLeaversSortCol = col; ntdLeaversSortAsc = (col !== 'tenureDays'); }
+        document.querySelectorAll('#ntdLeaversTable .ntd-sort i').forEach(i => i.className = 'bi bi-arrow-down-up text-muted');
+        const icon = th.querySelector('i');
+        if (icon) icon.className = ntdLeaversSortAsc ? 'bi bi-sort-up text-danger' : 'bi bi-sort-down text-danger';
+        ntdRenderLeaversTable();
+    });
+});
 
 (async function init() {
     const hasData = await ntdLoadFilters();

@@ -540,7 +540,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
                         Icon = diff < 0 ? "bi-arrow-down-circle-fill" : "bi-arrow-up-circle-fill",
                         Color = diff < 0 ? "success" : "danger",
                         Title = diff < 0 ? "90-Day Rate Improving" : "90-Day Rate Slipping",
-                        Description = $"{recentAvg:F1}% avg over the last {recent.Count} cohort(s) vs {priorAvg:F1}% before — {(diff > 0 ? "+" : "")}{diff}pt.",
+                        Description = $"Employees hired in the last {recent.Count} cohort month(s) left within 90 days at {recentAvg:F1}%, vs {priorAvg:F1}% for the {prior.Count} month(s) before that — a {Math.Abs(diff)}pt {(diff < 0 ? "improvement" : "increase")}.",
                     });
             }
         }
