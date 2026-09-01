@@ -448,7 +448,7 @@ public class UploadService : IUploadService
         return (true, $"Processed {parsed.Count} exit interview responses", parsed.Count);
     }
 
-    public async Task<(List<UploadHistoryItem> Items, int TotalCount)> GetHistoryPagedAsync(int page, int pageSize)
+    public async Task<(List<UploadHistoryItem> Items, int TotalCount)> GetHistoryPagedAsync(int page, int pageSize, string sort = "date", string dir = "desc")
     {
         var logs = await _db.UploadLogs.OrderByDescending(l => l.UploadDate)
             .Select(l => new { l.Id, l.FileType, l.FileName, l.Month, l.Year, l.UploadDate, l.UploadedBy, HasFile = l.FileContent != null })
@@ -482,7 +482,21 @@ public class UploadService : IUploadService
             });
         }
 
-        var ordered = items.OrderByDescending(i => i.UploadDate).ToList();
+        bool asc = dir == "asc";
+        IOrderedEnumerable<UploadHistoryItem> sorted = sort switch
+        {
+            "type" => asc ? items.OrderBy(i => i.Kind) : items.OrderByDescending(i => i.Kind),
+            "name" => asc
+                ? items.OrderBy(i => i.Files.Select(f => f.FileName).OrderBy(n => n).FirstOrDefault())
+                : items.OrderByDescending(i => i.Files.Select(f => f.FileName).OrderBy(n => n).FirstOrDefault()),
+            "period" => asc
+                ? items.OrderBy(i => i.Year ?? 0).ThenBy(i => i.Month ?? 0)
+                : items.OrderByDescending(i => i.Year ?? 0).ThenByDescending(i => i.Month ?? 0),
+            "uploadedby" => asc ? items.OrderBy(i => i.UploadedBy) : items.OrderByDescending(i => i.UploadedBy),
+            _ => asc ? items.OrderBy(i => i.UploadDate) : items.OrderByDescending(i => i.UploadDate),
+        };
+
+        var ordered = sorted.ToList();
         var page_ = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         return (page_, ordered.Count);
     }

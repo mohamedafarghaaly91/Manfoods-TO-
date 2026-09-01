@@ -144,7 +144,7 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
-    public async Task<IActionResult> Uploads(int page = 1) => await UploadsViewAsync(page);
+    public async Task<IActionResult> Uploads(int page = 1, string sort = "date", string dir = "desc") => await UploadsViewAsync(page, sort, dir);
 
     // Renders the Uploads page directly in the same response — no redirect,
     // no TempData/cookie round trip — so a Success/Error message set on
@@ -155,10 +155,12 @@ public class DashboardController : Controller
     // failed (the admin only found out later, from Upload History staying
     // empty). This app has a single admin user, so the exact exception
     // message is shown as-is rather than a generic sanitized message.
-    private async Task<IActionResult> UploadsViewAsync(int page = 1)
+    private async Task<IActionResult> UploadsViewAsync(int page = 1, string sort = "date", string dir = "desc")
     {
         const int pageSize = 10;
-        var (items, total) = await _uploads.GetHistoryPagedAsync(page, pageSize);
+        var (items, total) = await _uploads.GetHistoryPagedAsync(page, pageSize, sort, dir);
+        ViewBag.Sort = sort;
+        ViewBag.Dir = dir;
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
         ViewBag.TotalCount = total;
