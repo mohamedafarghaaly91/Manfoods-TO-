@@ -24,6 +24,10 @@
     <Content Remove="MvcApp.Tests/**/*" />
     <EmbeddedResource Remove="MvcApp.Tests/**/*" />
     <None Remove="MvcApp.Tests/**/*" />
+    <Compile Remove="Tools/**/*.cs" />
+    <Content Remove="Tools/**/*" />
+    <EmbeddedResource Remove="Tools/**/*" />
+    <None Remove="Tools/**/*" />
   </ItemGroup>
 
 </Project>
