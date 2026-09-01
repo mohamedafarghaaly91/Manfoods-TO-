@@ -90,12 +90,27 @@ BEGIN
         name NVARCHAR(MAX) NOT NULL DEFAULT '',
         store NVARCHAR(MAX) NOT NULL DEFAULT '',
         job_title NVARCHAR(MAX) NOT NULL DEFAULT '',
+        grade NVARCHAR(MAX) NOT NULL DEFAULT '',
+        payroll_group NVARCHAR(MAX) NOT NULL DEFAULT '',
+        cost_center NVARCHAR(MAX) NOT NULL DEFAULT '',
         gender NVARCHAR(MAX) NOT NULL DEFAULT '',
         hire_date DATE NULL,
         month INT NOT NULL DEFAULT 0,
         year INT NOT NULL DEFAULT 0
     );
 END
+-- These three were missing from this script entirely (on both the original
+-- Postgres/Neon version and this port) even though Models/ActiveEmployee.cs
+-- has always declared them — schema drift where the live database picked
+-- them up some other way but this script never did. Backfill explicitly so
+-- CREATE TABLE ... IF NOT EXISTS above being a no-op on an existing table
+-- doesn't leave them missing.
+IF COL_LENGTH('dbo.active_employees', 'grade') IS NULL
+    ALTER TABLE dbo.active_employees ADD grade NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.active_employees', 'payroll_group') IS NULL
+    ALTER TABLE dbo.active_employees ADD payroll_group NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.active_employees', 'cost_center') IS NULL
+    ALTER TABLE dbo.active_employees ADD cost_center NVARCHAR(MAX) NOT NULL DEFAULT '';
 
 -- ── resignations ──────────────────────────────
 IF OBJECT_ID('dbo.resignations', 'U') IS NULL
@@ -106,6 +121,8 @@ BEGIN
         name NVARCHAR(MAX) NOT NULL DEFAULT '',
         store NVARCHAR(MAX) NOT NULL DEFAULT '',
         job_title NVARCHAR(MAX) NOT NULL DEFAULT '',
+        payroll_group NVARCHAR(MAX) NOT NULL DEFAULT '',
+        cost_center NVARCHAR(MAX) NOT NULL DEFAULT '',
         gender NVARCHAR(MAX) NOT NULL DEFAULT '',
         hire_date DATE NULL,
         resignation_date DATE NULL,
@@ -114,6 +131,12 @@ BEGIN
         year INT NOT NULL DEFAULT 0
     );
 END
+-- Same schema-drift gap as active_employees above — Models/Resignation.cs
+-- has always declared these two.
+IF COL_LENGTH('dbo.resignations', 'payroll_group') IS NULL
+    ALTER TABLE dbo.resignations ADD payroll_group NVARCHAR(MAX) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.resignations', 'cost_center') IS NULL
+    ALTER TABLE dbo.resignations ADD cost_center NVARCHAR(MAX) NOT NULL DEFAULT '';
 
 -- ── store_references ──────────────────────────
 IF OBJECT_ID('dbo.store_references', 'U') IS NULL
