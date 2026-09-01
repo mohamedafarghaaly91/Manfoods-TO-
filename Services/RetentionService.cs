@@ -1,18 +1,28 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
+using MvcApp.Models;
 using MvcApp.Models.ViewModels;
 
 namespace MvcApp.Services;
 
 public class RetentionService : IRetentionService
 {
+    // Shared with UploadService, which invalidates this key whenever it writes
+    // to ActiveEmployees or Resignations — same convention as
+    // ScorecardService.HistoricalRecordsCacheKey.
+    public const string EmployeeCohortsCacheKey = "retention:employee-cohorts";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
+
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IMemoryCache _cache;
 
-    public RetentionService(AppDbContext db, IStoreAccessService storeAccess)
+    public RetentionService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _cache = cache;
     }
 
     // Real "retention" is a long-term measure — 30/90-day attrition is covered by the
@@ -49,12 +59,25 @@ public class RetentionService : IRetentionService
         public int? TenureDays { get; set; }
     }
 
+    // Fetches only the row(s) that could be "the latest period" for each store —
+    // i.e. rows whose (Year, Month) matches that store's own max — instead of
+    // pulling every historical period for every store over the wire. Ties (more
+    // than one row sharing a store's max period) are resolved by the caller with
+    // the exact same OrderByDescending(Year).ThenByDescending(Month).First() rule
+    // used before this optimization, so the result is identical either way.
+    private async Task<List<StoreReference>> LoadLatestStoreReferenceCandidatesAsync() =>
+        await _db.StoreReferences
+            .Where(s => s.Year * 100 + s.Month == _db.StoreReferences
+                .Where(x => x.StoreName == s.StoreName)
+                .Max(x => x.Year * 100 + x.Month))
+            .ToListAsync();
+
     // Stores whose latest-known Operation Manager / Operation Consultant match the filter.
     // Returns null when no OM/OC filter is set.
     private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc, string? soc = null, string? od = null)
     {
         if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
-        var refs = await _db.StoreReferences.ToListAsync();
+        var refs = await LoadLatestStoreReferenceCandidatesAsync();
         var latestByStore = refs.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         return latestByStore.Values
@@ -66,10 +89,16 @@ public class RetentionService : IRetentionService
             .ToList();
     }
 
-    private async Task<List<EmployeeCohort>> LoadEmployeeCohortsAsync(
-        string role, string? assignedName,
-        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
+    // This query has no request-specific parameters — it returns the same merged
+    // active/resignation rows regardless of role/period/om/oc filters (those are
+    // applied afterward by LoadEmployeeCohortsAsync) — so it's cached whole rather
+    // than re-read from Postgres on every Retention page interaction. See
+    // UploadService for the write-side invalidation of EmployeeCohortsCacheKey.
+    private async Task<List<EmployeeCohort>> LoadAllEmployeeCohortsAsync()
     {
+        if (_cache.TryGetValue(EmployeeCohortsCacheKey, out List<EmployeeCohort>? cached) && cached != null)
+            return cached;
+
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
             .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
@@ -111,7 +140,16 @@ public class RetentionService : IRetentionService
             };
         }
 
-        IEnumerable<EmployeeCohort> cohorts = byEmployee.Values;
+        var records = byEmployee.Values.ToList();
+        _cache.Set(EmployeeCohortsCacheKey, records, CacheDuration);
+        return records;
+    }
+
+    private async Task<List<EmployeeCohort>> LoadEmployeeCohortsAsync(
+        string role, string? assignedName,
+        int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
+    {
+        IEnumerable<EmployeeCohort> cohorts = await LoadAllEmployeeCohortsAsync();
 
         if (!string.IsNullOrWhiteSpace(months) && toYear.HasValue)
         {

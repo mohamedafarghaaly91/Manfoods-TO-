@@ -96,6 +96,19 @@ public class DashboardService : IDashboardService
         return await q.Select(s => s.StoreName).Distinct().ToListAsync();
     }
 
+    // Fetches only the row(s) that could be "the latest period" for each store —
+    // i.e. rows whose (Year, Month) matches that store's own max — instead of
+    // pulling every historical period for every store over the wire. Ties (more
+    // than one row sharing a store's max period) are resolved by the caller with
+    // the exact same OrderByDescending(Year).ThenByDescending(Month).First() rule
+    // used before this optimization, so the result is identical either way.
+    private async Task<List<StoreReference>> LoadLatestStoreReferenceCandidatesAsync() =>
+        await _db.StoreReferences
+            .Where(s => s.Year * 100 + s.Month == _db.StoreReferences
+                .Where(x => x.StoreName == s.StoreName)
+                .Max(x => x.Year * 100 + x.Month))
+            .ToListAsync();
+
     public async Task<List<string>> GetOperationManagersAsync(int? month, int? year, string role, string? assignedName)
     {
         var q = _db.StoreReferences.AsQueryable();
@@ -376,6 +389,14 @@ public class DashboardService : IDashboardService
     public async Task<List<StoreComparisonRow>> GetStoreComparisonAsync(int month, int year, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
+        // Multiple sibling AJAX endpoints (store-comparison, oc-om-analysis,
+        // smart-insights) each need this exact result for the same request
+        // parameters — cache it the same way GetKpisAsync is cached, so a single
+        // page load computes it once instead of recomputing it 2-4x.
+        var cacheKey = $"store-comparison_{month}_{year}_{fromMonth}_{fromYear}_{om}_{oc}_{soc}_{od}_{months}_{role}_{assignedName}";
+        if (_cache.TryGetValue(cacheKey, out List<StoreComparisonRow>? cachedRows) && cachedRows != null)
+            return cachedRows;
+
         var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
         var periods = ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToList();
@@ -458,7 +479,9 @@ public class DashboardService : IDashboardService
         if (MultiValueFilter.Split(soc) is { } socs) rows = rows.Where(r => socs.Contains(r.SeniorOperationConsultant));
         if (MultiValueFilter.Split(od) is { } ods) rows = rows.Where(r => ods.Contains(r.OperationDirector));
 
-        return rows.OrderByDescending(s => s.TurnoverRate).ToList();
+        var result = rows.OrderByDescending(s => s.TurnoverRate).ToList();
+        _cache.Set(cacheKey, result, CacheDuration);
+        return result;
     }
 
     public async Task<OcOmAnalysisResult> GetOcOmAnalysisAsync(int month, int year, string role, string? assignedName,
@@ -765,7 +788,7 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         // Latest OC/OM assignment per store
-        var storeRefList = await _db.StoreReferences.ToListAsync();
+        var storeRefList = await LoadLatestStoreReferenceCandidatesAsync();
         var latestRefByStore = storeRefList
             .GroupBy(s => s.StoreName)
             .ToDictionary(

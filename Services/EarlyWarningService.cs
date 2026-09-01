@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
 using MvcApp.Models.ViewModels;
 
@@ -6,12 +7,21 @@ namespace MvcApp.Services;
 
 public class EarlyWarningService : IEarlyWarningService
 {
+    // Shared with UploadService, which invalidates these keys whenever it writes
+    // to ActiveEmployees or Resignations — same convention as
+    // ScorecardService.HistoricalRecordsCacheKey.
+    public const string HistoricalRecordsCacheKey = "early-warning:historical-records";
+    public const string ResignedEmployeeIdsCacheKey = "early-warning:resigned-employee-ids";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
+
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
-    public EarlyWarningService(AppDbContext db, IStoreAccessService storeAccess)
+    private readonly IMemoryCache _cache;
+    public EarlyWarningService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _cache = cache;
     }
 
     // ── Constants ─────────────────────────────────────────────────────────────
@@ -50,6 +60,13 @@ public class EarlyWarningService : IEarlyWarningService
     // ── Data loaders ──────────────────────────────────────────────────────────
     private async Task<List<HistoricalRecord>> LoadHistoricalRecordsAsync()
     {
+        // This query has no request-specific parameters — same rows regardless of
+        // filters — so it's cached whole rather than re-read from Postgres on every
+        // call. See UploadService for the write-side invalidation of
+        // HistoricalRecordsCacheKey.
+        if (_cache.TryGetValue(HistoricalRecordsCacheKey, out List<HistoricalRecord>? cachedRecords) && cachedRecords != null)
+            return cachedRecords;
+
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
             .Select(e => new { e.EmployeeId, e.Store, e.JobTitle, e.Gender, e.HireDate })
@@ -85,7 +102,20 @@ public class EarlyWarningService : IEarlyWarningService
             };
         }
 
-        return byEmployee.Values.ToList();
+        var records = byEmployee.Values.ToList();
+        _cache.Set(HistoricalRecordsCacheKey, records, CacheDuration);
+        return records;
+    }
+
+    // Same no-request-parameters cacheability as LoadHistoricalRecordsAsync above.
+    private async Task<List<string>> LoadResignedEmployeeIdsAsync()
+    {
+        if (_cache.TryGetValue(ResignedEmployeeIdsCacheKey, out List<string>? cached) && cached != null)
+            return cached;
+
+        var ids = await _db.Resignations.Select(r => r.EmployeeId).Distinct().ToListAsync();
+        _cache.Set(ResignedEmployeeIdsCacheKey, ids, CacheDuration);
+        return ids;
     }
 
     private async Task<(List<ActiveCandidate> Candidates, int Month, int Year)> LoadActiveCandidatesAsync(string? months, int? year)
@@ -113,7 +143,7 @@ public class EarlyWarningService : IEarlyWarningService
         }
 
         var asOf       = new DateOnly(anchor.Year, anchor.Month, 1).AddMonths(1).AddDays(-1);
-        var resignedIds = (await _db.Resignations.Select(r => r.EmployeeId).Distinct().ToListAsync()).ToHashSet();
+        var resignedIds = (await LoadResignedEmployeeIdsAsync()).ToHashSet();
 
         var rows = await _db.ActiveEmployees
             .Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null)

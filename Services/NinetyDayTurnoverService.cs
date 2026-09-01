@@ -1,18 +1,29 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
+using MvcApp.Models;
 using MvcApp.Models.ViewModels;
 
 namespace MvcApp.Services;
 
 public class NinetyDayTurnoverService : INinetyDayTurnoverService
 {
+    // Shared with UploadService, which invalidates these keys whenever it writes
+    // to ActiveEmployees or Resignations — same convention as
+    // ScorecardService.HistoricalRecordsCacheKey.
+    public const string ActiveHiresCacheKey = "ninety-day:active-hires";
+    public const string ResignationTenuresCacheKey = "ninety-day:resignation-tenures";
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
+
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IMemoryCache _cache;
 
-    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess)
+    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _cache = cache;
     }
 
     private class ResignationTenure
@@ -30,6 +41,13 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
     private async Task<List<(string EmployeeId, string Store, int Month, int Year)>> LoadActiveHiresAsync()
     {
+        // This query has no request-specific parameters (the go-live threshold is a
+        // fixed cutoff, not a per-call filter), so it's cached whole rather than
+        // re-read from Postgres on every call — see UploadService for the
+        // write-side invalidation of ActiveHiresCacheKey.
+        if (_cache.TryGetValue(ActiveHiresCacheKey, out List<(string EmployeeId, string Store, int Month, int Year)>? cached) && cached != null)
+            return cached;
+
         // Go-live threshold is a dynamic date comparison (not a hardcoded year), so it
         // keeps working unchanged as future years' data arrives.
         var goLive = MetricsCalculationService.GoLiveDate;
@@ -37,16 +55,22 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .Where(e => e.HireDate != null && e.HireDate.Value >= goLive)
             .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
             .ToListAsync();
-        return rows.Select(r => (r.EmployeeId, r.Store, r.HireDate!.Value.Month, r.HireDate!.Value.Year)).ToList();
+        var result = rows.Select(r => (r.EmployeeId, r.Store, r.HireDate!.Value.Month, r.HireDate!.Value.Year)).ToList();
+        _cache.Set(ActiveHiresCacheKey, result, CacheDuration);
+        return result;
     }
 
     private async Task<List<ResignationTenure>> LoadResignationTenuresAsync()
     {
+        // Same no-request-parameters cacheability as LoadActiveHiresAsync above.
+        if (_cache.TryGetValue(ResignationTenuresCacheKey, out List<ResignationTenure>? cached) && cached != null)
+            return cached;
+
         var goLive = MetricsCalculationService.GoLiveDate;
         var rows = await _db.Resignations
             .Where(r => r.HireDate != null && r.ResignationDate != null && r.HireDate.Value >= goLive)
             .ToListAsync();
-        return rows.Select(r => new ResignationTenure
+        var result = rows.Select(r => new ResignationTenure
         {
             EmployeeId = r.EmployeeId,
             Name = r.Name,
@@ -58,14 +82,29 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             ResignationDate = r.ResignationDate!.Value,
             TenureDays = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
         }).ToList();
+        _cache.Set(ResignationTenuresCacheKey, result, CacheDuration);
+        return result;
     }
+
+    // Fetches only the row(s) that could be "the latest period" for each store —
+    // i.e. rows whose (Year, Month) matches that store's own max — instead of
+    // pulling every historical period for every store over the wire. Ties (more
+    // than one row sharing a store's max period) are resolved by the caller with
+    // the exact same OrderByDescending(Year).ThenByDescending(Month).First() rule
+    // used before this optimization, so the result is identical either way.
+    private async Task<List<StoreReference>> LoadLatestStoreReferenceCandidatesAsync() =>
+        await _db.StoreReferences
+            .Where(s => s.Year * 100 + s.Month == _db.StoreReferences
+                .Where(x => x.StoreName == s.StoreName)
+                .Max(x => x.Year * 100 + x.Month))
+            .ToListAsync();
 
     // Stores whose latest-known Operation Manager / Operation Consultant match the filter.
     // Returns null when no OM/OC filter is set.
     private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc, string? soc = null, string? od = null)
     {
         if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
-        var refs = await _db.StoreReferences.ToListAsync();
+        var refs = await LoadLatestStoreReferenceCandidatesAsync();
         var latestByStore = refs.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         return latestByStore.Values
@@ -233,7 +272,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         if (omOcStores != null) stores = stores.Where(s => omOcStores.Contains(s));
         if (accessible != null) stores = stores.Where(s => accessible.Contains(s));
 
-        var storeRefList = await _db.StoreReferences.ToListAsync();
+        var storeRefList = await LoadLatestStoreReferenceCandidatesAsync();
         var latestRefByStore = storeRefList.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
 
@@ -436,7 +475,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         if (omOcStores != null) allStores = allStores.Where(s => omOcStores.Contains(s)).ToList();
         if (accessible != null) allStores = allStores.Where(s => accessible.Contains(s)).ToList();
 
-        var storeRefList = await _db.StoreReferences.ToListAsync();
+        var storeRefList = await LoadLatestStoreReferenceCandidatesAsync();
         var latestRefByStore = storeRefList.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         var ocByStore = latestRefByStore.ToDictionary(kv => kv.Key, kv => kv.Value.OperationConsultant ?? "");

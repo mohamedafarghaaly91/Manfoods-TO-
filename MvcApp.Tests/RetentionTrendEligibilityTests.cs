@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Services;
@@ -21,7 +22,7 @@ public class RetentionTrendEligibilityTests
             .Options);
 
     private static RetentionService NewService(AppDbContext db) =>
-        new(db, new StoreAccessService(db));
+        new(db, new StoreAccessService(db), new MemoryCache(new MemoryCacheOptions()));
 
     private static void AddActive(AppDbContext db, string employeeId, string store, DateOnly hireDate, int month, int year) =>
         db.ActiveEmployees.Add(new ActiveEmployee

@@ -31,9 +31,21 @@ public class UploadService : IUploadService
         _logger = logger;
     }
 
-    // ActiveEmployees/Resignations changed — the Scorecard historical-records
-    // cache (ScorecardService.LoadHistoricalRecordsAsync) is now stale.
-    private void InvalidateScorecardHistoricalCache() => _cache.Remove(ScorecardService.HistoricalRecordsCacheKey);
+    // ActiveEmployees/Resignations changed — every cached full-table read derived
+    // from them is now stale: Scorecard's historical records
+    // (ScorecardService.LoadHistoricalRecordsAsync), 90-Day Turnover's active-hires/
+    // resignation-tenures (NinetyDayTurnoverService), Retention's employee cohorts
+    // (RetentionService), and Early Warning's historical records/resigned-ID list
+    // (EarlyWarningService).
+    private void InvalidateScorecardHistoricalCache()
+    {
+        _cache.Remove(ScorecardService.HistoricalRecordsCacheKey);
+        _cache.Remove(NinetyDayTurnoverService.ActiveHiresCacheKey);
+        _cache.Remove(NinetyDayTurnoverService.ResignationTenuresCacheKey);
+        _cache.Remove(RetentionService.EmployeeCohortsCacheKey);
+        _cache.Remove(EarlyWarningService.HistoricalRecordsCacheKey);
+        _cache.Remove(EarlyWarningService.ResignedEmployeeIdsCacheKey);
+    }
 
     // Runs detection in its own DI scope on a background task instead of on the
     // request thread: the request-scoped DbContext/services would be disposed as
