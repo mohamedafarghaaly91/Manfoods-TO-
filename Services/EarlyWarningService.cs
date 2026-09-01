@@ -14,6 +14,22 @@ public class EarlyWarningService : IEarlyWarningService
     public const string ResignedEmployeeIdsCacheKey = "early-warning:resigned-employee-ids";
     private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(6);
 
+    // LoadActiveCandidatesAsync's result does not depend on store/role — only on
+    // months/year — but GetWatchlistAsync's own cache key includes store, so
+    // calling it once per store (e.g. StoreActionPlanService's per-period
+    // detection loop, ~200 stores) reran this every time with an identical
+    // result. Caching it separately, keyed only by months/year, turns ~200
+    // redundant full ActiveEmployees pulls into one.
+    private static string CandidatesCacheKey(string? months, int? year) => $"early-warning:candidates_{months}_{year}";
+
+    // Same problem as LoadActiveCandidatesAsync above: these two full-table
+    // reads (ExitInterviews, StoreReferences) don't vary by store/role, but sat
+    // uncached inside GetWatchlistAsync's body — whose own cache key includes
+    // store — so a per-store caller (StoreActionPlanService's detection loop)
+    // re-ran them once per store instead of once per run.
+    private const string StoreExitScoresCacheKey = "early-warning:store-exit-scores";
+    private const string StoreReferenceRowsCacheKey = "early-warning:store-reference-rows";
+
     // Short-lived cache for the fully-scored watchlist itself, keyed by its
     // request parameters (same convention as DashboardService.GetKpisAsync/
     // GetStoreComparisonAsync). GetSummaryAsync recomputes the exact same
@@ -130,12 +146,21 @@ public class EarlyWarningService : IEarlyWarningService
 
     private async Task<(List<ActiveCandidate> Candidates, int Month, int Year)> LoadActiveCandidatesAsync(string? months, int? year)
     {
+        var candidatesCacheKey = CandidatesCacheKey(months, year);
+        if (_cache.TryGetValue(candidatesCacheKey, out (List<ActiveCandidate> Candidates, int Month, int Year) cached))
+            return cached;
+
         var periods = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
             .Select(e => new { e.Month, e.Year })
             .Distinct()
             .ToListAsync();
-        if (periods.Count == 0) return ([], 0, 0);
+        if (periods.Count == 0)
+        {
+            var empty = (new List<ActiveCandidate>(), 0, 0);
+            _cache.Set(candidatesCacheKey, empty, WatchlistCacheDuration);
+            return empty;
+        }
 
         (int Month, int Year) anchor;
         if (year.HasValue && !string.IsNullOrWhiteSpace(months))
@@ -174,7 +199,9 @@ public class EarlyWarningService : IEarlyWarningService
             })
             .ToList();
 
-        return (candidates, anchor.Month, anchor.Year);
+        var result = (candidates, anchor.Month, anchor.Year);
+        _cache.Set(candidatesCacheKey, result, WatchlistCacheDuration);
+        return result;
     }
 
     // ── Statistical helpers ───────────────────────────────────────────────────
@@ -298,6 +325,9 @@ public class EarlyWarningService : IEarlyWarningService
     /// </summary>
     private async Task<Dictionary<string, double>> LoadStoreExitScoresAsync()
     {
+        if (_cache.TryGetValue(StoreExitScoresCacheKey, out Dictionary<string, double>? cached) && cached != null)
+            return cached;
+
         var rows = await _db.ExitInterviews
             .Where(e => !string.IsNullOrEmpty(e.Store))
             .Select(e => new
@@ -309,7 +339,7 @@ public class EarlyWarningService : IEarlyWarningService
             })
             .ToListAsync();
 
-        return rows
+        var result = rows
             .GroupBy(e => e.Store)
             .Where(g => g.Count() >= MinExitSampleSize)
             .ToDictionary(
@@ -328,6 +358,28 @@ public class EarlyWarningService : IEarlyWarningService
                     if (answers.Count == 0) return 0.0;
                     return answers.Count(a => ExitSentiment(a) < 0) * 100.0 / answers.Count;
                 });
+
+        _cache.Set(StoreExitScoresCacheKey, result, WatchlistCacheDuration);
+        return result;
+    }
+
+    // Raw rows behind both LoadStoreLeaderRatesAsync and GetWatchlistAsync's
+    // Operation-Consultant-per-store lookup — same underlying StoreReferences
+    // table, previously queried twice (with slightly different filters) on
+    // every call.
+    private async Task<List<(string StoreName, string StoreLeader, string OperationConsultant, int Year, int Month)>> LoadStoreReferenceRowsAsync()
+    {
+        if (_cache.TryGetValue(StoreReferenceRowsCacheKey, out List<(string, string, string, int, int)>? cached) && cached != null)
+            return cached;
+
+        var rows = await _db.StoreReferences
+            .Where(s => !string.IsNullOrEmpty(s.StoreName))
+            .Select(s => new { s.StoreName, s.StoreLeader, s.OperationConsultant, s.Year, s.Month })
+            .ToListAsync();
+
+        var result = rows.Select(s => (s.StoreName, s.StoreLeader, s.OperationConsultant, s.Year, s.Month)).ToList();
+        _cache.Set(StoreReferenceRowsCacheKey, result, WatchlistCacheDuration);
+        return result;
     }
 
     /// <summary>
@@ -337,10 +389,10 @@ public class EarlyWarningService : IEarlyWarningService
     private async Task<Dictionary<string, (string Leader, double LeaderRate)>> LoadStoreLeaderRatesAsync(
         List<HistoricalRecord> historical)
     {
-        var storeRefs = await _db.StoreReferences
+        var storeRefs = (await LoadStoreReferenceRowsAsync())
             .Where(s => !string.IsNullOrEmpty(s.StoreLeader) && !string.IsNullOrEmpty(s.StoreName))
             .Select(s => new { s.StoreName, s.StoreLeader, s.Year, s.Month })
-            .ToListAsync();
+            .ToList();
 
         if (storeRefs.Count == 0) return [];
 
@@ -468,10 +520,7 @@ public class EarlyWarningService : IEarlyWarningService
         // ── Operation Consultant per store — latest assignment at or before the
         //    anchor period, so it matches the same snapshot the candidates come
         //    from (falls back to the latest known assignment if none is ≤ anchor).
-        var storeRefRows = await _db.StoreReferences
-            .Where(s => !string.IsNullOrEmpty(s.StoreName))
-            .Select(s => new { s.StoreName, s.OperationConsultant, s.Year, s.Month })
-            .ToListAsync();
+        var storeRefRows = await LoadStoreReferenceRowsAsync();
         var ocByStore = storeRefRows
             .GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g =>
