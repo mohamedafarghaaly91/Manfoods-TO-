@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
@@ -54,11 +55,26 @@ public class UploadService : IUploadService
     // stuck/unresponsive and let a detection failure masquerade as an upload failure.
     // The job is registered with the tracker so the admin UI can poll its
     // running/succeeded/failed status.
+    // Updating any one of the three period files (or re-uploading the whole
+    // period) fires its own detection job for that same month/year — several
+    // can easily overlap if files are updated in quick succession. Detection
+    // is check-then-insert per store (EvaluateStoreAsync: read the active
+    // plan, insert one if none exists), which is safe against a *second*
+    // full run for the same period (it no-ops once a store's already marked
+    // evaluated) but not against two runs racing on the same store's
+    // check-then-insert at the same instant — that raced INSERT is exactly
+    // what tripped ux_store_action_plans_active_store. Serializing runs per
+    // period closes the race; the loser just re-checks already-current data
+    // and finishes fast.
+    private static readonly ConcurrentDictionary<(int Month, int Year), SemaphoreSlim> _detectionGates = new();
+
     private void FireAndForgetDetection(int month, int year, string label)
     {
         var jobId = _jobTracker.Start(label);
         _ = Task.Run(async () =>
         {
+            var gate = _detectionGates.GetOrAdd((month, year), _ => new SemaphoreSlim(1, 1));
+            await gate.WaitAsync();
             try
             {
                 using var scope = _scopeFactory.CreateScope();
@@ -70,6 +86,10 @@ public class UploadService : IUploadService
             {
                 _logger.LogError(ex, "Action plan detection failed for period {Month}/{Year}", month, year);
                 _jobTracker.Fail(jobId, ex.Message);
+            }
+            finally
+            {
+                gate.Release();
             }
         });
     }
