@@ -171,10 +171,11 @@
             <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
         </div>
     </div>
+    <p id="ntdKpiRangeNote" class="text-muted-custom small mb-3" style="margin-top:-10px"></p>
 
     <div class="chart-card mb-4">
         <div class="chart-header">
-            <h6>@L["Chart_NinetyDayByCohort"]</h6>
+            <h6 id="ntdByCohortTitle">@L["Chart_NinetyDayByCohort"]</h6>
             <p>@L["Chart_NinetyDayByCohortSub"]</p>
         </div>
         <div class="chart-body"><canvas id="ntdByCohortChart" style="max-height:240px"></canvas></div>
@@ -182,27 +183,27 @@
 
     <div class="chart-card mb-4">
         <div class="chart-header">
-            <h6>90-Day Turnover Trend</h6>
+            <h6 id="ntdTrendTitle">90-Day Turnover Trend</h6>
             <p>Rate per hire-month cohort, all-time — dashed points are still provisional</p>
         </div>
         <div class="chart-body"><canvas id="ntdTrendChart" style="max-height:280px"></canvas></div>
     </div>
 
     <div class="chart-card mb-4">
-        <div class="chart-header"><h6>By Store</h6><p>Early-leaver rate for the selected cohort months</p></div>
+        <div class="chart-header"><h6 id="ntdByStoreTitle">By Store</h6><p>Early-leaver rate for the selected cohort months</p></div>
         <div class="chart-body"><canvas id="ntdByStoreChart"></canvas></div>
     </div>
 
     <div class="row g-2 g-md-3 mb-4">
         <div class="col-6">
             <div class="chart-card h-100 p-2 p-md-3">
-                <div class="chart-header"><h6>Reasons for Early Leaving</h6><p>From exit interviews, matched to this cohort's early leavers</p></div>
+                <div class="chart-header"><h6 id="ntdReasonsTitle">Reasons for Early Leaving</h6><p>From exit interviews, matched to this cohort's early leavers</p></div>
                 <div class="chart-body"><canvas id="ntdReasonsChart"></canvas></div>
             </div>
         </div>
         <div class="col-6">
             <div class="chart-card h-100 p-2 p-md-3">
-                <div class="chart-header"><h6>Gender Breakdown</h6><p>Gender of early leavers for the selected cohort months</p></div>
+                <div class="chart-header"><h6 id="ntdGenderTitle">Gender Breakdown</h6><p>Gender of early leavers for the selected cohort months</p></div>
                 <div class="tv-gender-body tv-gender-body-compact">
                     <div class="tv-gender-canvas-wrap"><canvas id="ntdGenderChart"></canvas></div>
                     <div class="tv-gender-list" id="ntdGenderStatsList"></div>
@@ -213,11 +214,11 @@
 
     <div class="charts-grid mb-4">
         <div class="chart-card">
-            <div class="chart-header"><h6>By Job Title</h6><p>Job titles of early leavers for the selected cohort months</p></div>
+            <div class="chart-header"><h6 id="ntdJobTitleTitle">By Job Title</h6><p>Job titles of early leavers for the selected cohort months</p></div>
             <div class="chart-body"><canvas id="ntdJobTitleChart"></canvas></div>
         </div>
         <div class="chart-card">
-            <div class="chart-header"><h6>By Payroll Group</h6><p>Payroll groups of early leavers for the selected cohort months</p></div>
+            <div class="chart-header"><h6 id="ntdPayrollTitle">By Payroll Group</h6><p>Payroll groups of early leavers for the selected cohort months</p></div>
             <div class="chart-body"><canvas id="ntdPayrollGroupChart"></canvas></div>
         </div>
     </div>
@@ -226,7 +227,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <div class="section-accent"></div>
-            <h5 class="mb-0 fw-bold">Store Comparison</h5>
+            <h5 class="mb-0 fw-bold" id="ntdStoreComparisonTitle">Store Comparison</h5>
             <span id="ntdStoreCountBadge" class="badge" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px"></span>
         </div>
         <input type="text" id="ntdStoreTableSearch" class="form-control form-control-sm"
@@ -277,7 +278,7 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.22 22)"><i class="bi bi-person-badge"></i></span>
                     <div>
-                        <h6 class="mb-0">Operation Consultants</h6>
+                        <h6 class="mb-0" id="ntdOcTitle">Operation Consultants</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
@@ -306,7 +307,7 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
                     <div>
-                        <h6 class="mb-0">Operation Directors</h6>
+                        <h6 class="mb-0" id="ntdOdTitle">Operation Directors</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
@@ -333,7 +334,7 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
                     <div>
-                        <h6 class="mb-0">Operation Managers</h6>
+                        <h6 class="mb-0" id="ntdOmTitle">Operation Managers</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
@@ -360,7 +361,7 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
                     <div>
-                        <h6 class="mb-0">Senior Operation Consultants</h6>
+                        <h6 class="mb-0" id="ntdSocTitle">Senior Operation Consultants</h6>
                         <p class="mb-0">Ranked by average 90-day rate</p>
                     </div>
                 </div>
@@ -391,7 +392,7 @@
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <div class="section-accent"></div>
-            <h5 class="mb-0 fw-bold">Full Data Table</h5>
+            <h5 class="mb-0 fw-bold" id="ntdTrendMatrixTitle">Full Data Table</h5>
             <span class="badge ms-1" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px">All Cohorts · 90-Day Rate</span>
         </div>
         <input type="text" id="ntdMatrixSearch" class="form-control form-control-sm"
@@ -466,6 +467,18 @@ let ntdStoreFilter = '', ntdOmFilter = '', ntdOcFilter = '', ntdSocFilter = '', 
 function ntdMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function ntdMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
 function ntdAnchor() { return ntdMonths.length ? Math.max(...ntdMonths) : null; }
+
+/* Same title-badge helper as Workforce/Turnover, but "is a range active"
+   means more than one cohort month checked in this page's own discrete
+   Year+Months picker (it doesn't use the continuous From→To filter those
+   pages do, so isPeriodRangeActive() from dashboard.js doesn't apply here). */
+const ntdTitleBase = {};
+function ntdSetTitleBadge(id, affected) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!(id in ntdTitleBase)) ntdTitleBase[id] = el.textContent;
+    el.innerHTML = ntdTitleBase[id] + ' ' + rangeFilterBadge(ntdMonths.length > 1, affected);
+}
 
 function ntdBuildQuery(extra) {
     const q = new URLSearchParams(extra || {});
@@ -645,6 +658,8 @@ function ntdRenderKpis(kpi) {
 }
 
 async function ntdLoadKpi() {
+    const noteEl = document.getElementById('ntdKpiRangeNote');
+    if (noteEl) noteEl.innerHTML = ntdMonths.length > 1 ? rangeFilterBadge(true, true) + ' — cards above reflect every cohort month checked.' : '';
     if (!ntdMonths.length) { ntdRenderKpis(null); return; }
     const kpi = await ntdFetch('kpi');
     ntdRenderKpis(kpi);
@@ -654,6 +669,7 @@ async function ntdLoadKpi() {
    Turnover page's Monthly Trend / Full Data Table. */
 let ntdTrendInstance;
 async function ntdLoadTrend() {
+    ntdSetTitleBadge('ntdTrendTitle', false);
     const q = new URLSearchParams();
     if (ntdStoreFilter) q.set('store', ntdStoreFilter);
     if (ntdOmFilter)    q.set('om', ntdOmFilter);
@@ -693,6 +709,7 @@ async function ntdLoadTrend() {
    independently (early leavers ÷ hires for that single cohort month). */
 let ntdByCohortInstance;
 async function ntdLoadByCohort() {
+    ntdSetTitleBadge('ntdByCohortTitle', true);
     const ctx = document.getElementById('ntdByCohortChart');
     if (!ctx) return;
     if (ntdByCohortInstance) ntdByCohortInstance.destroy();
@@ -725,6 +742,7 @@ async function ntdLoadByCohort() {
 
 let ntdByStoreInstance;
 async function ntdLoadByStore() {
+    ntdSetTitleBadge('ntdByStoreTitle', true);
     const ctx = document.getElementById('ntdByStoreChart');
     if (!ctx) return;
     if (ntdByStoreInstance) ntdByStoreInstance.destroy();
@@ -746,6 +764,7 @@ async function ntdLoadByStore() {
 
 let ntdReasonsInstance;
 async function ntdLoadReasons() {
+    ntdSetTitleBadge('ntdReasonsTitle', true);
     const ctx = document.getElementById('ntdReasonsChart');
     if (!ctx) return;
     if (ntdReasonsInstance) ntdReasonsInstance.destroy();
@@ -781,6 +800,7 @@ async function ntdLoadLeavers() {
 /* By Job Title (early leavers) --------------------------------------- */
 let ntdJobTitleInstance;
 async function ntdLoadJobTitleChart() {
+    ntdSetTitleBadge('ntdJobTitleTitle', true);
     const ctx = document.getElementById('ntdJobTitleChart');
     if (!ctx) return;
     if (ntdJobTitleInstance) ntdJobTitleInstance.destroy();
@@ -803,6 +823,7 @@ async function ntdLoadJobTitleChart() {
 /* By Payroll Group (early leavers) ------------------------------------ */
 let ntdPayrollGroupInstance;
 async function ntdLoadPayrollGroupChart() {
+    ntdSetTitleBadge('ntdPayrollTitle', true);
     const ctx = document.getElementById('ntdPayrollGroupChart');
     if (!ctx) return;
     if (ntdPayrollGroupInstance) ntdPayrollGroupInstance.destroy();
@@ -825,6 +846,7 @@ async function ntdLoadPayrollGroupChart() {
 /* Gender breakdown (early leavers) — donut + side list ------------------ */
 let ntdGenderInstance;
 async function ntdLoadGenderChart() {
+    ntdSetTitleBadge('ntdGenderTitle', true);
     const ctx = document.getElementById('ntdGenderChart');
     const list = document.getElementById('ntdGenderStatsList');
     if (!ctx) return;
@@ -898,6 +920,7 @@ function ntdRenderStoreTable() {
 }
 
 async function ntdLoadStoreComparison() {
+    ntdSetTitleBadge('ntdStoreComparisonTitle', true);
     if (!ntdMonths.length) { ntdStoreData = []; ntdRenderStoreTable(); return; }
     ntdStoreData = await ntdFetch('store-comparison') || [];
     ntdRenderStoreTable();
@@ -925,6 +948,10 @@ function ntdRenderOcOmTable(tbodyId, rows) {
 }
 
 async function ntdLoadOcOmAnalysis() {
+    ntdSetTitleBadge('ntdOcTitle', true);
+    ntdSetTitleBadge('ntdOdTitle', true);
+    ntdSetTitleBadge('ntdOmTitle', true);
+    ntdSetTitleBadge('ntdSocTitle', true);
     if (!ntdMonths.length) {
         ['ntdOcTableBody', 'ntdOmTableBody', 'ntdSocTableBody', 'ntdOdTableBody'].forEach(id => ntdRenderOcOmTable(id, []));
         return;
@@ -1089,6 +1116,7 @@ function ndMxSort(col) {
 }
 
 async function ntdLoadTrendMatrix() {
+    ntdSetTitleBadge('ntdTrendMatrixTitle', false);
     const body = document.getElementById('ntdMatrixBody');
     body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading…</td></tr>';
     const q = new URLSearchParams();
