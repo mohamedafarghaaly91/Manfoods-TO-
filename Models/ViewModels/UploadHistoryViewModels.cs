@@ -24,3 +24,14 @@ public class UploadHistoryItem
     public int PrimaryLogId { get; set; }
     public List<UploadFileRef> Files { get; set; } = new();
 }
+
+/// <summary>A raw grid preview of a single uploaded Excel file's first sheet
+/// — the header row plus up to a capped number of data rows — for showing
+/// in the Data Management portal without downloading the file.</summary>
+public class UploadFilePreview
+{
+    public string FileName { get; set; } = "";
+    public List<string> Headers { get; set; } = new();
+    public List<List<string>> Rows { get; set; } = new();
+    public int TotalRows { get; set; }
+}

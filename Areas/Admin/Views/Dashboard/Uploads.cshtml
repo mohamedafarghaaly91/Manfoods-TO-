@@ -76,6 +76,21 @@
 .dm-file-chip i { font-size:11px; }
 .dm-file-chip.disabled { opacity:.5; pointer-events:none; }
 
+.dm-file-chip-group { display:inline-flex; align-items:center; gap:2px; margin:2px 3px 2px 0; }
+.dm-file-chip-group .dm-file-chip { margin:0; }
+.dm-file-chip-preview {
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border:none; border-radius:50%; background:var(--bg-2); color:var(--text-2); font-size:11px; cursor:pointer; padding:0;
+}
+.dm-file-chip-preview:hover { background:oklch(0.55 0.19 250 / .15); color:oklch(0.48 0.18 250); }
+
+.dm-preview-table-wrap { max-height:60vh; overflow:auto; border:1px solid var(--card-border); border-radius:var(--radius-sm); }
+.dm-preview-table { width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap; }
+.dm-preview-table th, .dm-preview-table td { padding:7px 12px; border-bottom:1px solid var(--card-border); text-align:start; }
+.dm-preview-table th { background:var(--bg-2); position:sticky; top:0; color:var(--text); font-weight:700; }
+.dm-preview-table tbody tr:hover { background:var(--bg-2); }
+.dm-preview-empty { padding:30px; text-align:center; color:var(--text-3); font-size:13px; }
+
 .dm-action-btn {
     display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; border-radius:7px;
     padding:6px 12px; cursor:pointer; border:1px solid var(--card-border); background:var(--card-bg); color:var(--text-2);
@@ -290,9 +305,14 @@
                                 {
                                     if (f.HasFile)
                                     {
-                                        <a class="dm-file-chip" asp-area="Admin" asp-controller="Dashboard" asp-action="DownloadUploadFile" asp-route-id="@f.LogId" title="@f.FileName">
-                                            <i class="bi bi-download"></i>@f.FileName
-                                        </a>
+                                        <span class="dm-file-chip-group">
+                                            <button type="button" class="dm-file-chip-preview" title="@L["DM_Preview"]" data-log-id="@f.LogId" data-file-name="@f.FileName" onclick="dmOpenPreview(this.dataset.logId, this.dataset.fileName)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <a class="dm-file-chip" asp-area="Admin" asp-controller="Dashboard" asp-action="DownloadUploadFile" asp-route-id="@f.LogId" title="@f.FileName">
+                                                <i class="bi bi-download"></i>@f.FileName
+                                            </a>
+                                        </span>
                                     }
                                     else
                                     {
@@ -307,10 +327,6 @@
                             <td class="px-3 py-2 text-muted-custom small">@item.UploadDate.ToString("MMM dd, yyyy HH:mm")</td>
                             <td class="px-3 py-2">
                                 <div class="d-flex gap-2 flex-wrap">
-                                    <a href="/admin/dashboard/download-upload-group?id=@item.PrimaryLogId"
-                                       class="dm-action-btn download">
-                                        <i class="bi bi-download"></i>@L["DM_Download"]
-                                    </a>
                                     @if (isPeriod)
                                     {
                                         <button type="button" class="dm-action-btn update"
@@ -408,6 +424,20 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dmPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width:90vw">
+        <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius)">
+            <div class="modal-header" style="border-bottom:1px solid var(--card-border)">
+                <h6 class="modal-title fw-bold" style="color:var(--text)"><i class="bi bi-eye me-2" style="color:oklch(0.48 0.18 250)"></i><span id="dmPreviewTitle"></span></h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:var(--btn-close-filter,none)"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div id="dmPreviewBody"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -605,6 +635,46 @@ function dmOpenUpdateModal(month, year, periodLabel) {
     dmUpdateSubmitBtn.disabled = true;
     document.getElementById('dmUpdateError').style.display = 'none';
     new bootstrap.Modal(document.getElementById('dmUpdateModal')).show();
+}
+
+/* ── File preview modal ─────────────────────────────── */
+async function dmOpenPreview(logId, fileName) {
+    const titleEl = document.getElementById('dmPreviewTitle');
+    const bodyEl  = document.getElementById('dmPreviewBody');
+    titleEl.textContent = fileName;
+    bodyEl.innerHTML = `<div class="dm-preview-empty"><span class="spinner-border spinner-border-sm me-2"></span>@L["DM_Loading"]</div>`;
+    new bootstrap.Modal(document.getElementById('dmPreviewModal')).show();
+
+    let data;
+    try {
+        const res = await fetch(`/admin/dashboard/preview-upload-file?id=${logId}`);
+        if (!res.ok) throw new Error();
+        data = await res.json();
+    } catch {
+        bodyEl.innerHTML = `<div class="dm-preview-empty">@L["DM_PreviewFailed"]</div>`;
+        return;
+    }
+
+    if (!data.headers || data.headers.length === 0 || !data.rows || data.rows.length === 0) {
+        bodyEl.innerHTML = `<div class="dm-preview-empty">@L["DM_PreviewEmpty"]</div>`;
+        return;
+    }
+
+    const headHtml = data.headers.map(h => `<th>${dmEsc(h)}</th>`).join('');
+    const rowsHtml = data.rows.map(r => `<tr>${r.map(c => `<td>${dmEsc(c)}</td>`).join('')}</tr>`).join('');
+    const shownNote = data.totalRows > data.rows.length
+        ? `<p class="text-muted-custom small mt-2 mb-0">${String(data.rows.length)} / ${String(data.totalRows)} @L["DM_PreviewRowsShown"]</p>`
+        : '';
+
+    bodyEl.innerHTML = `
+        <div class="dm-preview-table-wrap">
+            <table class="dm-preview-table">
+                <thead><tr>${headHtml}</tr></thead>
+                <tbody>${rowsHtml}</tbody>
+            </table>
+        </div>
+        ${shownNote}
+    `;
 }
 </script>
 }

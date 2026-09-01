@@ -21,10 +21,12 @@ public interface IUploadService
     /// </summary>
     Task<(List<MvcApp.Models.ViewModels.UploadHistoryItem> Items, int TotalCount)> GetHistoryPagedAsync(int page, int pageSize);
     Task<List<MvcApp.Models.ViewModels.UploadHistoryItem>> GetAllHistoryAsync();
-    Task<List<(byte[] Content, string ContentType, string FileName)>> GetGroupFilesAsync(int primaryLogId);
-    Task<List<(byte[] Content, string ContentType, string FileName)>> ExportGroupAsync(int primaryLogId);
     Task DeleteLogAsync(int id);
     Task<(byte[] Content, string ContentType, string FileName)?> GetFileAsync(int id);
+
+    /// <summary>Reads a single uploaded file's raw bytes and returns its first
+    /// sheet as a header row + capped data rows, for an in-portal preview.</summary>
+    Task<MvcApp.Models.ViewModels.UploadFilePreview?> PreviewFileAsync(int logId, int maxRows = 300);
 
     /// <summary>
     /// Replaces a single file type (active_employees, resignations, or

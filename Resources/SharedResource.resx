@@ -132,6 +132,11 @@
   <data name="DM_DownloadHistory" xml:space="preserve"><value>Download History</value></data>
   <data name="DM_NoUploads" xml:space="preserve"><value>No uploads yet</value></data>
   <data name="DM_Download" xml:space="preserve"><value>Download</value></data>
+  <data name="DM_Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="DM_Loading" xml:space="preserve"><value>Loading…</value></data>
+  <data name="DM_PreviewFailed" xml:space="preserve"><value>Failed to load preview.</value></data>
+  <data name="DM_PreviewEmpty" xml:space="preserve"><value>This file has no data to preview.</value></data>
+  <data name="DM_PreviewRowsShown" xml:space="preserve"><value>rows shown</value></data>
   <data name="DM_Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="DM_UpdateFile" xml:space="preserve"><value>Update File</value></data>
   <data name="DM_UpdateFileTitle" xml:space="preserve"><value>Update a Single File</value></data>

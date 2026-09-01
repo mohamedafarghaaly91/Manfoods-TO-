@@ -132,6 +132,11 @@
   <data name="DM_DownloadHistory" xml:space="preserve"><value>تحميل السجل</value></data>
   <data name="DM_NoUploads" xml:space="preserve"><value>مفيش رفعات لسه</value></data>
   <data name="DM_Download" xml:space="preserve"><value>تحميل</value></data>
+  <data name="DM_Preview" xml:space="preserve"><value>معاينة</value></data>
+  <data name="DM_Loading" xml:space="preserve"><value>جارٍ التحميل…</value></data>
+  <data name="DM_PreviewFailed" xml:space="preserve"><value>فشل تحميل المعاينة.</value></data>
+  <data name="DM_PreviewEmpty" xml:space="preserve"><value>لا توجد بيانات في هذا الملف للمعاينة.</value></data>
+  <data name="DM_PreviewRowsShown" xml:space="preserve"><value>صف معروض</value></data>
   <data name="DM_Delete" xml:space="preserve"><value>حذف</value></data>
   <data name="DM_UpdateFile" xml:space="preserve"><value>تحديث ملف</value></data>
   <data name="DM_UpdateFileTitle" xml:space="preserve"><value>تحديث ملف واحد</value></data>

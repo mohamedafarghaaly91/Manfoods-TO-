@@ -417,28 +417,13 @@ public class DashboardController : Controller
         return File(file.Value.Content, file.Value.ContentType, file.Value.FileName);
     }
 
-    [HttpGet("admin/dashboard/download-upload-group")]
+    [HttpGet("admin/dashboard/preview-upload-file")]
     [RequireAdminAuth]
-    public async Task<IActionResult> DownloadUploadGroup([FromQuery] int id)
+    public async Task<IActionResult> PreviewUploadFile([FromQuery] int id)
     {
-        var files = await _uploads.ExportGroupAsync(id);
-        if (files.Count == 0) return NotFound();
-
-        if (files.Count == 1)
-            return File(files[0].Content, files[0].ContentType, files[0].FileName);
-
-        using var ms = new MemoryStream();
-        using (var zip = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
-        {
-            foreach (var f in files)
-            {
-                var entry = zip.CreateEntry(f.FileName, System.IO.Compression.CompressionLevel.Fastest);
-                using var entryStream = entry.Open();
-                await entryStream.WriteAsync(f.Content);
-            }
-        }
-        ms.Position = 0;
-        return File(ms.ToArray(), "application/zip", $"Upload_{DateTime.UtcNow:yyyyMMdd_HHmm}.zip");
+        var preview = await _uploads.PreviewFileAsync(id);
+        if (preview == null) return NotFound();
+        return Json(preview);
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
