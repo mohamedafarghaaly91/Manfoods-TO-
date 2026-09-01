@@ -95,7 +95,21 @@ CREATE TABLE IF NOT EXISTS store_references (
 );
 
 -- The actual table backing Models/StoreReference.cs is "store_reference"
--- (singular, EnsureCreated()-managed) — unrelated to "store_references" above.
+-- (singular) — unrelated to "store_references" above. EnsureCreated() only
+-- builds schema for a database with zero pre-existing tables, so on any
+-- database that already had other tables (e.g. this one), it silently
+-- never created this table. Create it explicitly so this script is the
+-- real source of truth for it, matching this app's other tables.
+CREATE TABLE IF NOT EXISTS store_reference (
+    id SERIAL PRIMARY KEY,
+    month INTEGER NOT NULL DEFAULT 0,
+    year INTEGER NOT NULL DEFAULT 0,
+    store_name TEXT NOT NULL DEFAULT '',
+    store_leader TEXT NOT NULL DEFAULT '',
+    operation_consultant TEXT NOT NULL DEFAULT '',
+    operation_manager TEXT NOT NULL DEFAULT ''
+);
+
 -- Backfill the OM/OC email columns used for per-store access restriction.
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_manager_email TEXT NOT NULL DEFAULT '';
 ALTER TABLE store_reference ADD COLUMN IF NOT EXISTS operation_consultant_email TEXT NOT NULL DEFAULT '';
