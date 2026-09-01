@@ -334,7 +334,7 @@
   <data name="Chart_MonthlyTrend" xml:space="preserve"><value>Monthly Turnover Trend</value></data>
   <data name="Chart_MonthlyTrendSub" xml:space="preserve"><value>Turnover rate over time</value></data>
   <data name="Chart_TurnoverByMonth" xml:space="preserve"><value>Turnover Rate by Month</value></data>
-  <data name="Chart_TurnoverByMonthSub" xml:space="preserve"><value>Resignations ÷ headcount for each selected month</value></data>
+  <data name="Chart_TurnoverByMonthSub" xml:space="preserve"><value>Resignations ÷ headcount for each month, all-time (not affected by the period filter)</value></data>
   <data name="Chart_HeadcountByJobTitle" xml:space="preserve"><value>Headcount by Job Title</value></data>
   <data name="Chart_HeadcountByJobTitleSub" xml:space="preserve"><value>Active employees grouped by role</value></data>
   <data name="Chart_HeadcountByPayroll" xml:space="preserve"><value>Headcount by Payroll Group</value></data>

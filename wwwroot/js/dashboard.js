@@ -193,23 +193,25 @@ async function loadCharts() {
         fetchJson('/api/dashboard/gender-breakdown?' + q),
     ]);
 
+    const jobTitleLabels = jobTitle.map(d=>d.label);
     jobTitleChart = mkChart(jobTitleChart, 'jobTitleChart', {
         type: 'bar',
-        data: { labels: jobTitle.map(d=>d.label), datasets: [{ data: jobTitle.map(d=>d.value), backgroundColor: '#6D5DFB', borderRadius: 4 }] },
-        options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}},y:{grid:{display:false},ticks:{color:'#5B5875'}}} }
+        data: { labels: jobTitleLabels, datasets: [{ data: jobTitle.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(jobTitleLabels, null), borderRadius: 4 }] },
+        options: { indexAxis:'y', plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} resignation(s)`}}}, scales:{x:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}},y:{grid:{display:false},ticks:{color:'#5B5875'}}} }
     });
 
+    const tenureLabels = tenure.map(d=>d.label);
     tenureChart = mkChart(tenureChart, 'tenureChart', {
         type: 'bar',
-        data: { labels: tenure.map(d=>d.label), datasets: [{ data: tenure.map(d=>d.value), backgroundColor: '#A78BFA', borderRadius: 4 }] },
-        options: { plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{color:'#5B5875'}},y:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}}} }
+        data: { labels: tenureLabels, datasets: [{ data: tenure.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(tenureLabels, null), borderRadius: 4 }] },
+        options: { plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} resignation(s)`}}}, scales:{x:{grid:{display:false},ticks:{color:'#5B5875'}},y:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}}} }
     });
 
     const genderLabels = gender.map(d=>d.label);
     genderChart = mkChart(genderChart, 'genderChart', {
         type: 'doughnut',
         data: { labels: genderLabels, datasets: [{ data: gender.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(genderLabels, ChartColors.GENDER_COLORS), borderWidth: 0 }] },
-        options: { plugins:{legend:{position:'bottom', labels:{color:'#5B5875', padding:16}}} }
+        options: { plugins:{legend:{position:'bottom', labels:{color:'#5B5875', padding:16}}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.label}: ${c.formattedValue}`}}} }
     });
 }
 

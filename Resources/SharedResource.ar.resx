@@ -334,7 +334,7 @@
   <data name="Chart_MonthlyTrend" xml:space="preserve"><value>اتجاه الدوران الشهري</value></data>
   <data name="Chart_MonthlyTrendSub" xml:space="preserve"><value>معدل الدوران عبر الزمن</value></data>
   <data name="Chart_TurnoverByMonth" xml:space="preserve"><value>معدل الدوران لكل شهر</value></data>
-  <data name="Chart_TurnoverByMonthSub" xml:space="preserve"><value>الاستقالات ÷ عدد الموظفين لكل شهر من الشهور المختارة</value></data>
+  <data name="Chart_TurnoverByMonthSub" xml:space="preserve"><value>الاستقالات ÷ عدد الموظفين لكل شهر، لكل الفترة الزمنية المتاحة (مش متأثر بفلتر الفترة)</value></data>
   <data name="Chart_HeadcountByJobTitle" xml:space="preserve"><value>عدد الموظفين حسب الوظيفة</value></data>
   <data name="Chart_HeadcountByJobTitleSub" xml:space="preserve"><value>الموظفون النشطون مجمّعون حسب الوظيفة</value></data>
   <data name="Chart_HeadcountByPayroll" xml:space="preserve"><value>عدد الموظفين حسب فئة الرواتب</value></data>
