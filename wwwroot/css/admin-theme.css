@@ -46,7 +46,7 @@ body.admin-theme {
 
     --header-h:      64px;
     --global-header-h: 100px;
-    --global-logo-h:   76px;
+    --global-logo-h:   86px;
     --portal-zoom:   0.8;
     --sidebar-w:     260px;
     --radius:        12px;
@@ -255,6 +255,7 @@ body.admin-theme .empty-state { color: var(--text-3); }
     height: var(--global-header-h);
     background: var(--nav-bg);
     border-bottom: 1px solid var(--nav-border);
+    box-shadow: var(--shadow-lg);
 }
 /* Both pinned with physical (not logical) left/right so the text stays
    top-left and the logo stays top-right regardless of LTR/RTL. */
@@ -263,11 +264,19 @@ body.admin-theme .empty-state { color: var(--text-3); }
     display: flex; flex-direction: column; justify-content: center;
     text-decoration: none;
 }
-.admin-global-brand-main {
-    font-size: 21px; font-weight: 700; color: var(--text);
-    font-family: 'Poppins', 'Inter', sans-serif; letter-spacing: -.01em;
+.admin-global-brand-line1 {
+    font-size: 12px; font-weight: 700; color: var(--red);
+    font-family: 'Poppins', 'Inter', sans-serif; letter-spacing: .02em;
 }
-.admin-global-brand-sub { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+.admin-global-brand-line2 {
+    font-size: 11px; font-weight: 500; color: var(--text-3);
+    margin-top: 1px;
+}
+.admin-global-brand-main {
+    font-size: 21px; font-weight: 400; color: var(--text);
+    font-family: Arial, 'Inter', sans-serif; letter-spacing: -.01em;
+    margin-top: 3px;
+}
 .admin-global-logo {
     position: absolute; top: 50%; right: 32px; transform: translateY(-50%);
     display: flex; align-items: center; justify-content: center;
