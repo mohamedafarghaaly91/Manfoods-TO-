@@ -74,7 +74,14 @@ builder.Services.AddSession(options =>
 var connectionString = BuildConnectionString();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sql =>
+        // Action-plan detection (Services/StoreActionPlanService.cs) issues many
+        // sequential per-store queries in a single background job after every
+        // monthly upload. The default 30s command timeout was tuned for Neon's
+        // low latency and started hitting "Execution Timeout Expired" against
+        // MonsterASP's higher round-trip latency — raise it so a single slow
+        // command doesn't fail the whole run.
+        sql.CommandTimeout(120)));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
