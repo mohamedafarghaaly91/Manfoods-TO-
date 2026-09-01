@@ -89,6 +89,13 @@ public class TrendMatrixResult
     public List<TrendMatrixRow> Rows    { get; set; } = new();
 }
 
+public class TurnoverTrendResult
+{
+    public double CurrentRate { get; set; }
+    public double? PreviousRate { get; set; }
+    public bool HasPrevious { get; set; }
+}
+
 public class StoreHeadcountRow
 {
     public string StoreName { get; set; } = "";

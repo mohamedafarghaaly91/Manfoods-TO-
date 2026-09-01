@@ -126,6 +126,16 @@ public class DashboardApiController : ControllerBase
         return Ok(await _dashboard.GetSmartInsightsAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
     }
 
+    [HttpGet("turnover-trend")]
+    public async Task<IActionResult> TurnoverTrend([FromQuery] int? month, [FromQuery] int? year,
+        [FromQuery] int? fromMonth, [FromQuery] int? fromYear, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        var kpis = await _dashboard.GetKpisAsync(month, year, null, role, assignedName, months: months);
+        return Ok(await _dashboard.GetTurnoverTrendAsync(kpis.Month, kpis.Year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months));
+    }
+
     [HttpGet("trend-matrix")]
     public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? sinceYear, [FromQuery] string? months)
     {

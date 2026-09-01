@@ -727,6 +727,32 @@ async function tvLoadReasonsChart() {
     });
 }
 
+/* Turnover-page-specific KPI cards: Resignations, Turnover Rate, and a Trend
+   card (current rate vs. the equivalent immediately-prior period) — replaces
+   dashboard.js's default 4-card set (Total Headcount/New Hires are already
+   shown on the Workforce page; repeating them here added nothing turnover-
+   specific). Overriding the global loadKpis (rather than just not calling
+   it) means _tvOrigLoadAll's internal loadKpis() call below picks this up
+   too, since it resolves the function by name at call time. */
+async function tvLoadKpis() {
+    const kpiEl = document.getElementById('kpiCards');
+    if (!kpiEl) return;
+    const [kpi, trend] = await Promise.all([
+        fetchJson('/api/dashboard/kpis?' + buildQuery()),
+        fetchJson('/api/dashboard/turnover-trend?' + buildQuery())
+    ]);
+    const diff = trend && trend.hasPrevious ? Math.round((trend.currentRate - trend.previousRate) * 10) / 10 : null;
+    const trendIcon  = diff === null ? 'bi-dash-circle' : diff > 0 ? 'bi-arrow-up-circle-fill' : diff < 0 ? 'bi-arrow-down-circle-fill' : 'bi-dash-circle-fill';
+    const trendClass = diff === null ? '' : diff > 0 ? 'text-danger' : diff < 0 ? 'text-success' : '';
+    const trendValue = diff === null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`;
+    kpiEl.innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(kpi.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">Turnover Rate</div></div>
+        <div class="kpi-card"><div class="kpi-icon ${trendClass}"><i class="bi ${trendIcon}"></i></div><div class="kpi-value ${trendClass}">${trendValue}</div><div class="kpi-label">Trend vs Prior Period</div></div>
+    `;
+}
+loadKpis = tvLoadKpis;
+
 /* Hook everything into dashboard.js's loadAll() so it all refreshes together */
 const _tvOrigLoadAll = loadAll;
 loadAll = async function () {

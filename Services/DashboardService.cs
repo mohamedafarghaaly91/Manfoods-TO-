@@ -550,6 +550,57 @@ public class DashboardService : IDashboardService
         return new OcOmAnalysisResult { OcRows = ocRows, OmRows = omRows, SocRows = socRows, OdRows = odRows };
     }
 
+    // Shifts a resolved period window back by its own length (or back one year for a
+    // discrete month selection) so callers can build an apples-to-apples "prior
+    // window" of the same length as the current selection. Shared by
+    // GetSmartInsightsAsync's trend/spike insights and GetTurnoverTrendAsync.
+    private static (int Month, int Year, int? FromMonth, int? FromYear, string? Months) ResolvePreviousWindow(
+        int month, int year, int? fromMonth, int? fromYear, string? months)
+    {
+        var periodCount = ResolvePeriods(month, year, fromMonth, fromYear, months).Count;
+
+        if (!string.IsNullOrWhiteSpace(months))
+        {
+            // Discrete month selection (e.g. "1,3,5" in 2024) → same months, prior year
+            return (month, year - 1, null, null, months);
+        }
+
+        // Contiguous range → shift the entire window back by periodCount months
+        var anchorShifted = new DateTime(year, month, 1).AddMonths(-periodCount);
+        int? prevFromMonth = null, prevFromYear = null;
+        if (fromMonth.HasValue && fromYear.HasValue)
+        {
+            var fromShifted = new DateTime(fromYear.Value, fromMonth.Value, 1).AddMonths(-periodCount);
+            prevFromMonth   = fromShifted.Month;
+            prevFromYear    = fromShifted.Year;
+        }
+        return (anchorShifted.Month, anchorShifted.Year, prevFromMonth, prevFromYear, null);
+    }
+
+    /// <summary>Company-wide turnover rate for the selected period vs. the
+    /// equivalent immediately-prior window (same length) — the Turnover
+    /// page's "Trend" KPI card. Reuses the same weighted-average-headcount
+    /// rate math as GetStoreComparisonAsync/GetSmartInsightsAsync.</summary>
+    public async Task<TurnoverTrendResult> GetTurnoverTrendAsync(int month, int year, string role, string? assignedName,
+        int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
+    {
+        var current = await GetStoreComparisonAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
+        var prevWindow = ResolvePreviousWindow(month, year, fromMonth, fromYear, months);
+        var previous = await GetStoreComparisonAsync(prevWindow.Month, prevWindow.Year, role, assignedName, prevWindow.FromMonth, prevWindow.FromYear, om, oc, soc, od, prevWindow.Months);
+
+        var currRate = MetricsCalculationService.RatePercent(current.Sum(s => s.Resignations), current.Sum(s => s.AvgHeadcount));
+        var prevRate = previous.Any()
+            ? MetricsCalculationService.RatePercent(previous.Sum(s => s.Resignations), previous.Sum(s => s.AvgHeadcount))
+            : (double?)null;
+
+        return new TurnoverTrendResult
+        {
+            CurrentRate = currRate,
+            PreviousRate = prevRate,
+            HasPrevious = previous.Any(),
+        };
+    }
+
     public async Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
@@ -563,33 +614,8 @@ public class DashboardService : IDashboardService
         var currentPeriods = ResolvePeriods(month, year, fromMonth, fromYear, months);
         var periodCount    = currentPeriods.Count;
 
-        int  prevAnchorMonth, prevAnchorYear;
-        int? prevFromMonth = null, prevFromYear = null;
-        string? prevMonths = null;
-
-        if (!string.IsNullOrWhiteSpace(months))
-        {
-            // Discrete month selection (e.g. "1,3,5" in 2024) → same months, prior year
-            prevAnchorMonth = month;
-            prevAnchorYear  = year - 1;
-            prevMonths      = months;
-        }
-        else
-        {
-            // Contiguous range → shift the entire window back by periodCount months
-            var anchorShifted = new DateTime(year, month, 1).AddMonths(-periodCount);
-            prevAnchorMonth   = anchorShifted.Month;
-            prevAnchorYear    = anchorShifted.Year;
-
-            if (fromMonth.HasValue && fromYear.HasValue)
-            {
-                var fromShifted = new DateTime(fromYear.Value, fromMonth.Value, 1).AddMonths(-periodCount);
-                prevFromMonth   = fromShifted.Month;
-                prevFromYear    = fromShifted.Year;
-            }
-        }
-
-        var previous    = await GetStoreComparisonAsync(prevAnchorMonth, prevAnchorYear, role, assignedName, prevFromMonth, prevFromYear, om, oc, soc, od, prevMonths);
+        var prevWindow = ResolvePreviousWindow(month, year, fromMonth, fromYear, months);
+        var previous    = await GetStoreComparisonAsync(prevWindow.Month, prevWindow.Year, role, assignedName, prevWindow.FromMonth, prevWindow.FromYear, om, oc, soc, od, prevWindow.Months);
         var prevByStore = previous.ToDictionary(s => s.StoreName);
 
         // Human-readable label for comparison window used in descriptions
