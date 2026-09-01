@@ -72,6 +72,10 @@ public class SmartInsightItem
     public string Color { get; set; } = "";
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
+    /// <summary>Which row of the Smart Insights grid this belongs on:
+    /// "primary" (highest/best/trend), "leadership" (highest OC/OM/OD
+    /// turnover), or "spike" (the up-to-3 stores with a sudden jump).</summary>
+    public string Group { get; set; } = "primary";
 }
 
 public class TrendMatrixRow

@@ -629,7 +629,8 @@ public class DashboardService : IDashboardService
                 Icon        = "bi-exclamation-triangle-fill",
                 Color       = "danger",
                 Title       = $"Highest Turnover: {highest.StoreName}",
-                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {Math.Round(highest.AvgHeadcount)} average employees."
+                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {Math.Round(highest.AvgHeadcount)} average employees.",
+                Group       = "primary"
             });
 
         // 2. Best performing store
@@ -640,31 +641,13 @@ public class DashboardService : IDashboardService
                 Icon        = "bi-check-circle-fill",
                 Color       = "success",
                 Title       = $"Best Performing: {best.StoreName}",
-                Description = $"Lowest turnover at {best.TurnoverRate:F1}% with only {best.Resignations} resignation(s)."
+                Description = $"Lowest turnover at {best.TurnoverRate:F1}% with only {best.Resignations} resignation(s).",
+                Group       = "primary"
             });
 
-        // 3. Spike detection (>= 5% jump vs equivalent prior window)
-        var spikes = current
-            .Where(s => prevByStore.TryGetValue(s.StoreName, out var p) && s.TurnoverRate - p.TurnoverRate >= 5)
-            .OrderByDescending(s => s.TurnoverRate - prevByStore[s.StoreName].TurnoverRate)
-            .Take(3)
-            .ToList();
-
-        foreach (var spike in spikes)
-        {
-            var prev  = prevByStore[spike.StoreName];
-            var delta = spike.TurnoverRate - prev.TurnoverRate;
-            insights.Add(new SmartInsightItem
-            {
-                Icon        = "bi-graph-up-arrow",
-                Color       = "warning",
-                Title       = $"Turnover Spike: {spike.StoreName}",
-                Description = $"↑ +{delta:F1}% vs {periodLabel} ({prev.TurnoverRate:F1}% → {spike.TurnoverRate:F1}%)."
-            });
-        }
-
-        // 4. Overall trend — compare turnover RATES (not raw counts) so a growing
-        //    workforce does not falsely appear as "Worsening".
+        // 3. Overall trend — compare turnover RATES (not raw counts) so a growing
+        //    workforce does not falsely appear as "Worsening". Placed in the same
+        //    "primary" row as Highest/Best above.
         if (previous.Any())
         {
             var currRes  = current.Sum(s => s.Resignations);
@@ -683,57 +666,77 @@ public class DashboardService : IDashboardService
                 Title       = rateDiff > 0 ? "Trend: Worsening" : rateDiff < 0 ? "Trend: Improving" : "Trend: Stable",
                 Description = rateDiff != 0
                     ? $"Turnover rate {(rateDiff > 0 ? "increased" : "decreased")} by {Math.Abs(rateDiff):F1}% vs {periodLabel} ({prevRate:F1}% → {currRate:F1}%)."
-                    : $"Turnover rate unchanged at {currRate:F1}% vs {periodLabel}."
+                    : $"Turnover rate unchanged at {currRate:F1}% vs {periodLabel}.",
+                Group       = "primary"
             });
         }
 
-        // 5. Worst OC by weighted turnover rate
-        var worstOc = current
-            .Where(s => !string.IsNullOrEmpty(s.OperationConsultant))
-            .GroupBy(s => s.OperationConsultant)
-            .Select(g => new
-            {
-                Name            = g.Key,
-                StoreCount      = g.Count(),
-                TotalRes        = g.Sum(s => s.Resignations),
-                TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))
-            })
-            .OrderByDescending(g => g.AvgTurnoverRate)
-            .FirstOrDefault();
+        // 4. Highest OC/OM/OD by weighted turnover rate — the "leadership" row.
+        // FirstOrDefault() on an empty sequence yields a default tuple (Name
+        // null, everything else 0) — checked for below instead of using a
+        // nullable tuple, to keep this straightforward.
+        (string Name, int StoreCount, int TotalRes, double AvgTurnoverRate) WeightedWorst(Func<StoreComparisonRow, string> keySelector) =>
+            current
+                .Where(s => !string.IsNullOrEmpty(keySelector(s)))
+                .GroupBy(keySelector)
+                .Select(g => (Name: g.Key, StoreCount: g.Count(), TotalRes: g.Sum(s => s.Resignations),
+                    AvgTurnoverRate: MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))))
+                .OrderByDescending(g => g.AvgTurnoverRate)
+                .FirstOrDefault();
 
-        if (worstOc != null)
+        var worstOc = WeightedWorst(s => s.OperationConsultant);
+        if (worstOc.Name != null)
             insights.Add(new SmartInsightItem
             {
                 Icon        = "bi-person-fill-exclamation",
                 Color       = "warning",
                 Title       = $"Highest OC Turnover: {worstOc.Name}",
-                Description = $"{worstOc.AvgTurnoverRate:F1}% weighted avg across {worstOc.StoreCount} store(s) — {worstOc.TotalRes} total resignation(s)."
+                Description = $"{worstOc.AvgTurnoverRate:F1}% weighted avg across {worstOc.StoreCount} store(s) — {worstOc.TotalRes} total resignation(s).",
+                Group       = "leadership"
             });
 
-        // 6. Worst OM by weighted turnover rate
-        var worstOm = current
-            .Where(s => !string.IsNullOrEmpty(s.OperationManager))
-            .GroupBy(s => s.OperationManager)
-            .Select(g => new
-            {
-                Name            = g.Key,
-                StoreCount      = g.Count(),
-                TotalRes        = g.Sum(s => s.Resignations),
-                TotalHead       = g.Sum(s => s.Headcount),
-                AvgTurnoverRate = MetricsCalculationService.RatePercent(g.Sum(s => s.Resignations), g.Sum(s => s.AvgHeadcount))
-            })
-            .OrderByDescending(g => g.AvgTurnoverRate)
-            .FirstOrDefault();
-
-        if (worstOm != null)
+        var worstOm = WeightedWorst(s => s.OperationManager);
+        if (worstOm.Name != null)
             insights.Add(new SmartInsightItem
             {
                 Icon        = "bi-person-badge-fill",
                 Color       = "warning",
                 Title       = $"Highest OM Turnover: {worstOm.Name}",
-                Description = $"{worstOm.AvgTurnoverRate:F1}% weighted avg across {worstOm.StoreCount} store(s) — {worstOm.TotalRes} total resignation(s)."
+                Description = $"{worstOm.AvgTurnoverRate:F1}% weighted avg across {worstOm.StoreCount} store(s) — {worstOm.TotalRes} total resignation(s).",
+                Group       = "leadership"
             });
+
+        var worstOd = WeightedWorst(s => s.OperationDirector);
+        if (worstOd.Name != null)
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-person-vcard-fill",
+                Color       = "warning",
+                Title       = $"Highest OD Turnover: {worstOd.Name}",
+                Description = $"{worstOd.AvgTurnoverRate:F1}% weighted avg across {worstOd.StoreCount} store(s) — {worstOd.TotalRes} total resignation(s).",
+                Group       = "leadership"
+            });
+
+        // 5. Spike detection (>= 5% jump vs equivalent prior window) — the "spike" row.
+        var spikes = current
+            .Where(s => prevByStore.TryGetValue(s.StoreName, out var p) && s.TurnoverRate - p.TurnoverRate >= 5)
+            .OrderByDescending(s => s.TurnoverRate - prevByStore[s.StoreName].TurnoverRate)
+            .Take(3)
+            .ToList();
+
+        foreach (var spike in spikes)
+        {
+            var prev  = prevByStore[spike.StoreName];
+            var delta = spike.TurnoverRate - prev.TurnoverRate;
+            insights.Add(new SmartInsightItem
+            {
+                Icon        = "bi-graph-up-arrow",
+                Color       = "warning",
+                Title       = $"Turnover Spike: {spike.StoreName}",
+                Description = $"↑ +{delta:F1}% vs {periodLabel} ({prev.TurnoverRate:F1}% → {spike.TurnoverRate:F1}%).",
+                Group       = "spike"
+            });
+        }
 
         return insights;
     }
