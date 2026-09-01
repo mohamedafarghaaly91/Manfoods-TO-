@@ -465,6 +465,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>Chart.register(ChartDataLabels);</script>
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script src="~/js/dashboard.js" asp-append-version="true"></script>
+<!-- dashboard.js is included only for shared helpers (rangeFilterBadge, fetchJson) —
+     this page has its own Year+Months filter UI, so dashboard.js's period/store
+     selects and loadPeriods() no-op here (no matching element IDs on this page). -->
 <script>
 /* ── 90-Day Turnover — Year + discrete cohort-Months multi-select, plus
    searchable single-select combos for Store/OM/OC (same components as the
