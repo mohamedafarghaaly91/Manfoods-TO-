@@ -107,6 +107,9 @@ public class NoOpExitInterviewService : IExitInterviewService
         Task.FromResult(new List<EngagementDriverItem>());
     public Task<ExitSentimentSummary> GetSentimentSummaryAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
         Task.FromResult(new ExitSentimentSummary());
+    public Task<Dictionary<string, ExitSentimentSummary>> GetSentimentSummariesByDimensionAsync(
+        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName) =>
+        Task.FromResult(names.ToDictionary(n => n, _ => new ExitSentimentSummary()));
     public Task<List<ExitInterviewCommentItem>> GetCommentsAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
         Task.FromResult(new List<ExitInterviewCommentItem>());
 }

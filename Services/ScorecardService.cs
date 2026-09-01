@@ -192,6 +192,11 @@ public class ScorecardService : IScorecardService
             ? historical.Where(h => periodKeys.Contains(h.HireDateKey)).ToList()
             : historical;
 
+        // One batched query for every name's sentiment instead of one query per
+        // name (was an N+1 — a separate ExitInterviews round trip per leader/OC/OM).
+        var sentimentByName = await _exitInterviews.GetSentimentSummariesByDimensionAsync(
+            dimension, aggregates.Keys.ToList(), role, assignedName);
+
         var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<ScorecardRow>();
         // Sequential — EF Core DbContext does not support concurrent queries.
@@ -218,14 +223,7 @@ public class ScorecardService : IScorecardService
                 eligibleForRetention.Count(r => MetricsCalculationService.IsRetainedAtMilestone(r.TenureDays, MetricsCalculationService.SixMonthRetentionDays)),
                 eligibleForRetention.Count);
 
-            var filter = dimension switch
-            {
-                "leader" => new ExitInterviewFilter { StoreLeader = name },
-                "oc" => new ExitInterviewFilter { OperationConsultant = name },
-                "om" => new ExitInterviewFilter { OperationManager = name },
-                _ => new ExitInterviewFilter(),
-            };
-            var sentiment = await _exitInterviews.GetSentimentSummaryAsync(filter, role, assignedName);
+            var sentiment = sentimentByName[name];
 
             result.Add(new ScorecardRow
             {

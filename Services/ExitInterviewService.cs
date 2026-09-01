@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using MvcApp.Data;
 using MvcApp.Models;
@@ -41,8 +42,15 @@ public class ExitInterviewService : IExitInterviewService
         return q;
     }
 
-    private async Task<List<ExitInterview>> FilteredAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        await (await ApplyFilterAsync(_db.ExitInterviews.AsNoTracking(), filter, role, assignedName)).ToListAsync();
+    // Projects to only the column(s) each caller actually needs, instead of
+    // materializing the full (wide, free-text-heavy) ExitInterview entity every
+    // time — same filtered row set and row order as before, just fewer columns
+    // crossing the wire.
+    private async Task<List<TResult>> FilteredAsync<TResult>(
+        ExitInterviewFilter filter, string role, string? assignedName, Expression<Func<ExitInterview, TResult>> selector) =>
+        await (await ApplyFilterAsync(_db.ExitInterviews.AsNoTracking(), filter, role, assignedName))
+            .Select(selector)
+            .ToListAsync();
 
     private static List<ChartDataItem> GroupCount(IEnumerable<string> values) =>
         values.Where(v => !string.IsNullOrWhiteSpace(v))
@@ -110,31 +118,57 @@ public class ExitInterviewService : IExitInterviewService
     }
 
     public async Task<List<ChartDataItem>> GetReasonsForLeavingAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.ReasonForLeaving));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving));
 
     public async Task<List<ChartDataItem>> GetWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.WouldReturn));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.WouldReturn));
 
     public async Task<List<ChartDataItem>> GetOverallExperienceAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.OverallExperience));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.OverallExperience));
 
     public async Task<List<ChartDataItem>> GetWorkloadConditionAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.WorkloadCondition));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.WorkloadCondition));
 
     public async Task<List<ChartDataItem>> GetTrainingAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.Training));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.Training));
 
     public async Task<List<ChartDataItem>> GetFairTreatmentAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.FairTreatment));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.FairTreatment));
 
     public async Task<List<ChartDataItem>> GetWorkPressureReasonAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount((await FilteredAsync(filter, role, assignedName)).Select(e => e.WorkPressureReasonText ?? ""));
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.WorkPressureReasonText ?? ""));
+
+    private class EngagementDriverRow
+    {
+        public string FairTreatment { get; set; } = "";
+        public string EncourageOpinions { get; set; } = "";
+        public string ComplaintsHandling { get; set; } = "";
+        public string BenefitsMatch { get; set; } = "";
+        public string Teamwork { get; set; } = "";
+        public string Communication { get; set; } = "";
+        public string TaskFit { get; set; } = "";
+        public string Training { get; set; } = "";
+        public string Feedback { get; set; } = "";
+        public string UsePersonalAbilities { get; set; } = "";
+    }
 
     public async Task<List<EngagementDriverItem>> GetEngagementDriversAsync(ExitInterviewFilter filter, string role, string? assignedName)
     {
-        var rows = await FilteredAsync(filter, role, assignedName);
+        var rows = await FilteredAsync(filter, role, assignedName, e => new EngagementDriverRow
+        {
+            FairTreatment = e.FairTreatment,
+            EncourageOpinions = e.EncourageOpinions,
+            ComplaintsHandling = e.ComplaintsHandling,
+            BenefitsMatch = e.BenefitsMatch,
+            Teamwork = e.Teamwork,
+            Communication = e.Communication,
+            TaskFit = e.TaskFit,
+            Training = e.Training,
+            Feedback = e.Feedback,
+            UsePersonalAbilities = e.UsePersonalAbilities,
+        });
 
-        var drivers = new (string Label, Func<ExitInterview, string> Selector)[]
+        var drivers = new (string Label, Func<EngagementDriverRow, string> Selector)[]
         {
             ("Fair Treatment", e => e.FairTreatment),
             ("Encouraged to Share Opinions", e => e.EncourageOpinions),
@@ -162,7 +196,7 @@ public class ExitInterviewService : IExitInterviewService
 
     public async Task<ExitSentimentSummary> GetSentimentSummaryAsync(ExitInterviewFilter filter, string role, string? assignedName)
     {
-        var rows = await FilteredAsync(filter, role, assignedName);
+        var rows = await FilteredAsync(filter, role, assignedName, e => new { e.WouldReturn, e.OverallExperience });
         // Sentiment is derived from WouldReturn + OverallExperience, but
         // TotalResponses must count forms (rows), not the sum of two answer columns.
         var answers = rows.Select(e => e.WouldReturn).Concat(rows.Select(e => e.OverallExperience))
@@ -176,12 +210,98 @@ public class ExitInterviewService : IExitInterviewService
         };
     }
 
+    private class SentimentSourceRow
+    {
+        public string Name { get; set; } = "";
+        public string WouldReturn { get; set; } = "";
+        public string OverallExperience { get; set; } = "";
+    }
+
+    public async Task<Dictionary<string, ExitSentimentSummary>> GetSentimentSummariesByDimensionAsync(
+        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName)
+    {
+        if (names.Count == 0) return new Dictionary<string, ExitSentimentSummary>();
+
+        if (dimension != "leader" && dimension != "oc" && dimension != "om")
+        {
+            // Every other dimension (e.g. "soc"/"od") looks up sentiment with an
+            // unfiltered ExitInterviewFilter() regardless of name — the same call
+            // GetSentimentSummaryAsync(new ExitInterviewFilter(), ...) would make
+            // for every single name — so compute it once and reuse for all of them.
+            var overall = await GetSentimentSummaryAsync(new ExitInterviewFilter(), role, assignedName);
+            return names.ToDictionary(n => n, _ => overall);
+        }
+
+        var nameSet = names.ToHashSet();
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        IQueryable<ExitInterview> q = _db.ExitInterviews.AsNoTracking();
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+
+        var rows = dimension switch
+        {
+            "leader" => await q.Where(e => nameSet.Contains(e.StoreLeader))
+                .Select(e => new SentimentSourceRow { Name = e.StoreLeader, WouldReturn = e.WouldReturn, OverallExperience = e.OverallExperience })
+                .ToListAsync(),
+            "oc" => await q.Where(e => nameSet.Contains(e.OperationConsultant))
+                .Select(e => new SentimentSourceRow { Name = e.OperationConsultant, WouldReturn = e.WouldReturn, OverallExperience = e.OverallExperience })
+                .ToListAsync(),
+            _ => await q.Where(e => nameSet.Contains(e.OperationManager))
+                .Select(e => new SentimentSourceRow { Name = e.OperationManager, WouldReturn = e.WouldReturn, OverallExperience = e.OverallExperience })
+                .ToListAsync(),
+        };
+
+        var result = rows.GroupBy(r => r.Name).ToDictionary(g => g.Key, g =>
+        {
+            var groupRows = g.ToList();
+            // Same "TotalResponses counts forms, not the sum of two answer columns"
+            // rule as GetSentimentSummaryAsync.
+            var answers = groupRows.Select(r => r.WouldReturn).Concat(groupRows.Select(r => r.OverallExperience))
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .ToList();
+            return new ExitSentimentSummary
+            {
+                TotalResponses = groupRows.Count,
+                PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
+            };
+        });
+
+        // A name with zero matching exit interviews gets the same empty summary
+        // GetSentimentSummaryAsync would have returned for it.
+        foreach (var name in nameSet)
+            if (!result.ContainsKey(name))
+                result[name] = new ExitSentimentSummary();
+
+        return result;
+    }
+
+    private class CommentRow
+    {
+        public string Store { get; set; } = "";
+        public string StoreLeader { get; set; } = "";
+        public string? ReasonOtherText { get; set; }
+        public string? WorkPressureReasonText { get; set; }
+        public string? WhatWouldChangeText { get; set; }
+        public string? WhatLearnedText { get; set; }
+        public string? FinalCommentsText { get; set; }
+        public DateTime? SubmittedAt { get; set; }
+    }
+
     public async Task<List<ExitInterviewCommentItem>> GetCommentsAsync(ExitInterviewFilter filter, string role, string? assignedName)
     {
-        var rows = await FilteredAsync(filter, role, assignedName);
+        var rows = await FilteredAsync(filter, role, assignedName, e => new CommentRow
+        {
+            Store = e.Store,
+            StoreLeader = e.StoreLeader,
+            ReasonOtherText = e.ReasonOtherText,
+            WorkPressureReasonText = e.WorkPressureReasonText,
+            WhatWouldChangeText = e.WhatWouldChangeText,
+            WhatLearnedText = e.WhatLearnedText,
+            FinalCommentsText = e.FinalCommentsText,
+            SubmittedAt = e.SubmittedAt,
+        });
         var result = new List<ExitInterviewCommentItem>();
 
-        void AddIfPresent(ExitInterview e, string? text, string questionLabel)
+        void AddIfPresent(CommentRow e, string? text, string questionLabel)
         {
             if (string.IsNullOrWhiteSpace(text)) return;
             result.Add(new ExitInterviewCommentItem
