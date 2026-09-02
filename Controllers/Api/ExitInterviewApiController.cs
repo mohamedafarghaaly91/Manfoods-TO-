@@ -95,6 +95,14 @@ public class ExitInterviewApiController : ControllerBase
         return Ok(await _exitInterviews.GetEngagementDriversAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
     }
 
+    [HttpGet("sentiment-summary")]
+    public async Task<IActionResult> SentimentSummary([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] int? year, [FromQuery] string? months)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _exitInterviews.GetSentimentSummaryAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+    }
+
     [HttpGet("comments")]
     public async Task<IActionResult> Comments([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
         [FromQuery] int? year, [FromQuery] string? months)

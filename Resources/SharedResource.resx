@@ -396,6 +396,11 @@
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>% who answered positively — lowest first</value></data>
   <data name="Chart_Comments" xml:space="preserve"><value>Comments</value></data>
   <data name="EI_SearchComments" xml:space="preserve"><value>Search comments…</value></data>
+  <data name="EI_AllQuestions" xml:space="preserve"><value>All Questions</value></data>
+  <data name="EI_TotalInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
+  <data name="EI_PositiveSentiment" xml:space="preserve"><value>Positive Sentiment</value></data>
+  <data name="EI_TopReason" xml:space="preserve"><value>Top Reason for Leaving</value></data>
+  <data name="EI_WouldReturnRate" xml:space="preserve"><value>Would Return</value></data>
   <data name="EI_CommentsCount" xml:space="preserve"><value>comments</value></data>
   <data name="EI_Question" xml:space="preserve"><value>Question</value></data>
   <data name="EI_Comment" xml:space="preserve"><value>Comment</value></data>

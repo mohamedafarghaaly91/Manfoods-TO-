@@ -396,6 +396,11 @@
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>نسبة الردود الإيجابية — الأقل رضا أولًا</value></data>
   <data name="Chart_Comments" xml:space="preserve"><value>التعليقات</value></data>
   <data name="EI_SearchComments" xml:space="preserve"><value>ابحث في التعليقات...</value></data>
+  <data name="EI_AllQuestions" xml:space="preserve"><value>كل الأسئلة</value></data>
+  <data name="EI_TotalInterviews" xml:space="preserve"><value>مقابلات الخروج</value></data>
+  <data name="EI_PositiveSentiment" xml:space="preserve"><value>نسبة الرضا الإيجابي</value></data>
+  <data name="EI_TopReason" xml:space="preserve"><value>أكتر سبب استقالة</value></data>
+  <data name="EI_WouldReturnRate" xml:space="preserve"><value>يرجع يشتغل تاني</value></data>
   <data name="EI_CommentsCount" xml:space="preserve"><value>تعليق</value></data>
   <data name="EI_Question" xml:space="preserve"><value>السؤال</value></data>
   <data name="EI_Comment" xml:space="preserve"><value>التعليق</value></data>
