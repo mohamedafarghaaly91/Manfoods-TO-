@@ -285,11 +285,11 @@
 
 <div class="charts-grid mb-4">
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_TurnoverByStoreCompare"]</h6></div>
+        <div class="chart-header"><h6>@L["Chart_TurnoverByStoreCompare"]</h6><p>Top 8 stores by combined A+B turnover — or a single A vs B bar if a store is selected in either panel</p></div>
         <div class="chart-body"><canvas id="cmpTurnoverChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6></div>
+        <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6><p>Top 8 stores by combined A+B 90-day rate — or a single A vs B bar if a store is selected in either panel</p></div>
         <div class="chart-body"><canvas id="cmpNinetyChart"></canvas></div>
     </div>
 </div>
@@ -304,13 +304,13 @@
         <table class="table table-hover mb-0" style="font-size:13px">
             <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
                 <tr>
-                    <th class="px-3 py-2">@L["Common_StoreName"]</th>
-                    <th class="px-3 py-2 text-center">Turnover% A</th>
-                    <th class="px-3 py-2 text-center">Turnover% B</th>
-                    <th class="px-3 py-2 text-center">Δ</th>
-                    <th class="px-3 py-2 text-center">90-Day% A</th>
-                    <th class="px-3 py-2 text-center">90-Day% B</th>
-                    <th class="px-3 py-2 text-center">Δ</th>
+                    <th class="cmp-sort px-3 py-2" data-col="store" style="cursor:pointer">@L["Common_StoreName"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="ta" style="cursor:pointer">Turnover% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="tb" style="cursor:pointer">Turnover% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dt" style="cursor:pointer">Δ <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="na" style="cursor:pointer">90-Day% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="nb" style="cursor:pointer">90-Day% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dn" style="cursor:pointer">Δ <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                 </tr>
             </thead>
             <tbody id="cmpTableBody">
@@ -669,6 +669,10 @@ function cmpRenderCharts(dataA, dataB) {
     });
 }
 
+let cmpTableRows = [];
+let cmpTableSortCol = 'store', cmpTableSortAsc = true;
+let cmpTurnoverColorRules = null, cmpNinetyColorRules = null;
+
 function cmpRenderTable(dataA, dataB) {
     const card = document.getElementById('cmpTableCard');
     if (panels.A.store || panels.B.store) { card.style.display = 'none'; return; }
@@ -680,28 +684,46 @@ function cmpRenderTable(dataA, dataB) {
     dataA.ninetyByStore.forEach(r => ninetyA[r.label] = r.value);
     dataB.ninetyByStore.forEach(r => ninetyB[r.label] = r.value);
 
-    const stores = Array.from(new Set([...Object.keys(turnoverA), ...Object.keys(turnoverB)])).sort();
-    if (!stores.length) {
+    const stores = Array.from(new Set([...Object.keys(turnoverA), ...Object.keys(turnoverB)]));
+    cmpTableRows = stores.map(s => {
+        const ta = turnoverA[s], tb = turnoverB[s], na = ninetyA[s], nb = ninetyB[s];
+        return {
+            store: s, ta, tb, na, nb,
+            dt: (ta !== undefined && tb !== undefined) ? ta - tb : null,
+            dn: (na !== undefined && nb !== undefined) ? na - nb : null,
+        };
+    });
+    cmpRenderTableRows();
+}
+
+function cmpRenderTableRows() {
+    if (!cmpTableRows.length) {
         document.getElementById('cmpTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No data.</td></tr>`;
         return;
     }
+    const rateBadge = (rules, v) => (v === undefined || v === null) ? '<span class="text-muted">—</span>' : ChartColors.rateBadgeHtml(rules, v);
+    const ltrDelta = v => v === null ? '—' : `<span style="direction:ltr;unicode-bidi:isolate">${v > 0 ? '+' : ''}${v.toFixed(1)}</span>`;
 
-    document.getElementById('cmpTableBody').innerHTML = stores.map(s => {
-        const ta = turnoverA[s], tb = turnoverB[s], na = ninetyA[s], nb = ninetyB[s];
-        const fmt = v => v === undefined ? '<span class="text-muted">—</span>' : v.toFixed(1) + '%';
-        const ltr = v => `<span style="direction:ltr;unicode-bidi:isolate">${v}</span>`;
-        const dt = (ta !== undefined && tb !== undefined) ? ltr((ta - tb).toFixed(1)) : '—';
-        const dn = (na !== undefined && nb !== undefined) ? ltr((na - nb).toFixed(1)) : '—';
-        return `<tr>
-            <td class="px-3 py-2 fw-semibold">${s}</td>
-            <td class="px-3 py-2 text-center">${fmt(ta)}</td>
-            <td class="px-3 py-2 text-center">${fmt(tb)}</td>
-            <td class="px-3 py-2 text-center">${dt}</td>
-            <td class="px-3 py-2 text-center">${fmt(na)}</td>
-            <td class="px-3 py-2 text-center">${fmt(nb)}</td>
-            <td class="px-3 py-2 text-center">${dn}</td>
-        </tr>`;
-    }).join('');
+    const rows = cmpTableRows.slice().sort((a, b) => {
+        const va = a[cmpTableSortCol], vb = b[cmpTableSortCol];
+        const naMissing = va === undefined || va === null, nbMissing = vb === undefined || vb === null;
+        if (naMissing && nbMissing) return 0;
+        if (naMissing) return 1;   // missing values always sort to the bottom
+        if (nbMissing) return -1;
+        if (typeof va === 'string') return cmpTableSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return cmpTableSortAsc ? va - vb : vb - va;
+    });
+
+    document.getElementById('cmpTableBody').innerHTML = rows.map(r => `
+        <tr>
+            <td class="px-3 py-2 fw-semibold">${r.store}</td>
+            <td class="px-3 py-2 text-center">${rateBadge(cmpTurnoverColorRules, r.ta)}</td>
+            <td class="px-3 py-2 text-center">${rateBadge(cmpTurnoverColorRules, r.tb)}</td>
+            <td class="px-3 py-2 text-center">${ltrDelta(r.dt)}</td>
+            <td class="px-3 py-2 text-center">${rateBadge(cmpNinetyColorRules, r.na)}</td>
+            <td class="px-3 py-2 text-center">${rateBadge(cmpNinetyColorRules, r.nb)}</td>
+            <td class="px-3 py-2 text-center">${ltrDelta(r.dn)}</td>
+        </tr>`).join('');
 }
 
 async function cmpRefreshAll() {
@@ -713,5 +735,24 @@ async function cmpRefreshAll() {
     cmpRenderTable(dataA, dataB);
 }
 
-cmpInit();
+/* Store Breakdown table — sort headers ------------------------------------ */
+document.querySelectorAll('#cmpTableCard .cmp-sort').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.dataset.col;
+        if (cmpTableSortCol === col) { cmpTableSortAsc = !cmpTableSortAsc; }
+        else { cmpTableSortCol = col; cmpTableSortAsc = col === 'store'; }
+        document.querySelectorAll('#cmpTableCard .cmp-sort i').forEach(i => i.className = 'bi bi-arrow-down-up text-muted');
+        const icon = th.querySelector('i');
+        if (icon) icon.className = cmpTableSortAsc ? 'bi bi-sort-up text-danger' : 'bi bi-sort-down text-danger';
+        cmpRenderTableRows();
+    });
+});
+
+(async function cmpInitPage() {
+    [cmpTurnoverColorRules, cmpNinetyColorRules] = await Promise.all([
+        ChartColors.loadRateRules('turnover'),
+        ChartColors.loadRateRules('ninety-day'),
+    ]);
+    await cmpInit();
+})();
 </script>
