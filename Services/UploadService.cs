@@ -391,6 +391,13 @@ public class UploadService : IUploadService
             {
                 FormsResponseId = responseId,
                 EmployeeId = employeeId,
+                // Store now comes straight from its own column in the export (added
+                // right after the employee ID column) instead of being resolved by
+                // matching the employee ID against a Resignation record — that match
+                // silently failed (leaving Store/StoreLeader/OC/OM blank, with no
+                // warning) whenever the ID was mistyped or the resignation hadn't
+                // been uploaded yet.
+                Store = Get(row, "اسم المطعم"),
                 SubmittedAt = completed,
                 Month = completed?.Month ?? 0,
                 Year = completed?.Year ?? 0,
@@ -419,10 +426,9 @@ public class UploadService : IUploadService
             parsed.Add((responseId, employeeId, interview));
         }
 
-        // Resolve Store / JobTitle from each employee's most recent resignation
-        // record, then Store Leader / OC / OM from the store reference closest
-        // to that resignation's period. Never stores or exposes the employee's
-        // name or national ID.
+        // Job Title still comes from the employee's most recent resignation record
+        // (best-effort only — a miss here just leaves JobTitle blank, it no longer
+        // affects Store/StoreLeader/OC/OM at all).
         var employeeIds = parsed.Where(p => !string.IsNullOrWhiteSpace(p.EmployeeId)).Select(p => p.EmployeeId).Distinct().ToList();
         var resignations = employeeIds.Count == 0
             ? new List<Resignation>()
@@ -431,20 +437,23 @@ public class UploadService : IUploadService
             .GroupBy(r => r.EmployeeId)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(r => r.Year).ThenByDescending(r => r.Month).First());
 
-        var storeNames = resignationByEmployee.Values.Select(r => r.Store).Distinct().ToList();
+        // Store Leader / OC / OM are resolved from the Store column itself — the
+        // store reference closest to (or, failing that, the latest known as of)
+        // the interview's own completion period.
+        var storeNames = parsed.Where(p => !string.IsNullOrWhiteSpace(p.Row.Store)).Select(p => p.Row.Store).Distinct().ToList();
         var storeRefs = storeNames.Count == 0
             ? new List<StoreReference>()
             : await _db.StoreReferences.Where(s => storeNames.Contains(s.StoreName)).ToListAsync();
 
         foreach (var (_, employeeId, interview) in parsed)
         {
-            if (string.IsNullOrWhiteSpace(employeeId) || !resignationByEmployee.TryGetValue(employeeId, out var res)) continue;
+            if (!string.IsNullOrWhiteSpace(employeeId) && resignationByEmployee.TryGetValue(employeeId, out var res))
+                interview.JobTitle = res.JobTitle;
 
-            interview.Store = res.Store;
-            interview.JobTitle = res.JobTitle;
+            if (string.IsNullOrWhiteSpace(interview.Store)) continue;
 
-            var refMatch = storeRefs.FirstOrDefault(s => s.StoreName == res.Store && s.Year == res.Year && s.Month == res.Month)
-                ?? storeRefs.Where(s => s.StoreName == res.Store).OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).FirstOrDefault();
+            var refMatch = storeRefs.FirstOrDefault(s => s.StoreName == interview.Store && s.Year == interview.Year && s.Month == interview.Month)
+                ?? storeRefs.Where(s => s.StoreName == interview.Store).OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).FirstOrDefault();
             if (refMatch != null)
             {
                 interview.StoreLeader = refMatch.StoreLeader;
@@ -465,7 +474,11 @@ public class UploadService : IUploadService
         _db.UploadLogs.Add(new UploadLog { FileType = "exit_interviews", FileName = file.FileName, Month = now.Month, Year = now.Year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
         await _db.SaveChangesAsync();
 
-        return (true, $"Processed {parsed.Count} exit interview responses", parsed.Count);
+        var missingStore = parsed.Count(p => string.IsNullOrWhiteSpace(p.Row.Store));
+        var message = missingStore > 0
+            ? $"Processed {parsed.Count} exit interview responses ({missingStore} missing a Store — check the \"اسم المطعم\" column for those rows)"
+            : $"Processed {parsed.Count} exit interview responses";
+        return (true, message, parsed.Count);
     }
 
     public async Task<(List<UploadHistoryItem> Items, int TotalCount)> GetHistoryPagedAsync(int page, int pageSize, string sort = "date", string dir = "desc")
