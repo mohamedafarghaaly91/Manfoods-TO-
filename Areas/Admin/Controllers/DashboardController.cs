@@ -331,16 +331,19 @@ public class DashboardController : Controller
         {
             // Mirrors the real Microsoft Forms export shape (headers match the
             // question text exactly) so admins know what to upload — this is a
-            // reference sample, not a fixed template to fill in by hand.
+            // reference sample, not a fixed template to fill in by hand. No "ID"
+            // column — Store/JobTitle/date all come from this sheet's own columns
+            // now, and re-uploads are deduplicated by a synthetic key instead.
             fileName = "Sample_Exit_Interviews.xlsx";
             var ws = wb.AddWorksheet("Exit Interview Responses");
             var headers = new[]
             {
-                "ID", "Start time", "Completion time", "Email", "Name", "Last modified time",
                 "الرقم الوظيفى",
-                "اسم المطعم",
                 "الاسم ( برجاء كتابة الاسم ثلاثى )",
-                "الرقم القومى ( يرجى ادخال ال 14 رقم )",
+                "الوظيفة",
+                "المطعم",
+                "Start time",
+                "Completion time",
                 "برجاء اختيار سبب ترك العمل",
                 "فى حالة وجود سبب اخر ( الرجاء ذكره )",
                 "هل يتم معاملة جميع العاملين معاملة عادلة ؟",
@@ -373,8 +376,8 @@ public class DashboardController : Controller
 
             var sample = new[]
             {
-                "1355", "2026-06-25 10:17", "2026-06-29 13:49", "anonymous", "", "",
-                "38416", "Store 1", "احمد ماهر عبدالعزيز", "29508172103033",
+                "38416", "احمد ماهر عبدالعزيز", "Crew Member", "Store 1",
+                "2026-06-25 10:17", "2026-06-29 13:49",
                 "المرتب غير مجزى", "عدم توافر فرص الترقيه",
                 "أعارض", "أعارض بشدة", "لا أوافق ولا اعارض", "أعارض بشدة",
                 "جيدة", "مقبولة", "ضعيفة",

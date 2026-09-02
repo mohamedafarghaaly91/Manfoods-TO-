@@ -363,6 +363,13 @@ public class UploadService : IUploadService
             var employeeId = Get(row, "الرقم الوظيفى");
             if (string.IsNullOrWhiteSpace(responseId) && string.IsNullOrWhiteSpace(employeeId)) continue;
 
+            // The current template has no Forms "ID" column (it was trimmed out),
+            // so fall back to a synthetic key built from row content that will be
+            // identical across re-uploads of the same response but distinct across
+            // different ones — Upsert-by-response-id still works without a real ID.
+            if (string.IsNullOrWhiteSpace(responseId))
+                responseId = $"{employeeId}|{Get(row, "المطعم")}|{Get(row, "Start time")}|{Get(row, "Completion time")}";
+
             DateTime? completed = null;
             // Microsoft Forms exports use "Completion time" in EN and "وقت الانتهاء"
             // in AR; the export may also use "Start time" / "وقت البدء" as a fallback.
@@ -391,13 +398,13 @@ public class UploadService : IUploadService
             {
                 FormsResponseId = responseId,
                 EmployeeId = employeeId,
-                // Store now comes straight from its own column in the export (added
-                // right after the employee ID column) instead of being resolved by
-                // matching the employee ID against a Resignation record — that match
-                // silently failed (leaving Store/StoreLeader/OC/OM blank, with no
-                // warning) whenever the ID was mistyped or the resignation hadn't
-                // been uploaded yet.
-                Store = Get(row, "اسم المطعم"),
+                // Store and Job Title now come straight from their own columns in
+                // the export instead of being resolved by matching the employee ID
+                // against a Resignation record — that match silently failed (leaving
+                // Store/StoreLeader/OC/OM/JobTitle blank, with no warning) whenever
+                // the ID was mistyped or the resignation hadn't been uploaded yet.
+                Store = Get(row, "المطعم"),
+                JobTitle = Get(row, "الوظيفة"),
                 SubmittedAt = completed,
                 // Month/Year are set below, after the resignation-date lookup
                 // (Resignation date -> Completion time -> Start time priority).
@@ -455,7 +462,9 @@ public class UploadService : IUploadService
             if (!string.IsNullOrWhiteSpace(employeeId) && resignationByEmployee.TryGetValue(employeeId, out var r))
             {
                 res = r;
-                interview.JobTitle = r.JobTitle;
+                // The "الوظيفة" column is the primary source (set at parse time);
+                // this is only a fallback for rows where that column was left blank.
+                if (string.IsNullOrWhiteSpace(interview.JobTitle)) interview.JobTitle = r.JobTitle;
             }
 
             if (res?.ResignationDate is { } resignDate)
@@ -495,7 +504,7 @@ public class UploadService : IUploadService
 
         var missingStore = parsed.Count(p => string.IsNullOrWhiteSpace(p.Row.Store));
         var message = missingStore > 0
-            ? $"Processed {parsed.Count} exit interview responses ({missingStore} missing a Store — check the \"اسم المطعم\" column for those rows)"
+            ? $"Processed {parsed.Count} exit interview responses ({missingStore} missing a Store — check the \"المطعم\" column for those rows)"
             : $"Processed {parsed.Count} exit interview responses";
         return (true, message, parsed.Count);
     }
