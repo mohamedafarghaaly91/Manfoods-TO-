@@ -384,7 +384,7 @@ function eiMkChart(ref, id, labels, values, horizontal, colorMode) {
         return new Chart(ctx.getContext('2d'), {
             type: 'bar',
             data: { labels, datasets: [{ data: values, backgroundColor: ChartColors.colorsByLabel(labels, null), borderRadius: 4, maxBarThickness: 26 }] },
-            options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} response(s)` } }, datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' } }, scales: { x: { grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)' } }, y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } } } }
+            options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} response(s)` } }, datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v : '' } }, scales: { x: { grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)' } }, y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } } } }
         });
     }
     const colors = colorMode === 'yesno'  ? ChartColors.colorsByYesNo(labels)

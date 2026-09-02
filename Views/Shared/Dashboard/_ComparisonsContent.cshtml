@@ -689,7 +689,8 @@ function cmpRenderCharts(dataA, dataB) {
         ] },
         options: {
             interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } } },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
             scales: { y: { ticks: { callback: v => v + '%' } } }
         }
     });
@@ -703,7 +704,8 @@ function cmpRenderCharts(dataA, dataB) {
         ] },
         options: {
             interaction: { mode: 'index', intersect: false },
-            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } } },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
             scales: { y: { ticks: { callback: v => v + '%' } } }
         }
     });
