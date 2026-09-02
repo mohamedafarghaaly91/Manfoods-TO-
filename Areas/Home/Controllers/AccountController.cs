@@ -28,8 +28,8 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var (user, failReason) = await _auth.ValidateAsync(vm.Email, vm.Password);
-        if (user == null) { ModelState.AddModelError("", failReason ?? "Invalid email or password"); return View(vm); }
+        var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password);
+        if (user == null) { ModelState.AddModelError("", "Invalid email or password"); return View(vm); }
 
         if (user.Role == "Admin")
         {
