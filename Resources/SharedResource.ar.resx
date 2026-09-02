@@ -558,6 +558,14 @@
   <data name="Chart_EwReasonBreakdownSub" xml:space="preserve"><value>كام حالة في قائمة المتابعة سبّبها كل عامل خطر</value></data>
   <data name="Chart_EwStoreBreakdown" xml:space="preserve"><value>قائمة المتابعة حسب الفرع</value></data>
   <data name="Chart_EwStoreBreakdownSub" xml:space="preserve"><value>الموظفين المهددين دلوقتي فين بالظبط</value></data>
+  <data name="Chart_EwHighRiskByStore" xml:space="preserve"><value>أعلى 5 فروع — خطر عالي</value></data>
+  <data name="Chart_EwHighRiskByStoreSub" xml:space="preserve"><value>الفروع اللي فيها أكتر عدد موظفين 4-5★، مش أي حد في القائمة</value></data>
+  <data name="Chart_EwJobTitleBreakdown" xml:space="preserve"><value>قائمة المتابعة حسب الوظيفة</value></data>
+  <data name="Chart_EwJobTitleBreakdownSub" xml:space="preserve"><value>أكتر الوظائف ظهورًا في قائمة المتابعة</value></data>
+  <data name="Chart_EwStarDistribution" xml:space="preserve"><value>توزيع درجة الخطر</value></data>
+  <data name="Chart_EwStarDistributionSub" xml:space="preserve"><value>كام حالة عند كل مستوى نجوم</value></data>
+  <data name="Chart_EwTrend" xml:space="preserve"><value>اتجاه قائمة المتابعة عبر الوقت</value></data>
+  <data name="Chart_EwTrendSub" xml:space="preserve"><value>إجمالي القائمة وعدد الخطر العالي، لقطة كل شهر</value></data>
 
 
   <!-- Retention -->

@@ -558,6 +558,14 @@
   <data name="Chart_EwReasonBreakdownSub" xml:space="preserve"><value>How many watchlist entries triggered each risk factor</value></data>
   <data name="Chart_EwStoreBreakdown" xml:space="preserve"><value>Watchlist by Store</value></data>
   <data name="Chart_EwStoreBreakdownSub" xml:space="preserve"><value>Where the at-risk employees currently are</value></data>
+  <data name="Chart_EwHighRiskByStore" xml:space="preserve"><value>Top 5 Stores — High Risk</value></data>
+  <data name="Chart_EwHighRiskByStoreSub" xml:space="preserve"><value>Stores with the most 4-5★ employees, not just any watchlist entry</value></data>
+  <data name="Chart_EwJobTitleBreakdown" xml:space="preserve"><value>Watchlist by Job Title</value></data>
+  <data name="Chart_EwJobTitleBreakdownSub" xml:space="preserve"><value>Which roles show up most on the watchlist</value></data>
+  <data name="Chart_EwStarDistribution" xml:space="preserve"><value>Risk Score Distribution</value></data>
+  <data name="Chart_EwStarDistributionSub" xml:space="preserve"><value>How many watchlist entries fall at each star level</value></data>
+  <data name="Chart_EwTrend" xml:space="preserve"><value>Watchlist Trend Over Time</value></data>
+  <data name="Chart_EwTrendSub" xml:space="preserve"><value>Total watchlist and high-risk counts, one snapshot per month</value></data>
 
   <!-- Retention -->
   <data name="Ret_MilestoneTitle" xml:space="preserve"><value>Retention Milestones</value></data>
