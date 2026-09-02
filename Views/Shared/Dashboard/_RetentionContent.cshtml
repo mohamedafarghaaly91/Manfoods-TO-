@@ -147,7 +147,6 @@
             <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
         </div>
     </div>
-    <p id="rtKpiRangeNote" class="text-muted-custom small mb-3" style="margin-top:-10px"></p>
 
     <div class="chart-card mb-4">
         <div class="chart-header">
@@ -395,29 +394,40 @@ async function rtLoadFilters() {
 /* Admin-configurable via the Settings page (loaded once in rtLoadAll below). */
 let rtRetentionColorRules = null;
 
+/* KPI cards mirror the "Team Experience by Store" table below: each card is a
+   tenure bucket's share of CURRENT active headcount (a snapshot), not a
+   survival/eligibility rate — so a bucket nobody has reached yet correctly
+   reads 0%, and short-tenure resignations never distort a longer bucket's card. */
 function rtRenderMilestones(items) {
     const el = document.getElementById('rtMilestoneCards');
-    if (!items || !items.length) { el.innerHTML = ''; return; }
-    el.innerHTML = items.map(m => {
-        if (!m.totalHires) {
-            return `<div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass"></i></div><div class="kpi-value text-muted" style="font-size:16px">Not yet</div><div class="kpi-label">${m.label} Retention</div><div class="kpi-desc">Share of hires still employed at ${m.label} — no cohort has reached this milestone yet</div></div>`;
-        }
-        const c = ChartColors.rateColor(rtRetentionColorRules, m.retentionRate);
-        const valueStyle = c.bg ? `color:${c.bg}` : '';
+    if (!items) { el.innerHTML = ''; return; }
+    const total = items.reduce((s, b) => s + b.value, 0);
+    if (!total) { el.innerHTML = '<div class="text-muted small py-3">No active headcount data yet.</div>'; return; }
+    const byLabel = {};
+    items.forEach(b => { byLabel[b.label] = b.value; });
+    el.innerHTML = Object.keys(ChartColors.RETENTION_TENURE_BUCKET_COLORS).map(label => {
+        const value = byLabel[label] || 0;
+        const pct = value / total * 100;
+        const color = ChartColors.RETENTION_TENURE_BUCKET_COLORS[label];
         return `<div class="kpi-card">
-            <div class="kpi-icon"><i class="bi bi-calendar-check"></i></div>
-            <div class="kpi-value" style="${valueStyle}">${m.retentionRate.toFixed(1)}%</div>
-            <div class="kpi-label">${m.label} Retention</div>
-            <div class="kpi-desc">Share of hires still employed at ${m.label}</div>
-            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${m.retained}/${m.totalHires} hires · through ${m.throughCohortLabel}</div>
+            <div class="kpi-icon"><i class="bi bi-people-fill" style="color:${color}"></i></div>
+            <div class="kpi-value" style="color:${color}">${pct.toFixed(1)}%</div>
+            <div class="kpi-label">${label}</div>
+            <div class="kpi-desc">Share of current headcount with this tenure</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${value}/${total} active employees</div>
         </div>`;
     }).join('');
 }
 
 async function rtLoadMilestones() {
-    const noteEl = document.getElementById('rtKpiRangeNote');
-    if (noteEl) noteEl.innerHTML = rtMonths.length > 1 ? rangeFilterBadge(true, true) + ' — cards above reflect every cohort month checked.' : '';
-    rtRenderMilestones(await rtFetch('milestones'));
+    const q = new URLSearchParams();
+    if (rtStoreFilter) q.set('store', rtStoreFilter);
+    if (rtOmFilter)    q.set('om', rtOmFilter);
+    if (rtOcFilter)    q.set('oc', rtOcFilter);
+    if (rtSocFilter)   q.set('soc', rtSocFilter);
+    if (rtOdFilter)    q.set('od', rtOdFilter);
+    const r = await fetch(`/api/retention/tenure-distribution?${q.toString()}`);
+    rtRenderMilestones(r.ok ? await r.json() : []);
 }
 
 let rtSurvivalInstance;
