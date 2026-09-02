@@ -15,7 +15,7 @@ namespace MvcApp.Services;
 /// </summary>
 public class ColorRulesService : IColorRulesService
 {
-    public static readonly string[] Metrics = { "turnover", "ninety-day", "retention" };
+    public static readonly string[] Metrics = { "turnover", "ninety-day", "retention", "early-warning" };
 
     private static readonly Dictionary<string, List<ColorRule>> Defaults = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -41,6 +41,15 @@ public class ColorRulesService : IColorRulesService
             new ColorRule { UpTo = 50, Color = "bad" },
             new ColorRule { UpTo = 70, Color = "warning" },
             new ColorRule { UpTo = null, Color = "good" },
+        },
+        // Early Warning risk score, 0-5 stars (not a %) — matches the star colors
+        // hardcoded on the page before this became configurable: 0-1 green, 2-3
+        // yellow, 4-5 red.
+        ["early-warning"] = new()
+        {
+            new ColorRule { UpTo = 1, Color = "good" },
+            new ColorRule { UpTo = 3, Color = "warning" },
+            new ColorRule { UpTo = null, Color = "bad" },
         },
     };
 

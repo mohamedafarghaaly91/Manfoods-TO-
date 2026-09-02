@@ -28,6 +28,7 @@ const SET_METRICS = [
     { key: 'turnover',   title: 'Turnover Rate',  sub: 'Colors used everywhere a Turnover Rate % is shown (Store Comparison, OC/OM/OD tables, Full Data Table, Scorecard, store health cards).' },
     { key: 'ninety-day', title: '90-Day Rate',     sub: 'Colors used everywhere an early-leaver 90-Day Rate % is shown.' },
     { key: 'retention',  title: 'Retention Rate',  sub: 'Colors used for retention milestone cards and the store retention ranking chart. Higher is better here, so order your rules the other way around.' },
+    { key: 'early-warning', title: 'Early Warning Risk Stars', sub: 'Colors used for the risk-score star badges on the Early Warning page (0-5 stars, not a %).', unit: '★', step: 1, max: 5 },
 ];
 
 const SET_COLOR_OPTIONS = [
@@ -68,8 +69,8 @@ function setRenderSection(metric) {
         }
         return `<div class="set-rule-row" data-i="${i}">
             <span style="font-size:13px;color:var(--text-2)">Up to</span>
-            <input type="number" step="0.1" min="0" class="form-control form-control-sm set-upto-input" value="${r.upTo}">
-            <span style="font-size:13px;color:var(--text-2)">%</span>
+            <input type="number" step="${metric.step ?? 0.1}" min="0" ${metric.max ? `max="${metric.max}"` : ''} class="form-control form-control-sm set-upto-input" value="${r.upTo}">
+            <span style="font-size:13px;color:var(--text-2)">${metric.unit ?? '%'}</span>
             <span>&rarr;</span>
             ${setColorSelectHtml(r.color)}
             <span class="set-swatch" style="background:${setColorHex(r.color)}"></span>
@@ -96,14 +97,23 @@ function setRenderSection(metric) {
     setRenderPreview(metric);
 }
 
+function setPreviewBadgeHtml(metric, rules, value) {
+    const c = ChartColors.rateColor(rules, value);
+    const text = metric.unit === '★' ? value.toFixed(0) + '★' : value.toFixed(1) + '%';
+    if (!c.bg) return `<span style="font-weight:700">${text}</span>`;
+    return `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${text}</span>`;
+}
+
 function setRenderPreview(metric) {
     const rules = setState[metric.key];
     const el = document.getElementById(`set-preview-${metric.key}`);
-    // A handful of sample percentages spanning below/at/between/above the configured cutoffs.
+    // A handful of sample values spanning below/at/between/above the configured cutoffs.
     const cutoffs = rules.filter(r => r.upTo !== null).map(r => r.upTo);
     const max = cutoffs.length ? Math.max(...cutoffs) : 20;
-    const samples = new Set([0, ...cutoffs, ...cutoffs.map(c => c + 1), Math.round(max * 1.5)]);
-    el.innerHTML = [...samples].sort((a, b) => a - b).map(p => ChartColors.rateBadgeHtml(rules, p)).join('');
+    const upperBound = metric.max ?? Math.round(max * 1.5);
+    const samples = new Set([0, ...cutoffs, ...cutoffs.map(c => c + 1), upperBound]);
+    el.innerHTML = [...samples].filter(v => !metric.max || v <= metric.max).sort((a, b) => a - b)
+        .map(p => setPreviewBadgeHtml(metric, rules, p)).join('');
 }
 
 function setAddRule(metric) {

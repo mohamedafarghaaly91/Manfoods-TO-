@@ -142,11 +142,11 @@
 
     <div class="charts-grid mb-4">
         <div class="chart-card">
-            <div class="chart-header"><h6>@L["Chart_EwReasonBreakdown"]</h6><p>@L["Chart_EwReasonBreakdownSub"]</p></div>
+            <div class="chart-header"><h6 id="ewReasonTitle">@L["Chart_EwReasonBreakdown"]</h6><p>@L["Chart_EwReasonBreakdownSub"]</p></div>
             <div class="chart-body"><canvas id="ewReasonChart"></canvas></div>
         </div>
         <div class="chart-card">
-            <div class="chart-header"><h6>@L["Chart_EwStoreBreakdown"]</h6><p>@L["Chart_EwStoreBreakdownSub"]</p></div>
+            <div class="chart-header"><h6 id="ewStoreTitle">@L["Chart_EwStoreBreakdown"]</h6><p>@L["Chart_EwStoreBreakdownSub"]</p></div>
             <div class="chart-body"><canvas id="ewStoreChart"></canvas></div>
         </div>
     </div>
@@ -219,6 +219,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>Chart.register(ChartDataLabels);</script>
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script src="~/js/dashboard.js" asp-append-version="true"></script>
+<!-- dashboard.js is included only for shared helpers (rangeFilterBadge) — this
+     page has its own Year+Months filter UI, so dashboard.js's period/store
+     selects and loadPeriods() no-op here (no matching element IDs on this page). -->
 <script>
 /* ── Early Warning page — Year + discrete Months multi-select (picks which
    Active Employees snapshot counts as "currently active"), same filter
@@ -227,6 +231,15 @@
 let ewYear = null, ewMonths = [], ewYearMonthsMap = {};
 let ewStoreFilter = '';
 let ewWatchlistData = [];
+let ewRiskColorRules = null;
+
+const ewTitleBase = {};
+function ewSetTitleBadge(id, affected) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!(id in ewTitleBase)) ewTitleBase[id] = el.textContent;
+    el.innerHTML = ewTitleBase[id] + ' ' + rangeFilterBadge(ewMonths.length > 1, affected);
+}
 
 const EW_REASON_TYPES = ['new_hire_window', 'store_history', 'role_history', 'peak_window', 'gender_history', 'exit_interview_score', 'store_leader_history'];
 const EW_L = document.getElementById('ewLocalization').dataset;
@@ -411,10 +424,8 @@ function ewReasonText(reason) {
 }
 
 function ewRiskBadge(stars) {
-    // High risk (4-5 stars) -> red, Medium risk (2-3 stars) -> amber, Low risk (0-1 stars) -> green.
-    const color = stars >= 4 ? ChartColors.SEMANTIC.BAD
-                : stars >= 2 ? ChartColors.SEMANTIC.WARNING
-                :              ChartColors.SEMANTIC.GOOD;
+    // Admin-configurable via the Settings page (metric "early-warning").
+    const color = ChartColors.rateColor(ewRiskColorRules, stars).bg || ChartColors.SEMANTIC.GOOD;
     const filled = '★'.repeat(stars);
     const empty  = '☆'.repeat(5 - stars);
     return `<span style="color:${color};font-size:15px;letter-spacing:1px;line-height:1" title="${stars}/5">${filled}${empty}</span>`;
@@ -511,6 +522,7 @@ ewWireSortHeaders('ewHighRiskBody', () => ewRenderHighRiskTable(ewWatchlistData)
 let ewReasonChartInstance, ewStoreChartInstance;
 
 function ewLoadReasonChart(rows) {
+    ewSetTitleBadge('ewReasonTitle', true);
     const counts = {};
     EW_REASON_TYPES.forEach(t => counts[t] = 0);
     rows.forEach(r => r.reasons.forEach(x => { if (counts[x.type] != null) counts[x.type]++; }));
@@ -550,6 +562,7 @@ function ewLoadReasonChart(rows) {
 }
 
 function ewLoadStoreChart(rows) {
+    ewSetTitleBadge('ewStoreTitle', true);
     const counts = {};
     rows.forEach(r => { if (r.store) counts[r.store] = (counts[r.store] || 0) + 1; });
     const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -594,6 +607,7 @@ async function ewLoadAll() {
 document.getElementById('ewSearch').addEventListener('input', () => ewRenderTable(ewWatchlistData));
 
 (async function init() {
+    ewRiskColorRules = await ChartColors.loadRateRules('early-warning');
     const hasData = await ewLoadFilters();
     if (hasData) await ewLoadAll();
 })();
