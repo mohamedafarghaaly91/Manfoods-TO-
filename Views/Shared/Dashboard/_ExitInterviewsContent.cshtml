@@ -66,6 +66,16 @@
 /* Engagement Drivers stat text is always English by design (unlocalized
    metric names) — isolate it from RTL bidi reordering when the page is in Arabic. */
 .ei-driver-stat { direction:ltr; unicode-bidi:isolate; }
+
+.ei-sort-header { cursor:pointer; user-select:none; white-space:nowrap; }
+.ei-sort-header:hover { color:var(--red); }
+.ei-sort-icon { font-size:10px; margin-left:4px; opacity:0.35; }
+[dir="rtl"] .ei-sort-icon { margin-left:0; margin-right:4px; }
+.ei-sort-header.ei-sort-asc .ei-sort-icon,
+.ei-sort-header.ei-sort-desc .ei-sort-icon { opacity:1; color:var(--red); }
+.ei-sort-header.ei-sort-asc .ei-sort-icon::before { content:"\f235"; }   /* bi-caret-up-fill */
+.ei-sort-header.ei-sort-desc .ei-sort-icon::before { content:"\f229"; } /* bi-caret-down-fill */
+.ei-sort-header:not(.ei-sort-asc):not(.ei-sort-desc) .ei-sort-icon::before { content:"\f229"; }
 </style>
 
 <div class="page-header">
@@ -224,17 +234,44 @@
     </div>
     <div class="chart-card mb-4 p-0" style="overflow:hidden" data-comments-count-label="@L["EI_CommentsCount"]" data-no-comments-label="@L["EI_NoCommentsForFilters"]">
         <div class="table-responsive" style="max-height:480px;overflow-y:auto">
-            <table class="table table-hover mb-0" style="font-size:13px">
+            <table class="table table-hover mb-0 ei-sortable-table" style="font-size:13px">
                 <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
                     <tr>
-                        <th class="px-3 py-2">@L["Common_StoreName"]</th>
-                        <th class="px-3 py-2">@L["SC_StoreLeader"]</th>
-                        <th class="px-3 py-2">@L["EI_Question"]</th>
+                        <th class="px-3 py-2 ei-sort-header" data-sort-key="store">@L["Common_StoreName"]<i class="bi ei-sort-icon"></i></th>
+                        <th class="px-3 py-2 ei-sort-header" data-sort-key="storeLeader">@L["SC_StoreLeader"]<i class="bi ei-sort-icon"></i></th>
+                        <th class="px-3 py-2 ei-sort-header" data-sort-key="questionLabel">@L["EI_Question"]<i class="bi ei-sort-icon"></i></th>
                         <th class="px-3 py-2">@L["EI_Comment"]</th>
                     </tr>
                 </thead>
                 <tbody id="eiCommentsBody">
                     <tr><td colspan="4" class="text-center py-4 text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <div class="section-accent"></div>
+            <h5 class="mb-0 fw-bold">@L["Chart_WhatWouldChange"]</h5>
+            <span id="eiChangeCommentCountBadge" class="badge" style="background:var(--bg-2);color:var(--text-2);font-size:11px"></span>
+        </div>
+        <input type="text" id="eiChangeCommentSearch" class="form-control form-control-sm" placeholder="@L["EI_SearchComments"]" style="width:220px;border-radius:20px">
+    </div>
+    <div class="chart-card mb-4 p-0" style="overflow:hidden" data-comments-count-label="@L["EI_CommentsCount"]" data-no-comments-label="@L["EI_NoCommentsForFilters"]">
+        <div class="table-responsive" style="max-height:480px;overflow-y:auto">
+            <table class="table table-hover mb-0 ei-sortable-table" style="font-size:13px">
+                <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                    <tr>
+                        <th class="px-3 py-2 ei-sort-header" data-sort-key="store">@L["Common_StoreName"]<i class="bi ei-sort-icon"></i></th>
+                        <th class="px-3 py-2 ei-sort-header" data-sort-key="storeLeader">@L["SC_StoreLeader"]<i class="bi ei-sort-icon"></i></th>
+                        <th class="px-3 py-2">@L["EI_Comment"]</th>
+                    </tr>
+                </thead>
+                <tbody id="eiChangeCommentsBody">
+                    <tr><td colspan="3" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
                     </td></tr>
                 </tbody>
@@ -698,6 +735,42 @@ function eiRenderInsights() {
 }
 
 let eiCommentsData = [];
+
+/* Generic sortable-header wiring — each table tracks its own sort key/dir,
+   same pattern as the Early Warning page's High Risk / Watch List tables. */
+const eiSortState = {}; // tableId -> { key, dir }
+
+function eiSortValue(row, key) {
+    return (row[key] || '').toString().toLowerCase();
+}
+
+function eiApplySort(tableId, rows) {
+    const state = eiSortState[tableId];
+    if (!state || !state.key) return rows;
+    return rows.slice().sort((a, b) => {
+        const va = eiSortValue(a, state.key), vb = eiSortValue(b, state.key);
+        if (va < vb) return state.dir === 'asc' ? -1 : 1;
+        if (va > vb) return state.dir === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+function eiWireSortHeaders(tableId, renderFn) {
+    const table = document.getElementById(tableId).closest('table');
+    table.querySelectorAll('.ei-sort-header').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.dataset.sortKey;
+            const state = eiSortState[tableId] || { key: null, dir: 'asc' };
+            state.dir = (state.key === key && state.dir === 'asc') ? 'desc' : 'asc';
+            state.key = key;
+            eiSortState[tableId] = state;
+            table.querySelectorAll('.ei-sort-header').forEach(h => h.classList.remove('ei-sort-asc', 'ei-sort-desc'));
+            th.classList.add(state.dir === 'asc' ? 'ei-sort-asc' : 'ei-sort-desc');
+            renderFn();
+        });
+    });
+}
+
 function eiPopulateQuestionFilter() {
     const sel = document.getElementById('eiCommentQuestionFilter');
     const current = sel.value;
@@ -706,34 +779,62 @@ function eiPopulateQuestionFilter() {
     sel.value = questions.includes(current) ? current : '';
 }
 
+function eiCommentRowsHtml(rows, includeQuestionCol) {
+    return rows.map(c => `
+        <tr>
+            <td class="px-3 py-2 fw-semibold">${c.store || '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${c.storeLeader || '<span class="text-muted">—</span>'}</td>
+            ${includeQuestionCol ? `<td class="px-3 py-2" style="white-space:nowrap;color:oklch(0.5 0.03 258)">${c.questionLabel}</td>` : ''}
+            <td class="px-3 py-2">${c.text}</td>
+        </tr>`).join('');
+}
+
 function eiRenderComments() {
     const search = (document.getElementById('eiCommentSearch').value || '').toLowerCase();
     const questionFilter = document.getElementById('eiCommentQuestionFilter').value;
-    const rows = eiCommentsData.filter(c =>
+    let rows = eiCommentsData.filter(c =>
         (!questionFilter || c.questionLabel === questionFilter) &&
         (c.text.toLowerCase().includes(search) ||
         (c.store || '').toLowerCase().includes(search) ||
         (c.questionLabel || '').toLowerCase().includes(search))
     );
+    rows = eiApplySort('eiCommentsBody', rows);
     const labels = document.querySelector('[data-comments-count-label]').dataset;
     const badge = document.getElementById('eiCommentCountBadge');
     if (badge) badge.textContent = `${rows.length} ${labels.commentsCountLabel}`;
 
     const tbody = document.getElementById('eiCommentsBody');
     if (!rows.length) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">${labels.noCommentsLabel}</td></tr>`; return; }
-    tbody.innerHTML = rows.map(c => `
-        <tr>
-            <td class="px-3 py-2 fw-semibold">${c.store || '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${c.storeLeader || '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2" style="white-space:nowrap;color:oklch(0.5 0.03 258)">${c.questionLabel}</td>
-            <td class="px-3 py-2">${c.text}</td>
-        </tr>`).join('');
+    tbody.innerHTML = eiCommentRowsHtml(rows, true);
 }
+
+/* "What They Would Change" — same shape as the Comments table above, fixed
+   to just that one free-text question. */
+const EI_CHANGE_QUESTION_LABEL = "What They'd Change";
+function eiRenderChangeComments() {
+    const search = (document.getElementById('eiChangeCommentSearch').value || '').toLowerCase();
+    let rows = eiCommentsData.filter(c =>
+        c.questionLabel === EI_CHANGE_QUESTION_LABEL &&
+        (c.text.toLowerCase().includes(search) || (c.store || '').toLowerCase().includes(search))
+    );
+    rows = eiApplySort('eiChangeCommentsBody', rows);
+    const labels = document.querySelector('[data-comments-count-label]').dataset;
+    const badge = document.getElementById('eiChangeCommentCountBadge');
+    if (badge) badge.textContent = `${rows.length} ${labels.commentsCountLabel}`;
+
+    const tbody = document.getElementById('eiChangeCommentsBody');
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted">${labels.noCommentsLabel}</td></tr>`; return; }
+    tbody.innerHTML = eiCommentRowsHtml(rows, false);
+}
+
+eiWireSortHeaders('eiCommentsBody', eiRenderComments);
+eiWireSortHeaders('eiChangeCommentsBody', eiRenderChangeComments);
 
 async function eiLoadComments() {
     eiCommentsData = await eiFetch('comments');
     eiPopulateQuestionFilter();
     eiRenderComments();
+    eiRenderChangeComments();
 }
 
 async function eiLoadAll() {
@@ -751,6 +852,7 @@ async function eiLoadAll() {
 
 document.getElementById('eiCommentSearch').addEventListener('input', eiRenderComments);
 document.getElementById('eiCommentQuestionFilter').addEventListener('change', eiRenderComments);
+document.getElementById('eiChangeCommentSearch').addEventListener('input', eiRenderChangeComments);
 
 (async function init() {
     const hasData = await eiLoadFilters();

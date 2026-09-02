@@ -404,6 +404,7 @@
   <data name="Chart_Comments" xml:space="preserve"><value>التعليقات</value></data>
   <data name="EI_SearchComments" xml:space="preserve"><value>ابحث في التعليقات...</value></data>
   <data name="EI_AllQuestions" xml:space="preserve"><value>كل الأسئلة</value></data>
+  <data name="Chart_WhatWouldChange" xml:space="preserve"><value>الحاجة اللي كانوا هيغيروها</value></data>
   <data name="EI_TotalInterviews" xml:space="preserve"><value>مقابلات الخروج</value></data>
   <data name="EI_PositiveSentiment" xml:space="preserve"><value>نسبة الرضا الإيجابي</value></data>
   <data name="EI_TopReason" xml:space="preserve"><value>أكتر سبب استقالة</value></data>
