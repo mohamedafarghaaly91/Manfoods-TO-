@@ -262,10 +262,12 @@ let wfJobTitleChart, wfPayrollChart, wfTenureChart, wfGenderChart;
 async function wfLoadJobTitleChart() {
     wfSetTitleBadge('wfJobTitleTitle', true);
     const data = await fetchJson(`/api/dashboard/headcount-by-job-title?${buildQuery()}`);
+    const labels = data.map(d => d.label);
+    const colors = ChartColors.colorsByLabel(labels, null);
     wfJobTitleChart = mkChart(wfJobTitleChart, 'wfJobTitleChart', {
         type: 'bar',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: '#6D5DFB', borderRadius: 4 }] },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } },
+        data: { labels, datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderRadius: 4 }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.formattedValue} employees` } } },
             scales: { x: { grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } }, y: { grid: { display: false }, ticks: { color: '#5B5875' } } } }
     });
 }
@@ -278,7 +280,7 @@ async function wfLoadPayrollChart() {
     wfPayrollChart = mkChart(wfPayrollChart, 'wfPayrollChart', {
         type: 'bar',
         data: { labels, datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderRadius: 4 }] },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } },
+        options: { indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.formattedValue} employees` } } },
             scales: { x: { grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } }, y: { grid: { display: false }, ticks: { color: '#5B5875' } } } }
     });
 }
@@ -304,7 +306,7 @@ async function wfLoadGenderChart() {
     wfGenderChart = mkChart(wfGenderChart, 'wfGenderChart', {
         type: 'doughnut',
         data: { labels: genderLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: genderColors, borderWidth: 0 }] },
-        options: { plugins: { legend: { display: false } } }
+        options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue}` } } } }
     });
 
     const el = document.getElementById('wfGenderStatsList');

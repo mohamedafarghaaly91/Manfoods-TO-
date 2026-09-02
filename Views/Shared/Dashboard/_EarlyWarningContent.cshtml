@@ -538,6 +538,7 @@ function ewLoadReasonChart(rows) {
             indexAxis: 'y', maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} employee(s)` } },
                 datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' },
             },
             scales: {
@@ -566,6 +567,7 @@ function ewLoadStoreChart(rows) {
             indexAxis: 'y', maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} employee(s) on the watchlist` } },
                 datalabels: { anchor: 'end', align: 'right', color: 'oklch(0.5 0.03 258)', font: { size: 11, weight: '600' }, formatter: v => v > 0 ? v : '' },
             },
             scales: {

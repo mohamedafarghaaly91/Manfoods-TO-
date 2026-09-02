@@ -710,7 +710,12 @@ async function ntdLoadTrend() {
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false }, datalabels: { display: false } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.formattedValue}%${data[c.dataIndex]?.isProvisional ? ' (provisional)' : ''}` } },
+                datalabels: { display: false }
+            },
             scales: {
                 x: { ticks: { color: 'oklch(0.5 0.03 258)', font: { size: 11 } }, grid: { display: false } },
                 y: { ticks: { color: 'oklch(0.5 0.03 258)', font: { size: 11 }, callback: v => v + '%' }, grid: { color: 'oklch(0.92 0.008 255)' } }

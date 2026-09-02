@@ -639,7 +639,11 @@ function cmpRenderCharts(dataA, dataB) {
             { label: cmpLabel('A'), data: t.seriesA, backgroundColor: 'oklch(0.5 0.18 25)', borderRadius: 4 },
             { label: cmpLabel('B'), data: t.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
         ] },
-        options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => v + '%' } } } }
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } } },
+            scales: { y: { ticks: { callback: v => v + '%' } } }
+        }
     });
 
     const n = cmpBuildSeries(dataA, dataB, 'ninetyByStore', dataA.ninety.rate, dataB.ninety.rate);
@@ -649,7 +653,11 @@ function cmpRenderCharts(dataA, dataB) {
             { label: cmpLabel('A'), data: n.seriesA, backgroundColor: 'oklch(0.5 0.18 25)', borderRadius: 4 },
             { label: cmpLabel('B'), data: n.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
         ] },
-        options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => v + '%' } } } }
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } } },
+            scales: { y: { ticks: { callback: v => v + '%' } } }
+        }
     });
 }
 
