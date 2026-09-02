@@ -385,10 +385,10 @@ function ewRenderSummary(s) {
     const el = document.getElementById('ewSummaryCards');
     if (!s) { el.innerHTML = ''; return; }
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${s.totalWatchlist}</div><div class="kpi-label">${EW_L.kpiInWatchlist}</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${s.highRiskCount}</div><div class="kpi-label">${EW_L.kpiHighRisk}</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div><div class="kpi-value">${s.newHireWindowCount}</div><div class="kpi-label">${EW_L.kpiNewHireWindow}</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${s.companyBaselineRate.toFixed(1)}%</div><div class="kpi-label">${EW_L.kpiCompanyBaseline}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${s.totalWatchlist}</div><div class="kpi-label">${EW_L.kpiInWatchlist}</div><div class="kpi-desc">Active employees matching at least one risk factor</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${s.highRiskCount}</div><div class="kpi-label">${EW_L.kpiHighRisk}</div><div class="kpi-desc">4-5★ risk score (3+ matching risk factors)</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div><div class="kpi-value">${s.newHireWindowCount}</div><div class="kpi-label">${EW_L.kpiNewHireWindow}</div><div class="kpi-desc">Still within their first 90 days of hire</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${s.companyBaselineRate.toFixed(1)}%</div><div class="kpi-label">${EW_L.kpiCompanyBaseline}</div><div class="kpi-desc">Company-wide early-leaver rate used as the risk baseline</div></div>
     `;
 }
 

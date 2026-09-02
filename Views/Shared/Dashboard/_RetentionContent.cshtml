@@ -383,7 +383,7 @@ function rtRenderMilestones(items) {
     if (!items || !items.length) { el.innerHTML = ''; return; }
     el.innerHTML = items.map(m => {
         if (!m.totalHires) {
-            return `<div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass"></i></div><div class="kpi-value text-muted" style="font-size:16px">Not yet</div><div class="kpi-label">${m.label} Retention</div></div>`;
+            return `<div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass"></i></div><div class="kpi-value text-muted" style="font-size:16px">Not yet</div><div class="kpi-label">${m.label} Retention</div><div class="kpi-desc">Share of hires still employed at ${m.label} — no cohort has reached this milestone yet</div></div>`;
         }
         const c = ChartColors.rateColor(rtRetentionColorRules, m.retentionRate);
         const valueStyle = c.bg ? `color:${c.bg}` : '';
@@ -391,6 +391,7 @@ function rtRenderMilestones(items) {
             <div class="kpi-icon"><i class="bi bi-calendar-check"></i></div>
             <div class="kpi-value" style="${valueStyle}">${m.retentionRate.toFixed(1)}%</div>
             <div class="kpi-label">${m.label} Retention</div>
+            <div class="kpi-desc">Share of hires still employed at ${m.label}</div>
             <div style="font-size:11px;color:var(--text-3);margin-top:2px">${m.retained}/${m.totalHires} hires · through ${m.throughCohortLabel}</div>
         </div>`;
     }).join('');

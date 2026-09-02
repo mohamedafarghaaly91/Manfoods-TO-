@@ -409,6 +409,11 @@ html, body {
     font-size: 11px; color: var(--text-3);
     font-weight: 600; text-transform: uppercase; letter-spacing: .8px;
 }
+.kpi-desc {
+    font-size: 10.5px; color: var(--text-3);
+    font-weight: 400; text-transform: none; letter-spacing: 0;
+    line-height: 1.35; margin-top: 1px; opacity: .8;
+}
 .kpi-delta {
     font-size: 12px; font-weight: 600;
     display: inline-flex; align-items: center; gap: 4px;

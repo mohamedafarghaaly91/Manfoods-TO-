@@ -248,9 +248,9 @@ async function wfLoadKpis() {
     if (!kpiEl) return;
     const data = await fetchJson('/api/dashboard/kpis?' + buildQuery());
     kpiEl.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">Total Headcount</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">New Hires</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">Total Headcount</div><div class="kpi-desc">Employees on the active roster for the period</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">New Hires</div><div class="kpi-desc">Employees hired during the selected period</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div><div class="kpi-desc">Total resignations in the selected period</div></div>
     `;
     const noteEl = document.getElementById('wfKpiRangeNote');
     if (noteEl) noteEl.innerHTML = isPeriodRangeActive() ? rangeFilterBadge(true, true) + ' — the 3 cards above add up every period in the selected range.' : '';

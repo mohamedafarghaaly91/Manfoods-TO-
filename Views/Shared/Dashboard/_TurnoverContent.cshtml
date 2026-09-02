@@ -776,9 +776,9 @@ async function tvLoadKpis() {
     const trendClass = diff === null ? '' : diff > 0 ? 'text-danger' : diff < 0 ? 'text-success' : '';
     const trendValue = diff === null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`;
     kpiEl.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(kpi.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">Turnover Rate</div></div>
-        <div class="kpi-card"><div class="kpi-icon ${trendClass}"><i class="bi ${trendIcon}"></i></div><div class="kpi-value ${trendClass}">${trendValue}</div><div class="kpi-label">Trend vs Prior Period</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.totalResignations||0}</div><div class="kpi-label">Resignations</div><div class="kpi-desc">Total resignations in the selected period</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(kpi.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">Turnover Rate</div><div class="kpi-desc">Resignations ÷ average headcount for the period</div></div>
+        <div class="kpi-card"><div class="kpi-icon ${trendClass}"><i class="bi ${trendIcon}"></i></div><div class="kpi-value ${trendClass}">${trendValue}</div><div class="kpi-label">Trend vs Prior Period</div><div class="kpi-desc">Change in turnover rate vs. the equivalent prior period</div></div>
     `;
 }
 loadKpis = tvLoadKpis;

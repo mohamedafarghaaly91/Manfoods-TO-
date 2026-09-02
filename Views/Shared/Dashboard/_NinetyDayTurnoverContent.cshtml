@@ -664,9 +664,9 @@ function ntdRenderKpis(kpi) {
     const el = document.getElementById('ntdKpiCards');
     if (!kpi) { el.innerHTML = ''; return; }
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${kpi.totalHires}</div><div class="kpi-label">Hired This Cohort</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.earlyLeavers}</div><div class="kpi-label">Left Within 90 Days</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${kpi.rate.toFixed(1)}%${kpi.isProvisional ? ' <span class=\'badge\' style=\'font-size:10px;background:oklch(0.75 0.16 75 / .18);color:oklch(0.5 0.14 75)\'>provisional</span>' : ''}</div><div class="kpi-label">90-Day Turnover Rate</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${kpi.totalHires}</div><div class="kpi-label">Hired This Cohort</div><div class="kpi-desc">Employees hired in the selected cohort month(s)</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.earlyLeavers}</div><div class="kpi-label">Left Within 90 Days</div><div class="kpi-desc">Of this cohort, resigned within 90 days of hire</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${kpi.rate.toFixed(1)}%${kpi.isProvisional ? ' <span class=\'badge\' style=\'font-size:10px;background:oklch(0.75 0.16 75 / .18);color:oklch(0.5 0.14 75)\'>provisional</span>' : ''}</div><div class="kpi-label">90-Day Turnover Rate</div><div class="kpi-desc">Early leavers ÷ hires in this cohort</div></div>
     `;
     document.getElementById('ntdProvisionalBanner').style.display = kpi.isProvisional ? '' : 'none';
 }
