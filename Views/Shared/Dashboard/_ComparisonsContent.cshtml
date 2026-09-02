@@ -531,6 +531,13 @@ async function cmpInit() {
         panels[side].yearMonthsMap = yearMonthsMap;
         const yearSel = document.getElementById(`cmpYear${side}`);
         yearSel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        // Reset Filters must actually clear the store/OM/OC/SOC/OD pick on
+        // both panels — previously only year/months were reset, so a store
+        // picked before hitting Reset stayed selected (and kept the Store
+        // Breakdown table hidden, since that table only shows when neither
+        // panel has a store).
+        panels[side].store = ''; panels[side].om = ''; panels[side].oc = ''; panels[side].soc = ''; panels[side].od = '';
+        combos[`store${side}`].setValue(''); combos[`om${side}`].setValue(''); combos[`oc${side}`].setValue(''); combos[`soc${side}`].setValue(''); combos[`od${side}`].setValue('');
     }
 
     // A defaults to the latest year/all its months; B defaults to the same
