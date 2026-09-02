@@ -660,4 +660,50 @@
   <data name="AC_ClosedReason" xml:space="preserve"><value>سبب الإغلاق</value></data>
   <data name="AC_CompletedBy" xml:space="preserve"><value>تم الإنجاز بواسطة</value></data>
   <data name="AC_ChronicNote" xml:space="preserve"><value>هذا المطعم كان لديه أكثر من خطة عمل واحدة عبر الوقت.</value></data>
+  <data name="Common_NoDataForPeriod" xml:space="preserve"><value>لا توجد بيانات متاحة للفترة المختارة.</value></data>
+  <data name="ST_EmployeesSuffix" xml:space="preserve"><value>موظف</value></data>
+  <data name="ST_HealthCritical" xml:space="preserve"><value>حرجة</value></data>
+  <data name="ST_HealthGood" xml:space="preserve"><value>جيدة</value></data>
+  <data name="ST_HealthNone" xml:space="preserve"><value>—</value></data>
+  <data name="ST_HealthWatch" xml:space="preserve"><value>تحت المراقبة</value></data>
+  <data name="ST_HighRiskSuffix" xml:space="preserve"><value>معرضين للخطر</value></data>
+  <data name="ST_InsightBestDesc" xml:space="preserve"><value>نسبة دوران — أفضل مطعم من حيث الاستقرار هذه الفترة.</value></data>
+  <data name="ST_InsightBestTitle" xml:space="preserve"><value>أفضل مطعم أداءً</value></data>
+  <data name="ST_InsightCriticalDesc" xml:space="preserve"><value>مطعم لديه حاليًا خطة عمل بخطورة حرجة أو عالية — يستحق المتابعة أولاً.</value></data>
+  <data name="ST_InsightCriticalTitle" xml:space="preserve"><value>مطاعم تحتاج اهتمام</value></data>
+  <data name="ST_InsightHighRiskDesc1" xml:space="preserve"><value>موظف معرض للخطر تم رصدهم عبر</value></data>
+  <data name="ST_InsightHighRiskDesc2" xml:space="preserve"><value>مطعم في قائمة مراقبة الإنذار المبكر.</value></data>
+  <data name="ST_InsightHighRiskTitle" xml:space="preserve"><value>إشارات إنذار مبكر</value></data>
+  <data name="ST_InsightImprovingDesc" xml:space="preserve"><value>تحسن في متوسط نسبة الدوران مقارنة بالفترة السابقة.</value></data>
+  <data name="ST_InsightImprovingTitle" xml:space="preserve"><value>تحسن عام</value></data>
+  <data name="ST_InsightNoCriticalDesc" xml:space="preserve"><value>لا يوجد أي مطعم لديه حاليًا خطة عمل بخطورة حرجة أو عالية.</value></data>
+  <data name="ST_InsightNoCriticalTitle" xml:space="preserve"><value>لا توجد مطاعم حرجة</value></data>
+  <data name="ST_InsightWorseningDesc" xml:space="preserve"><value>زيادة في متوسط نسبة الدوران مقارنة بالفترة السابقة.</value></data>
+  <data name="ST_InsightWorseningTitle" xml:space="preserve"><value>تدهور عام</value></data>
+  <data name="ST_InsightWorstDesc" xml:space="preserve"><value>نسبة دوران — المطعم الأكثر احتياجًا للاهتمام هذه الفترة.</value></data>
+  <data name="ST_InsightWorstTitle" xml:space="preserve"><value>مطعم يحتاج اهتمام</value></data>
+  <data name="ST_KpiAvgTurnover" xml:space="preserve"><value>متوسط نسبة الدوران</value></data>
+  <data name="ST_KpiAvgTurnoverDesc" xml:space="preserve"><value>متوسط نسبة الدوران عبر كل المطاعم المعروضة</value></data>
+  <data name="ST_KpiCriticalStores" xml:space="preserve"><value>مطاعم حرجة / عالية</value></data>
+  <data name="ST_KpiCriticalStoresDesc" xml:space="preserve"><value>مطاعم لديها خطة عمل نشطة بخطورة حرجة أو عالية</value></data>
+  <data name="ST_KpiHighRiskStores" xml:space="preserve"><value>مطاعم بها موظفين معرضين للخطر</value></data>
+  <data name="ST_KpiHighRiskStoresDesc" xml:space="preserve"><value>مطاعم بها موظف واحد على الأقل معرض للخطر في قائمة مراقبة الإنذار المبكر</value></data>
+  <data name="ST_KpiTotalHeadcount" xml:space="preserve"><value>إجمالي عدد الموظفين</value></data>
+  <data name="ST_KpiTotalHeadcountDesc" xml:space="preserve"><value>إجمالي عدد الموظفين عبر كل المطاعم المعروضة</value></data>
+  <data name="ST_KpiTotalResignations" xml:space="preserve"><value>إجمالي الاستقالات</value></data>
+  <data name="ST_KpiTotalResignationsDesc" xml:space="preserve"><value>إجمالي الاستقالات عبر كل المطاعم المعروضة هذه الفترة</value></data>
+  <data name="ST_KpiTotalStores" xml:space="preserve"><value>إجمالي المطاعم</value></data>
+  <data name="ST_KpiTotalStoresDesc" xml:space="preserve"><value>عدد المطاعم المطابقة للفلاتر الحالية</value></data>
+  <data name="ST_NoMatchingStores" xml:space="preserve"><value>لا توجد مطاعم مطابقة لفلاترك.</value></data>
+  <data name="ST_OcOm" xml:space="preserve"><value>OC / OM</value></data>
+  <data name="ST_ResignationsLabel" xml:space="preserve"><value>الاستقالات</value></data>
+  <data name="ST_SortHeadcountAsc" xml:space="preserve"><value>عدد الموظفين (من الأقل للأكثر)</value></data>
+  <data name="ST_SortHeadcountDesc" xml:space="preserve"><value>عدد الموظفين (من الأكثر للأقل)</value></data>
+  <data name="ST_SortLabel" xml:space="preserve"><value>ترتيب حسب</value></data>
+  <data name="ST_SortNameAsc" xml:space="preserve"><value>اسم المطعم (أ-ي)</value></data>
+  <data name="ST_SortResignationsAsc" xml:space="preserve"><value>الاستقالات (من الأقل للأكثر)</value></data>
+  <data name="ST_SortResignationsDesc" xml:space="preserve"><value>الاستقالات (من الأكثر للأقل)</value></data>
+  <data name="ST_SortTurnoverAsc" xml:space="preserve"><value>نسبة الدوران (من الأقل للأكثر)</value></data>
+  <data name="ST_SortTurnoverDesc" xml:space="preserve"><value>نسبة الدوران (من الأكثر للأقل)</value></data>
+  <data name="ST_TurnoverRate" xml:space="preserve"><value>نسبة الدوران</value></data>
 </root>

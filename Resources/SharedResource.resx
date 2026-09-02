@@ -659,4 +659,50 @@
   <data name="AC_ClosedReason" xml:space="preserve"><value>Closing Reason</value></data>
   <data name="AC_CompletedBy" xml:space="preserve"><value>Completed by</value></data>
   <data name="AC_ChronicNote" xml:space="preserve"><value>This store has had more than one action plan over time.</value></data>
+  <data name="Common_NoDataForPeriod" xml:space="preserve"><value>No data available for the selected period.</value></data>
+  <data name="ST_EmployeesSuffix" xml:space="preserve"><value>employees</value></data>
+  <data name="ST_HealthCritical" xml:space="preserve"><value>Critical</value></data>
+  <data name="ST_HealthGood" xml:space="preserve"><value>Healthy</value></data>
+  <data name="ST_HealthNone" xml:space="preserve"><value>—</value></data>
+  <data name="ST_HealthWatch" xml:space="preserve"><value>Watch</value></data>
+  <data name="ST_HighRiskSuffix" xml:space="preserve"><value>high-risk</value></data>
+  <data name="ST_InsightBestDesc" xml:space="preserve"><value>turnover — the healthiest store this period.</value></data>
+  <data name="ST_InsightBestTitle" xml:space="preserve"><value>Best Performing Store</value></data>
+  <data name="ST_InsightCriticalDesc" xml:space="preserve"><value>store(s) currently have a Critical or High severity action plan — worth checking on first.</value></data>
+  <data name="ST_InsightCriticalTitle" xml:space="preserve"><value>Stores Needing Attention</value></data>
+  <data name="ST_InsightHighRiskDesc1" xml:space="preserve"><value>high-risk employee(s) flagged across</value></data>
+  <data name="ST_InsightHighRiskDesc2" xml:space="preserve"><value>store(s) on the Early Warning watchlist.</value></data>
+  <data name="ST_InsightHighRiskTitle" xml:space="preserve"><value>Early Warning Signals</value></data>
+  <data name="ST_InsightImprovingDesc" xml:space="preserve"><value>average turnover improvement vs. the previous period.</value></data>
+  <data name="ST_InsightImprovingTitle" xml:space="preserve"><value>Improving Overall</value></data>
+  <data name="ST_InsightNoCriticalDesc" xml:space="preserve"><value>No store currently has a Critical or High severity action plan.</value></data>
+  <data name="ST_InsightNoCriticalTitle" xml:space="preserve"><value>No Critical Stores</value></data>
+  <data name="ST_InsightWorseningDesc" xml:space="preserve"><value>average turnover increase vs. the previous period.</value></data>
+  <data name="ST_InsightWorseningTitle" xml:space="preserve"><value>Worsening Overall</value></data>
+  <data name="ST_InsightWorstDesc" xml:space="preserve"><value>turnover — the store needing the most attention this period.</value></data>
+  <data name="ST_InsightWorstTitle" xml:space="preserve"><value>Store Needing Attention</value></data>
+  <data name="ST_KpiAvgTurnover" xml:space="preserve"><value>Avg. Turnover Rate</value></data>
+  <data name="ST_KpiAvgTurnoverDesc" xml:space="preserve"><value>Average turnover rate across all shown stores</value></data>
+  <data name="ST_KpiCriticalStores" xml:space="preserve"><value>Critical / High Stores</value></data>
+  <data name="ST_KpiCriticalStoresDesc" xml:space="preserve"><value>Stores with a Critical or High severity active action plan</value></data>
+  <data name="ST_KpiHighRiskStores" xml:space="preserve"><value>Stores With High-Risk Staff</value></data>
+  <data name="ST_KpiHighRiskStoresDesc" xml:space="preserve"><value>Stores with at least one high-risk employee on the Early Warning watchlist</value></data>
+  <data name="ST_KpiTotalHeadcount" xml:space="preserve"><value>Total Headcount</value></data>
+  <data name="ST_KpiTotalHeadcountDesc" xml:space="preserve"><value>Combined headcount across all shown stores</value></data>
+  <data name="ST_KpiTotalResignations" xml:space="preserve"><value>Total Resignations</value></data>
+  <data name="ST_KpiTotalResignationsDesc" xml:space="preserve"><value>Combined resignations across all shown stores this period</value></data>
+  <data name="ST_KpiTotalStores" xml:space="preserve"><value>Total Stores</value></data>
+  <data name="ST_KpiTotalStoresDesc" xml:space="preserve"><value>Number of stores matching the current filters</value></data>
+  <data name="ST_NoMatchingStores" xml:space="preserve"><value>No stores match your filters.</value></data>
+  <data name="ST_OcOm" xml:space="preserve"><value>OC / OM</value></data>
+  <data name="ST_ResignationsLabel" xml:space="preserve"><value>Resignations</value></data>
+  <data name="ST_SortHeadcountAsc" xml:space="preserve"><value>Headcount (Low to High)</value></data>
+  <data name="ST_SortHeadcountDesc" xml:space="preserve"><value>Headcount (High to Low)</value></data>
+  <data name="ST_SortLabel" xml:space="preserve"><value>Sort By</value></data>
+  <data name="ST_SortNameAsc" xml:space="preserve"><value>Store Name (A-Z)</value></data>
+  <data name="ST_SortResignationsAsc" xml:space="preserve"><value>Resignations (Low to High)</value></data>
+  <data name="ST_SortResignationsDesc" xml:space="preserve"><value>Resignations (High to Low)</value></data>
+  <data name="ST_SortTurnoverAsc" xml:space="preserve"><value>Turnover Rate (Low to High)</value></data>
+  <data name="ST_SortTurnoverDesc" xml:space="preserve"><value>Turnover Rate (High to Low)</value></data>
+  <data name="ST_TurnoverRate" xml:space="preserve"><value>Turnover Rate</value></data>
 </root>

@@ -2,99 +2,406 @@
     var __area = ViewContext.RouteData.Values["area"]?.ToString();
     var __areaPrefix = string.Equals(__area, "Home", StringComparison.OrdinalIgnoreCase) ? "/home" : "/admin";
 }
+<style>
+.st-filterbar { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; }
+.st-filter-group { display:flex; flex-direction:column; gap:5px; }
+.st-filter-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-3); }
+.st-select-wrap { position:relative; }
+.st-select {
+    appearance:none; -webkit-appearance:none;
+    background:var(--card-bg); border:1px solid var(--card-border); color:var(--text);
+    border-radius:var(--radius-sm); font-size:13.5px; font-weight:600;
+    height:42px; padding:0 34px 0 14px; min-width:150px;
+    box-shadow:var(--shadow-sm); cursor:pointer;
+}
+.st-select:focus { outline:none; border-color:var(--red); box-shadow:0 0 0 3px var(--red-light); }
+.st-select-wrap i { position:absolute; top:50%; right:12px; transform:translateY(-50%); font-size:11px; color:var(--text-3); pointer-events:none; }
+[dir="rtl"] .st-select { padding:0 14px 0 34px; }
+[dir="rtl"] .st-select-wrap i { right:auto; left:12px; }
+.st-badge { padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; display:inline-block; }
+.st-trend { font-size:11.5px; font-weight:700; display:inline-flex; align-items:center; gap:2px; }
+.st-card-flags { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+.st-ac-link { text-decoration:none; }
+</style>
+
 <div class="page-header">
     <div>
         <h1 class="page-title">@L["Page_Stores"]</h1>
         <p class="page-subtitle">@L["Page_StoresSub"]</p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
-        <select id="periodSelect" class="form-select form-select-dark" style="width:180px">
-            <option value="">@L["Common_SelectPeriod"]</option>
-        </select>
-        <input type="text" id="storeCardSearch" class="form-control form-control-sm"
-               placeholder="&#xF52A; @L["Common_SearchStore"]" style="width:220px;border-radius:20px">
+    <div class="st-filterbar">
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_SelectPeriod"]</span>
+            <div class="st-select-wrap">
+                <select id="periodSelect" class="st-select"></select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_OperationManager"]</span>
+            <div class="st-select-wrap">
+                <select id="omSelect" class="st-select"></select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_OperationConsultant"]</span>
+            <div class="st-select-wrap">
+                <select id="ocSelect" class="st-select"></select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_SeniorOperationConsultants"]</span>
+            <div class="st-select-wrap">
+                <select id="socSelect" class="st-select"></select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_OperationDirectors"]</span>
+            <div class="st-select-wrap">
+                <select id="odSelect" class="st-select"></select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["ST_SortLabel"]</span>
+            <div class="st-select-wrap">
+                <select id="stSortSelect" class="st-select">
+                    <option value="turnover_desc">@L["ST_SortTurnoverDesc"]</option>
+                    <option value="turnover_asc">@L["ST_SortTurnoverAsc"]</option>
+                    <option value="headcount_desc">@L["ST_SortHeadcountDesc"]</option>
+                    <option value="headcount_asc">@L["ST_SortHeadcountAsc"]</option>
+                    <option value="resignations_desc">@L["ST_SortResignationsDesc"]</option>
+                    <option value="resignations_asc">@L["ST_SortResignationsAsc"]</option>
+                    <option value="name_asc">@L["ST_SortNameAsc"]</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+        </div>
+        <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_SearchStore"]</span>
+            <input type="text" id="storeCardSearch" class="form-control form-control-dark form-control-sm"
+                   placeholder="&#xF52A; @L["Common_SearchStore"]" style="width:200px;height:42px;border-radius:8px">
+        </div>
         <button type="button" class="reset-filters-btn" onclick="resetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
         </button>
     </div>
 </div>
 
-<div id="storeCardsContainer" class="row g-3">
+<div id="stSummaryCards" class="kpi-grid mb-4">
+    <div class="kpi-spinner text-center py-3 w-100">
+        <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
+    </div>
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <i class="bi bi-lightbulb-fill" style="color:oklch(0.75 0.16 75)"></i>
+    <h5 class="mb-0 fw-bold">@L["Common_SmartInsights"]</h5>
+    <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Common_AutoGenerated"]</span>
+</div>
+<div class="chart-card mb-4" id="stInsightsCard">
+    <div id="stInsights">
+        <div class="text-center py-3 text-muted">
+            <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
+        </div>
+    </div>
+</div>
+
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <div class="section-accent"></div>
+        <h5 class="mb-0 fw-bold">@L["Page_Stores"]</h5>
+        <span id="stCountBadge" class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px"></span>
+    </div>
+</div>
+
+<div id="storeCardsContainer" class="row g-3"
+     data-no-matches="@L["ST_NoMatchingStores"]"
+     data-employees-suffix="@L["ST_EmployeesSuffix"]"
+     data-turnover-rate="@L["ST_TurnoverRate"]"
+     data-oc-om="@L["ST_OcOm"]"
+     data-resignations="@L["ST_ResignationsLabel"]"
+     data-health-good="@L["ST_HealthGood"]"
+     data-health-watch="@L["ST_HealthWatch"]"
+     data-health-critical="@L["ST_HealthCritical"]"
+     data-health-none="@L["ST_HealthNone"]"
+     data-ac-severity-critical="@L["AC_SeverityCritical"]"
+     data-ac-severity-high="@L["AC_SeverityHigh"]"
+     data-ac-severity-medium="@L["AC_SeverityMedium"]"
+     data-ac-severity-low="@L["AC_SeverityLow"]"
+     data-high-risk-suffix="@L["ST_HighRiskSuffix"]">
     <div class="col-12 text-center py-5 text-muted">
-        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading stores…
+        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script src="~/js/store-action-plan.js" asp-append-version="true"></script>
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 <script>
-/* Stores page reuses periodSelect (from dashboard.js loadPeriods) but has no
-   #kpiCards / chart canvases, so loadAll() below is a no-op override that
-   only drives the store-cards grid instead. */
+/* Stores page reuses periodSelect/omSelect/ocSelect/socSelect/odSelect (from
+   dashboard.js loadPeriods) but has no #kpiCards / chart canvases, so loadAll()
+   below is a no-op override that only drives this page's own KPI row,
+   insights, and store-cards grid instead. */
 const __AREA_PREFIX = '@__areaPrefix';
 let stStoreData = [];
+let stPrevByStore = {};
+let stAcByStore = {};
+let stHighRiskByStore = {};
+let stSort = 'turnover_desc';
+
+const stContainerEl = document.getElementById('storeCardsContainer');
+const ST_D = stContainerEl.dataset;
 
 /* Admin-configurable via the Settings page (loaded once in loadAll below). */
 let stTurnoverColorRules = null;
 const stToneByColor = { none: 'none', good: 'success', warning: 'warning', warning_strong: 'warning_strong', bad: 'danger' };
-const stLabelByTone = { none: '—', success: 'Healthy', warning: 'Watch', warning_strong: 'Watch', danger: 'Critical' };
+const stLabelByTone = { none: ST_D.healthNone, success: ST_D.healthGood, warning: ST_D.healthWatch, warning_strong: ST_D.healthWatch, danger: ST_D.healthCritical };
 function stHealth(rate) {
     const tone = stToneByColor[ChartColors.matchRateColorName(stTurnoverColorRules, rate)] || 'none';
     return { label: stLabelByTone[tone], tone };
 }
 
+const ST_AC_SEVERITY_META = {
+    Critical: { label: ST_D.acSeverityCritical, bg: 'oklch(0.6 0.22 22 / .12)', color: ChartColors.SEMANTIC.BAD },
+    High:     { label: ST_D.acSeverityHigh,     bg: 'oklch(0.7 0.19 45 / .14)', color: 'oklch(0.6 0.19 45)' },
+    Medium:   { label: ST_D.acSeverityMedium,   bg: 'oklch(0.75 0.16 75 / .14)', color: 'oklch(0.6 0.14 75)' },
+    Low:      { label: ST_D.acSeverityLow,      bg: 'var(--card-bg-2)', color: 'var(--text-2)' },
+};
+
+function stSortRows(rows) {
+    const sorted = [...rows];
+    switch (stSort) {
+        case 'turnover_asc':      sorted.sort((a, b) => a.turnoverRate - b.turnoverRate); break;
+        case 'headcount_desc':    sorted.sort((a, b) => b.headcount - a.headcount); break;
+        case 'headcount_asc':     sorted.sort((a, b) => a.headcount - b.headcount); break;
+        case 'resignations_desc': sorted.sort((a, b) => b.resignations - a.resignations); break;
+        case 'resignations_asc':  sorted.sort((a, b) => a.resignations - b.resignations); break;
+        case 'name_asc':          sorted.sort((a, b) => a.storeName.localeCompare(b.storeName)); break;
+        default:                  sorted.sort((a, b) => b.turnoverRate - a.turnoverRate); break;
+    }
+    return sorted;
+}
+
 function stRenderCards() {
     const search = (document.getElementById('storeCardSearch').value || '').toLowerCase();
-    const rows = stStoreData.filter(r =>
+    let rows = stStoreData.filter(r =>
         r.storeName.toLowerCase().includes(search) ||
         (r.operationConsultant || '').toLowerCase().includes(search) ||
         (r.operationManager || '').toLowerCase().includes(search)
     );
+    rows = stSortRows(rows);
 
-    const container = document.getElementById('storeCardsContainer');
+    document.getElementById('stCountBadge').textContent = rows.length;
+
     if (!rows.length) {
-        container.innerHTML = '<div class="col-12 text-center py-5 text-muted">No matching stores.</div>';
+        stContainerEl.innerHTML = `<div class="col-12 empty-state"><i class="bi bi-shop"></i><p>${sapEscape(ST_D.noMatches)}</p></div>`;
         return;
     }
 
     const toneVar = { success: 'oklch(0.62 0.15 155)', warning: 'oklch(0.75 0.16 75)', warning_strong: 'oklch(0.68 0.18 55)', danger: 'oklch(0.6 0.22 22)', none: 'var(--text-3)' };
     const toneBg  = { success: 'oklch(0.62 0.15 155 / .1)', warning: 'oklch(0.75 0.16 75 / .15)', warning_strong: 'oklch(0.68 0.18 55 / .12)', danger: 'oklch(0.6 0.22 22 / .08)', none: 'var(--bg-2)' };
 
-    container.innerHTML = rows.map(r => {
+    stContainerEl.innerHTML = rows.map(r => {
         const h = stHealth(r.turnoverRate);
+        const prev = stPrevByStore[r.storeName];
+        let trendHtml = '';
+        if (prev !== undefined && prev !== null) {
+            const delta = r.turnoverRate - prev;
+            if (Math.abs(delta) >= 0.1) {
+                const improving = delta < 0;
+                trendHtml = `<span class="st-trend" style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i>${Math.abs(delta).toFixed(1)}pt</span>`;
+            }
+        }
+
+        const ac = stAcByStore[r.storeName];
+        const highRisk = stHighRiskByStore[r.storeName] || 0;
+        const flags = [];
+        if (ac && ac.planStatus === 'Active') {
+            const sev = ST_AC_SEVERITY_META[ac.severity] || ST_AC_SEVERITY_META.Low;
+            flags.push(`<a class="st-ac-link" href="${__AREA_PREFIX}/dashboard/actioncenterdetail?store=${encodeURIComponent(r.storeName)}">
+                <span class="st-badge" style="background:${sev.bg};color:${sev.color}"><i class="bi bi-clipboard2-pulse-fill"></i> ${sapEscape(sev.label)}</span>
+            </a>`);
+        }
+        if (highRisk > 0) {
+            flags.push(`<span class="st-badge" style="background:oklch(0.6 0.22 22 / .1);color:${ChartColors.SEMANTIC.BAD}"><i class="bi bi-exclamation-triangle-fill"></i> ${highRisk} ${sapEscape(ST_D.highRiskSuffix)}</span>`);
+        }
+
         return `<div class="col-sm-6 col-lg-4 col-xl-3">
-            <a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" class="card-dark d-block h-100" style="text-decoration:none;color:inherit">
-                <div class="d-flex align-items-start justify-content-between mb-3">
-                    <div>
-                        <h6 class="mb-1 fw-bold" style="font-size:14px">${r.storeName}</h6>
-                        <div style="font-size:11.5px;color:var(--text-3)"><i class="bi bi-people me-1"></i>${r.headcount} employees</div>
+            <div class="card-dark h-100">
+                <a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" class="d-block" style="text-decoration:none;color:inherit">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div>
+                            <h6 class="mb-1 fw-bold" style="font-size:14px">${sapEscape(r.storeName)}</h6>
+                            <div style="font-size:11.5px;color:var(--text-3)"><i class="bi bi-people me-1"></i>${r.headcount} ${sapEscape(ST_D.employeesSuffix)}</div>
+                        </div>
+                        <span class="st-badge" style="background:${toneBg[h.tone]};color:${toneVar[h.tone]}">${sapEscape(h.label)}</span>
                     </div>
-                    <span style="background:${toneBg[h.tone]};color:${toneVar[h.tone]};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap">${h.label}</span>
-                </div>
-                <div class="d-flex align-items-baseline gap-2">
-                    <div style="font-size:22px;font-weight:700">${r.turnoverRate.toFixed(1)}%</div>
-                </div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:12px">Turnover rate</div>
-                <div style="border-top:1px solid var(--card-border);padding-top:10px;display:flex;justify-content:space-between;font-size:11.5px">
-                    <div>
-                        <div style="color:var(--text-3)">OC / OM</div>
-                        <div class="fw-semibold mt-1">${r.operationConsultant || '—'}</div>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <div style="font-size:22px;font-weight:700">${r.turnoverRate.toFixed(1)}%</div>
+                        ${trendHtml}
                     </div>
-                    <div class="text-end">
-                        <div style="color:var(--text-3)">Resignations</div>
-                        <div class="fw-semibold mt-1" style="color:oklch(0.6 0.22 22)">${r.resignations}</div>
+                    <div style="font-size:11px;color:var(--text-3);margin-bottom:12px">${sapEscape(ST_D.turnoverRate)}</div>
+                    <div style="border-top:1px solid var(--card-border);padding-top:10px;display:flex;justify-content:space-between;font-size:11.5px">
+                        <div>
+                            <div style="color:var(--text-3)">${sapEscape(ST_D.ocOm)}</div>
+                            <div class="fw-semibold mt-1">${r.operationConsultant ? sapEscape(r.operationConsultant) : '—'}</div>
+                        </div>
+                        <div class="text-end">
+                            <div style="color:var(--text-3)">${sapEscape(ST_D.resignations)}</div>
+                            <div class="fw-semibold mt-1" style="color:oklch(0.6 0.22 22)">${r.resignations}</div>
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+                ${flags.length ? `<div class="st-card-flags">${flags.join('')}</div>` : ''}
+            </div>
         </div>`;
     }).join('');
 }
 
+function stRenderInsights(rows) {
+    const el = document.getElementById('stInsights');
+    const colorMap = {
+        danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
+        warning:   { bg: 'oklch(0.75 0.16 75 / .12)', border: ChartColors.SEMANTIC.WARNING, text: 'oklch(0.6 0.14 75)' },
+        success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: 'oklch(0.5 0.15 155)', text: 'oklch(0.5 0.15 155)' },
+        secondary: { bg: 'var(--bg-2)', border: 'var(--text-3)', text: 'var(--text-2)' },
+    };
+    const items = [];
+
+    if (!rows.length) { el.innerHTML = `<div class="text-muted" style="font-size:13px">@L["Common_NoDataForPeriod"]</div>`; return; }
+
+    const eligible = rows.filter(r => r.headcount >= 3);
+    if (eligible.length) {
+        const best = [...eligible].sort((a, b) => a.turnoverRate - b.turnoverRate)[0];
+        items.push({ icon: 'bi-trophy-fill', color: 'success', title: '@L["ST_InsightBestTitle"]',
+            description: `${best.storeName} — ${best.turnoverRate.toFixed(1)}% @L["ST_InsightBestDesc"]` });
+
+        const worst = [...eligible].sort((a, b) => b.turnoverRate - a.turnoverRate)[0];
+        if (worst.turnoverRate > 0) {
+            items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: '@L["ST_InsightWorstTitle"]',
+                description: `${worst.storeName} — ${worst.turnoverRate.toFixed(1)}% @L["ST_InsightWorstDesc"]` });
+        }
+    }
+
+    const criticalStores = rows.filter(r => {
+        const ac = stAcByStore[r.storeName];
+        return ac && ac.planStatus === 'Active' && (ac.severity === 'Critical' || ac.severity === 'High');
+    });
+    if (criticalStores.length > 0) {
+        items.push({ icon: 'bi-clipboard2-pulse-fill', color: 'danger', title: '@L["ST_InsightCriticalTitle"]',
+            description: `${criticalStores.length} @L["ST_InsightCriticalDesc"]` });
+    } else {
+        items.push({ icon: 'bi-check-circle-fill', color: 'success', title: '@L["ST_InsightNoCriticalTitle"]', description: '@L["ST_InsightNoCriticalDesc"]' });
+    }
+
+    const withPrev = rows.filter(r => stPrevByStore[r.storeName] !== undefined && stPrevByStore[r.storeName] !== null);
+    if (withPrev.length) {
+        const avgCur = withPrev.reduce((s, r) => s + r.turnoverRate, 0) / withPrev.length;
+        const avgPrev = withPrev.reduce((s, r) => s + stPrevByStore[r.storeName], 0) / withPrev.length;
+        const delta = avgCur - avgPrev;
+        if (Math.abs(delta) >= 0.1) {
+            const improving = delta < 0;
+            items.push({ icon: improving ? 'bi-graph-down-arrow' : 'bi-graph-up-arrow', color: improving ? 'success' : 'warning',
+                title: improving ? '@L["ST_InsightImprovingTitle"]' : '@L["ST_InsightWorseningTitle"]',
+                description: `${Math.abs(delta).toFixed(1)}pt ${improving ? '@L["ST_InsightImprovingDesc"]' : '@L["ST_InsightWorseningDesc"]'}` });
+        }
+    }
+
+    const highRiskStores = Object.entries(stHighRiskByStore).filter(([store, count]) => count > 0 && rows.some(r => r.storeName === store));
+    if (highRiskStores.length > 0) {
+        const totalHighRisk = highRiskStores.reduce((s, [, c]) => s + c, 0);
+        items.push({ icon: 'bi-eye-fill', color: 'warning', title: '@L["ST_InsightHighRiskTitle"]',
+            description: `${totalHighRisk} @L["ST_InsightHighRiskDesc1"] ${highRiskStores.length} @L["ST_InsightHighRiskDesc2"]` });
+    }
+
+    el.innerHTML = '<div class="row g-3">' + items.map(item => {
+        const c = colorMap[item.color] || colorMap.secondary;
+        return `<div class="col-md-6">
+            <div style="background:${c.bg};border-left:3px solid ${c.border};border-radius:8px;padding:12px 14px;height:100%">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:15px"></i>
+                    <div>
+                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${item.title}</div>
+                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${item.description}</div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('') + '</div>';
+}
+
+function stRenderSummary(rows) {
+    const totalStores = rows.length;
+    const totalHeadcount = rows.reduce((s, r) => s + r.headcount, 0);
+    const totalResignations = rows.reduce((s, r) => s + r.resignations, 0);
+    const avgTurnover = totalStores ? rows.reduce((s, r) => s + r.turnoverRate, 0) / totalStores : 0;
+    const criticalCount = rows.filter(r => {
+        const ac = stAcByStore[r.storeName];
+        return ac && ac.planStatus === 'Active' && (ac.severity === 'Critical' || ac.severity === 'High');
+    }).length;
+    const highRiskStoreCount = rows.filter(r => (stHighRiskByStore[r.storeName] || 0) > 0).length;
+
+    document.getElementById('stSummaryCards').innerHTML = `
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-shop"></i></div><div class="kpi-value">${totalStores}</div><div class="kpi-label">@L["ST_KpiTotalStores"]</div><div class="kpi-desc">@L["ST_KpiTotalStoresDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${totalHeadcount}</div><div class="kpi-label">@L["ST_KpiTotalHeadcount"]</div><div class="kpi-desc">@L["ST_KpiTotalHeadcountDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${totalResignations}</div><div class="kpi-label">@L["ST_KpiTotalResignations"]</div><div class="kpi-desc">@L["ST_KpiTotalResignationsDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${avgTurnover.toFixed(1)}%</div><div class="kpi-label">@L["ST_KpiAvgTurnover"]</div><div class="kpi-desc">@L["ST_KpiAvgTurnoverDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-clipboard2-pulse-fill"></i></div><div class="kpi-value text-danger">${criticalCount}</div><div class="kpi-label">@L["ST_KpiCriticalStores"]</div><div class="kpi-desc">@L["ST_KpiCriticalStoresDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${highRiskStoreCount}</div><div class="kpi-label">@L["ST_KpiHighRiskStores"]</div><div class="kpi-desc">@L["ST_KpiHighRiskStoresDesc"]</div></div>
+    `;
+}
+
+async function stLoadPreviousPeriod() {
+    const periods = await fetchJson('/api/dashboard/available-periods');
+    const idx = periods.findIndex(p => p.month === periodMonth && p.year === periodYear);
+    if (idx === -1 || idx + 1 >= periods.length) return null;
+    return periods[idx + 1];
+}
+
 async function stLoadStores() {
     if (!periodMonth || !periodYear) return;
-    const data = await fetchJson(`/api/dashboard/store-comparison?month=${periodMonth}&year=${periodYear}`);
-    stStoreData = data || [];
+
+    const q = new URLSearchParams();
+    q.set('month', periodMonth); q.set('year', periodYear);
+    if (omFilter) q.set('om', omFilter);
+    if (ocFilter) q.set('oc', ocFilter);
+    if (socFilter) q.set('soc', socFilter);
+    if (odFilter) q.set('od', odFilter);
+
+    const [current, acStores, watchlist, prevPeriod] = await Promise.all([
+        fetchJson(`/api/dashboard/store-comparison?${q.toString()}`),
+        sapFetchJson('/api/store-action-plan/action-center/stores'),
+        sapFetchJson('/api/early-warning/watchlist'),
+        stLoadPreviousPeriod(),
+    ]);
+
+    stStoreData = current || [];
+
+    stAcByStore = {};
+    (acStores || []).forEach(s => { stAcByStore[s.storeName] = s; });
+
+    stHighRiskByStore = {};
+    (watchlist || []).forEach(w => { if (w.stars >= 4) stHighRiskByStore[w.store] = (stHighRiskByStore[w.store] || 0) + 1; });
+
+    stPrevByStore = {};
+    if (prevPeriod) {
+        const pq = new URLSearchParams();
+        pq.set('month', prevPeriod.month); pq.set('year', prevPeriod.year);
+        if (omFilter) pq.set('om', omFilter);
+        if (ocFilter) pq.set('oc', ocFilter);
+        if (socFilter) pq.set('soc', socFilter);
+        if (odFilter) pq.set('od', odFilter);
+        const previous = await fetchJson(`/api/dashboard/store-comparison?${pq.toString()}`);
+        (previous || []).forEach(p => { stPrevByStore[p.storeName] = p.turnoverRate; });
+    }
+
+    stRenderSummary(stStoreData);
+    stRenderInsights(stStoreData);
     stRenderCards();
 }
 
@@ -102,5 +409,15 @@ loadAll = async function () {
     if (!stTurnoverColorRules) stTurnoverColorRules = await ChartColors.loadRateRules('turnover');
     await stLoadStores();
 };
+
 document.getElementById('storeCardSearch').addEventListener('input', stRenderCards);
+document.getElementById('stSortSelect').addEventListener('change', function () { stSort = this.value; stRenderCards(); });
+
+const stDashboardResetFilters = resetFilters;
+resetFilters = async function () {
+    stSort = 'turnover_desc';
+    const sortSel = document.getElementById('stSortSelect');
+    if (sortSel) sortSel.value = 'turnover_desc';
+    await stDashboardResetFilters();
+};
 </script>
