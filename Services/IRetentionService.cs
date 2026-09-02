@@ -42,4 +42,22 @@ public interface IRetentionService
 
     Task<List<SmartInsightItem>> GetInsightsAsync(string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
+
+    /// <summary>Share of the current active team past 6 months' tenure, per job title.</summary>
+    Task<List<ChartDataItem>> GetRetentionByJobTitleAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
+
+    /// <summary>Share of the current active team past 6 months' tenure, per gender.</summary>
+    Task<List<ChartDataItem>> GetGenderRetentionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
+
+    /// <summary>Average tenure (whole months) of the current active team, per store.</summary>
+    Task<List<ChartDataItem>> GetAverageTenureByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
+
+    /// <summary>Average tenure (whole months) of the current active team, grouped by "om"/"oc"/"soc"/"od".</summary>
+    Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null);
+
+    /// <summary>How soon after being hired people who eventually resigned actually left.</summary>
+    Task<List<ChartDataItem>> GetTimeToFirstResignationDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null);
+
+    /// <summary>New hires per month, all-time.</summary>
+    Task<List<ChartDataItem>> GetMonthlyHiringVolumeAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null);
 }

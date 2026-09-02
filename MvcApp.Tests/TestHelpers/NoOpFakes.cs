@@ -77,6 +77,18 @@ public class NoOpRetentionService : IRetentionService
     public Task<List<SmartInsightItem>> GetInsightsAsync(string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<SmartInsightItem>());
+    public Task<List<ChartDataItem>> GetRetentionByJobTitleAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
+        Task.FromResult(new List<ChartDataItem>());
+    public Task<List<ChartDataItem>> GetGenderRetentionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
+        Task.FromResult(new List<ChartDataItem>());
+    public Task<List<ChartDataItem>> GetAverageTenureByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
+        Task.FromResult(new List<ChartDataItem>());
+    public Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null) =>
+        Task.FromResult(new List<ManagerTenureRow>());
+    public Task<List<ChartDataItem>> GetTimeToFirstResignationDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
+        Task.FromResult(new List<ChartDataItem>());
+    public Task<List<ChartDataItem>> GetMonthlyHiringVolumeAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null) =>
+        Task.FromResult(new List<ChartDataItem>());
 }
 
 public class NoOpEarlyWarningService : IEarlyWarningService

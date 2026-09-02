@@ -354,6 +354,26 @@
   <data name="Retention_LeaderboardTopSub" xml:space="preserve"><value>Highest share of current team with 6+ months on the job</value></data>
   <data name="Retention_LeaderboardBottom" xml:space="preserve"><value>Worst 5 Stores for Retention</value></data>
   <data name="Retention_LeaderboardBottomSub" xml:space="preserve"><value>Lowest share of current team with 6+ months on the job</value></data>
+  <data name="Retention_ByJobTitleGender" xml:space="preserve"><value>By Job Title &amp; Gender</value></data>
+  <data name="Retention_ByJobTitle" xml:space="preserve"><value>Retention by Job Title</value></data>
+  <data name="Retention_ByJobTitleSub" xml:space="preserve"><value>% of each role's current team with 6+ months on the job</value></data>
+  <data name="Retention_ByGender" xml:space="preserve"><value>Retention by Gender</value></data>
+  <data name="Retention_ByGenderSub" xml:space="preserve"><value>% of the current team with 6+ months on the job, by gender</value></data>
+  <data name="Retention_ByOcOm" xml:space="preserve"><value>By Operation Consultant &amp; Manager — Average Tenure</value></data>
+  <data name="Retention_RankedByTenure" xml:space="preserve"><value>Ranked by average tenure of current team</value></data>
+  <data name="Retention_StoreTenureTop" xml:space="preserve"><value>Best 5 Stores by Average Tenure</value></data>
+  <data name="Retention_StoreTenureTopSub" xml:space="preserve"><value>Highest average months on the job, current team</value></data>
+  <data name="Retention_StoreTenureBottom" xml:space="preserve"><value>Worst 5 Stores by Average Tenure</value></data>
+  <data name="Retention_StoreTenureBottomSub" xml:space="preserve"><value>Lowest average months on the job, current team</value></data>
+  <data name="Retention_OcTenureTop" xml:space="preserve"><value>Best 5 Operation Consultants by Average Tenure</value></data>
+  <data name="Retention_OcTenureTopSub" xml:space="preserve"><value>Highest average months on the job, current team</value></data>
+  <data name="Retention_OcTenureBottom" xml:space="preserve"><value>Worst 5 Operation Consultants by Average Tenure</value></data>
+  <data name="Retention_OcTenureBottomSub" xml:space="preserve"><value>Lowest average months on the job, current team</value></data>
+  <data name="Retention_MoreContext" xml:space="preserve"><value>More Context</value></data>
+  <data name="Retention_TimeToFirstResign" xml:space="preserve"><value>How Soon People Leave</value></data>
+  <data name="Retention_TimeToFirstResignSub" xml:space="preserve"><value>Of everyone who ever resigned, how long they had been on the job — all-time</value></data>
+  <data name="Retention_HiringVolume" xml:space="preserve"><value>Monthly Hiring Volume</value></data>
+  <data name="Retention_HiringVolumeSub" xml:space="preserve"><value>New hires per month, all-time — context for the charts above</value></data>
   <data name="Chart_SurvivalCurve" xml:space="preserve"><value>Team Tenure Curve</value></data>
   <data name="Chart_SurvivalCurveSub" xml:space="preserve"><value>% of today's active team that has been here at least this long</value></data>
   <data name="Chart_StoreLeaderboard" xml:space="preserve"><value>Store Leaderboard</value></data>

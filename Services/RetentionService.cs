@@ -537,4 +537,189 @@ public class RetentionService : IRetentionService
 
         return insights;
     }
+
+    // ── Additional snapshot-based charts (all plain "current active headcount"
+    // views, same philosophy as the KPI cards / Team Tenure Curve above — no
+    // eligibility/survival model, so every number here is a number a regular
+    // user can read as-is: "X% of the team", "Y months on average"). ──────────
+
+    private static readonly (string Label, int MinDays, int MaxDays)[] FirstResignationBuckets =
+    {
+        ("First week", 0, 7),
+        ("1–4 weeks", 7, 30),
+        ("1–3 months", 30, 90),
+        ("3–6 months", 90, 180),
+        ("6–12 months", 180, 365),
+        ("1+ year", 365, int.MaxValue),
+    };
+
+    private async Task<(int Month, int Year)?> ResolveAnchorPeriodAsync(int? month, int? year)
+    {
+        var periods = await _db.ActiveEmployees.Where(e => e.HireDate != null).Select(e => new { e.Month, e.Year }).Distinct().ToListAsync();
+        if (periods.Count == 0) return null;
+        return (month.HasValue && year.HasValue && periods.Any(p => p.Month == month && p.Year == year))
+            ? (month.Value, year.Value)
+            : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
+    }
+
+    private async Task<IQueryable<ActiveEmployee>> BuildActiveSnapshotQueryAsync(int anchorMonth, int anchorYear,
+        string? store, string role, string? assignedName, string? om, string? oc, string? soc, string? od)
+    {
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var q = _db.ActiveEmployees.Where(e => e.Month == anchorMonth && e.Year == anchorYear && e.HireDate != null);
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
+        else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) q = q.Where(e => omOcStores.Contains(e.Store));
+        return q;
+    }
+
+    private async Task<Dictionary<string, (string Om, string Oc, string Soc, string Od)>> GetManagerMappingByStoreAsync()
+    {
+        var refs = await LoadLatestStoreReferenceCandidatesAsync();
+        return refs.GroupBy(s => s.StoreName)
+            .ToDictionary(g => g.Key, g =>
+            {
+                var latest = g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First();
+                return (latest.OperationManager ?? "", latest.OperationConsultant ?? "", latest.SeniorOperationConsultant ?? "", latest.OperationDirector ?? "");
+            });
+    }
+
+    /// <summary>Share of the current active team past 6 months' tenure, per job title.</summary>
+    public async Task<List<ChartDataItem>> GetRetentionByJobTitleAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null)
+    {
+        var anchor = await ResolveAnchorPeriodAsync(month, year);
+        if (anchor == null) return new List<ChartDataItem>();
+        var q = await BuildActiveSnapshotQueryAsync(anchor.Value.Month, anchor.Value.Year, store, role, assignedName, om, oc, soc, od);
+        var rows = await q.Select(e => new { e.JobTitle, e.HireDate }).ToListAsync();
+        var asOf = new DateOnly(anchor.Value.Year, anchor.Value.Month, DateTime.DaysInMonth(anchor.Value.Year, anchor.Value.Month));
+
+        return rows.Where(r => !string.IsNullOrWhiteSpace(r.JobTitle)).GroupBy(r => r.JobTitle)
+            .Select(g => new ChartDataItem
+            {
+                Label = g.Key,
+                Value = (int)MetricsCalculationService.RatePercent(
+                    g.Count(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) >= MetricsCalculationService.SixMonthRetentionDays),
+                    g.Count(), 0),
+            })
+            .OrderByDescending(c => c.Value)
+            .ToList();
+    }
+
+    /// <summary>Share of the current active team past 6 months' tenure, per gender.</summary>
+    public async Task<List<ChartDataItem>> GetGenderRetentionAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null)
+    {
+        var anchor = await ResolveAnchorPeriodAsync(month, year);
+        if (anchor == null) return new List<ChartDataItem>();
+        var q = await BuildActiveSnapshotQueryAsync(anchor.Value.Month, anchor.Value.Year, store, role, assignedName, om, oc, soc, od);
+        var rows = await q.Select(e => new { e.Gender, e.HireDate }).ToListAsync();
+        var asOf = new DateOnly(anchor.Value.Year, anchor.Value.Month, DateTime.DaysInMonth(anchor.Value.Year, anchor.Value.Month));
+
+        return rows.Where(r => !string.IsNullOrWhiteSpace(r.Gender)).GroupBy(r => r.Gender)
+            .Select(g => new ChartDataItem
+            {
+                Label = g.Key,
+                Value = (int)MetricsCalculationService.RatePercent(
+                    g.Count(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) >= MetricsCalculationService.SixMonthRetentionDays),
+                    g.Count(), 0),
+            })
+            .OrderByDescending(c => c.Value)
+            .ToList();
+    }
+
+    /// <summary>Average tenure (in whole months) of the current active team, per store.</summary>
+    public async Task<List<ChartDataItem>> GetAverageTenureByStoreAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null)
+    {
+        var anchor = await ResolveAnchorPeriodAsync(month, year);
+        if (anchor == null) return new List<ChartDataItem>();
+        var q = await BuildActiveSnapshotQueryAsync(anchor.Value.Month, anchor.Value.Year, store, role, assignedName, om, oc, soc, od);
+        var rows = await q.Select(e => new { e.Store, e.HireDate }).ToListAsync();
+        var asOf = new DateOnly(anchor.Value.Year, anchor.Value.Month, DateTime.DaysInMonth(anchor.Value.Year, anchor.Value.Month));
+
+        return rows.GroupBy(r => r.Store)
+            .Select(g => new ChartDataItem
+            {
+                Label = g.Key,
+                Value = (int)Math.Round(g.Average(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) / 30.44)),
+            })
+            .OrderByDescending(c => c.Value)
+            .ToList();
+    }
+
+    /// <summary>Average tenure (in whole months) of the current active team, grouped by the
+    /// given manager dimension ("om", "oc", "soc" or "od") — same shape as the "By Operation
+    /// Consultant &amp; Manager" tables elsewhere, but measuring tenure instead of turnover.</summary>
+    public async Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName,
+        int? month = null, int? year = null)
+    {
+        var anchor = await ResolveAnchorPeriodAsync(month, year);
+        if (anchor == null) return new List<ManagerTenureRow>();
+
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var q = _db.ActiveEmployees.Where(e => e.Month == anchor.Value.Month && e.Year == anchor.Value.Year && e.HireDate != null);
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+        var rows = await q.Select(e => new { e.Store, e.HireDate }).ToListAsync();
+
+        var mapping = await GetManagerMappingByStoreAsync();
+        Func<string, string> pick = dimension switch
+        {
+            "om" => s => mapping.TryGetValue(s, out var m) ? m.Om : "",
+            "oc" => s => mapping.TryGetValue(s, out var m) ? m.Oc : "",
+            "soc" => s => mapping.TryGetValue(s, out var m) ? m.Soc : "",
+            "od" => s => mapping.TryGetValue(s, out var m) ? m.Od : "",
+            _ => s => "",
+        };
+        var asOf = new DateOnly(anchor.Value.Year, anchor.Value.Month, DateTime.DaysInMonth(anchor.Value.Year, anchor.Value.Month));
+
+        return rows
+            .Select(r => new { r.Store, r.HireDate, Manager = pick(r.Store) })
+            .Where(r => !string.IsNullOrWhiteSpace(r.Manager))
+            .GroupBy(r => r.Manager)
+            .Select(g => new ManagerTenureRow
+            {
+                Name = g.Key,
+                Stores = g.Select(x => x.Store).Distinct().Count(),
+                Headcount = g.Count(),
+                AvgTenureMonths = Math.Round(g.Average(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) / 30.44), 1),
+            })
+            .OrderByDescending(r => r.AvgTenureMonths)
+            .ToList();
+    }
+
+    /// <summary>How soon after being hired people who eventually resigned actually left —
+    /// e.g. "34% resigned within their first month" — all-time, so it always has enough
+    /// data to read even for a young company where long-term milestones don't yet.</summary>
+    public async Task<List<ChartDataItem>> GetTimeToFirstResignationDistributionAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null)
+    {
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var q = _db.Resignations.Where(r => r.HireDate != null && r.ResignationDate != null);
+        if (accessible != null) q = q.Where(r => accessible.Contains(r.Store));
+        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(r => stores.Contains(r.Store));
+        else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) q = q.Where(r => omOcStores.Contains(r.Store));
+        var tenures = await q.Select(r => r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber).ToListAsync();
+
+        return FirstResignationBuckets
+            .Select(b => new ChartDataItem { Label = b.Label, Value = tenures.Count(t => t >= b.MinDays && t < b.MaxDays) })
+            .ToList();
+    }
+
+    /// <summary>New hires per month, all-time (both still-active and since-resigned hires
+    /// count), for simple hiring-volume context alongside the retention charts above.</summary>
+    public async Task<List<ChartDataItem>> GetMonthlyHiringVolumeAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null)
+    {
+        var cohorts = await LoadEmployeeCohortsAsync(role, assignedName, om: om, oc: oc, soc: soc, od: od);
+        if (MultiValueFilter.Split(store) is { } stores) cohorts = cohorts.Where(c => stores.Contains(c.Store)).ToList();
+
+        return cohorts
+            .Where(c => !sinceYear.HasValue || c.CohortYear >= sinceYear.Value)
+            .GroupBy(c => new { c.CohortMonth, c.CohortYear })
+            .Select(g => new { g.Key.CohortMonth, g.Key.CohortYear, Count = g.Count() })
+            .OrderBy(x => x.CohortYear).ThenBy(x => x.CohortMonth)
+            .Select(x => new ChartDataItem { Label = new DateOnly(x.CohortYear, x.CohortMonth, 1).ToString("MMM yy"), Value = x.Count })
+            .ToList();
+    }
 }

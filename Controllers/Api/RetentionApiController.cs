@@ -109,6 +109,53 @@ public class RetentionApiController : ControllerBase
         return Ok(await _retention.GetStoreRetentionRankingAsync(store, role, assignedName, om, oc, soc, od, month, year));
     }
 
+    [HttpGet("by-job-title")]
+    public async Task<IActionResult> ByJobTitle([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetRetentionByJobTitleAsync(store, role, assignedName, om, oc, soc, od, month, year));
+    }
+
+    [HttpGet("by-gender")]
+    public async Task<IActionResult> ByGender([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetGenderRetentionAsync(store, role, assignedName, om, oc, soc, od, month, year));
+    }
+
+    [HttpGet("average-tenure-by-store")]
+    public async Task<IActionResult> AverageTenureByStore([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetAverageTenureByStoreAsync(store, role, assignedName, om, oc, soc, od, month, year));
+    }
+
+    [HttpGet("average-tenure-by-manager")]
+    public async Task<IActionResult> AverageTenureByManager([FromQuery] string dimension, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetAverageTenureByManagerAsync(dimension, role, assignedName, month, year));
+    }
+
+    [HttpGet("time-to-first-resignation")]
+    public async Task<IActionResult> TimeToFirstResignation([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetTimeToFirstResignationDistributionAsync(store, role, assignedName, om, oc, soc, od));
+    }
+
+    [HttpGet("monthly-hiring-volume")]
+    public async Task<IActionResult> MonthlyHiringVolume([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? sinceYear)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetMonthlyHiringVolumeAsync(store, role, assignedName, om, oc, soc, od, sinceYear));
+    }
+
     [HttpGet("senior-operation-consultants")]
     public async Task<IActionResult> SeniorOperationConsultants()
     {

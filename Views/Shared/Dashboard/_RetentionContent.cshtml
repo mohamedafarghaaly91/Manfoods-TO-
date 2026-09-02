@@ -193,6 +193,168 @@
             </table>
         </div>
     </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="section-accent"></div>
+        <h5 class="mb-0 fw-bold">@L["Retention_ByJobTitleGender"]</h5>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtJobTitleTitle">@L["Retention_ByJobTitle"]</h6><p>@L["Retention_ByJobTitleSub"]</p></div>
+                <div class="chart-body"><canvas id="rtJobTitleChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtGenderTitle">@L["Retention_ByGender"]</h6><p>@L["Retention_ByGenderSub"]</p></div>
+                <div class="chart-body"><canvas id="rtGenderChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="section-accent"></div>
+        <h5 class="mb-0 fw-bold">@L["Retention_ByOcOm"]</h5>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card p-0 h-100 d-flex flex-column" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.22 22)"><i class="bi bi-person-badge"></i></span>
+                    <div><h6 class="mb-0" id="rtOcTitle">@L["Common_OperationConsultants"]</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                </div>
+                <div class="table-responsive" style="flex:1;overflow-y:auto">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Headcount</th>
+                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rtOcTableBody">
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 d-flex flex-column gap-3">
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
+                    <div><h6 class="mb-0" id="rtOdTitle">Operation Directors</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255)">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Headcount</th>
+                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rtOdTableBody">
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
+                    <div><h6 class="mb-0" id="rtOmTitle">Operation Managers</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255)">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Headcount</th>
+                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rtOmTableBody">
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.16 25)"></div>Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-card p-0" style="overflow:hidden">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
+                    <div><h6 class="mb-0" id="rtSocMgrTitle">Senior Operation Consultants</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:oklch(0.965 0.008 255)">
+                            <tr>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2 text-center">Stores</th>
+                                <th class="px-3 py-2 text-center">Headcount</th>
+                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rtSocMgrTableBody">
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtStoreTenureTopTitle">@L["Retention_StoreTenureTop"]</h6><p>@L["Retention_StoreTenureTopSub"]</p></div>
+                <div class="chart-body"><canvas id="rtStoreTenureTopChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtStoreTenureBottomTitle">@L["Retention_StoreTenureBottom"]</h6><p>@L["Retention_StoreTenureBottomSub"]</p></div>
+                <div class="chart-body"><canvas id="rtStoreTenureBottomChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtOcTenureTopTitle">@L["Retention_OcTenureTop"]</h6><p>@L["Retention_OcTenureTopSub"]</p></div>
+                <div class="chart-body"><canvas id="rtOcTenureTopChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtOcTenureBottomTitle">@L["Retention_OcTenureBottom"]</h6><p>@L["Retention_OcTenureBottomSub"]</p></div>
+                <div class="chart-body"><canvas id="rtOcTenureBottomChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="section-accent"></div>
+        <h5 class="mb-0 fw-bold">@L["Retention_MoreContext"]</h5>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtFirstResignTitle">@L["Retention_TimeToFirstResign"]</h6><p>@L["Retention_TimeToFirstResignSub"]</p></div>
+                <div class="chart-body"><canvas id="rtFirstResignChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card h-100">
+                <div class="chart-header"><h6 id="rtHiringVolumeTitle">@L["Retention_HiringVolume"]</h6><p>@L["Retention_HiringVolumeSub"]</p></div>
+                <div class="chart-body"><canvas id="rtHiringVolumeChart"></canvas></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -553,6 +715,171 @@ async function rtLoadTenureByStore() {
     rtRenderTenureTable(r.ok ? await r.json() : []);
 }
 
+/* ── Retention by Job Title / Gender — same plain "% of current team past 6
+   months" logic as the KPI cards, just sliced a different way. ─────────── */
+function rtFilterQuery() {
+    const q = new URLSearchParams();
+    if (rtStoreFilter) q.set('store', rtStoreFilter);
+    if (rtOmFilter)    q.set('om', rtOmFilter);
+    if (rtOcFilter)    q.set('oc', rtOcFilter);
+    if (rtSocFilter)   q.set('soc', rtSocFilter);
+    if (rtOdFilter)    q.set('od', rtOdFilter);
+    return q;
+}
+
+function rtRenderPctBarChart(canvasId, existing, data, colors) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return existing;
+    if (existing) existing.destroy();
+    return new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: colors || ChartColors.colorsByLabel(data.map(d => d.label), null), borderRadius: 4, maxBarThickness: 30 }] },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue}% still on the job after 6 months` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' }
+            },
+            scales: {
+                x: { min: 0, max: 100, grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)', callback: v => v + '%' } },
+                y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } }
+            }
+        }
+    });
+}
+
+let rtJobTitleInstance;
+async function rtLoadJobTitleChart() {
+    const r = await fetch(`/api/retention/by-job-title?${rtFilterQuery().toString()}`);
+    const data = r.ok ? await r.json() : [];
+    rtJobTitleInstance = rtRenderPctBarChart('rtJobTitleChart', rtJobTitleInstance, data);
+}
+
+let rtGenderInstance;
+async function rtLoadGenderChart() {
+    const r = await fetch(`/api/retention/by-gender?${rtFilterQuery().toString()}`);
+    const data = r.ok ? await r.json() : [];
+    rtGenderInstance = rtRenderPctBarChart('rtGenderChart', rtGenderInstance, data, ChartColors.colorsByLabel(data.map(d => d.label), ChartColors.GENDER_COLORS));
+}
+
+/* ── Average Tenure by Operation Consultant & Manager — same table shape as
+   the "By Operation Consultant & Manager" section on other pages, but the
+   metric is average tenure of the current team instead of turnover. ────── */
+function rtRenderManagerTenureRows(tbodyId, rows) {
+    const tbody = document.getElementById(tbodyId);
+    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No data.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `<tr>
+        <td class="px-3 py-2 fw-semibold">${r.name}</td>
+        <td class="px-3 py-2 text-center">${r.stores}</td>
+        <td class="px-3 py-2 text-center">${r.headcount}</td>
+        <td class="px-3 py-2 text-center fw-semibold">${r.avgTenureMonths.toFixed(1)} mo</td>
+    </tr>`).join('');
+}
+
+async function rtLoadManagerTenureTable() {
+    const [oc, od, om, soc] = await Promise.all(['oc', 'od', 'om', 'soc'].map(dim =>
+        fetch(`/api/retention/average-tenure-by-manager?dimension=${dim}`).then(r => r.ok ? r.json() : [])
+    ));
+    rtRenderManagerTenureRows('rtOcTableBody', oc);
+    rtRenderManagerTenureRows('rtOdTableBody', od);
+    rtRenderManagerTenureRows('rtOmTableBody', om);
+    rtRenderManagerTenureRows('rtSocMgrTableBody', soc);
+    return oc;
+}
+
+/* ── Best/Worst 5 by average tenure — store and Operation Consultant. ────── */
+function rtRenderTenureRankChart(canvasId, existing, data, color) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return existing;
+    if (existing) existing.destroy();
+    return new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: color, borderRadius: 4, maxBarThickness: 30 }] },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.formattedValue} months on average` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v + ' mo' : '' }
+            },
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)' } },
+                y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } }
+            }
+        }
+    });
+}
+
+let rtStoreTenureTopInstance, rtStoreTenureBottomInstance;
+async function rtLoadStoreTenureCharts() {
+    const r = await fetch(`/api/retention/average-tenure-by-store?${rtFilterQuery().toString()}`);
+    const data = r.ok ? await r.json() : [];
+    rtStoreTenureTopInstance = rtRenderTenureRankChart('rtStoreTenureTopChart', rtStoreTenureTopInstance, data.slice(0, 5), ChartColors.SEMANTIC.GOOD);
+    rtStoreTenureBottomInstance = rtRenderTenureRankChart('rtStoreTenureBottomChart', rtStoreTenureBottomInstance, data.slice(-5).reverse(), ChartColors.SEMANTIC.BAD);
+}
+
+let rtOcTenureTopInstance, rtOcTenureBottomInstance;
+async function rtLoadOcTenureCharts(ocRows) {
+    const data = (ocRows || []).map(r => ({ label: r.name, value: r.avgTenureMonths }));
+    rtOcTenureTopInstance = rtRenderTenureRankChart('rtOcTenureTopChart', rtOcTenureTopInstance, data.slice(0, 5), ChartColors.SEMANTIC.GOOD);
+    rtOcTenureBottomInstance = rtRenderTenureRankChart('rtOcTenureBottomChart', rtOcTenureBottomInstance, data.slice(-5).reverse(), ChartColors.SEMANTIC.BAD);
+}
+
+/* ── How soon people leave, and how much hiring is happening — both always
+   full history, so they read clearly even for a young company. ─────────── */
+let rtFirstResignInstance;
+async function rtLoadFirstResignationChart() {
+    const r = await fetch(`/api/retention/time-to-first-resignation?${rtFilterQuery().toString()}`);
+    const data = r.ok ? await r.json() : [];
+    const total = data.reduce((s, d) => s + d.value, 0);
+    const ctx = document.getElementById('rtFirstResignChart');
+    if (!ctx) return;
+    if (rtFirstResignInstance) rtFirstResignInstance.destroy();
+    rtFirstResignInstance = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(data.map(d => d.label), null), borderRadius: 6, maxBarThickness: 46 }] },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.formattedValue} resignation(s) (${total > 0 ? (c.parsed.y / total * 100).toFixed(0) : 0}% of all resignations)` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v : '' }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } },
+                y: { beginAtZero: true, ticks: { color: 'oklch(0.5 0.03 258)', precision: 0 }, grid: { color: 'oklch(0.92 0.008 255)' } }
+            }
+        }
+    });
+}
+
+let rtHiringVolumeInstance;
+async function rtLoadHiringVolumeChart() {
+    const q = rtFilterQuery();
+    if (rtYear) q.set('sinceYear', rtYear);
+    const r = await fetch(`/api/retention/monthly-hiring-volume?${q.toString()}`);
+    const data = r.ok ? await r.json() : [];
+    const ctx = document.getElementById('rtHiringVolumeChart');
+    if (!ctx) return;
+    if (rtHiringVolumeInstance) rtHiringVolumeInstance.destroy();
+    rtHiringVolumeInstance = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), borderColor: 'oklch(0.5 0.18 25)', backgroundColor: 'oklch(0.5 0.18 25 / .12)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 6 }] },
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.formattedValue} new hire(s)` } },
+                datalabels: { display: false }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } },
+                y: { beginAtZero: true, ticks: { color: 'oklch(0.5 0.03 258)', precision: 0 }, grid: { color: 'oklch(0.92 0.008 255)' } }
+            }
+        }
+    });
+}
+
 function rtRenderInsights(items) {
     const el = document.getElementById('rtInsights');
     if (!items || !items.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">No insights available yet — upload more periods of data to enable trend analysis.</div>'; return; }
@@ -584,7 +911,13 @@ async function rtLoadInsights() {
 
 async function rtLoadAll() {
     if (!rtYear || !rtMonths.length) return;
-    await Promise.all([rtLoadMilestones(), rtLoadSurvivalCurve(), rtLoadLeaderboard(), rtLoadTenureByStore(), rtLoadInsights()]);
+    const [ocRows] = await Promise.all([
+        rtLoadManagerTenureTable(),
+        rtLoadMilestones(), rtLoadSurvivalCurve(), rtLoadLeaderboard(), rtLoadTenureByStore(), rtLoadInsights(),
+        rtLoadJobTitleChart(), rtLoadGenderChart(), rtLoadStoreTenureCharts(),
+        rtLoadFirstResignationChart(), rtLoadHiringVolumeChart(),
+    ]);
+    await rtLoadOcTenureCharts(ocRows);
 }
 
 (async function init() {

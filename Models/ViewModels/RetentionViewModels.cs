@@ -37,3 +37,13 @@ public class StoreTenureRow
     public int Headcount { get; set; }
     public List<ChartDataItem> Buckets { get; set; } = new();
 }
+
+/// <summary>Average tenure of the current active team under one manager/consultant,
+/// same shape as the "By Operation Consultant & Manager" tables on other pages.</summary>
+public class ManagerTenureRow
+{
+    public string Name { get; set; } = "";
+    public int Stores { get; set; }
+    public int Headcount { get; set; }
+    public double AvgTenureMonths { get; set; }
+}

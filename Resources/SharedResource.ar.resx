@@ -354,6 +354,26 @@
   <data name="Retention_LeaderboardTopSub" xml:space="preserve"><value>أعلى نسبة فريق مكمل 6 شهور فأكتر</value></data>
   <data name="Retention_LeaderboardBottom" xml:space="preserve"><value>أسوأ 5 فروع في الاحتفاظ</value></data>
   <data name="Retention_LeaderboardBottomSub" xml:space="preserve"><value>أقل نسبة فريق مكمل 6 شهور فأكتر</value></data>
+  <data name="Retention_ByJobTitleGender" xml:space="preserve"><value>حسب المسمى الوظيفي والنوع</value></data>
+  <data name="Retention_ByJobTitle" xml:space="preserve"><value>الاحتفاظ حسب المسمى الوظيفي</value></data>
+  <data name="Retention_ByJobTitleSub" xml:space="preserve"><value>% من فريق كل وظيفة مكمل 6 شهور فأكتر</value></data>
+  <data name="Retention_ByGender" xml:space="preserve"><value>الاحتفاظ حسب النوع</value></data>
+  <data name="Retention_ByGenderSub" xml:space="preserve"><value>% من الفريق الحالي مكمل 6 شهور فأكتر، حسب النوع</value></data>
+  <data name="Retention_ByOcOm" xml:space="preserve"><value>حسب المسؤول — متوسط مدة الخدمة</value></data>
+  <data name="Retention_RankedByTenure" xml:space="preserve"><value>مرتبة حسب متوسط مدة خدمة الفريق الحالي</value></data>
+  <data name="Retention_StoreTenureTop" xml:space="preserve"><value>أفضل 5 فروع في متوسط مدة الخدمة</value></data>
+  <data name="Retention_StoreTenureTopSub" xml:space="preserve"><value>أعلى متوسط شهور خدمة للفريق الحالي</value></data>
+  <data name="Retention_StoreTenureBottom" xml:space="preserve"><value>أقل 5 فروع في متوسط مدة الخدمة</value></data>
+  <data name="Retention_StoreTenureBottomSub" xml:space="preserve"><value>أقل متوسط شهور خدمة للفريق الحالي</value></data>
+  <data name="Retention_OcTenureTop" xml:space="preserve"><value>أفضل 5 مستشاري عمليات في متوسط مدة الخدمة</value></data>
+  <data name="Retention_OcTenureTopSub" xml:space="preserve"><value>أعلى متوسط شهور خدمة للفريق الحالي</value></data>
+  <data name="Retention_OcTenureBottom" xml:space="preserve"><value>أقل 5 مستشاري عمليات في متوسط مدة الخدمة</value></data>
+  <data name="Retention_OcTenureBottomSub" xml:space="preserve"><value>أقل متوسط شهور خدمة للفريق الحالي</value></data>
+  <data name="Retention_MoreContext" xml:space="preserve"><value>معلومات إضافية</value></data>
+  <data name="Retention_TimeToFirstResign" xml:space="preserve"><value>الاستقالة بتحصل بعد كام؟</value></data>
+  <data name="Retention_TimeToFirstResignSub" xml:space="preserve"><value>كل اللي استقالوا يومًا، كانوا شغالين قد إيه — عبر كل الفترات</value></data>
+  <data name="Retention_HiringVolume" xml:space="preserve"><value>حجم التوظيف الشهري</value></data>
+  <data name="Retention_HiringVolumeSub" xml:space="preserve"><value>عدد التعيينات الجديدة كل شهر — للمساعدة فى فهم الشارتس اللى فوق</value></data>
   <data name="Chart_SurvivalCurve" xml:space="preserve"><value>منحنى مدة الخدمة</value></data>
   <data name="Chart_SurvivalCurveSub" xml:space="preserve"><value>% من الفريق الشغال حاليًا اللي مكمل المدة دي أو أكتر</value></data>
   <data name="Chart_StoreLeaderboard" xml:space="preserve"><value>تصنيف الفروع</value></data>
