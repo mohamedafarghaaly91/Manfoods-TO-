@@ -355,7 +355,7 @@ public class UploadService : IUploadService
         string Get(IXLRow row, string header) =>
             headerMap.TryGetValue(NormalizeHeader(header), out var col) ? row.Cell(col).GetString().Trim() : "";
 
-        var parsed = new List<(string ResponseId, string EmployeeId, ExitInterview Row)>();
+        var parsed = new List<(string ResponseId, string EmployeeId, DateTime? Completed, ExitInterview Row)>();
 
         foreach (var row in ws.RowsUsed().Skip(1))
         {
@@ -399,8 +399,8 @@ public class UploadService : IUploadService
                 // been uploaded yet.
                 Store = Get(row, "اسم المطعم"),
                 SubmittedAt = completed,
-                Month = completed?.Month ?? 0,
-                Year = completed?.Year ?? 0,
+                // Month/Year are set below, after the resignation-date lookup
+                // (Resignation date -> Completion time -> Start time priority).
 
                 ReasonForLeaving = Get(row, "برجاء اختيار سبب ترك العمل"),
                 ReasonOtherText = NullIfEmpty(Get(row, "فى حالة وجود سبب اخر ( الرجاء ذكره )")),
@@ -423,10 +423,10 @@ public class UploadService : IUploadService
                 FinalCommentsText = NullIfEmpty(Get(row, "هل هناك أي شيء ترغب في مشاركته معنا قبل مغادرتك؟")),
             };
 
-            parsed.Add((responseId, employeeId, interview));
+            parsed.Add((responseId, employeeId, completed, interview));
         }
 
-        // Job Title still comes from the employee's most recent resignation record
+        // Job Title comes from the employee's most recent resignation record
         // (best-effort only — a miss here just leaves JobTitle blank, it no longer
         // affects Store/StoreLeader/OC/OM at all).
         var employeeIds = parsed.Where(p => !string.IsNullOrWhiteSpace(p.EmployeeId)).Select(p => p.EmployeeId).Distinct().ToList();
@@ -439,16 +439,35 @@ public class UploadService : IUploadService
 
         // Store Leader / OC / OM are resolved from the Store column itself — the
         // store reference closest to (or, failing that, the latest known as of)
-        // the interview's own completion period.
+        // the interview's own resolved period.
         var storeNames = parsed.Where(p => !string.IsNullOrWhiteSpace(p.Row.Store)).Select(p => p.Row.Store).Distinct().ToList();
         var storeRefs = storeNames.Count == 0
             ? new List<StoreReference>()
             : await _db.StoreReferences.Where(s => storeNames.Contains(s.StoreName)).ToListAsync();
 
-        foreach (var (_, employeeId, interview) in parsed)
+        foreach (var (_, employeeId, completed, interview) in parsed)
         {
-            if (!string.IsNullOrWhiteSpace(employeeId) && resignationByEmployee.TryGetValue(employeeId, out var res))
-                interview.JobTitle = res.JobTitle;
+            // Month/Year priority: the employee's actual resignation date (most
+            // accurate) -> the form's Completion time -> its Start time. Falls
+            // back to 0/0 (the "undated" sentinel) only when none of the three
+            // is available.
+            Resignation? res = null;
+            if (!string.IsNullOrWhiteSpace(employeeId) && resignationByEmployee.TryGetValue(employeeId, out var r))
+            {
+                res = r;
+                interview.JobTitle = r.JobTitle;
+            }
+
+            if (res?.ResignationDate is { } resignDate)
+            {
+                interview.Month = resignDate.Month;
+                interview.Year = resignDate.Year;
+            }
+            else if (completed.HasValue)
+            {
+                interview.Month = completed.Value.Month;
+                interview.Year = completed.Value.Year;
+            }
 
             if (string.IsNullOrWhiteSpace(interview.Store)) continue;
 
