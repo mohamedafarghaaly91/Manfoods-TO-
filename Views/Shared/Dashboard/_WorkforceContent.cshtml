@@ -120,7 +120,7 @@
 </div>
 <div class="row g-3">
     <div class="col-lg-6">
-        <div class="chart-card p-0 h-100" style="overflow:hidden">
+        <div class="chart-card p-0" style="overflow:hidden">
             <div class="chart-header stat-card-header">
                 <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 25)"><i class="bi bi-person-badge"></i></span>
                 <div><h6 class="mb-0" id="wfOcTitle">@L["Common_OperationConsultants"]</h6><p class="mb-0">@L["Common_Headcount"] &amp; @L["Common_TurnoverPct"] by consultant</p></div>
@@ -347,7 +347,7 @@ async function wfLoadHeadcountTrend() {
             },
             // beginAtZero so a modest real change in headcount doesn't read as a
             // dramatic climb just because the axis auto-scaled to a narrow range.
-            scales: { x: { grid: { display: false }, ticks: { color: '#5B5875' } }, y: { beginAtZero: true, grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875' } } }
+            scales: { x: { grid: { display: false }, ticks: { color: '#5B5875' } }, y: { beginAtZero: true, grid: { color: '#E4E2F5' }, ticks: { color: '#5B5875', stepSize: 200 } } }
         }
     });
 }
