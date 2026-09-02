@@ -306,10 +306,10 @@
                     <th class="cmp-sort px-3 py-2" data-col="store" style="cursor:pointer">@L["Common_StoreName"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     <th class="cmp-sort px-3 py-2 text-center" data-col="ta" style="cursor:pointer">Turnover% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     <th class="cmp-sort px-3 py-2 text-center" data-col="tb" style="cursor:pointer">Turnover% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="dt" style="cursor:pointer">Δ <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dt" style="cursor:pointer" title="Difference: Turnover% A − Turnover% B">Δ (A−B) <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     <th class="cmp-sort px-3 py-2 text-center" data-col="na" style="cursor:pointer">90-Day% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     <th class="cmp-sort px-3 py-2 text-center" data-col="nb" style="cursor:pointer">90-Day% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="dn" style="cursor:pointer">Δ <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dn" style="cursor:pointer" title="Difference: 90-Day% A − 90-Day% B">Δ (A−B) <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                 </tr>
             </thead>
             <tbody id="cmpTableBody">
@@ -622,7 +622,11 @@ function cmpInsightCard(metric, aVal, bVal) {
                 : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
     const title = flat ? `${metric}: No Change` : `${metric} ${improved ? 'Improved' : 'Worsened'}`;
     const desc = `<b>${cmpLabel('A')}</b>: ${aVal.toFixed(1)}% vs <b>${cmpLabel('B')}</b>: ${bVal.toFixed(1)}% — ${flat ? 'essentially unchanged' : `${improved ? '↓' : '↑'} ${Math.abs(delta).toFixed(1)}pt ${improved ? 'better' : 'worse'}`}.`;
-    return `<div class="col-md-6">
+    return cmpInsightCardHtml(icon, color, title, desc);
+}
+
+function cmpInsightCardHtml(icon, color, title, desc) {
+    return `<div class="col-md-4">
         <div style="background:${color.bg};border-left:4px solid ${color.border};border-radius:8px;padding:14px 16px;height:100%">
             <div class="d-flex align-items-start gap-2">
                 <i class="bi ${icon} mt-1 flex-shrink-0" style="color:${color.text};font-size:17px"></i>
@@ -635,10 +639,29 @@ function cmpInsightCard(metric, aVal, bVal) {
     </div>`;
 }
 
+/* Third insight: whichever store moved the most (either direction) in
+   Turnover Rate between A and B — only meaningful company-wide, same
+   guard as the Store Breakdown table below. */
+function cmpMoverInsightCard(dataA, dataB) {
+    if (panels.A.store || panels.B.store) return '';
+    const rows = cmpComputeTableRows(dataA, dataB).filter(r => r.dt !== null);
+    if (!rows.length) return '';
+    const biggest = rows.reduce((m, r) => Math.abs(r.dt) > Math.abs(m.dt) ? r : m);
+    if (Math.abs(biggest.dt) < 0.05) return '';
+    const improved = biggest.dt <= 0;
+    const icon  = improved ? 'bi-trophy-fill' : 'bi-exclamation-triangle-fill';
+    const color = improved ? { bg: '#f0fff4', border: '#198754', text: '#198754' }
+                            : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
+    const title = `Most ${improved ? 'Improved' : 'Worsened'} Store: ${biggest.store}`;
+    const desc = `Turnover ${biggest.ta.toFixed(1)}% (${cmpLabel('A')}) vs ${biggest.tb.toFixed(1)}% (${cmpLabel('B')}) — ${improved ? '↓' : '↑'} ${Math.abs(biggest.dt).toFixed(1)}pt.`;
+    return cmpInsightCardHtml(icon, color, title, desc);
+}
+
 function cmpRenderInsight(dataA, dataB) {
     document.getElementById('cmpInsightContainer').innerHTML =
         cmpInsightCard('Turnover Rate', dataA.kpi.turnoverRate, dataB.kpi.turnoverRate) +
-        cmpInsightCard('90-Day Rate', dataA.ninety.rate, dataB.ninety.rate);
+        cmpInsightCard('90-Day Rate', dataA.ninety.rate, dataB.ninety.rate) +
+        cmpMoverInsightCard(dataA, dataB);
 }
 
 let cmpTurnoverChart, cmpNinetyChart;
@@ -690,11 +713,7 @@ let cmpTableRows = [];
 let cmpTableSortCol = 'store', cmpTableSortAsc = true;
 let cmpTurnoverColorRules = null, cmpNinetyColorRules = null;
 
-function cmpRenderTable(dataA, dataB) {
-    const card = document.getElementById('cmpTableCard');
-    if (panels.A.store || panels.B.store) { card.style.display = 'none'; return; }
-    card.style.display = '';
-
+function cmpComputeTableRows(dataA, dataB) {
     const turnoverA = {}, turnoverB = {}, ninetyA = {}, ninetyB = {};
     dataA.byStore.forEach(r => turnoverA[r.storeName] = r.turnoverRate);
     dataB.byStore.forEach(r => turnoverB[r.storeName] = r.turnoverRate);
@@ -702,7 +721,7 @@ function cmpRenderTable(dataA, dataB) {
     dataB.ninetyByStore.forEach(r => ninetyB[r.label] = r.value);
 
     const stores = Array.from(new Set([...Object.keys(turnoverA), ...Object.keys(turnoverB)]));
-    cmpTableRows = stores.map(s => {
+    return stores.map(s => {
         const ta = turnoverA[s], tb = turnoverB[s], na = ninetyA[s], nb = ninetyB[s];
         return {
             store: s, ta, tb, na, nb,
@@ -710,6 +729,14 @@ function cmpRenderTable(dataA, dataB) {
             dn: (na !== undefined && nb !== undefined) ? na - nb : null,
         };
     });
+}
+
+function cmpRenderTable(dataA, dataB) {
+    const card = document.getElementById('cmpTableCard');
+    if (panels.A.store || panels.B.store) { card.style.display = 'none'; return; }
+    card.style.display = '';
+
+    cmpTableRows = cmpComputeTableRows(dataA, dataB);
     cmpRenderTableRows();
 }
 
