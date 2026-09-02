@@ -43,6 +43,17 @@ builder.Services.AddRateLimiter(options =>
     });
 
     options.RejectionStatusCode = 429;
+
+    // Default rejection is a bare 429 with no body, which on the login
+    // page looks exactly like the form silently doing nothing. Show a
+    // visible message instead (fine to be this specific — single-admin
+    // app, raw technical errors are OK to surface directly in the UI).
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.ContentType = "text/plain";
+        await context.HttpContext.Response.WriteAsync(
+            "Too many attempts — rate limit exceeded. Please wait about a minute and try again.", token);
+    };
 });
 
 builder.Services.AddDistributedMemoryCache();
