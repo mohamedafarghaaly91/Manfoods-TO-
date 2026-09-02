@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<StoreActionPlan> StoreActionPlans { get; set; }
     public DbSet<ActionPlanRecommendation> ActionPlanRecommendations { get; set; }
     public DbSet<ActionPlanNote> ActionPlanNotes { get; set; }
+    public DbSet<ActionPlanMetricSnapshot> ActionPlanMetricSnapshots { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

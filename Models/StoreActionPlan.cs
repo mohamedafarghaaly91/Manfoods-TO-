@@ -62,4 +62,23 @@ public class StoreActionPlan
 
     [Column("last_evaluated_year")]
     public int? LastEvaluatedYear { get; set; }
+
+    // ── Action Center: ownership, target date, and manual override ──────────
+    // All optional — the original detection/auto-resolve engine (and the
+    // legacy Store Action Plan page) never reads or writes these, so they're
+    // purely additive and safe alongside it.
+    [Column("assigned_to_name")]
+    public string? AssignedToName { get; set; }
+
+    [Column("target_resolution_date")]
+    public DateOnly? TargetResolutionDate { get; set; }
+
+    // Set only when an Admin manually closes a plan instead of letting the
+    // 2-clean-cycle auto-resolve rule do it — ResolvedReason becomes
+    // "Manual_Override" and this records who did it and why.
+    [Column("closed_by_name")]
+    public string? ClosedByName { get; set; }
+
+    [Column("manual_close_reason")]
+    public string? ManualCloseReason { get; set; }
 }

@@ -45,6 +45,10 @@ public class DashboardController : Controller
 
     public IActionResult StoreActionPlanDetail() => View();
 
+    public IActionResult ActionCenter() => View();
+
+    public IActionResult ActionCenterDetail() => View();
+
     public async Task<IActionResult> Reports()
     {
         var periods = await _dashboard.GetAvailablePeriodsAsync();

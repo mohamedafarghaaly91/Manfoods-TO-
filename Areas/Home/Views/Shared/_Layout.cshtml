@@ -106,6 +106,12 @@
                     <span class="nav-item-label">@L["Nav_StoreActionPlan"]</span>
                 </span>
             </a>
+            <a href="/home/dashboard/actioncenter" class="nav-item @((IsActive("ActionCenter") || IsActive("ActionCenterDetail")) ? "active" : "")">
+                <span class="nav-item-inner">
+                    <span class="nav-icon-wrap"><i class="bi bi-bullseye"></i></span>
+                    <span class="nav-item-label">@L["Nav_ActionCenter"]</span>
+                </span>
+            </a>
             <a href="/home/dashboard/stores" class="nav-item @(IsActive("Stores") ? "active" : "")">
                 <span class="nav-item-inner">
                     <span class="nav-icon-wrap"><i class="bi bi-shop"></i></span>

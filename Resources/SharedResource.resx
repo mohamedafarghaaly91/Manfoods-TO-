@@ -28,6 +28,7 @@
   <data name="Nav_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>
   <data name="Nav_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>Action Plans</value></data>
+  <data name="Nav_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
   <data name="Nav_Stores" xml:space="preserve"><value>Stores</value></data>
   <data name="SAP_LoadingStores" xml:space="preserve"><value>Loading stores…</value></data>
   <data name="SAP_Loading" xml:space="preserve"><value>Loading…</value></data>
@@ -307,6 +308,8 @@
   <data name="Page_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Page_ScorecardSub" xml:space="preserve"><value>Performance rankings across store leaders, consultants, and managers</value></data>
   <data name="Page_StoreActionPlans" xml:space="preserve"><value>Store Action Plans</value></data>
+  <data name="Page_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
+  <data name="Page_ActionCenterSub" xml:space="preserve"><value>Company-wide view of every store's turnover action plan — severity, ownership, progress, and outcomes in one place</value></data>
   <data name="Page_StoreActionPlansSub" xml:space="preserve"><value>Turnover action plans and follow-up notes, per store</value></data>
   <data name="Page_Stores" xml:space="preserve"><value>Stores</value></data>
   <data name="Page_StoresSub" xml:space="preserve"><value>Turnover health across every store</value></data>
@@ -586,4 +589,74 @@
   <data name="Ret_SurvivalCurveSub" xml:space="preserve"><value>Probability of an employee still being active after N days</value></data>
   <data name="Ret_NoMilestoneData" xml:space="preserve"><value>No milestone data yet</value></data>
   <data name="Ret_NoMilestoneDataSub" xml:space="preserve"><value>Upload data with hire dates to see retention milestones here.</value></data>
+  <data name="AC_Store" xml:space="preserve"><value>Store</value></data>
+  <data name="AC_ChartTopReasons" xml:space="preserve"><value>Top Issue Categories</value></data>
+  <data name="AC_ChartTopReasonsSub" xml:space="preserve"><value>Recommendation categories across all active plans</value></data>
+  <data name="AC_ChartByRegion" xml:space="preserve"><value>Active Plans by Operation Manager</value></data>
+  <data name="AC_ChartByRegionSub" xml:space="preserve"><value>Where active plans are concentrated</value></data>
+  <data name="AC_ChartTrend" xml:space="preserve"><value>Opened vs. Resolved (Last 6 Months)</value></data>
+  <data name="AC_ChartTrendSub" xml:space="preserve"><value>How many plans were opened vs. resolved each month</value></data>
+  <data name="AC_StoresTable" xml:space="preserve"><value>Stores</value></data>
+  <data name="AC_NoMatchingStores" xml:space="preserve"><value>No stores match your search.</value></data>
+  <data name="AC_SeverityCritical" xml:space="preserve"><value>Critical</value></data>
+  <data name="AC_SeverityHigh" xml:space="preserve"><value>High</value></data>
+  <data name="AC_SeverityMedium" xml:space="preserve"><value>Medium</value></data>
+  <data name="AC_SeverityLow" xml:space="preserve"><value>Low</value></data>
+  <data name="AC_SeverityNone" xml:space="preserve"><value>None</value></data>
+  <data name="AC_TrendImproving" xml:space="preserve"><value>Improving</value></data>
+  <data name="AC_TrendWorsening" xml:space="preserve"><value>Worsening</value></data>
+  <data name="AC_TrendFlat" xml:space="preserve"><value>Flat</value></data>
+  <data name="AC_TrendNew" xml:space="preserve"><value>New</value></data>
+  <data name="AC_Chronic" xml:space="preserve"><value>Chronic</value></data>
+  <data name="AC_Stalled" xml:space="preserve"><value>Stalled</value></data>
+  <data name="AC_Severity" xml:space="preserve"><value>Severity</value></data>
+  <data name="AC_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="AC_Age" xml:space="preserve"><value>Age</value></data>
+  <data name="AC_Trend" xml:space="preserve"><value>Trend</value></data>
+  <data name="AC_Progress" xml:space="preserve"><value>Progress</value></data>
+  <data name="AC_AssignedTo" xml:space="preserve"><value>Assigned To</value></data>
+  <data name="AC_Flags" xml:space="preserve"><value>Flags</value></data>
+  <data name="AC_KpiActive" xml:space="preserve"><value>Active Plans</value></data>
+  <data name="AC_KpiActiveDesc" xml:space="preserve"><value>Stores currently under an active action plan</value></data>
+  <data name="AC_KpiCritical" xml:space="preserve"><value>Critical</value></data>
+  <data name="AC_KpiCriticalDesc" xml:space="preserve"><value>Active plans with 3+ distinct issues detected</value></data>
+  <data name="AC_KpiStalled" xml:space="preserve"><value>Stalled</value></data>
+  <data name="AC_KpiStalledDesc" xml:space="preserve"><value>Active 45+ days with no completed tasks</value></data>
+  <data name="AC_KpiChronic" xml:space="preserve"><value>Chronic Stores</value></data>
+  <data name="AC_KpiChronicDesc" xml:space="preserve"><value>Stores that have had more than one action plan</value></data>
+  <data name="AC_KpiResolvedMonth" xml:space="preserve"><value>Resolved This Month</value></data>
+  <data name="AC_KpiResolvedMonthDesc" xml:space="preserve"><value>Plans closed (auto or manually) this calendar month</value></data>
+  <data name="AC_KpiAvgDays" xml:space="preserve"><value>Avg. Days to Resolve</value></data>
+  <data name="AC_KpiAvgDaysDesc" xml:space="preserve"><value>Average time from plan creation to resolution</value></data>
+  <data name="AC_InsightAllClearTitle" xml:space="preserve"><value>All Clear</value></data>
+  <data name="AC_InsightAllClearDesc" xml:space="preserve"><value>No stores currently have an active action plan.</value></data>
+  <data name="AC_InsightCriticalTitle" xml:space="preserve"><value>Critical Stores Need Attention</value></data>
+  <data name="AC_InsightCriticalDesc" xml:space="preserve"><value>store(s) have 3+ issues detected at once and need priority follow-up.</value></data>
+  <data name="AC_InsightStalledTitle" xml:space="preserve"><value>Stalled Plans</value></data>
+  <data name="AC_InsightStalledDesc" xml:space="preserve"><value>plan(s) have been open 45+ days with no completed tasks — check in with the owner.</value></data>
+  <data name="AC_InsightTopReasonTitle" xml:space="preserve"><value>Most Common Issue</value></data>
+  <data name="AC_InsightTopReasonDesc" xml:space="preserve"><value>appears in {0} active plan(s) — the most common issue category right now.</value></data>
+  <data name="AC_InsightTopRegionTitle" xml:space="preserve"><value>Region Needing Focus</value></data>
+  <data name="AC_InsightTopRegionDesc" xml:space="preserve"><value>has {0} active plan(s) — more than any other Operation Manager's stores.</value></data>
+  <data name="AC_InsightChronicTitle" xml:space="preserve"><value>Repeat Problem Stores</value></data>
+  <data name="AC_InsightChronicDesc" xml:space="preserve"><value>store(s) have had more than one action plan — worth a deeper root-cause review.</value></data>
+  <data name="AC_NoInsights" xml:space="preserve"><value>Nothing stands out right now.</value></data>
+  <data name="AC_TrendOpened" xml:space="preserve"><value>Opened</value></data>
+  <data name="AC_TrendResolved" xml:space="preserve"><value>Resolved</value></data>
+  <data name="AC_NoChange" xml:space="preserve"><value>No change</value></data>
+  <data name="AC_PlansOverTime" xml:space="preserve"><value>plans over time</value></data>
+  <data name="AC_ProgressTitle" xml:space="preserve"><value>Progress</value></data>
+  <data name="AC_MetricTrendTitle" xml:space="preserve"><value>Metric Trend Since Plan Opened</value></data>
+  <data name="AC_AssignmentTitle" xml:space="preserve"><value>Ownership &amp; Target Date</value></data>
+  <data name="AC_TargetDate" xml:space="preserve"><value>Target Resolution Date</value></data>
+  <data name="AC_Saved" xml:space="preserve"><value>Saved.</value></data>
+  <data name="AC_ManualCloseTitle" xml:space="preserve"><value>Manually Close This Plan</value></data>
+  <data name="AC_ManualCloseDesc" xml:space="preserve"><value>Are you sure you want to close this plan? This should only be done if the issue is resolved outside the normal detection cycle.</value></data>
+  <data name="AC_ManualClosePlaceholder" xml:space="preserve"><value>Reason for closing this plan…</value></data>
+  <data name="AC_ManualCloseBtn" xml:space="preserve"><value>Close Plan</value></data>
+  <data name="AC_ManualCloseReasonRequired" xml:space="preserve"><value>A reason is required to close the plan.</value></data>
+  <data name="AC_ClosedBy" xml:space="preserve"><value>Closed By</value></data>
+  <data name="AC_ClosedReason" xml:space="preserve"><value>Closing Reason</value></data>
+  <data name="AC_CompletedBy" xml:space="preserve"><value>Completed by</value></data>
+  <data name="AC_ChronicNote" xml:space="preserve"><value>This store has had more than one action plan over time.</value></data>
 </root>

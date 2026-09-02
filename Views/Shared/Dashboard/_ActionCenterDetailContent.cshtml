@@ -1,0 +1,458 @@
+@{
+    var __area = ViewContext.RouteData.Values["area"]?.ToString();
+    var __areaPrefix = string.Equals(__area, "Home", StringComparison.OrdinalIgnoreCase) ? "/home" : "/admin";
+}
+<style>
+.acd-back-btn { display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; color:var(--text-2); text-decoration:none; margin-bottom:14px; }
+.acd-back-btn:hover { color:var(--red); }
+.acd-back-btn i { font-size:12px; }
+[dir="rtl"] .acd-back-btn i { transform:scaleX(-1); }
+.acd-kpi-label { font-size:11px; color:var(--text-3); }
+.acd-kpi-value { font-size:22px; font-weight:700; margin-top:2px; }
+.acd-kpi-delta { font-size:11.5px; margin-top:2px; font-weight:600; }
+.acd-meta-label { font-size:11px; color:var(--text-3); }
+.acd-rec-item { display:flex; align-items:flex-start; gap:10px; border-left:3px solid var(--red); padding:10px 12px; background:var(--card-bg-2); border-radius:8px; }
+.acd-rec-item.acd-rec-done { border-left-color:oklch(0.62 0.15 155); opacity:0.7; }
+.acd-rec-category { font-size:10.5px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; font-weight:700; }
+.acd-rec-text.done { text-decoration:line-through; color:var(--text-3); }
+.acd-note-item { border-bottom:1px solid var(--card-border); padding-bottom:10px; }
+.acd-badge { padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; display:inline-block; }
+.chart-body canvas { direction:ltr; }
+.acd-check { width:18px; height:18px; cursor:pointer; accent-color:oklch(0.5 0.15 155); margin-top:2px; flex-shrink:0; }
+</style>
+
+<a class="acd-back-btn" href="@(__areaPrefix)/dashboard/actioncenter">
+    <i class="bi bi-arrow-left"></i>@L["Common_Back"]
+</a>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title" id="acdStoreName">@L["Page_ActionCenter"]</h1>
+        <p class="page-subtitle" id="acdSubtitle"></p>
+    </div>
+</div>
+
+<div id="acdContent"
+     data-status-active="@L["SAP_StatusActive"]"
+     data-status-resolved="@L["SAP_StatusResolved"]"
+     data-status-none="@L["SAP_StatusNone"]"
+     data-severity-critical="@L["AC_SeverityCritical"]"
+     data-severity-high="@L["AC_SeverityHigh"]"
+     data-severity-medium="@L["AC_SeverityMedium"]"
+     data-severity-low="@L["AC_SeverityLow"]"
+     data-severity-none="@L["AC_SeverityNone"]"
+     data-no-issues="@L["SAP_NoIssuesDetected"]"
+     data-kpi-turnover="@L["SAP_KpiTurnoverRate"]"
+     data-kpi-early-leaver="@L["SAP_KpiEarlyLeaverRate"]"
+     data-kpi-retention="@L["SAP_KpiRetentionRate"]"
+     data-meta-responsible="@L["SAP_Responsible"]"
+     data-meta-created="@L["SAP_MetaCreated"]"
+     data-meta-resolved="@L["SAP_MetaResolvedDate"]"
+     data-meta-healthy-streak="@L["SAP_MetaHealthyStreak"]"
+     data-healthy-streak-suffix="@L["SAP_HealthyStreakSuffix"]"
+     data-detected-issues="@L["SAP_DetectedIssues"]"
+     data-recommendations="@L["SAP_Recommendations"]"
+     data-no-recommendations="@L["SAP_NoRecommendationsYet"]"
+     data-notes="@L["SAP_Notes"]"
+     data-no-notes="@L["SAP_NoNotesYet"]"
+     data-note-placeholder="@L["SAP_NotePlaceholder"]"
+     data-add-note="@L["SAP_AddNote"]"
+     data-note-required="@L["SAP_NoteRequired"]"
+     data-note-add-failed="@L["SAP_NoteAddFailed"]"
+     data-note-add-failed-retry="@L["SAP_NoteAddFailedRetry"]"
+     data-no-store-selected="@L["SAP_NoStoreSelected"]"
+     data-no-access="@L["SAP_NoAccessOrNotFound"]"
+     data-chronic="@L["AC_Chronic"]"
+     data-stalled="@L["AC_Stalled"]"
+     data-chronic-note="@L["AC_ChronicNote"]"
+     data-progress-title="@L["AC_ProgressTitle"]"
+     data-trend-title="@L["AC_MetricTrendTitle"]"
+     data-assignment-title="@L["AC_AssignmentTitle"]"
+     data-assigned-to="@L["AC_AssignedTo"]"
+     data-target-date="@L["AC_TargetDate"]"
+     data-save="@L["Common_Save"]"
+     data-saved="@L["AC_Saved"]"
+     data-manual-close-title="@L["AC_ManualCloseTitle"]"
+     data-manual-close-desc="@L["AC_ManualCloseDesc"]"
+     data-manual-close-placeholder="@L["AC_ManualClosePlaceholder"]"
+     data-manual-close-btn="@L["AC_ManualCloseBtn"]"
+     data-manual-close-reason-required="@L["AC_ManualCloseReasonRequired"]"
+     data-closed-by="@L["AC_ClosedBy"]"
+     data-closed-reason="@L["AC_ClosedReason"]">
+    <div class="text-center py-5 text-muted">
+        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["SAP_Loading"]
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>Chart.register(ChartDataLabels);</script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script src="~/js/store-action-plan.js" asp-append-version="true"></script>
+<script>
+const acdContentEl = document.getElementById('acdContent');
+const ACD_D = acdContentEl.dataset;
+const ACD_SEVERITY_META = {
+    Critical: { label: ACD_D.severityCritical, bg: 'oklch(0.6 0.22 22 / .12)', color: ChartColors.SEMANTIC.BAD },
+    High:     { label: ACD_D.severityHigh,     bg: 'oklch(0.7 0.19 45 / .14)', color: 'oklch(0.6 0.19 45)' },
+    Medium:   { label: ACD_D.severityMedium,   bg: 'oklch(0.75 0.16 75 / .14)', color: 'oklch(0.6 0.14 75)' },
+    Low:      { label: ACD_D.severityLow,      bg: 'var(--card-bg-2)', color: 'var(--text-2)' },
+    None:     { label: ACD_D.severityNone,     bg: 'oklch(0.62 0.15 155 / .12)', color: 'oklch(0.5 0.15 155)' },
+};
+
+function acdFmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function acdDateInputValue(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString().slice(0, 10);
+}
+function acdRate(v) { return (v === null || v === undefined) ? '—' : Number(v).toFixed(1) + '%'; }
+function acdCurrentStore() { return new URLSearchParams(window.location.search).get('store'); }
+
+let acdTrendChartInst = null;
+function acdRenderTrendChart(snapshots) {
+    const canvas = document.getElementById('acdTrendChart');
+    if (!canvas) return;
+    if (acdTrendChartInst) acdTrendChartInst.destroy();
+    acdTrendChartInst = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: snapshots.map(s => s.label),
+            datasets: [
+                { label: 'Turnover %', data: snapshots.map(s => s.turnoverRate), borderColor: ChartColors.SEMANTIC.BAD, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
+                { label: 'Early Leaver %', data: snapshots.map(s => s.earlyLeaverRate), borderColor: ChartColors.SEMANTIC.WARNING, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
+                { label: 'Signals', data: snapshots.map(s => s.signalCount), borderColor: 'var(--text-3)', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, yAxisID: 'y1', borderDash: [4, 3] },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom' }, datalabels: { display: false } },
+            scales: {
+                y:  { beginAtZero: true, position: 'left', title: { display: true, text: '%' } },
+                y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 }, title: { display: true, text: '# signals' } },
+            }
+        }
+    });
+}
+
+function acdRender(data) {
+    const d = ACD_D;
+
+    document.getElementById('acdStoreName').textContent = data.storeName;
+    document.title = data.storeName + ' — Workforce Insights Hub';
+
+    const statusMeta = sapStatusMeta(data.status, { active: d.statusActive, resolved: d.statusResolved, none: d.statusNone });
+    const sevMeta = ACD_SEVERITY_META[data.severity] || ACD_SEVERITY_META.None;
+
+    let badges = `<span class="acd-badge" style="background:${SAP_TONE_BG[statusMeta.tone]};color:${SAP_TONE_VAR[statusMeta.tone]}">${sapEscape(statusMeta.label)}</span>`;
+    if (data.status === 'Active') badges += ` <span class="acd-badge" style="background:${sevMeta.bg};color:${sevMeta.color}">${sapEscape(sevMeta.label)}</span>`;
+    if (data.isChronic) badges += ` <span class="acd-badge" style="background:oklch(0.75 0.16 75 / .14);color:oklch(0.6 0.14 75)">${sapEscape(d.chronic)}</span>`;
+    if (data.isStalled) badges += ` <span class="acd-badge" style="background:oklch(0.6 0.22 22 / .12);color:${ChartColors.SEMANTIC.BAD}">${sapEscape(d.stalled)}</span>`;
+    document.getElementById('acdSubtitle').innerHTML = badges;
+
+    const resp = data.responsibleParty;
+    const respHtml = resp && resp.name
+        ? `${sapEscape(resp.name)}${resp.role ? ` <span style="color:var(--text-3)">(${sapEscape(resp.role.replace('_', ' '))})</span>` : ''}`
+        : '—';
+
+    if (data.status === 'None') {
+        acdContentEl.innerHTML = `<div class="card-dark empty-state"><i class="bi bi-clipboard-check"></i><p>${sapEscape(d.noIssues)}</p></div>`;
+        return;
+    }
+
+    let html = '';
+
+    // ── KPI cards: baseline vs. latest snapshot ──
+    const snaps = data.metricSnapshots || [];
+    const latest = snaps.length ? snaps[snaps.length - 1] : null;
+    function deltaHtml(base, cur) {
+        if (base === null || base === undefined || cur === null || cur === undefined) return '';
+        const delta = cur - base;
+        if (Math.abs(delta) < 0.05) return `<div class="acd-kpi-delta" style="color:var(--text-3)">— @L["AC_NoChange"]</div>`;
+        const improving = delta < 0;
+        return `<div class="acd-kpi-delta" style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pt</div>`;
+    }
+    html += `<div class="row g-3 mb-4">
+        <div class="col-sm-4"><div class="card-dark">
+            <div class="acd-kpi-label">${sapEscape(d.kpiTurnover)}</div>
+            <div class="acd-kpi-value">${acdRate(latest ? latest.turnoverRate : data.baselineTurnoverRate)}</div>
+            ${latest ? deltaHtml(data.baselineTurnoverRate, latest.turnoverRate) : ''}
+        </div></div>
+        <div class="col-sm-4"><div class="card-dark">
+            <div class="acd-kpi-label">${sapEscape(d.kpiEarlyLeaver)}</div>
+            <div class="acd-kpi-value">${acdRate(latest ? latest.earlyLeaverRate : data.baselineEarlyLeaverRate)}</div>
+            ${latest ? deltaHtml(data.baselineEarlyLeaverRate, latest.earlyLeaverRate) : ''}
+        </div></div>
+        <div class="col-sm-4"><div class="card-dark">
+            <div class="acd-kpi-label">${sapEscape(d.kpiRetention)}</div>
+            <div class="acd-kpi-value">${acdRate(latest ? latest.retentionRate : data.baselineRetentionRate)}</div>
+            ${latest ? deltaHtml(data.baselineRetentionRate, latest.retentionRate) : ''}
+        </div></div>
+    </div>`;
+
+    if (snaps.length >= 2) {
+        html += `<div class="chart-card mb-4">
+            <div class="chart-header"><h6>${sapEscape(d.trendTitle)}</h6></div>
+            <div class="chart-body" style="height:260px"><canvas id="acdTrendChart"></canvas></div>
+        </div>`;
+    }
+
+    // ── Meta card ──
+    html += `<div class="card-dark mb-4">
+        <div class="d-flex flex-wrap gap-4 mb-3">
+            <div><div class="acd-meta-label">${sapEscape(d.metaResponsible)}</div><div class="fw-semibold mt-1">${respHtml}</div></div>
+            <div><div class="acd-meta-label">${sapEscape(d.metaCreated)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.createdAt)}</div></div>
+            ${data.status === 'Resolved' ? `<div><div class="acd-meta-label">${sapEscape(d.metaResolved)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.resolvedAt)}</div></div>` : ''}
+            <div><div class="acd-meta-label">${sapEscape(d.metaHealthyStreak)}</div><div class="fw-semibold mt-1">${data.healthyStreakCount} ${sapEscape(d.healthyStreakSuffix)}</div></div>
+            ${data.isChronic ? `<div><div class="acd-meta-label">${sapEscape(d.chronic)}</div><div class="fw-semibold mt-1">${data.historicalPlanCount} @L["AC_PlansOverTime"]</div></div>` : ''}
+        </div>
+        <div class="acd-meta-label mb-1">${sapEscape(d.detectedIssues)}</div>
+        <div style="white-space:pre-line;font-size:13.5px;color:var(--text-2)">${sapEscape(data.detectedIssuesSummary) || '—'}</div>
+        ${data.status === 'Resolved' && data.closedByName ? `<div class="mt-3 pt-3" style="border-top:1px solid var(--card-border)">
+            <div class="acd-meta-label mb-1">${sapEscape(d.closedBy)}</div>
+            <div class="fw-semibold" style="font-size:13.5px">${sapEscape(data.closedByName)}</div>
+            ${data.manualCloseReason ? `<div class="acd-meta-label mt-2 mb-1">${sapEscape(d.closedReason)}</div><div style="font-size:13.5px;color:var(--text-2)">${sapEscape(data.manualCloseReason)}</div>` : ''}
+        </div>` : ''}
+    </div>`;
+
+    // ── Assignment panel (Admin only, active plans) ──
+    if (data.canManage && data.status === 'Active') {
+        html += `<div class="card-dark mb-4">
+            <h6 class="fw-bold mb-3">${sapEscape(d.assignmentTitle)}</h6>
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-5">
+                    <label class="acd-meta-label d-block mb-1">${sapEscape(d.assignedTo)}</label>
+                    <input type="text" id="acdAssignedName" class="form-control form-control-dark" value="${data.assignedToName ? sapEscape(data.assignedToName) : ''}">
+                </div>
+                <div class="col-sm-4">
+                    <label class="acd-meta-label d-block mb-1">${sapEscape(d.targetDate)}</label>
+                    <input type="date" id="acdTargetDate" class="form-control form-control-dark" value="${acdDateInputValue(data.targetResolutionDate)}">
+                </div>
+                <div class="col-sm-3">
+                    <button class="btn-primary w-100" id="acdSaveAssignBtn" type="button" onclick="acdSaveAssignment()"><i class="bi bi-check-lg me-1"></i>${sapEscape(d.save)}</button>
+                </div>
+            </div>
+            <div id="acdAssignMsg" class="small mt-2" style="display:none"></div>
+        </div>`;
+    } else if (data.assignedToName || data.targetResolutionDate) {
+        html += `<div class="card-dark mb-4">
+            <h6 class="fw-bold mb-3">${sapEscape(d.assignmentTitle)}</h6>
+            <div class="d-flex flex-wrap gap-4">
+                <div><div class="acd-meta-label">${sapEscape(d.assignedTo)}</div><div class="fw-semibold mt-1">${data.assignedToName ? sapEscape(data.assignedToName) : '—'}</div></div>
+                <div><div class="acd-meta-label">${sapEscape(d.targetDate)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.targetResolutionDate)}</div></div>
+            </div>
+        </div>`;
+    }
+
+    // ── Recommendations checklist ──
+    const recs = data.recommendations || [];
+    const completed = recs.filter(r => r.isCompleted).length;
+    const pct = recs.length > 0 ? Math.round(completed / recs.length * 100) : 0;
+    html += `<div class="card-dark mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <h6 class="fw-bold mb-0">${sapEscape(d.recommendations)}</h6>
+            ${recs.length ? `<span style="font-size:12px;color:var(--text-3)">${completed}/${recs.length} (${pct}%)</span>` : ''}
+        </div>
+        ${recs.length === 0 ? `<p class="text-muted-custom mb-0">${sapEscape(d.noRecommendations)}</p>` : `
+        <div class="d-flex flex-column gap-2" id="acdRecList">
+            ${recs.map(r => `
+                <div class="acd-rec-item${r.isCompleted ? ' acd-rec-done' : ''}" data-rec-id="${r.id}">
+                    <input type="checkbox" class="acd-check" ${r.isCompleted ? 'checked' : ''} onchange="acdToggleRec(${r.id}, this.checked)">
+                    <div style="flex:1">
+                        <div class="acd-rec-category">${sapEscape(r.category)}</div>
+                        <div class="acd-rec-text${r.isCompleted ? ' done' : ''}" style="font-size:13.5px;margin-top:2px">${sapEscape(r.recommendationText)}</div>
+                        ${r.isCompleted && r.completedByName ? `<div style="font-size:11px;color:var(--text-3);margin-top:3px">@L["AC_CompletedBy"] ${sapEscape(r.completedByName)} — ${acdFmtDate(r.completedAt)}</div>` : ''}
+                    </div>
+                </div>`).join('')}
+        </div>`}
+    </div>`;
+
+    // ── Notes ──
+    const notes = data.notes || [];
+    html += `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-3">${sapEscape(d.notes)}</h6>
+        <div class="d-flex flex-column gap-3 mb-3" id="acdNotesList">
+            ${notes.length === 0 ? `<p class="text-muted-custom mb-0">${sapEscape(d.noNotes)}</p>` : notes.map(n => `
+                <div class="acd-note-item">
+                    <div class="d-flex justify-content-between align-items-baseline gap-2">
+                        <span class="fw-semibold" style="font-size:13px">${sapEscape(n.authorName)}${n.authorRole ? ` <span style="color:var(--text-3);font-weight:400">(${sapEscape(n.authorRole.replace('_', ' '))})</span>` : ''}</span>
+                        <span style="font-size:11px;color:var(--text-3);white-space:nowrap">${acdFmtDate(n.createdAt)}</span>
+                    </div>
+                    <div style="font-size:13.5px;color:var(--text-2);margin-top:4px;white-space:pre-line">${sapEscape(n.noteText)}</div>
+                </div>
+            `).join('')}
+        </div>
+        ${data.canAddNotes ? `
+        <div class="d-flex flex-column gap-2">
+            <textarea id="acdNoteInput" rows="3" class="form-control form-control-dark" placeholder="${sapEscape(d.notePlaceholder)}"></textarea>
+            <div id="acdNoteError" class="small" style="display:none;color:oklch(0.6 0.22 22)"></div>
+            <button class="btn-primary align-self-start" id="acdAddNoteBtn" type="button" onclick="acdSubmitNote()"><i class="bi bi-plus-lg me-1"></i>${sapEscape(d.addNote)}</button>
+        </div>` : ''}
+    </div>`;
+
+    // ── Manual close (Admin only, active plans) ──
+    if (data.canManage && data.status === 'Active') {
+        html += `<div class="card-dark mb-4">
+            <h6 class="fw-bold mb-2">${sapEscape(d.manualCloseTitle)}</h6>
+            <p class="text-muted-custom" style="font-size:12.5px">${sapEscape(d.manualCloseDesc)}</p>
+            <textarea id="acdCloseReason" rows="2" class="form-control form-control-dark mb-2" placeholder="${sapEscape(d.manualClosePlaceholder)}"></textarea>
+            <div id="acdCloseMsg" class="small mb-2" style="display:none"></div>
+            <button class="btn-primary" id="acdCloseBtn" type="button" style="background:${ChartColors.SEMANTIC.BAD};border-color:${ChartColors.SEMANTIC.BAD}" onclick="acdManualClose()"><i class="bi bi-x-circle me-1"></i>${sapEscape(d.manualCloseBtn)}</button>
+        </div>`;
+    }
+
+    acdContentEl.innerHTML = html;
+    if (snaps.length >= 2) acdRenderTrendChart(snaps);
+}
+
+async function acdLoad() {
+    const store = acdCurrentStore();
+    const d = ACD_D;
+
+    if (!store) {
+        acdContentEl.innerHTML = `<div class="card-dark empty-state"><i class="bi bi-shop"></i><p>${sapEscape(d.noStoreSelected)}</p></div>`;
+        return;
+    }
+
+    const data = await sapFetchJson('/api/store-action-plan/action-center/detail?store=' + encodeURIComponent(store));
+    if (!data) {
+        document.getElementById('acdStoreName').textContent = store;
+        acdContentEl.innerHTML = `<div class="card-dark empty-state"><i class="bi bi-lock"></i><p>${sapEscape(d.noAccess)}</p></div>`;
+        return;
+    }
+
+    acdRender(data);
+}
+
+async function acdToggleRec(id, isCompleted) {
+    const item = document.querySelector(`.acd-rec-item[data-rec-id="${id}"]`);
+    try {
+        const res = await fetch(`/api/store-action-plan/recommendations/${id}/toggle`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isCompleted })
+        });
+        if (!res.ok) { await acdLoad(); return; }
+        await acdLoad();
+    } catch { await acdLoad(); }
+}
+
+async function acdSaveAssignment() {
+    const store = acdCurrentStore();
+    const btn = document.getElementById('acdSaveAssignBtn');
+    const msgEl = document.getElementById('acdAssignMsg');
+    const name = (document.getElementById('acdAssignedName').value || '').trim();
+    const dateVal = document.getElementById('acdTargetDate').value || null;
+    const d = ACD_D;
+
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/assign`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assignedToName: name || null, targetResolutionDate: dateVal })
+        });
+        msgEl.style.display = 'block';
+        if (res.ok) {
+            msgEl.style.color = 'oklch(0.5 0.15 155)';
+            msgEl.textContent = d.saved;
+        } else {
+            msgEl.style.color = 'oklch(0.6 0.22 22)';
+            msgEl.textContent = await res.text();
+        }
+    } catch {
+        msgEl.style.display = 'block';
+        msgEl.style.color = 'oklch(0.6 0.22 22)';
+        msgEl.textContent = 'Error';
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function acdManualClose() {
+    const store = acdCurrentStore();
+    const btn = document.getElementById('acdCloseBtn');
+    const msgEl = document.getElementById('acdCloseMsg');
+    const reason = (document.getElementById('acdCloseReason').value || '').trim();
+    const d = ACD_D;
+
+    msgEl.style.display = 'none';
+    if (!reason) {
+        msgEl.style.display = 'block';
+        msgEl.style.color = 'oklch(0.6 0.22 22)';
+        msgEl.textContent = d.manualCloseReasonRequired;
+        return;
+    }
+
+    if (!confirm(d.manualCloseDesc)) return;
+
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/close`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason })
+        });
+        if (!res.ok) {
+            msgEl.style.display = 'block';
+            msgEl.style.color = 'oklch(0.6 0.22 22)';
+            msgEl.textContent = await res.text();
+            btn.disabled = false;
+            return;
+        }
+        await acdLoad();
+    } catch {
+        msgEl.style.display = 'block';
+        msgEl.style.color = 'oklch(0.6 0.22 22)';
+        msgEl.textContent = 'Error';
+        btn.disabled = false;
+    }
+}
+
+async function acdSubmitNote() {
+    const store = acdCurrentStore();
+    const textEl = document.getElementById('acdNoteInput');
+    const errEl = document.getElementById('acdNoteError');
+    const btn = document.getElementById('acdAddNoteBtn');
+    const d = ACD_D;
+    const text = (textEl.value || '').trim();
+
+    errEl.style.display = 'none';
+    if (!text) {
+        errEl.textContent = d.noteRequired;
+        errEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    try {
+        const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ noteText: text })
+        });
+
+        if (!res.ok) {
+            const msg = await res.json().catch(() => null);
+            errEl.textContent = (typeof msg === 'string' && msg) ? msg : d.noteAddFailed;
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            return;
+        }
+
+        await acdLoad();
+    } catch {
+        errEl.textContent = d.noteAddFailedRetry;
+        errEl.style.display = 'block';
+        btn.disabled = false;
+    }
+}
+
+acdLoad();
+</script>

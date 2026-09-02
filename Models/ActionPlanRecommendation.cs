@@ -28,4 +28,14 @@ public class ActionPlanRecommendation
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // ── Action Center: turns each recommendation into a checkable task ──────
+    [Column("is_completed")]
+    public bool IsCompleted { get; set; }
+
+    [Column("completed_at")]
+    public DateTime? CompletedAt { get; set; }
+
+    [Column("completed_by_name")]
+    public string? CompletedByName { get; set; }
 }

@@ -29,4 +29,35 @@ public interface IStoreActionPlanService
     /// re-running it does not create a second active plan for a store or duplicate
     /// a recommendation the plan already has.</summary>
     Task RunDetectionForPeriodAsync(int month, int year);
+
+    // ────────────────────────────── Action Center ──────────────────────────────
+
+    /// <summary>Company-wide (scoped to accessible stores) dashboard summary: active
+    /// plan counts, this month's opened/resolved, average days to resolution,
+    /// stalled/chronic/critical counts, top reasons by category, plans by region
+    /// (Operation Manager), and a monthly opened-vs-resolved trend.</summary>
+    Task<ActionCenterSummaryDto> GetActionCenterSummaryAsync(string role, string? email);
+
+    /// <summary>Every accessible store with its plan status, computed severity,
+    /// age, chronic/stalled flags, trend direction, and task-completion progress —
+    /// the richer row set that makes the Action Center list page a real dashboard
+    /// instead of plain cards.</summary>
+    Task<List<ActionCenterStoreRowDto>> GetActionCenterStoresAsync(string role, string? email);
+
+    /// <summary>Same plan lookup as GetForStoreAsync, but the DTO is filled in with
+    /// the Action Center fields too: severity, chronic/stalled flags, metric
+    /// snapshot history, assignment, and target date.</summary>
+    Task<StoreActionPlanDto?> GetActionCenterDetailAsync(string storeName, string role, string? email);
+
+    /// <summary>Marks a recommendation done/not-done. Same permission rule as notes
+    /// (Head_Manager or Operation_Consultant with store access) plus Admin.</summary>
+    Task<bool> ToggleRecommendationAsync(int recommendationId, bool isCompleted, string role, string? email, string actorName);
+
+    /// <summary>Sets (or clears, when both are null/blank) the owner and target
+    /// resolution date on a store's active plan. Admin only.</summary>
+    Task<bool> SetAssignmentAsync(string storeName, string? assignedToName, DateOnly? targetResolutionDate, string role);
+
+    /// <summary>Manually closes a store's active plan instead of waiting for the
+    /// 2-clean-cycle auto-resolve rule. Admin only; requires a reason.</summary>
+    Task<(bool success, string message)> ManualCloseAsync(string storeName, string reason, string role, string closedByName);
 }

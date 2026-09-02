@@ -116,10 +116,14 @@ public class StoreActionPlanService : IStoreActionPlanService
             CanAddNotes = canAddNotes,
             Recommendations = recommendations.Select(r => new ActionPlanRecommendationDto
             {
+                Id = r.Id,
                 SignalCode = r.SignalCode,
                 Category = r.Category,
                 RecommendationText = r.RecommendationText,
                 CreatedAt = r.CreatedAt,
+                IsCompleted = r.IsCompleted,
+                CompletedAt = r.CompletedAt,
+                CompletedByName = r.CompletedByName,
             }).ToList(),
             Notes = notes.Select(n => new ActionPlanNoteDto
             {
@@ -265,6 +269,7 @@ public class StoreActionPlanService : IStoreActionPlanService
             await _db.SaveChangesAsync();
 
             AddRecommendations(plan.Id, metrics.Signals);
+            RecordMetricSnapshot(plan.Id, month, year, metrics);
             await _db.SaveChangesAsync();
             return;
         }
@@ -308,7 +313,29 @@ public class StoreActionPlanService : IStoreActionPlanService
         existing.LastEvaluatedMonth = month;
         existing.LastEvaluatedYear = year;
 
+        RecordMetricSnapshot(existing.Id, month, year, metrics);
+
         await _db.SaveChangesAsync();
+    }
+
+    /// <summary>One row per detection cycle for a store with a plan — captured
+    /// regardless of whether any signal fired that cycle, so the Action Center
+    /// can chart real progress (baseline vs. now) instead of a single frozen
+    /// creation-time snapshot. Purely additive: the legacy detection logic above
+    /// and the old Store Action Plan page never read this table.</summary>
+    private void RecordMetricSnapshot(int planId, int month, int year, PeriodMetrics metrics)
+    {
+        _db.ActionPlanMetricSnapshots.Add(new ActionPlanMetricSnapshot
+        {
+            StoreActionPlanId = planId,
+            Month = month,
+            Year = year,
+            TurnoverRate = metrics.TurnoverRate,
+            EarlyLeaverRate = metrics.EarlyLeaverRate,
+            RetentionRate = metrics.RetentionRate,
+            SignalCount = metrics.Signals.Count,
+            RecordedAt = DateTime.UtcNow,
+        });
     }
 
     private void AddRecommendations(int planId, List<FiredSignal> signals)
@@ -559,5 +586,301 @@ public class StoreActionPlanService : IStoreActionPlanService
         {
             "Review the dominant resignation reason with the Store Leader and plan a targeted response.",
         });
+    }
+
+    // ════════════════════════════ Action Center ════════════════════════════
+    // Everything below reads/writes the same store_action_plans /
+    // action_plan_recommendations rows the legacy engine above already
+    // maintains, plus the new (purely additive) columns/table — so the old
+    // Store Action Plan page keeps working completely unchanged.
+
+    private const int StalledAgeDaysThreshold = 45;
+    private const double TrendFlatMarginPoints = 1.0;
+
+    private static string ComputeSeverity(string status, int distinctSignalCount)
+    {
+        if (status != "Active") return "None";
+        return distinctSignalCount switch
+        {
+            >= 3 => "Critical",
+            2 => "High",
+            1 => "Medium",
+            _ => "Low",
+        };
+    }
+
+    private static int SeverityRank(string severity) => severity switch
+    {
+        "Critical" => 4,
+        "High" => 3,
+        "Medium" => 2,
+        "Low" => 1,
+        _ => 0,
+    };
+
+    /// <summary>Improving/Worsening based on the change in Turnover Rate between
+    /// the plan's first and most recent metric snapshot — the one metric present
+    /// on every snapshot. "New" until there are at least 2 snapshots to compare.</summary>
+    private static string ComputeTrend(List<ActionPlanMetricSnapshot> snapshots)
+    {
+        var withTurnover = snapshots.Where(s => s.TurnoverRate.HasValue).OrderBy(s => s.Year).ThenBy(s => s.Month).ToList();
+        if (withTurnover.Count < 2) return "New";
+        var delta = withTurnover.Last().TurnoverRate!.Value - withTurnover.First().TurnoverRate!.Value;
+        if (delta <= -TrendFlatMarginPoints) return "Improving";
+        if (delta >= TrendFlatMarginPoints) return "Worsening";
+        return "Flat";
+    }
+
+    private async Task<Dictionary<string, string>> GetOperationManagerByStoreAsync(List<string> storeNames)
+    {
+        if (storeNames.Count == 0) return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var refs = await _db.StoreReferences.Where(s => storeNames.Contains(s.StoreName)).ToListAsync();
+        return refs.GroupBy(s => s.StoreName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First().OperationManager ?? "",
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    public async Task<List<ActionCenterStoreRowDto>> GetActionCenterStoresAsync(string role, string? email)
+    {
+        var storeRefs = await _stores.GetStoresAsync(null, null, role, email);
+        var storeNames = storeRefs.Select(s => s.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (storeNames.Count == 0) return new List<ActionCenterStoreRowDto>();
+
+        var latestPeriod = await _db.StoreReferences
+            .OrderByDescending(s => s.Year).ThenByDescending(s => s.Month)
+            .Select(s => new { s.Month, s.Year })
+            .FirstOrDefaultAsync();
+        var latestRefsByStore = latestPeriod == null
+            ? new Dictionary<string, StoreReference>(StringComparer.OrdinalIgnoreCase)
+            : (await _db.StoreReferences
+                .Where(s => s.Month == latestPeriod.Month && s.Year == latestPeriod.Year && storeNames.Contains(s.StoreName))
+                .ToListAsync())
+                .GroupBy(s => s.StoreName, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+        var allPlans = await _db.StoreActionPlans.Where(p => storeNames.Contains(p.StoreName)).ToListAsync();
+        var plansByStore = allPlans.GroupBy(p => p.StoreName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        var latestPlanIds = plansByStore.Values.Select(list => list.OrderByDescending(p => p.CreatedAt).First().Id).ToList();
+        var recsByPlan = (await _db.ActionPlanRecommendations.Where(r => latestPlanIds.Contains(r.StoreActionPlanId)).ToListAsync())
+            .GroupBy(r => r.StoreActionPlanId).ToDictionary(g => g.Key, g => g.ToList());
+        var snapshotsByPlan = (await _db.ActionPlanMetricSnapshots.Where(s => latestPlanIds.Contains(s.StoreActionPlanId)).ToListAsync())
+            .GroupBy(s => s.StoreActionPlanId).ToDictionary(g => g.Key, g => g.ToList());
+
+        var asOf = DateTime.UtcNow;
+        var result = new List<ActionCenterStoreRowDto>();
+        foreach (var storeName in storeNames)
+        {
+            plansByStore.TryGetValue(storeName, out var storePlans);
+            var latest = storePlans?.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
+            latestRefsByStore.TryGetValue(storeName, out var reference);
+            var responsible = reference != null ? _storeAccess.ResolveResponsible(reference) : null;
+
+            if (latest == null)
+            {
+                result.Add(new ActionCenterStoreRowDto
+                {
+                    StoreName = storeName,
+                    PlanStatus = "None",
+                    ResponsibleName = responsible?.Name,
+                    ResponsibleRole = responsible?.Role,
+                });
+                continue;
+            }
+
+            var recs = recsByPlan.TryGetValue(latest.Id, out var r) ? r : new List<ActionPlanRecommendation>();
+            var distinctSignals = recs.Select(x => x.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            var snapshots = snapshotsByPlan.TryGetValue(latest.Id, out var snaps) ? snaps : new List<ActionPlanMetricSnapshot>();
+            var ageDays = (int)((latest.Status == "Resolved" && latest.ResolvedAt.HasValue ? latest.ResolvedAt.Value : asOf) - latest.CreatedAt).TotalDays;
+            var tasksCompleted = recs.Count(x => x.IsCompleted);
+
+            result.Add(new ActionCenterStoreRowDto
+            {
+                StoreName = storeName,
+                PlanStatus = latest.Status,
+                PlanId = latest.Id,
+                Severity = ComputeSeverity(latest.Status, distinctSignals),
+                SignalCount = distinctSignals,
+                AgeDays = ageDays,
+                IsChronic = (storePlans?.Count ?? 0) > 1,
+                IsStalled = latest.Status == "Active" && ageDays >= StalledAgeDaysThreshold && tasksCompleted == 0,
+                Trend = ComputeTrend(snapshots),
+                ResponsibleName = responsible?.Name,
+                ResponsibleRole = responsible?.Role,
+                AssignedToName = latest.AssignedToName,
+                TargetResolutionDate = latest.TargetResolutionDate,
+                TasksTotal = recs.Count,
+                TasksCompleted = tasksCompleted,
+            });
+        }
+
+        return result.OrderByDescending(r => SeverityRank(r.Severity)).ThenByDescending(r => r.AgeDays).ToList();
+    }
+
+    public async Task<ActionCenterSummaryDto> GetActionCenterSummaryAsync(string role, string? email)
+    {
+        var summary = new ActionCenterSummaryDto();
+        var storeRefs = await _stores.GetStoresAsync(null, null, role, email);
+        var storeNames = storeRefs.Select(s => s.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (storeNames.Count == 0) return summary;
+
+        var allPlans = await _db.StoreActionPlans.Where(p => storeNames.Contains(p.StoreName)).ToListAsync();
+        var activePlans = allPlans.Where(p => p.Status == "Active").ToList();
+        var resolvedPlans = allPlans.Where(p => p.Status == "Resolved" && p.ResolvedAt.HasValue).ToList();
+        var now = DateTime.UtcNow;
+
+        summary.TotalActive = activePlans.Count;
+        summary.OpenedThisMonth = allPlans.Count(p => p.CreatedAt.Year == now.Year && p.CreatedAt.Month == now.Month);
+        summary.ResolvedThisMonth = resolvedPlans.Count(p => p.ResolvedAt!.Value.Year == now.Year && p.ResolvedAt.Value.Month == now.Month);
+        summary.AvgDaysToResolution = resolvedPlans.Count > 0
+            ? Math.Round(resolvedPlans.Average(p => (p.ResolvedAt!.Value - p.CreatedAt).TotalDays), 1)
+            : null;
+
+        var storeGroups = allPlans.GroupBy(p => p.StoreName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Count(), StringComparer.OrdinalIgnoreCase);
+
+        var activePlanIds = activePlans.Select(p => p.Id).ToList();
+        var recsByActivePlan = (await _db.ActionPlanRecommendations.Where(r => activePlanIds.Contains(r.StoreActionPlanId)).ToListAsync())
+            .GroupBy(r => r.StoreActionPlanId).ToDictionary(g => g.Key, g => g.ToList());
+
+        int chronicCount = 0, stalledCount = 0, criticalCount = 0;
+        var categoryCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var plan in activePlans)
+        {
+            if (storeGroups.TryGetValue(plan.StoreName, out var histCount) && histCount > 1) chronicCount++;
+            var recs = recsByActivePlan.TryGetValue(plan.Id, out var r) ? r : new List<ActionPlanRecommendation>();
+            var distinctSignals = recs.Select(x => x.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            if (ComputeSeverity(plan.Status, distinctSignals) == "Critical") criticalCount++;
+
+            var ageDays = (int)(now - plan.CreatedAt).TotalDays;
+            var tasksCompleted = recs.Count(x => x.IsCompleted);
+            if (ageDays >= StalledAgeDaysThreshold && tasksCompleted == 0) stalledCount++;
+
+            foreach (var cat in recs.Select(x => x.Category).Distinct(StringComparer.OrdinalIgnoreCase))
+                categoryCounts[cat] = categoryCounts.GetValueOrDefault(cat) + 1;
+        }
+        summary.ChronicCount = chronicCount;
+        summary.StalledCount = stalledCount;
+        summary.CriticalCount = criticalCount;
+        summary.TopReasons = categoryCounts.OrderByDescending(kv => kv.Value)
+            .Select(kv => new ChartDataItem { Label = kv.Key, Value = kv.Value }).ToList();
+
+        var omByStore = await GetOperationManagerByStoreAsync(
+            activePlans.Select(p => p.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+        summary.ByRegion = activePlans
+            .Select(p => omByStore.TryGetValue(p.StoreName, out var om) ? om : "")
+            .Where(om => !string.IsNullOrWhiteSpace(om))
+            .GroupBy(om => om, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+            .OrderByDescending(c => c.Value)
+            .ToList();
+
+        // Monthly trend — last 6 calendar months, opened vs. resolved.
+        var months = Enumerable.Range(0, 6)
+            .Select(i => now.AddMonths(-i))
+            .Select(d => (d.Year, d.Month))
+            .OrderBy(p => p.Year).ThenBy(p => p.Month)
+            .ToList();
+        summary.MonthlyTrend = months.Select(p => new ActionCenterTrendPointDto
+        {
+            Label = new DateOnly(p.Year, p.Month, 1).ToString("MMM yy"),
+            Opened = allPlans.Count(x => x.CreatedAt.Year == p.Year && x.CreatedAt.Month == p.Month),
+            Resolved = resolvedPlans.Count(x => x.ResolvedAt!.Value.Year == p.Year && x.ResolvedAt.Value.Month == p.Month),
+        }).ToList();
+
+        return summary;
+    }
+
+    public async Task<StoreActionPlanDto?> GetActionCenterDetailAsync(string storeName, string role, string? email)
+    {
+        var dto = await GetForStoreAsync(storeName, role, email);
+        if (dto == null || dto.Status == "None") return dto;
+
+        var allPlans = await _db.StoreActionPlans.Where(p => p.StoreName == storeName).ToListAsync();
+        dto.HistoricalPlanCount = allPlans.Count;
+        dto.IsChronic = allPlans.Count > 1;
+
+        // Same "most recent plan" selection GetForStoreAsync itself used.
+        var plan = allPlans.OrderByDescending(p => p.CreatedAt).First();
+        dto.AssignedToName = plan.AssignedToName;
+        dto.TargetResolutionDate = plan.TargetResolutionDate;
+        dto.ClosedByName = plan.ClosedByName;
+        dto.ManualCloseReason = plan.ManualCloseReason;
+        dto.CanManage = role == "Admin";
+
+        var distinctSignals = dto.Recommendations.Select(r => r.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+        dto.Severity = ComputeSeverity(dto.Status, distinctSignals);
+
+        var snapshots = await _db.ActionPlanMetricSnapshots
+            .Where(s => s.StoreActionPlanId == plan.Id)
+            .OrderBy(s => s.Year).ThenBy(s => s.Month)
+            .ToListAsync();
+        dto.MetricSnapshots = snapshots.Select(s => new ActionCenterMetricSnapshotDto
+        {
+            Label = new DateOnly(s.Year, s.Month, 1).ToString("MMM yy"),
+            Month = s.Month,
+            Year = s.Year,
+            TurnoverRate = s.TurnoverRate,
+            EarlyLeaverRate = s.EarlyLeaverRate,
+            RetentionRate = s.RetentionRate,
+            SignalCount = s.SignalCount,
+        }).ToList();
+
+        var ageDays = (int)((dto.Status == "Resolved" && dto.ResolvedAt.HasValue ? dto.ResolvedAt.Value : DateTime.UtcNow) - dto.CreatedAt).TotalDays;
+        var tasksCompleted = dto.Recommendations.Count(r => r.IsCompleted);
+        dto.IsStalled = dto.Status == "Active" && ageDays >= StalledAgeDaysThreshold && tasksCompleted == 0;
+
+        return dto;
+    }
+
+    public async Task<bool> ToggleRecommendationAsync(int recommendationId, bool isCompleted, string role, string? email, string actorName)
+    {
+        var rec = await _db.ActionPlanRecommendations.FindAsync(recommendationId);
+        if (rec == null) return false;
+        var plan = await _db.StoreActionPlans.FindAsync(rec.StoreActionPlanId);
+        if (plan == null) return false;
+
+        if (role != "Admin")
+        {
+            if (role is not ("Head_Manager" or "Operation_Consultant")) return false;
+            if (!await _storeAccess.CanAccessStoreAsync(role, email, plan.StoreName)) return false;
+        }
+
+        rec.IsCompleted = isCompleted;
+        rec.CompletedAt = isCompleted ? DateTime.UtcNow : null;
+        rec.CompletedByName = isCompleted ? actorName : null;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> SetAssignmentAsync(string storeName, string? assignedToName, DateOnly? targetResolutionDate, string role)
+    {
+        if (role != "Admin") return false;
+        var plan = await _db.StoreActionPlans.FirstOrDefaultAsync(p => p.StoreName == storeName && p.Status == "Active");
+        if (plan == null) return false;
+
+        plan.AssignedToName = string.IsNullOrWhiteSpace(assignedToName) ? null : assignedToName.Trim();
+        plan.TargetResolutionDate = targetResolutionDate;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<(bool success, string message)> ManualCloseAsync(string storeName, string reason, string role, string closedByName)
+    {
+        if (role != "Admin") return (false, "Only an Admin can manually close a plan.");
+        if (string.IsNullOrWhiteSpace(reason)) return (false, "A reason is required.");
+        var plan = await _db.StoreActionPlans.FirstOrDefaultAsync(p => p.StoreName == storeName && p.Status == "Active");
+        if (plan == null) return (false, "No active plan for this store.");
+
+        plan.Status = "Resolved";
+        plan.ResolvedAt = DateTime.UtcNow;
+        plan.ResolvedReason = "Manual_Override";
+        plan.ClosedByName = closedByName;
+        plan.ManualCloseReason = reason.Trim();
+        await _db.SaveChangesAsync();
+        return (true, "Plan closed.");
     }
 }

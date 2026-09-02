@@ -381,6 +381,52 @@ END
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_action_plan_notes_plan_id' AND object_id = OBJECT_ID('dbo.action_plan_notes'))
     CREATE INDEX ix_action_plan_notes_plan_id ON dbo.action_plan_notes (store_action_plan_id);
 
+-- ── Action Center additions ──────────────────────────────────────────────
+-- Purely additive columns/table on top of the existing Store Action Plan
+-- schema above — the legacy detection engine and the old Store Action Plan
+-- page never read or write any of these, so both pages can run side by side
+-- against the same store_action_plans/action_plan_recommendations rows.
+
+-- Turns each system-generated recommendation into a checkable task.
+IF COL_LENGTH('dbo.action_plan_recommendations', 'is_completed') IS NULL
+    ALTER TABLE dbo.action_plan_recommendations ADD is_completed BIT NOT NULL DEFAULT 0;
+IF COL_LENGTH('dbo.action_plan_recommendations', 'completed_at') IS NULL
+    ALTER TABLE dbo.action_plan_recommendations ADD completed_at DATETIME2 NULL;
+IF COL_LENGTH('dbo.action_plan_recommendations', 'completed_by_name') IS NULL
+    ALTER TABLE dbo.action_plan_recommendations ADD completed_by_name NVARCHAR(MAX) NULL;
+
+-- Ownership, target date, and a manual-override close path (the legacy engine
+-- only ever auto-resolves after 2 consecutive clean cycles; Action Center
+-- lets an Admin close a plan early with a recorded reason).
+IF COL_LENGTH('dbo.store_action_plans', 'assigned_to_name') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD assigned_to_name NVARCHAR(MAX) NULL;
+IF COL_LENGTH('dbo.store_action_plans', 'target_resolution_date') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD target_resolution_date DATE NULL;
+IF COL_LENGTH('dbo.store_action_plans', 'closed_by_name') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD closed_by_name NVARCHAR(MAX) NULL;
+IF COL_LENGTH('dbo.store_action_plans', 'manual_close_reason') IS NULL
+    ALTER TABLE dbo.store_action_plans ADD manual_close_reason NVARCHAR(MAX) NULL;
+
+-- One row per detection cycle for a store with an active plan, regardless of
+-- whether a signal fired that cycle — lets Action Center chart real
+-- baseline-vs-now progress instead of a single frozen creation-time snapshot.
+IF OBJECT_ID('dbo.action_plan_metric_snapshots', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.action_plan_metric_snapshots (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_action_plan_id INT NOT NULL REFERENCES dbo.store_action_plans (id) ON DELETE CASCADE,
+        month INT NOT NULL,
+        year INT NOT NULL,
+        turnover_rate FLOAT NULL,
+        early_leaver_rate FLOAT NULL,
+        retention_rate FLOAT NULL,
+        signal_count INT NOT NULL DEFAULT 0,
+        recorded_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_action_plan_metric_snapshots_plan_id' AND object_id = OBJECT_ID('dbo.action_plan_metric_snapshots'))
+    CREATE INDEX ix_action_plan_metric_snapshots_plan_id ON dbo.action_plan_metric_snapshots (store_action_plan_id);
+
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal

@@ -28,6 +28,7 @@
   <data name="Nav_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
   <data name="Nav_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
   <data name="Nav_StoreActionPlan" xml:space="preserve"><value>خطط العمل</value></data>
+  <data name="Nav_ActionCenter" xml:space="preserve"><value>مركز العمليات</value></data>
   <data name="Nav_Stores" xml:space="preserve"><value>الفروع</value></data>
   <data name="SAP_LoadingStores" xml:space="preserve"><value>جاري تحميل الفروع…</value></data>
   <data name="SAP_Loading" xml:space="preserve"><value>جاري التحميل…</value></data>
@@ -307,6 +308,8 @@
   <data name="Page_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
   <data name="Page_ScorecardSub" xml:space="preserve"><value>تصنيف الأداء لقادة الفروع والمستشارين والمديرين</value></data>
   <data name="Page_StoreActionPlans" xml:space="preserve"><value>خطط عمل الفروع</value></data>
+  <data name="Page_ActionCenter" xml:space="preserve"><value>مركز العمليات</value></data>
+  <data name="Page_ActionCenterSub" xml:space="preserve"><value>نظرة شاملة على خطط عمل كل الفروع — الشدة، المسؤولية، التقدّم، والنتائج في مكان واحد</value></data>
   <data name="Page_StoreActionPlansSub" xml:space="preserve"><value>خطط عمل معدل الدوران وملاحظات المتابعة لكل فرع</value></data>
   <data name="Page_Stores" xml:space="preserve"><value>الفروع</value></data>
   <data name="Page_StoresSub" xml:space="preserve"><value>حالة معدل الدوران في جميع الفروع</value></data>
@@ -587,4 +590,74 @@
   <data name="Ret_SurvivalCurveSub" xml:space="preserve"><value>احتمال أن يبقى الموظف فعالًا بعد N يومًا</value></data>
   <data name="Ret_NoMilestoneData" xml:space="preserve"><value>لا توجد بيانات معالم بعد</value></data>
   <data name="Ret_NoMilestoneDataSub" xml:space="preserve"><value>ارفع بيانات مع تواريخ التعيين لعرض معالم الاحتفاظ هنا.</value></data>
+  <data name="AC_Store" xml:space="preserve"><value>المطعم</value></data>
+  <data name="AC_ChartTopReasons" xml:space="preserve"><value>أكثر فئات المشاكل تكرارًا</value></data>
+  <data name="AC_ChartTopReasonsSub" xml:space="preserve"><value>فئات التوصيات عبر كل الخطط النشطة</value></data>
+  <data name="AC_ChartByRegion" xml:space="preserve"><value>الخطط النشطة حسب مدير العمليات</value></data>
+  <data name="AC_ChartByRegionSub" xml:space="preserve"><value>أين تتركز الخطط النشطة</value></data>
+  <data name="AC_ChartTrend" xml:space="preserve"><value>المفتوحة مقابل المغلقة (آخر 6 أشهر)</value></data>
+  <data name="AC_ChartTrendSub" xml:space="preserve"><value>عدد الخطط التي تم فتحها مقابل التي تم حلها كل شهر</value></data>
+  <data name="AC_StoresTable" xml:space="preserve"><value>المطاعم</value></data>
+  <data name="AC_NoMatchingStores" xml:space="preserve"><value>لا توجد مطاعم مطابقة لبحثك.</value></data>
+  <data name="AC_SeverityCritical" xml:space="preserve"><value>حرجة</value></data>
+  <data name="AC_SeverityHigh" xml:space="preserve"><value>عالية</value></data>
+  <data name="AC_SeverityMedium" xml:space="preserve"><value>متوسطة</value></data>
+  <data name="AC_SeverityLow" xml:space="preserve"><value>منخفضة</value></data>
+  <data name="AC_SeverityNone" xml:space="preserve"><value>لا يوجد</value></data>
+  <data name="AC_TrendImproving" xml:space="preserve"><value>في تحسن</value></data>
+  <data name="AC_TrendWorsening" xml:space="preserve"><value>في تدهور</value></data>
+  <data name="AC_TrendFlat" xml:space="preserve"><value>ثابت</value></data>
+  <data name="AC_TrendNew" xml:space="preserve"><value>جديد</value></data>
+  <data name="AC_Chronic" xml:space="preserve"><value>متكررة</value></data>
+  <data name="AC_Stalled" xml:space="preserve"><value>متعثرة</value></data>
+  <data name="AC_Severity" xml:space="preserve"><value>الخطورة</value></data>
+  <data name="AC_Status" xml:space="preserve"><value>الحالة</value></data>
+  <data name="AC_Age" xml:space="preserve"><value>المدة</value></data>
+  <data name="AC_Trend" xml:space="preserve"><value>الاتجاه</value></data>
+  <data name="AC_Progress" xml:space="preserve"><value>التقدم</value></data>
+  <data name="AC_AssignedTo" xml:space="preserve"><value>مسؤول التنفيذ</value></data>
+  <data name="AC_Flags" xml:space="preserve"><value>ملاحظات</value></data>
+  <data name="AC_KpiActive" xml:space="preserve"><value>خطط نشطة</value></data>
+  <data name="AC_KpiActiveDesc" xml:space="preserve"><value>المطاعم التي لديها خطة عمل نشطة حاليًا</value></data>
+  <data name="AC_KpiCritical" xml:space="preserve"><value>حرجة</value></data>
+  <data name="AC_KpiCriticalDesc" xml:space="preserve"><value>خطط نشطة بها 3 مشاكل مكتشفة أو أكثر فى نفس الوقت</value></data>
+  <data name="AC_KpiStalled" xml:space="preserve"><value>متعثرة</value></data>
+  <data name="AC_KpiStalledDesc" xml:space="preserve"><value>نشطة منذ 45 يومًا أو أكثر بدون أي مهمة مكتملة</value></data>
+  <data name="AC_KpiChronic" xml:space="preserve"><value>مطاعم متكررة المشاكل</value></data>
+  <data name="AC_KpiChronicDesc" xml:space="preserve"><value>مطاعم كان لديها أكثر من خطة عمل واحدة</value></data>
+  <data name="AC_KpiResolvedMonth" xml:space="preserve"><value>تم حلها هذا الشهر</value></data>
+  <data name="AC_KpiResolvedMonthDesc" xml:space="preserve"><value>خطط تم إغلاقها (تلقائيًا أو يدويًا) هذا الشهر</value></data>
+  <data name="AC_KpiAvgDays" xml:space="preserve"><value>متوسط أيام الحل</value></data>
+  <data name="AC_KpiAvgDaysDesc" xml:space="preserve"><value>متوسط الوقت من إنشاء الخطة حتى حلها</value></data>
+  <data name="AC_InsightAllClearTitle" xml:space="preserve"><value>لا توجد مشاكل حاليًا</value></data>
+  <data name="AC_InsightAllClearDesc" xml:space="preserve"><value>لا يوجد أي مطعم لديه خطة عمل نشطة حاليًا.</value></data>
+  <data name="AC_InsightCriticalTitle" xml:space="preserve"><value>مطاعم حرجة تحتاج اهتمام</value></data>
+  <data name="AC_InsightCriticalDesc" xml:space="preserve"><value>مطعم لديه 3 مشاكل أو أكثر فى نفس الوقت ويحتاج متابعة عاجلة.</value></data>
+  <data name="AC_InsightStalledTitle" xml:space="preserve"><value>خطط متعثرة</value></data>
+  <data name="AC_InsightStalledDesc" xml:space="preserve"><value>خطة مفتوحة منذ 45 يومًا أو أكثر بدون أي مهمة مكتملة — تابع مع المسؤول عنها.</value></data>
+  <data name="AC_InsightTopReasonTitle" xml:space="preserve"><value>أكثر المشاكل تكرارًا</value></data>
+  <data name="AC_InsightTopReasonDesc" xml:space="preserve"><value>موجودة في {0} خطة نشطة — أكثر فئة مشاكل تكرارًا حاليًا.</value></data>
+  <data name="AC_InsightTopRegionTitle" xml:space="preserve"><value>منطقة تحتاج تركيز</value></data>
+  <data name="AC_InsightTopRegionDesc" xml:space="preserve"><value>لديه {0} خطة نشطة — أكثر من أي مدير عمليات آخر.</value></data>
+  <data name="AC_InsightChronicTitle" xml:space="preserve"><value>مطاعم متكررة المشاكل</value></data>
+  <data name="AC_InsightChronicDesc" xml:space="preserve"><value>مطعم كان لديه أكثر من خطة عمل واحدة — يستحق مراجعة أعمق للسبب الجذري.</value></data>
+  <data name="AC_NoInsights" xml:space="preserve"><value>لا توجد ملاحظات بارزة حاليًا.</value></data>
+  <data name="AC_TrendOpened" xml:space="preserve"><value>تم فتحها</value></data>
+  <data name="AC_TrendResolved" xml:space="preserve"><value>تم حلها</value></data>
+  <data name="AC_NoChange" xml:space="preserve"><value>لا تغيير</value></data>
+  <data name="AC_PlansOverTime" xml:space="preserve"><value>خطة عبر الوقت</value></data>
+  <data name="AC_ProgressTitle" xml:space="preserve"><value>التقدم</value></data>
+  <data name="AC_MetricTrendTitle" xml:space="preserve"><value>اتجاه المؤشرات منذ فتح الخطة</value></data>
+  <data name="AC_AssignmentTitle" xml:space="preserve"><value>المسؤولية والموعد المستهدف</value></data>
+  <data name="AC_TargetDate" xml:space="preserve"><value>تاريخ الحل المستهدف</value></data>
+  <data name="AC_Saved" xml:space="preserve"><value>تم الحفظ.</value></data>
+  <data name="AC_ManualCloseTitle" xml:space="preserve"><value>إغلاق هذه الخطة يدويًا</value></data>
+  <data name="AC_ManualCloseDesc" xml:space="preserve"><value>هل أنت متأكد من إغلاق هذه الخطة؟ يجب أن يتم ذلك فقط إذا تم حل المشكلة خارج دورة الاكتشاف الطبيعية.</value></data>
+  <data name="AC_ManualClosePlaceholder" xml:space="preserve"><value>سبب إغلاق هذه الخطة…</value></data>
+  <data name="AC_ManualCloseBtn" xml:space="preserve"><value>إغلاق الخطة</value></data>
+  <data name="AC_ManualCloseReasonRequired" xml:space="preserve"><value>السبب مطلوب لإغلاق الخطة.</value></data>
+  <data name="AC_ClosedBy" xml:space="preserve"><value>تم الإغلاق بواسطة</value></data>
+  <data name="AC_ClosedReason" xml:space="preserve"><value>سبب الإغلاق</value></data>
+  <data name="AC_CompletedBy" xml:space="preserve"><value>تم الإنجاز بواسطة</value></data>
+  <data name="AC_ChronicNote" xml:space="preserve"><value>هذا المطعم كان لديه أكثر من خطة عمل واحدة عبر الوقت.</value></data>
 </root>

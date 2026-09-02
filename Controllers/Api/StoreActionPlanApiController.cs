@@ -94,8 +94,93 @@ public class StoreActionPlanApiController : ControllerBase
         return Accepted(new { status = "started", periods = periods.Count });
     }
 
+    // ────────────────────────────── Action Center ──────────────────────────────
+
+    [HttpGet("action-center/summary")]
+    public async Task<IActionResult> GetActionCenterSummary()
+    {
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        return Ok(await _actionPlans.GetActionCenterSummaryAsync(role, email));
+    }
+
+    [HttpGet("action-center/stores")]
+    public async Task<IActionResult> GetActionCenterStores()
+    {
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        return Ok(await _actionPlans.GetActionCenterStoresAsync(role, email));
+    }
+
+    [HttpGet("action-center/detail")]
+    public async Task<IActionResult> GetActionCenterDetail([FromQuery] string store)
+    {
+        if (string.IsNullOrWhiteSpace(store)) return BadRequest("store is required.");
+
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        var result = await _actionPlans.GetActionCenterDetailAsync(store, role, email);
+        if (result == null) return NotFound();
+
+        return Ok(result);
+    }
+
+    [HttpPost("recommendations/{id:int}/toggle")]
+    [RequireRole("Admin", "Head_Manager", "Operation_Consultant")]
+    public async Task<IActionResult> ToggleRecommendation(int id, [FromBody] ToggleRecommendationRequest request)
+    {
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        var actorName = HttpContext.Session.GetAssignedName() ?? email ?? "";
+
+        var success = await _actionPlans.ToggleRecommendationAsync(id, request?.IsCompleted ?? false, role, email, actorName);
+        if (!success) return BadRequest("Not permitted or recommendation not found.");
+
+        return Ok();
+    }
+
+    [HttpPost("{store}/assign")]
+    [RequireRole("Admin")]
+    public async Task<IActionResult> SetAssignment(string store, [FromBody] SetAssignmentRequest request)
+    {
+        var role = HttpContext.Session.GetRole();
+        var success = await _actionPlans.SetAssignmentAsync(store, request?.AssignedToName, request?.TargetResolutionDate, role);
+        if (!success) return BadRequest("No active plan for this store.");
+
+        return Ok();
+    }
+
+    [HttpPost("{store}/close")]
+    [RequireRole("Admin")]
+    public async Task<IActionResult> ManualClose(string store, [FromBody] ManualCloseRequest request)
+    {
+        var role = HttpContext.Session.GetRole();
+        var closedByName = HttpContext.Session.GetAssignedName() ?? HttpContext.Session.GetEmail() ?? "";
+
+        var (success, message) = await _actionPlans.ManualCloseAsync(store, request?.Reason ?? "", role, closedByName);
+        if (!success) return BadRequest(message);
+
+        return Ok();
+    }
+
     public class AddNoteRequest
     {
         public string NoteText { get; set; } = "";
+    }
+
+    public class ToggleRecommendationRequest
+    {
+        public bool IsCompleted { get; set; }
+    }
+
+    public class SetAssignmentRequest
+    {
+        public string? AssignedToName { get; set; }
+        public DateOnly? TargetResolutionDate { get; set; }
+    }
+
+    public class ManualCloseRequest
+    {
+        public string? Reason { get; set; }
     }
 }
