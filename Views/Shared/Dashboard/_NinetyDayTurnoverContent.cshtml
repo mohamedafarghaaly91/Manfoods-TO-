@@ -85,7 +85,11 @@
    Early Leaving" (col-6 at all breakpoints) — stay row-oriented and shrink
    text/spacing instead of falling back to the stacked mobile layout, which
    would otherwise make the narrower half-width card look too tall. */
-.tv-gender-body-compact { gap:8px; height:auto; min-height:150px; }
+/* Grows to fill whatever height the flex-column card gives it (the card
+   sits h-100 next to the taller "Reasons for Early Leaving" chart card in
+   the same row) and vertically centers its content instead of leaving
+   empty space below it. */
+.tv-gender-body-compact { gap:8px; flex:1; min-height:150px; }
 .tv-gender-body-compact .tv-gender-canvas-wrap { flex:0 0 40%; height:130px; width:auto; }
 .tv-gender-body-compact .tv-gender-row { font-size:11px; gap:6px; }
 .tv-gender-body-compact .tv-gender-dot { width:8px; height:8px; }
@@ -202,7 +206,7 @@
             </div>
         </div>
         <div class="col-6">
-            <div class="chart-card h-100 p-2 p-md-3">
+            <div class="chart-card h-100 p-2 p-md-3 d-flex flex-column">
                 <div class="chart-header"><h6 id="ntdGenderTitle">Gender Breakdown</h6><p>Gender of early leavers for the selected cohort months</p></div>
                 <div class="tv-gender-body tv-gender-body-compact">
                     <div class="tv-gender-canvas-wrap"><canvas id="ntdGenderChart"></canvas></div>
