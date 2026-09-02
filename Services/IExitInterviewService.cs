@@ -29,4 +29,16 @@ public interface IExitInterviewService
         string dimension, IReadOnlyCollection<string> names, string role, string? assignedName);
 
     Task<List<ExitInterviewCommentItem>> GetCommentsAsync(ExitInterviewFilter filter, string role, string? assignedName);
+
+    /// <summary>Count of exit interviews per job title.</summary>
+    Task<List<ChartDataItem>> GetByJobTitleAsync(ExitInterviewFilter filter, string role, string? assignedName);
+
+    /// <summary>Monthly count of each of the top reasons for leaving, all-time
+    /// (ignores the filter's Year/Months — same "always full history" rule as
+    /// other trend charts elsewhere in the app).</summary>
+    Task<List<ExitReasonTrendPoint>> GetReasonsTrendAsync(ExitInterviewFilter filter, string role, string? assignedName);
+
+    /// <summary>For each of the top reasons for leaving, what share of the people
+    /// who gave that reason said they'd return to work here again.</summary>
+    Task<List<ExitReasonReturnItem>> GetReasonVsWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName);
 }

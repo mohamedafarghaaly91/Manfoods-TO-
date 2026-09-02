@@ -172,10 +172,25 @@
         <div class="chart-body chart-body-sm"><canvas id="eiWorkPressureChart"></canvas></div>
     </div>
 
+    <div class="charts-grid mb-4">
+        <div class="chart-card">
+            <div class="chart-header"><h6 id="eiJobTitleTitle">@L["Chart_EiByJobTitle"]</h6><p>@L["Chart_EiByJobTitleSub"]</p></div>
+            <div class="chart-body chart-body-sm"><canvas id="eiJobTitleChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header"><h6 id="eiReasonsTrendTitle">@L["Chart_EiReasonsTrend"]</h6><p>@L["Chart_EiReasonsTrendSub"]</p></div>
+            <div class="chart-body chart-body-sm"><canvas id="eiReasonsTrendChart"></canvas></div>
+        </div>
+    </div>
+
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
         <h5 class="mb-0 fw-bold" id="eiDriversTitle">@L["Chart_EngagementDrivers"]</h5>
         <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EngagementDriversSub"]</span>
+    </div>
+    <div class="chart-card mb-4">
+        <div class="chart-header"><p class="mb-0">@L["Chart_EiDriversChartSub"]</p></div>
+        <div class="chart-body" style="height:340px"><canvas id="eiDriversChart"></canvas></div>
     </div>
     <div class="chart-card mb-4" id="eiDriversCard">
         <div id="eiDriversContainer">
@@ -183,6 +198,15 @@
                 <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
             </div>
         </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="section-accent"></div>
+        <h5 class="mb-0 fw-bold" id="eiReasonReturnTitle">@L["Chart_EiReasonVsReturn"]</h5>
+        <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EiReasonVsReturnSub"]</span>
+    </div>
+    <div class="chart-card mb-4">
+        <div class="chart-body chart-body-sm"><canvas id="eiReasonReturnChart"></canvas></div>
     </div>
 
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -471,6 +495,75 @@ async function eiLoadWorkPressure() {
     eiWorkPressureChart = eiMkChart(eiWorkPressureChart, 'eiWorkPressureChart', data.map(d => d.label), data.map(d => d.value), true);
 }
 
+let eiJobTitleChart;
+async function eiLoadJobTitleChart() {
+    eiSetTitleBadge('eiJobTitleTitle', true);
+    const data = await eiFetch('by-job-title');
+    eiJobTitleChart = eiMkChart(eiJobTitleChart, 'eiJobTitleChart', data.map(d => d.label), data.map(d => d.value), true);
+}
+
+let eiReasonsTrendChart;
+async function eiLoadReasonsTrendChart() {
+    eiSetTitleBadge('eiReasonsTrendTitle', false);
+    const data = await eiFetch('reasons-trend');
+    const ctx = document.getElementById('eiReasonsTrendChart');
+    if (!ctx) return;
+    if (eiReasonsTrendChart) eiReasonsTrendChart.destroy();
+    if (!data.length) return;
+    const reasons = Object.keys(data[0].counts || {});
+    const colors = ChartColors.colorsByLabel(reasons, null);
+    eiReasonsTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => d.label),
+            datasets: reasons.map((reason, i) => ({
+                label: reason,
+                data: data.map(d => d.counts[reason] ?? 0),
+                borderColor: colors[i],
+                backgroundColor: 'transparent',
+                tension: 0.3, pointRadius: 3, spanGaps: true,
+            })),
+        },
+        options: {
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { color: 'oklch(0.5 0.03 258)', font: { size: 10.5 }, boxWidth: 10 } },
+                tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}` } },
+                datalabels: { display: false },
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } },
+                y: { beginAtZero: true, ticks: { color: 'oklch(0.5 0.03 258)', precision: 0 }, grid: { color: 'oklch(0.92 0.008 255)' } },
+            },
+        },
+    });
+}
+
+let eiReasonReturnChart;
+async function eiLoadReasonReturnChart() {
+    eiSetTitleBadge('eiReasonReturnTitle', true);
+    const data = await eiFetch('reason-vs-would-return');
+    const ctx = document.getElementById('eiReasonReturnChart');
+    if (!ctx) return;
+    if (eiReasonReturnChart) eiReasonReturnChart.destroy();
+    eiReasonReturnChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: data.map(d => d.reason), datasets: [{ data: data.map(d => d.wouldReturnPercent), backgroundColor: data.map(d => eiDriverTone(d.wouldReturnPercent)), borderRadius: 4, maxBarThickness: 30 }] },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.formattedValue}% of the ${data[c.dataIndex].count} who gave this reason would return` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(0) + '%' : '' },
+            },
+            scales: {
+                x: { min: 0, max: 100, grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)', callback: v => v + '%' } },
+                y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)' } },
+            },
+        },
+    });
+}
+
 async function eiLoadSentiment() {
     eiSentimentData = await eiFetch('sentiment-summary');
 }
@@ -481,9 +574,34 @@ function eiDriverTone(pct) {
     return ChartColors.SEMANTIC.BAD;
 }
 
+let eiDriversChartInstance;
+function eiRenderDriversChart() {
+    const ctx = document.getElementById('eiDriversChart');
+    if (!ctx) return;
+    if (eiDriversChartInstance) eiDriversChartInstance.destroy();
+    if (!eiDriversData.length) return;
+    eiDriversChartInstance = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: eiDriversData.map(d => d.label), datasets: [{ data: eiDriversData.map(d => d.positivePercent), backgroundColor: eiDriversData.map(d => eiDriverTone(d.positivePercent)), borderRadius: 4, maxBarThickness: 24 }] },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.formattedValue}% positive (${eiDriversData[c.dataIndex].totalResponses} responses)` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 11, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(0) + '%' : '' },
+            },
+            scales: {
+                x: { min: 0, max: 100, grid: { color: 'oklch(0.92 0.008 255)' }, ticks: { color: 'oklch(0.5 0.03 258)', callback: v => v + '%' } },
+                y: { grid: { display: false }, ticks: { color: 'oklch(0.5 0.03 258)', font: { size: 10.5 } } },
+            },
+        },
+    });
+}
+
 async function eiLoadDrivers() {
     eiSetTitleBadge('eiDriversTitle', true);
     eiDriversData = await eiFetch('engagement-drivers');
+    eiRenderDriversChart();
     const container = document.getElementById('eiDriversContainer');
     if (!eiDriversData.length) { container.innerHTML = '<div class="text-center py-3 text-muted">No data for the selected filters.</div>'; return; }
     container.innerHTML = eiDriversData.map(d => `
@@ -625,6 +743,7 @@ async function eiLoadAll() {
     await Promise.all([
         eiLoadReasons(), eiLoadReturn(), eiLoadExperience(), eiLoadTraining(), eiLoadFairTreatment(),
         eiLoadWorkload(), eiLoadWorkPressure(), eiLoadDrivers(), eiLoadComments(), eiLoadSentiment(),
+        eiLoadJobTitleChart(), eiLoadReasonsTrendChart(), eiLoadReasonReturnChart(),
     ]);
     eiRenderSummary();
     eiRenderInsights();

@@ -325,4 +325,66 @@ public class ExitInterviewService : IExitInterviewService
 
         return result.OrderByDescending(c => c.SubmittedAt).ToList();
     }
+
+    public async Task<List<ChartDataItem>> GetByJobTitleAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.JobTitle));
+
+    private static bool IsYes(string answer)
+    {
+        var a = answer.Trim().ToLowerInvariant();
+        return a is "yes" or "y" or "true" or "نعم";
+    }
+
+    public async Task<List<ExitReasonTrendPoint>> GetReasonsTrendAsync(ExitInterviewFilter filter, string role, string? assignedName)
+    {
+        // Always full history — same rule as other trend charts elsewhere in the
+        // app — so the filter's own Year/Months selection is dropped here while
+        // the store/leader/OC/OM scoping is kept.
+        var allTimeFilter = new ExitInterviewFilter
+        {
+            Store = filter.Store, StoreLeader = filter.StoreLeader,
+            OperationConsultant = filter.OperationConsultant, OperationManager = filter.OperationManager,
+        };
+        var rows = await FilteredAsync(allTimeFilter, role, assignedName, e => new { e.Month, e.Year, e.ReasonForLeaving });
+        var dated = rows.Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
+        if (dated.Count == 0) return new List<ExitReasonTrendPoint>();
+
+        var topReasons = dated.GroupBy(r => r.ReasonForLeaving)
+            .OrderByDescending(g => g.Count())
+            .Take(5)
+            .Select(g => g.Key)
+            .ToList();
+
+        return dated.GroupBy(r => (r.Year, r.Month))
+            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+            .Select(g => new ExitReasonTrendPoint
+            {
+                Label = new DateOnly(g.Key.Year, g.Key.Month, 1).ToString("MMM yy"),
+                Counts = topReasons.ToDictionary(reason => reason, reason => g.Count(r => r.ReasonForLeaving == reason)),
+            })
+            .ToList();
+    }
+
+    public async Task<List<ExitReasonReturnItem>> GetReasonVsWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName)
+    {
+        var rows = await FilteredAsync(filter, role, assignedName, e => new { e.ReasonForLeaving, e.WouldReturn });
+        var valid = rows.Where(r => !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
+
+        return valid.GroupBy(r => r.ReasonForLeaving)
+            .Select(g =>
+            {
+                var withAnswer = g.Where(r => !string.IsNullOrWhiteSpace(r.WouldReturn)).ToList();
+                var yesCount = withAnswer.Count(r => IsYes(r.WouldReturn));
+                return new ExitReasonReturnItem
+                {
+                    Reason = g.Key,
+                    Count = g.Count(),
+                    WouldReturnPercent = withAnswer.Count > 0 ? Math.Round(yesCount * 100.0 / withAnswer.Count, 1) : 0,
+                };
+            })
+            .Where(x => x.Count >= 2)
+            .OrderByDescending(x => x.Count)
+            .Take(6)
+            .ToList();
+    }
 }

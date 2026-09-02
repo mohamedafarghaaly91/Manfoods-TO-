@@ -394,6 +394,13 @@
   <data name="Chart_WorkPressureReasonSub" xml:space="preserve"><value>لما وصفوا ضغط العمل بإنه شديد، إيه كان السبب من وجهة نظرهم</value></data>
   <data name="Chart_EngagementDrivers" xml:space="preserve"><value>محركات الانخراط</value></data>
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>نسبة الردود الإيجابية — الأقل رضا أولًا</value></data>
+  <data name="Chart_EiByJobTitle" xml:space="preserve"><value>مقابلات الخروج حسب الوظيفة</value></data>
+  <data name="Chart_EiByJobTitleSub" xml:space="preserve"><value>أكتر الوظائف اللي بتعمل مقابلات خروج</value></data>
+  <data name="Chart_EiReasonsTrend" xml:space="preserve"><value>أسباب الاستقالة عبر الوقت</value></data>
+  <data name="Chart_EiReasonsTrendSub" xml:space="preserve"><value>عدد كل سبب من أهم الأسباب شهر بشهر، عبر كل الفترات</value></data>
+  <data name="Chart_EiDriversChartSub" xml:space="preserve"><value>نفس بيانات القائمة تحت، كتشارت واحد — الأقل رضا (الأحوج لاهتمام) أولًا</value></data>
+  <data name="Chart_EiReasonVsReturn" xml:space="preserve"><value>سبب الاستقالة مقابل الرغبة فى العودة</value></data>
+  <data name="Chart_EiReasonVsReturnSub" xml:space="preserve"><value>لكل سبب من أهم الأسباب، نسبة اللي قالوا هيرجعوا يشتغلوا تاني</value></data>
   <data name="Chart_Comments" xml:space="preserve"><value>التعليقات</value></data>
   <data name="EI_SearchComments" xml:space="preserve"><value>ابحث في التعليقات...</value></data>
   <data name="EI_AllQuestions" xml:space="preserve"><value>كل الأسئلة</value></data>

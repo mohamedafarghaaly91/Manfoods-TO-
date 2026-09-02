@@ -95,6 +95,30 @@ public class ExitInterviewApiController : ControllerBase
         return Ok(await _exitInterviews.GetEngagementDriversAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
     }
 
+    [HttpGet("by-job-title")]
+    public async Task<IActionResult> ByJobTitle([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] int? year, [FromQuery] string? months)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _exitInterviews.GetByJobTitleAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+    }
+
+    [HttpGet("reasons-trend")]
+    public async Task<IActionResult> ReasonsTrend([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] int? year, [FromQuery] string? months)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _exitInterviews.GetReasonsTrendAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+    }
+
+    [HttpGet("reason-vs-would-return")]
+    public async Task<IActionResult> ReasonVsWouldReturn([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] int? year, [FromQuery] string? months)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _exitInterviews.GetReasonVsWouldReturnAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+    }
+
     [HttpGet("sentiment-summary")]
     public async Task<IActionResult> SentimentSummary([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
         [FromQuery] int? year, [FromQuery] string? months)

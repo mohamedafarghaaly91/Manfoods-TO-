@@ -394,6 +394,13 @@
   <data name="Chart_WorkPressureReasonSub" xml:space="preserve"><value>When workload was described as heavy, what they said caused it</value></data>
   <data name="Chart_EngagementDrivers" xml:space="preserve"><value>Engagement Drivers</value></data>
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>% who answered positively — lowest first</value></data>
+  <data name="Chart_EiByJobTitle" xml:space="preserve"><value>Exit Interviews by Job Title</value></data>
+  <data name="Chart_EiByJobTitleSub" xml:space="preserve"><value>Which roles are giving the most exit interviews</value></data>
+  <data name="Chart_EiReasonsTrend" xml:space="preserve"><value>Reasons for Leaving Over Time</value></data>
+  <data name="Chart_EiReasonsTrendSub" xml:space="preserve"><value>Monthly count of the top reasons, all-time</value></data>
+  <data name="Chart_EiDriversChartSub" xml:space="preserve"><value>Same data as the list below, as a single chart — lowest (most in need of attention) first</value></data>
+  <data name="Chart_EiReasonVsReturn" xml:space="preserve"><value>Reason for Leaving vs. Would Return</value></data>
+  <data name="Chart_EiReasonVsReturnSub" xml:space="preserve"><value>For each top reason, the share of people who said they'd work here again</value></data>
   <data name="Chart_Comments" xml:space="preserve"><value>Comments</value></data>
   <data name="EI_SearchComments" xml:space="preserve"><value>Search comments…</value></data>
   <data name="EI_AllQuestions" xml:space="preserve"><value>All Questions</value></data>

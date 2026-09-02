@@ -39,3 +39,20 @@ public class ExitInterviewCommentItem
     public string Text { get; set; } = "";
     public DateTime? SubmittedAt { get; set; }
 }
+
+/// <summary>One month's count of each of the top reasons for leaving, for the
+/// Reasons Trend chart.</summary>
+public class ExitReasonTrendPoint
+{
+    public string Label { get; set; } = "";
+    public Dictionary<string, int> Counts { get; set; } = new();
+}
+
+/// <summary>For one reason for leaving: how many gave it, and what share of
+/// them said they'd return — the "Reason vs Would Return" cross-analysis.</summary>
+public class ExitReasonReturnItem
+{
+    public string Reason { get; set; } = "";
+    public int Count { get; set; }
+    public double WouldReturnPercent { get; set; }
+}

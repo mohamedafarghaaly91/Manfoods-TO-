@@ -128,6 +128,12 @@ public class NoOpExitInterviewService : IExitInterviewService
         Task.FromResult(names.ToDictionary(n => n, _ => new ExitSentimentSummary()));
     public Task<List<ExitInterviewCommentItem>> GetCommentsAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
         Task.FromResult(new List<ExitInterviewCommentItem>());
+    public Task<List<ChartDataItem>> GetByJobTitleAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        Task.FromResult(new List<ChartDataItem>());
+    public Task<List<ExitReasonTrendPoint>> GetReasonsTrendAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        Task.FromResult(new List<ExitReasonTrendPoint>());
+    public Task<List<ExitReasonReturnItem>> GetReasonVsWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        Task.FromResult(new List<ExitReasonReturnItem>());
 }
 
 public class NoOpStoreService : IStoreService
