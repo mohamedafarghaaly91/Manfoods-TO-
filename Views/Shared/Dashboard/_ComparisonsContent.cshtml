@@ -592,10 +592,10 @@ function cmpDeltaBadge(a, b, lowerIsBetter) {
 
 function cmpRenderKpis(dataA, dataB) {
     const metrics = [
-        { label: 'Turnover %',          desc: 'Resignations ÷ average headcount',            a: dataA.kpi.turnoverRate,        b: dataB.kpi.turnoverRate,        fmt: v => v.toFixed(1) + '%', lowerIsBetter: true },
         { label: 'Headcount',           desc: 'Employees on the active roster',              a: dataA.kpi.totalHeadcount,      b: dataB.kpi.totalHeadcount,      fmt: v => v,                  lowerIsBetter: null },
         { label: 'New Hires',           desc: 'Employees hired in the period',               a: dataA.kpi.newHires,            b: dataB.kpi.newHires,            fmt: v => v,                  lowerIsBetter: false },
         { label: 'Resignations',        desc: 'Total resignations in the period',            a: dataA.kpi.totalResignations,   b: dataB.kpi.totalResignations,   fmt: v => v,                  lowerIsBetter: true },
+        { label: 'Turnover %',          desc: 'Resignations ÷ average headcount',            a: dataA.kpi.turnoverRate,        b: dataB.kpi.turnoverRate,        fmt: v => v.toFixed(1) + '%', lowerIsBetter: true },
         { label: '90-Day Early Leavers',desc: 'Resigned within 90 days of hire',             a: dataA.ninety.earlyLeavers,     b: dataB.ninety.earlyLeavers,     fmt: v => v,                  lowerIsBetter: true },
         { label: '90-Day Turnover Rate',desc: 'Early leavers ÷ hires in the cohort',         a: dataA.ninety.rate,             b: dataB.ninety.rate,             fmt: v => v.toFixed(1) + '%', lowerIsBetter: true }
     ];
