@@ -153,6 +153,53 @@ const ChartColors = (function () {
         return labels.map(likertColor);
     }
 
+    /* Admin-configurable rate→color thresholds (Settings page). One
+       independent rule set per metric: 'turnover', 'ninety-day', 'retention'.
+       Every page that colors a rate by threshold should go through these
+       instead of hardcoding its own cutoffs, so the Settings page actually
+       controls the whole site. */
+    const RATE_COLOR_MAP = {
+        none:           { bg: null, fg: null },
+        good:           { bg: SEMANTIC.GOOD, fg: '#fff' },
+        warning:        { bg: SEMANTIC.WARNING, fg: '#1C1C27' },
+        warning_strong: { bg: SEMANTIC.WARNING_STRONG, fg: '#fff' },
+        bad:            { bg: SEMANTIC.BAD, fg: '#fff' },
+    };
+
+    const _rateRulesCache = {};
+    async function loadRateRules(metric) {
+        if (_rateRulesCache[metric]) return _rateRulesCache[metric];
+        const promise = fetch(`/api/settings/color-rules/${metric}`)
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
+        _rateRulesCache[metric] = promise;
+        const rules = await promise;
+        if (!rules || !rules.length) { delete _rateRulesCache[metric]; return null; }
+        _rateRulesCache[metric] = rules;
+        return rules;
+    }
+
+    function matchRateColorName(rules, percent) {
+        if (!rules || !rules.length) return 'none';
+        for (const r of rules) {
+            if (r.upTo === null || r.upTo === undefined) return r.color;
+            if (percent <= r.upTo) return r.color;
+        }
+        return rules[rules.length - 1].color;
+    }
+
+    function rateColor(rules, percent) {
+        return RATE_COLOR_MAP[matchRateColorName(rules, percent)] || RATE_COLOR_MAP.none;
+    }
+
+    function rateBadgeHtml(rules, percent, decimals) {
+        decimals = decimals ?? 1;
+        const c = rateColor(rules, percent);
+        const text = percent.toFixed(decimals) + '%';
+        if (!c.bg) return `<span style="font-weight:700">${text}</span>`;
+        return `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${text}</span>`;
+    }
+
     return {
         SEMANTIC,
         LIKERT_SCALE,
@@ -168,5 +215,9 @@ const ChartColors = (function () {
         likertLevel,
         likertColor,
         colorsByLikert,
+        loadRateRules,
+        matchRateColorName,
+        rateColor,
+        rateBadgeHtml,
     };
 })();

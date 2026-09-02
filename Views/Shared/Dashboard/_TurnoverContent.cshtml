@@ -457,11 +457,11 @@ loadStores = async function () {
 /* ── Extra sections (Smart Insights, Store Comparison, OC/OM, Payroll chart) ── */
 let tvStoreData = [], tvSortCol = 'turnoverRate', tvSortAsc = false;
 
+/* Admin-configurable via the Settings page (loaded once in loadAll below). */
+let tvTurnoverColorRules = null;
 function tvRateColor(rate) {
-    if (rate >= 15) return { bg: ChartColors.SEMANTIC.BAD, fg: '#fff' };
-    if (rate >= 8)  return { bg: ChartColors.SEMANTIC.WARNING_STRONG, fg: '#fff' };
-    if (rate >= 4)  return { bg: ChartColors.SEMANTIC.WARNING, fg: '#1C1C27' };
-    return { bg: ChartColors.SEMANTIC.GOOD, fg: '#fff' };
+    const c = ChartColors.rateColor(tvTurnoverColorRules, rate);
+    return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
 }
 
 /* Store Comparison ----------------------------------------- */
@@ -786,6 +786,7 @@ loadKpis = tvLoadKpis;
 /* Hook everything into dashboard.js's loadAll() so it all refreshes together */
 const _tvOrigLoadAll = loadAll;
 loadAll = async function () {
+    if (!tvTurnoverColorRules) tvTurnoverColorRules = await ChartColors.loadRateRules('turnover');
     await _tvOrigLoadAll();
     tvSetTitleBadge('tvJobTitleTitle', true);
     tvSetTitleBadge('tvTenureTitle', true);
@@ -821,13 +822,12 @@ function fmtPeriod(pk) {
 function mxRateCell(rate) {
     if (rate === null || rate === undefined)
         return `<td class="px-2 py-2 text-center text-muted" style="color:#ccc">—</td>`;
-    const bg = rate >= 15 ? ChartColors.SEMANTIC.BAD
-             : rate >= 8  ? ChartColors.SEMANTIC.WARNING_STRONG
-             : rate >= 4  ? ChartColors.SEMANTIC.WARNING
-             : ChartColors.SEMANTIC.GOOD;
-    const fg = rate >= 4 ? (rate >= 8 ? '#fff' : '#1C1C27') : '#fff';
+    const c = tvRateColor(rate);
+    const style = c.bg === 'transparent'
+        ? 'font-weight:700;white-space:nowrap'
+        : `background:${c.bg};color:${c.fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap`;
     return `<td class="px-2 py-2 text-center">
-        <span style="background:${bg};color:${fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap">${rate.toFixed(1)}%</span>
+        <span style="${style}">${rate.toFixed(1)}%</span>
     </td>`;
 }
 

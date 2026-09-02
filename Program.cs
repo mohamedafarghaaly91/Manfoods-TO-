@@ -109,6 +109,7 @@ builder.Services.AddScoped<IEarlyWarningService, EarlyWarningService>();
 builder.Services.AddScoped<IScorecardService, ScorecardService>();
 builder.Services.AddScoped<IStoreActionPlanService, StoreActionPlanService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IColorRulesService, ColorRulesService>();
 
 var app = builder.Build();
 app.UseForwardedHeaders(new ForwardedHeadersOptions

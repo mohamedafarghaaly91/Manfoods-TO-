@@ -43,6 +43,8 @@ public class DashboardController : Controller
 
     public IActionResult Turnover() => View();
 
+    public IActionResult Settings() => View();
+
     public IActionResult Comparisons() => View();
 
     public IActionResult Workforce() => View();

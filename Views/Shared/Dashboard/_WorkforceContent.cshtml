@@ -387,12 +387,12 @@ async function wfLoadStoreTable() {
 }
 
 /* OC / OM tables (reusing the same rendering approach as Turnover) ------- */
+let wfTurnoverColorRules = null;
 function wfRenderOcOmTable(tbodyId, rows) {
     const tbody = document.getElementById(tbodyId);
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No data for this period.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
-        const bg = r.avgTurnoverRate >= 15 ? ChartColors.SEMANTIC.BAD : r.avgTurnoverRate >= 8 ? ChartColors.SEMANTIC.WARNING_STRONG : r.avgTurnoverRate >= 4 ? ChartColors.SEMANTIC.WARNING : ChartColors.SEMANTIC.GOOD;
-        const badge = `<span style="background:${bg};color:#fff;padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.avgTurnoverRate.toFixed(1)}%</span>`;
+        const badge = ChartColors.rateBadgeHtml(wfTurnoverColorRules, r.avgTurnoverRate);
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${r.name}</td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
@@ -424,6 +424,7 @@ async function wfLoadOcOm() {
    loadPeriods() (called at the bottom of dashboard.js) triggers once
    periods are loaded. */
 loadAll = async function () {
+    if (!wfTurnoverColorRules) wfTurnoverColorRules = await ChartColors.loadRateRules('turnover');
     await Promise.all([
         wfLoadKpis(),
         wfLoadJobTitleChart(),

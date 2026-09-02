@@ -156,6 +156,7 @@
   <data name="DM_MonthlyDataBadge" xml:space="preserve"><value>بيانات شهرية</value></data>
   <data name="DM_ExitInterviewsBadge" xml:space="preserve"><value>مقابلات خروج</value></data>
   <data name="Nav_Users" xml:space="preserve"><value>المستخدمون</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>الإعدادات</value></data>
 
   <!-- Login -->
   <data name="Login_SignInToContinue" xml:space="preserve"><value>سجّل دخولك للمتابعة</value></data>
@@ -313,6 +314,8 @@
   <data name="Page_ReportsSub" xml:space="preserve"><value>تصدير كل أجزاء البوابة إلى Excel</value></data>
   <data name="Page_Users" xml:space="preserve"><value>المستخدمون</value></data>
   <data name="Page_UsersSub" xml:space="preserve"><value>إدارة الوصول للنظام والأدوار</value></data>
+  <data name="Page_Settings" xml:space="preserve"><value>الإعدادات</value></data>
+  <data name="Page_SettingsSub" xml:space="preserve"><value>اختر حدود النسب اللي بتلوّن الشارات في كل الموقع</value></data>
   <data name="Page_CreateUser" xml:space="preserve"><value>إنشاء مستخدم</value></data>
   <data name="Page_CreateUserSub" xml:space="preserve"><value>إضافة مستخدم جديد للنظام</value></data>
   <data name="Page_EditUser" xml:space="preserve"><value>تعديل مستخدم</value></data>

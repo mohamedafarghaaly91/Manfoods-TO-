@@ -156,6 +156,7 @@
   <data name="DM_MonthlyDataBadge" xml:space="preserve"><value>Monthly Data</value></data>
   <data name="DM_ExitInterviewsBadge" xml:space="preserve"><value>Exit Interviews</value></data>
   <data name="Nav_Users" xml:space="preserve"><value>Users</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>Settings</value></data>
 
   <!-- Login -->
   <data name="Login_SignInToContinue" xml:space="preserve"><value>Sign in to continue</value></data>
@@ -313,6 +314,8 @@
   <data name="Page_ReportsSub" xml:space="preserve"><value>Export every part of the portal to Excel</value></data>
   <data name="Page_Users" xml:space="preserve"><value>Users</value></data>
   <data name="Page_UsersSub" xml:space="preserve"><value>Manage system access and roles</value></data>
+  <data name="Page_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Page_SettingsSub" xml:space="preserve"><value>Choose the rate thresholds that color badges site-wide</value></data>
   <data name="Page_CreateUser" xml:space="preserve"><value>Create User</value></data>
   <data name="Page_CreateUserSub" xml:space="preserve"><value>Add a new system user</value></data>
   <data name="Page_EditUser" xml:space="preserve"><value>Edit User</value></data>

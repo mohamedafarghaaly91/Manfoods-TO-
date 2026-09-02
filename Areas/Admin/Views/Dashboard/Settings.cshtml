@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = L["Page_Settings"].Value;
+}
+
+<style>
+.set-card { margin-bottom: 28px; }
+.set-rules { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.set-rule-row { display: flex; align-items: center; gap: 10px; }
+.set-rule-row .form-control, .set-rule-row .form-select { max-width: 160px; }
+.set-swatch { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.08); }
+.set-preview { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
+.set-save-status { font-size: 12.5px; margin-inline-start: 10px; }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@L["Page_Settings"]</h1>
+        <p class="page-subtitle">@L["Page_SettingsSub"]</p>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+<div id="setSections"></div>
+
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script>
+const SET_METRICS = [
+    { key: 'turnover',   title: 'Turnover Rate',  sub: 'Colors used everywhere a Turnover Rate % is shown (Store Comparison, OC/OM/OD tables, Full Data Table, Scorecard, store health cards).' },
+    { key: 'ninety-day', title: '90-Day Rate',     sub: 'Colors used everywhere an early-leaver 90-Day Rate % is shown.' },
+    { key: 'retention',  title: 'Retention Rate',  sub: 'Colors used for retention milestone cards and the store retention ranking chart. Higher is better here, so order your rules the other way around.' },
+];
+
+const SET_COLOR_OPTIONS = [
+    { value: 'none',           label: 'No color (plain text)' },
+    { value: 'good',           label: 'Green' },
+    { value: 'warning',        label: 'Yellow' },
+    { value: 'warning_strong', label: 'Orange' },
+    { value: 'bad',            label: 'Red' },
+];
+
+const setState = {}; // metric -> array of { upTo, color }
+
+function setColorHex(name) {
+    return { none: '#ffffff', good: ChartColors.SEMANTIC.GOOD, warning: ChartColors.SEMANTIC.WARNING,
+             warning_strong: ChartColors.SEMANTIC.WARNING_STRONG, bad: ChartColors.SEMANTIC.BAD }[name] || '#fff';
+}
+
+function setColorSelectHtml(selected) {
+    return `<select class="form-select form-select-sm set-color-select">
+        ${SET_COLOR_OPTIONS.map(o => `<option value="${o.value}" ${o.value === selected ? 'selected' : ''}>${o.label}</option>`).join('')}
+    </select>`;
+}
+
+function setRenderSection(metric) {
+    const section = document.getElementById(`set-section-${metric.key}`);
+    const rules = setState[metric.key];
+    const rulesEl = section.querySelector('.set-rules');
+
+    rulesEl.innerHTML = rules.map((r, i) => {
+        const isLast = i === rules.length - 1;
+        if (isLast) {
+            return `<div class="set-rule-row" data-i="${i}">
+                <span style="min-width:160px;font-size:13px;color:var(--text-2)">Everything above the last rule</span>
+                <span>&rarr;</span>
+                ${setColorSelectHtml(r.color)}
+                <span class="set-swatch" style="background:${setColorHex(r.color)}"></span>
+            </div>`;
+        }
+        return `<div class="set-rule-row" data-i="${i}">
+            <span style="font-size:13px;color:var(--text-2)">Up to</span>
+            <input type="number" step="0.1" min="0" class="form-control form-control-sm set-upto-input" value="${r.upTo}">
+            <span style="font-size:13px;color:var(--text-2)">%</span>
+            <span>&rarr;</span>
+            ${setColorSelectHtml(r.color)}
+            <span class="set-swatch" style="background:${setColorHex(r.color)}"></span>
+            <button type="button" class="btn btn-sm btn-outline-danger set-remove-btn" style="padding:2px 9px"><i class="bi bi-trash"></i></button>
+        </div>`;
+    }).join('');
+
+    rulesEl.querySelectorAll('.set-rule-row').forEach(row => {
+        const i = parseInt(row.dataset.i);
+        const uptoInput = row.querySelector('.set-upto-input');
+        if (uptoInput) uptoInput.addEventListener('input', () => { rules[i].upTo = parseFloat(uptoInput.value) || 0; setRenderPreview(metric); });
+        row.querySelector('.set-color-select').addEventListener('change', e => {
+            rules[i].color = e.target.value;
+            row.querySelector('.set-swatch').style.background = setColorHex(e.target.value);
+            setRenderPreview(metric);
+        });
+        const removeBtn = row.querySelector('.set-remove-btn');
+        if (removeBtn) removeBtn.addEventListener('click', () => {
+            rules.splice(i, 1);
+            setRenderSection(metric);
+        });
+    });
+
+    setRenderPreview(metric);
+}
+
+function setRenderPreview(metric) {
+    const rules = setState[metric.key];
+    const el = document.getElementById(`set-preview-${metric.key}`);
+    // A handful of sample percentages spanning below/at/between/above the configured cutoffs.
+    const cutoffs = rules.filter(r => r.upTo !== null).map(r => r.upTo);
+    const max = cutoffs.length ? Math.max(...cutoffs) : 20;
+    const samples = new Set([0, ...cutoffs, ...cutoffs.map(c => c + 1), Math.round(max * 1.5)]);
+    el.innerHTML = [...samples].sort((a, b) => a - b).map(p => ChartColors.rateBadgeHtml(rules, p)).join('');
+}
+
+function setAddRule(metric) {
+    const rules = setState[metric.key];
+    // Insert before the catch-all (last) row, defaulting just above the previous cutoff.
+    const prevUpTo = rules.length > 1 ? rules[rules.length - 2].upTo : 0;
+    rules.splice(rules.length - 1, 0, { upTo: prevUpTo + 1, color: 'warning' });
+    setRenderSection(metric);
+}
+
+async function setSave(metric) {
+    const statusEl = document.getElementById(`set-status-${metric.key}`);
+    const rules = setState[metric.key];
+    // Keep rules sorted ascending by upTo (catch-all null rule stays last).
+    const sorted = rules.slice(0, -1).sort((a, b) => a.upTo - b.upTo).concat(rules[rules.length - 1]);
+    setState[metric.key] = sorted;
+    setRenderSection(metric);
+
+    statusEl.textContent = 'Saving...';
+    statusEl.style.color = 'var(--text-3)';
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const r = await fetch(`/api/settings/color-rules/${metric.key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify(sorted.map(r => ({ upTo: r.upTo === null ? null : r.upTo, color: r.color }))),
+        });
+        if (!r.ok) { statusEl.textContent = 'Save failed: ' + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
+        statusEl.textContent = 'Saved.';
+        statusEl.style.color = ChartColors.SEMANTIC.GOOD;
+    } catch (e) {
+        statusEl.textContent = 'Save failed: ' + e.message;
+        statusEl.style.color = ChartColors.SEMANTIC.BAD;
+    }
+}
+
+async function setInit() {
+    const container = document.getElementById('setSections');
+    container.innerHTML = SET_METRICS.map(m => `
+        <div class="chart-card set-card" id="set-section-${m.key}">
+            <div class="chart-header">
+                <h6>${m.title}</h6>
+                <p>${m.sub}</p>
+            </div>
+            <div style="padding:0 20px 20px">
+                <div class="set-rules"></div>
+                <div class="set-preview" id="set-preview-${m.key}"></div>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-secondary set-add-btn"><i class="bi bi-plus-lg me-1"></i>Add rule</button>
+                    <button type="button" class="btn btn-sm btn-danger ms-2 set-save-btn">Save</button>
+                    <span class="set-save-status" id="set-status-${m.key}"></span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    for (const m of SET_METRICS) {
+        const r = await fetch(`/api/settings/color-rules/${m.key}`);
+        setState[m.key] = r.ok ? await r.json() : [];
+        setRenderSection(m);
+        document.getElementById(`set-section-${m.key}`).querySelector('.set-add-btn').addEventListener('click', () => setAddRule(m));
+        document.getElementById(`set-section-${m.key}`).querySelector('.set-save-btn').addEventListener('click', () => setSave(m));
+    }
+}
+
+setInit();
+</script>

@@ -915,11 +915,11 @@ async function ntdLoadGenderChart() {
 /* Store Comparison (90-day) -------------------------------------------- */
 let ntdStoreData = [], ntdStoreSortCol = 'rate', ntdStoreSortAsc = false;
 
+/* Admin-configurable via the Settings page (loaded once in init below). */
+let ntdNinetyDayColorRules = null;
 function ntdRateColor(rate) {
-    if (rate >= 50) return { bg: ChartColors.SEMANTIC.BAD, fg: '#fff' };
-    if (rate >= 25) return { bg: ChartColors.SEMANTIC.WARNING_STRONG, fg: '#fff' };
-    if (rate >= 10) return { bg: ChartColors.SEMANTIC.WARNING, fg: '#1C1C27' };
-    return { bg: ChartColors.SEMANTIC.GOOD, fg: '#fff' };
+    const c = ChartColors.rateColor(ntdNinetyDayColorRules, rate);
+    return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
 }
 
 function ntdRenderStoreTable() {
@@ -1060,13 +1060,15 @@ function ndMxFmtPeriod(pk) {
 function ndMxRateCell(rate) {
     if (rate === null || rate === undefined)
         return `<td class="px-2 py-2 text-center text-muted" style="color:#ccc">—</td>`;
-    const bg = rate >= 15 ? ChartColors.SEMANTIC.BAD
-             : rate >= 8  ? ChartColors.SEMANTIC.WARNING_STRONG
-             : rate >= 4  ? ChartColors.SEMANTIC.WARNING
-             : ChartColors.SEMANTIC.GOOD;
-    const fg = rate >= 4 ? (rate >= 8 ? '#fff' : '#1C1C27') : '#fff';
+    // Reuses ntdRateColor so this stays consistent with every other 90-Day
+    // Rate badge on the page (this cell used to have its own hardcoded
+    // Turnover-style thresholds, mismatched with the rest of the page).
+    const c = ntdRateColor(rate);
+    const style = c.bg === 'transparent'
+        ? 'font-weight:700;white-space:nowrap'
+        : `background:${c.bg};color:${c.fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap`;
     return `<td class="px-2 py-2 text-center">
-        <span style="background:${bg};color:${fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap">${rate.toFixed(1)}%</span>
+        <span style="${style}">${rate.toFixed(1)}%</span>
     </td>`;
 }
 
@@ -1193,6 +1195,7 @@ document.querySelectorAll('#ntdLeaversTable .ntd-sort').forEach(th => {
 });
 
 (async function init() {
+    ntdNinetyDayColorRules = await ChartColors.loadRateRules('ninety-day');
     const hasData = await ntdLoadFilters();
     if (hasData) await Promise.all([ntdLoadTrend(), ntdLoadAll(), ntdLoadTrendMatrix()]);
 })();

@@ -305,6 +305,22 @@ function scRateBadge(rate, goodIsHigh) {
     return `<span style="background:${bg};color:${fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${rate.toFixed(1)}%</span>`;
 }
 
+/* Turnover/90-Day/Retention rate columns go through the Settings-page rules
+   instead (scRateBadge above stays as-is for sentiment% and flagged%, which
+   aren't part of that system). */
+let scColorRules = { turnover: null, ninetyDay: null, retention: null };
+async function scLoadColorRules() {
+    const [t, n, r] = await Promise.all([
+        ChartColors.loadRateRules('turnover'),
+        ChartColors.loadRateRules('ninety-day'),
+        ChartColors.loadRateRules('retention'),
+    ]);
+    scColorRules = { turnover: t, ninetyDay: n, retention: r };
+}
+function scMetricBadge(rate, metric) {
+    return ChartColors.rateBadgeHtml(scColorRules[metric], rate);
+}
+
 /* Months multi-select ---------------------------------------------------- */
 function scBuildMonthsOptions() {
     const container = document.getElementById('scMonthsOptions');
@@ -431,9 +447,9 @@ async function scLoadRanking() {
             <td class="px-3 py-2 fw-semibold">${r.name}</td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
-            <td class="px-3 py-2 text-center">${scRateBadge(r.turnoverRate, false)}</td>
-            <td class="px-3 py-2 text-center">${scRateBadge(r.earlyLeaver90Rate, false)}</td>
-            <td class="px-3 py-2 text-center">${scRateBadge(r.retention180Rate, true)}</td>
+            <td class="px-3 py-2 text-center">${scMetricBadge(r.turnoverRate, 'turnover')}</td>
+            <td class="px-3 py-2 text-center">${scMetricBadge(r.earlyLeaver90Rate, 'ninetyDay')}</td>
+            <td class="px-3 py-2 text-center">${scMetricBadge(r.retention180Rate, 'retention')}</td>
             <td class="px-3 py-2 text-center">${r.exitResponseCount > 0 ? scRateBadge(r.exitSentimentPercent, true) : '<span class="text-muted" style="font-size:11px">لا يوجد بيانات</span>'}</td>
         </tr>`).join('');
 }
@@ -475,7 +491,7 @@ async function scLoadLeaderDetail() {
             <td class="px-3 py-2 text-center">${r.periodLabel}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2 text-center">${r.resignations}</td>
-            <td class="px-3 py-2 text-center">${scRateBadge(r.turnoverRate, false)}</td>
+            <td class="px-3 py-2 text-center">${scMetricBadge(r.turnoverRate, 'turnover')}</td>
         </tr>`).join('');
 
     const ctx = document.getElementById('scLeaderChart');
@@ -573,6 +589,7 @@ async function scLoadAll() {
 }
 
 (async function init() {
+    await scLoadColorRules();
     const hasData = await scLoadFilters();
     if (hasData) await scLoadAll();
 })();
