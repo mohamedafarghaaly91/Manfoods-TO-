@@ -15,32 +15,35 @@ public class AuthService : IAuthService
         _logger = logger;
     }
 
-    public async Task<User?> ValidateAsync(string email, string password)
+    public async Task<(User? User, string? FailReason)> ValidateAsync(string email, string password)
     {
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == email.ToLower());
 
         if (user == null)
         {
-            _logger.LogWarning("Login failed: no user found for email {Email}", email.ToLower());
-            return null;
+            var reason = $"No user found for email '{email.ToLower()}'.";
+            _logger.LogWarning("Login failed: {Reason}", reason);
+            return (null, reason);
         }
         // Bulk-created accounts start with no password set (pending activation
         // via the OTP flow) — reject the login attempt instead of letting
         // BCrypt.Verify throw on a null/empty hash.
         if (string.IsNullOrEmpty(user.PasswordHash))
         {
-            _logger.LogWarning("Login failed: user {Email} has no password hash set", email.ToLower());
-            return null;
+            var reason = $"User '{email.ToLower()}' has no password hash set.";
+            _logger.LogWarning("Login failed: {Reason}", reason);
+            return (null, reason);
         }
 
         if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
         {
-            _logger.LogWarning("Login failed: password mismatch for {Email}", email.ToLower());
-            return null;
+            var reason = $"Password mismatch for '{email.ToLower()}'.";
+            _logger.LogWarning("Login failed: {Reason}", reason);
+            return (null, reason);
         }
 
-        return user;
+        return (user, null);
     }
 
     public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
