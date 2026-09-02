@@ -265,12 +265,12 @@ body.admin-theme .empty-state { color: var(--text-3); }
     text-decoration: none;
 }
 .admin-global-brand-line1 {
-    font-size: 12px; font-weight: 600; color: var(--red);
-    font-family: 'Inter', sans-serif; letter-spacing: .02em;
+    font-size: 15px; font-weight: 600; color: var(--red);
+    font-family: 'Times New Roman', Times, serif; letter-spacing: .02em;
 }
 .admin-global-brand-main {
     font-size: 17px; font-weight: 600; color: var(--red);
-    font-family: 'Inter', sans-serif; letter-spacing: -.01em;
+    font-family: 'Times New Roman', Times, serif; letter-spacing: -.01em;
     margin-top: 3px;
 }
 .admin-global-logo {
