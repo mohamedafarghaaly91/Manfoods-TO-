@@ -5,7 +5,12 @@
     var userEmail    = session?.GetString("Email") ?? "";
     var userRole     = session?.GetString("Role")  ?? "";
     var currentPath  = HttpCtx.HttpContext?.Request.Path.Value ?? "";
-    bool IsActive(string seg) => currentPath.Contains(seg, StringComparison.OrdinalIgnoreCase);
+    // Exact path-segment match, not substring — "Turnover" is itself a substring
+    // of "NinetyDayTurnover", so a plain Contains() lit up both nav links at once
+    // whenever the 90-Day Turnover page was active.
+    bool IsActive(string seg) => currentPath
+        .Split('/', StringSplitOptions.RemoveEmptyEntries)
+        .Any(s => string.Equals(s, seg, StringComparison.OrdinalIgnoreCase));
     var initials     = string.IsNullOrEmpty(userEmail) ? "A" : userEmail.Substring(0,1).ToUpper();
     var currentLang  = HttpCtx.HttpContext?.Request.Cookies["mf-lang"] ?? "en";
     var isRtl        = currentLang == "ar";
