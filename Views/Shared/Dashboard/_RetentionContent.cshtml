@@ -207,8 +207,6 @@
 let rtYear = null, rtMonths = [], rtYearMonthsMap = {};
 let rtStoreFilter = '', rtOmFilter = '', rtOcFilter = '', rtSocFilter = '', rtOdFilter = '';
 
-const RT_MILESTONE_ORDER = ['6 Months', '1 Year', '2 Years', '3 Years', '4 Years', '5 Years'];
-
 function rtMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function rtMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
 function rtAnchor() { return rtMonths.length ? Math.max(...rtMonths) : null; }
@@ -430,10 +428,20 @@ async function rtLoadMilestones() {
     rtRenderMilestones(r.ok ? await r.json() : []);
 }
 
+/* Snapshot of today's active team (not the milestone eligibility model) — same
+   philosophy as the KPI cards above, so it stays meaningful for a young company
+   and ignores the cohort Months filter (badge shows "Latest period only"). */
 let rtSurvivalInstance;
 async function rtLoadSurvivalCurve() {
-    rtSetTitleBadge('rtSurvivalTitle', true);
-    const data = await rtFetch('survival-curve') || [];
+    rtSetTitleBadge('rtSurvivalTitle', false);
+    const q = new URLSearchParams();
+    if (rtStoreFilter) q.set('store', rtStoreFilter);
+    if (rtOmFilter)    q.set('om', rtOmFilter);
+    if (rtOcFilter)    q.set('oc', rtOcFilter);
+    if (rtSocFilter)   q.set('soc', rtSocFilter);
+    if (rtOdFilter)    q.set('od', rtOdFilter);
+    const r = await fetch(`/api/retention/active-tenure-curve?${q.toString()}`);
+    const data = r.ok ? await r.json() : [];
     const ctx = document.getElementById('rtSurvivalChart');
     if (!ctx) return;
     if (rtSurvivalInstance) rtSurvivalInstance.destroy();
@@ -442,7 +450,7 @@ async function rtLoadSurvivalCurve() {
         data: {
             labels: data.map(d => d.label),
             datasets: [{
-                label: 'Retained',
+                label: 'Still on the team',
                 data: data.map(d => d.retentionRate),
                 borderColor: 'oklch(0.55 0.19 25)',
                 backgroundColor: 'oklch(0.55 0.19 25 / .15)',
@@ -453,7 +461,7 @@ async function rtLoadSurvivalCurve() {
             responsive: true,
             plugins: {
                 legend: { display: false },
-                tooltip: { callbacks: { afterLabel: c => `Sample: ${data[c.dataIndex]?.sampleSize ?? 0} hires` } },
+                tooltip: { callbacks: { afterLabel: c => `Out of ${data[c.dataIndex]?.sampleSize ?? 0} active employees today` } },
                 datalabels: { display: false }
             },
             scales: {
@@ -464,8 +472,11 @@ async function rtLoadSurvivalCurve() {
     });
 }
 
-/* Trend chart — always full history (unaffected by the Months multi-select),
-   scoped from the selected Year onward, same rule as the Turnover page. */
+/* Trend chart — a single 6-Month Retention line per hire-month cohort, always
+   full history (unaffected by the Months multi-select), scoped from the
+   selected Year onward, same rule as the Turnover page's Monthly Trend.
+   Simplified from 6 overlapping milestone lines to just this one, since 6mo
+   is the only milestone with enough matured cohorts to read clearly today. */
 let rtTrendInstance;
 async function rtLoadTrend() {
     rtSetTitleBadge('rtTrendTitle', false);
@@ -481,25 +492,25 @@ async function rtLoadTrend() {
     const ctx = document.getElementById('rtTrendChart');
     if (!ctx) return;
     if (rtTrendInstance) rtTrendInstance.destroy();
+    const label = '6 Months';
     rtTrendInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: data.map(d => d.label),
-            datasets: RT_MILESTONE_ORDER.map(label => ({
-                label,
+            datasets: [{
+                label: '6-Month Retention',
                 data: data.map(d => d.rates?.[label] ?? null),
-                borderColor: ChartColors.RETENTION_MILESTONE_COLORS[label] || ChartColors.hashColor(label),
-                backgroundColor: 'transparent',
+                borderColor: 'oklch(0.55 0.19 25)',
+                backgroundColor: 'oklch(0.55 0.19 25 / .15)',
                 segment: { borderDash: c => data[c.p1DataIndex]?.provisional?.[label] ? [6, 4] : undefined },
-                tension: 0.3, fill: false, pointRadius: 3, spanGaps: true
-            }))
+                tension: 0.3, fill: true, pointRadius: 4, spanGaps: true
+            }]
         },
         options: {
             responsive: true,
-            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { labels: { color: 'oklch(0.5 0.03 258)', font: { size: 11 } } },
-                tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
+                legend: { display: false },
+                tooltip: { callbacks: { afterLabel: c => data[c.dataIndex]?.provisional?.[label] ? 'This cohort hasn\'t fully reached 6 months yet — provisional' : '' } },
                 datalabels: { display: false }
             },
             scales: {
@@ -512,8 +523,15 @@ async function rtLoadTrend() {
 
 let rtLeaderboardInstance;
 async function rtLoadLeaderboard() {
-    rtSetTitleBadge('rtLeaderboardTitle', true);
-    const data = await rtFetch('store-leaderboard') || [];
+    rtSetTitleBadge('rtLeaderboardTitle', false);
+    const q = new URLSearchParams();
+    if (rtStoreFilter) q.set('store', rtStoreFilter);
+    if (rtOmFilter)    q.set('om', rtOmFilter);
+    if (rtOcFilter)    q.set('oc', rtOcFilter);
+    if (rtSocFilter)   q.set('soc', rtSocFilter);
+    if (rtOdFilter)    q.set('od', rtOdFilter);
+    const r = await fetch(`/api/retention/store-retention-ranking?${q.toString()}`);
+    const data = r.ok ? await r.json() : [];
     const ctx = document.getElementById('rtLeaderboardChart');
     if (!ctx) return;
     if (rtLeaderboardInstance) rtLeaderboardInstance.destroy();

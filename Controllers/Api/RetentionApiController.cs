@@ -93,6 +93,22 @@ public class RetentionApiController : ControllerBase
         return Ok(await _retention.GetTenureDistributionByStoreAsync(store, role, assignedName, om, oc, soc, od, month, year));
     }
 
+    [HttpGet("active-tenure-curve")]
+    public async Task<IActionResult> ActiveTenureCurve([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetActiveTenureCurveAsync(store, role, assignedName, om, oc, soc, od, month, year));
+    }
+
+    [HttpGet("store-retention-ranking")]
+    public async Task<IActionResult> StoreRetentionRanking([FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc,
+        [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] int? month, [FromQuery] int? year)
+    {
+        var (role, assignedName) = Identity();
+        return Ok(await _retention.GetStoreRetentionRankingAsync(store, role, assignedName, om, oc, soc, od, month, year));
+    }
+
     [HttpGet("senior-operation-consultants")]
     public async Task<IActionResult> SeniorOperationConsultants()
     {

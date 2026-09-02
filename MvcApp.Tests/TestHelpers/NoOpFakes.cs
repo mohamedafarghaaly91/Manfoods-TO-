@@ -70,6 +70,10 @@ public class NoOpRetentionService : IRetentionService
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<StoreTenureRow>> GetTenureDistributionByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
         Task.FromResult(new List<StoreTenureRow>());
+    public Task<List<SurvivalPoint>> GetActiveTenureCurveAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
+        Task.FromResult(new List<SurvivalPoint>());
+    public Task<List<ChartDataItem>> GetStoreRetentionRankingAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
+        Task.FromResult(new List<ChartDataItem>());
     public Task<List<SmartInsightItem>> GetInsightsAsync(string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<SmartInsightItem>());

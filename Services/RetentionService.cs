@@ -125,14 +125,19 @@ public class RetentionService : IRetentionService
             };
         }
 
-        // Resignation records win — they prove the employee actually left.
+        // Resignation records win — they prove the employee actually left. The
+        // resignation sheet's own Store column is sometimes left blank at upload
+        // time, so fall back to the employee's last-known active Store rather
+        // than losing them from every store-grouped chart (Leaderboard, etc.).
         foreach (var r in resignationRows)
         {
             if (string.IsNullOrWhiteSpace(r.EmployeeId)) continue;
+            var store = !string.IsNullOrWhiteSpace(r.Store) ? r.Store
+                : byEmployee.TryGetValue(r.EmployeeId, out var prior) ? prior.Store : r.Store;
             byEmployee[r.EmployeeId] = new EmployeeCohort
             {
                 EmployeeId = r.EmployeeId,
-                Store = r.Store,
+                Store = store,
                 HireDate = r.HireDate!.Value,
                 CohortMonth = r.HireDate!.Value.Month,
                 CohortYear = r.HireDate!.Value.Year,
@@ -377,6 +382,83 @@ public class RetentionService : IRetentionService
                 }).ToList()
             })
             .OrderByDescending(r => r.Headcount)
+            .ToList();
+    }
+
+    /// <summary>Cumulative share of the CURRENT active workforce whose tenure has reached
+    /// each day mark — a plain headcount snapshot, not a survival/eligibility model, so it
+    /// stays meaningful even for a young company where few cohorts have had time to mature.</summary>
+    public async Task<List<SurvivalPoint>> GetActiveTenureCurveAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null)
+    {
+        var periods = await _db.ActiveEmployees
+            .Where(e => e.HireDate != null)
+            .Select(e => new { e.Month, e.Year })
+            .Distinct()
+            .ToListAsync();
+        if (periods.Count == 0) return new List<SurvivalPoint>();
+
+        var anchor = (month.HasValue && year.HasValue && periods.Any(p => p.Month == month && p.Year == year))
+            ? (Month: month.Value, Year: year.Value)
+            : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
+
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
+        if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
+        else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
+        var hireDates = await rowsQuery.Select(e => e.HireDate!.Value).ToListAsync();
+        if (hireDates.Count == 0) return new List<SurvivalPoint>();
+
+        var asOf = new DateOnly(anchor.Year, anchor.Month, DateTime.DaysInMonth(anchor.Year, anchor.Month));
+        var total = hireDates.Count;
+
+        return CurvePoints
+            .Select(p => new SurvivalPoint
+            {
+                Day = p.Days,
+                Label = p.Label,
+                RetentionRate = MetricsCalculationService.RatePercent(hireDates.Count(hd => (asOf.DayNumber - hd.DayNumber) >= p.Days), total),
+                SampleSize = total,
+            })
+            .ToList();
+    }
+
+    /// <summary>Per-store share of the CURRENT active workforce that has reached 6 months'
+    /// tenure, ranked best first — a plain headcount snapshot computed from ActiveEmployees
+    /// only, so a blank Store on a resignation row can never hide a store from the chart.</summary>
+    public async Task<List<ChartDataItem>> GetStoreRetentionRankingAsync(string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null)
+    {
+        var periods = await _db.ActiveEmployees
+            .Where(e => e.HireDate != null)
+            .Select(e => new { e.Month, e.Year })
+            .Distinct()
+            .ToListAsync();
+        if (periods.Count == 0) return new List<ChartDataItem>();
+
+        var anchor = (month.HasValue && year.HasValue && periods.Any(p => p.Month == month && p.Year == year))
+            ? (Month: month.Value, Year: year.Value)
+            : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
+
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
+        if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
+        else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
+        var rows = await rowsQuery.Select(e => new { e.Store, e.HireDate }).ToListAsync();
+
+        var asOf = new DateOnly(anchor.Year, anchor.Month, DateTime.DaysInMonth(anchor.Year, anchor.Month));
+
+        return rows.GroupBy(r => r.Store)
+            .Select(g => new ChartDataItem
+            {
+                Label = g.Key,
+                Value = (int)MetricsCalculationService.RatePercent(
+                    g.Count(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) >= MetricsCalculationService.SixMonthRetentionDays),
+                    g.Count(), 0),
+            })
+            .OrderByDescending(c => c.Value)
             .ToList();
     }
 

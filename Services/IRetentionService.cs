@@ -33,6 +33,13 @@ public interface IRetentionService
     /// <summary>Same tenure buckets as above, broken out per store.</summary>
     Task<List<StoreTenureRow>> GetTenureDistributionByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
 
+    /// <summary>Cumulative share of the CURRENT active workforce whose tenure has reached
+    /// each day mark — a plain headcount snapshot, not the milestone eligibility model.</summary>
+    Task<List<SurvivalPoint>> GetActiveTenureCurveAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
+
+    /// <summary>Per-store share of the CURRENT active workforce past 6 months' tenure, best first.</summary>
+    Task<List<ChartDataItem>> GetStoreRetentionRankingAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
+
     Task<List<SmartInsightItem>> GetInsightsAsync(string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, int? toMonth = null, int? toYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
 }
