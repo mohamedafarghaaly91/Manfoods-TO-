@@ -193,30 +193,35 @@
         </div>
     </div>
 
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <div class="section-accent"></div>
-        <h5 class="mb-0 fw-bold" id="eiDriversTitle">@L["Chart_EngagementDrivers"]</h5>
-        <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EngagementDriversSub"]</span>
-    </div>
-    <div class="chart-card mb-4">
-        <div class="chart-header"><p class="mb-0">@L["Chart_EiDriversChartSub"]</p></div>
-        <div class="chart-body" style="height:340px"><canvas id="eiDriversChart"></canvas></div>
-    </div>
-    <div class="chart-card mb-4" id="eiDriversCard">
-        <div id="eiDriversContainer">
-            <div class="text-center py-3 text-muted">
-                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="section-accent"></div>
+                <h5 class="mb-0 fw-bold" id="eiDriversTitle">@L["Chart_EngagementDrivers"]</h5>
+                <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EngagementDriversSub"]</span>
+            </div>
+            <div class="chart-card mb-3">
+                <div class="chart-header"><p class="mb-0">@L["Chart_EiDriversChartSub"]</p></div>
+                <div class="chart-body" style="height:340px"><canvas id="eiDriversChart"></canvas></div>
+            </div>
+            <div class="chart-card" id="eiDriversCard">
+                <div id="eiDriversContainer">
+                    <div class="text-center py-3 text-muted">
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <div class="section-accent"></div>
-        <h5 class="mb-0 fw-bold" id="eiReasonReturnTitle">@L["Chart_EiReasonVsReturn"]</h5>
-        <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EiReasonVsReturnSub"]</span>
-    </div>
-    <div class="chart-card mb-4">
-        <div class="chart-body chart-body-sm"><canvas id="eiReasonReturnChart"></canvas></div>
+        <div class="col-lg-6">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <div class="section-accent"></div>
+                <h5 class="mb-0 fw-bold" id="eiReasonReturnTitle">@L["Chart_EiReasonVsReturn"]</h5>
+                <span class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px">@L["Chart_EiReasonVsReturnSub"]</span>
+            </div>
+            <div class="chart-card">
+                <div class="chart-body" style="height:340px"><canvas id="eiReasonReturnChart"></canvas></div>
+            </div>
+        </div>
     </div>
 
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -548,7 +553,10 @@ async function eiLoadReasonsTrendChart() {
     if (eiReasonsTrendChart) eiReasonsTrendChart.destroy();
     if (!data.length) return;
     const reasons = Object.keys(data[0].counts || {});
-    const colors = ChartColors.colorsByLabel(reasons, null);
+    // Assigned by position (not by label hash) so every reason present in
+    // this chart is guaranteed a distinct color from the palette — a hash
+    // lookup can send two different reasons to the same slot.
+    const colors = reasons.map((_, i) => ChartColors.CATEGORICAL_PALETTE[i % ChartColors.CATEGORICAL_PALETTE.length]);
     eiReasonsTrendChart = new Chart(ctx, {
         type: 'line',
         data: {
