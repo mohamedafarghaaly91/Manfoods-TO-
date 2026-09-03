@@ -375,6 +375,12 @@ body.admin-theme .admin-nav-link {
         transition: transform .25s ease;
     }
     .admin-sidebar.open { transform: translateX(0); }
+    /* RTL: the sidebar sits on the physical right on desktop (it's the
+       first flex child, and flex-direction:row packs right-to-left under
+       dir=rtl) — dock and slide it from the same side on mobile instead
+       of always defaulting to the left. */
+    [dir="rtl"] .admin-sidebar { left: auto; right: 0; transform: translateX(100%); }
+    [dir="rtl"] .admin-sidebar.open { transform: translateX(0); }
     .admin-topbar { display: flex; }
     .admin-hamburger { display: flex; }
     .admin-content { padding: 20px 16px 48px; }

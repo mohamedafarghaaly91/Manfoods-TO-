@@ -1054,5 +1054,9 @@ a:hover { color: #fff; }
 /* Page header action buttons */
 [dir="rtl"] .page-header { flex-direction: row-reverse; }
 
+/* "Back" links/buttons using a literal left-pointing arrow glyph — mirror
+   so it still reads as "back" (points toward reading-start) in RTL. */
+[dir="rtl"] .btn-outline-secondary .bi-arrow-left { transform: scaleX(-1); display: inline-block; }
+
 /* Insight card */
 [dir="rtl"] .insight-card { flex-direction: row-reverse; text-align: right; }

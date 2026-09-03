@@ -7,7 +7,7 @@
     width: 248px;
     flex-shrink: 0;
     background: #17142A;
-    border-right: 1px solid var(--border);
+    border-inline-end: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -16,6 +16,10 @@
     overflow-y: auto;
     box-shadow: 2px 0 16px rgba(0,0,0,.5);
 }
+/* RTL: the sidebar is the first flex child of .app-wrapper, so it packs to
+   the physical right under dir=rtl — its divider/shadow should face the
+   main content on the left instead of always pointing right. */
+[dir="rtl"] .home-sidebar { box-shadow: -2px 0 16px rgba(0,0,0,.5); }
 
 /* Brand strip */
 .home-brand {
@@ -144,11 +148,11 @@
 }
 .nav-item.active::before {
     content: '';
-    position: absolute; left: 0; top: 50%;
+    position: absolute; inset-inline-start: 0; top: 50%;
     transform: translateY(-50%);
     width: 3px; height: 60%;
     background: linear-gradient(180deg, var(--red), var(--gold));
-    border-radius: 0 3px 3px 0;
+    border-start-end-radius: 3px; border-end-end-radius: 3px;
 }
 .nav-icon-wrap {
     width: 30px; height: 30px;
@@ -229,9 +233,10 @@
 /* ══ LIGHT MODE OVERRIDES ════════════════════════════ */
 [data-theme="light"] .home-sidebar {
     background: #fff;
-    border-right-color: rgba(0,0,0,.1);
+    border-inline-end-color: rgba(0,0,0,.1);
     box-shadow: 2px 0 12px rgba(0,0,0,.06);
 }
+[dir="rtl"] [data-theme="light"] .home-sidebar { box-shadow: -2px 0 12px rgba(0,0,0,.06); }
 [data-theme="light"] .home-brand {
     background: linear-gradient(135deg, #F5F2FF 0%, #FBFAFF 100%);
     border-bottom-color: rgba(109,93,251,.15);
