@@ -124,11 +124,18 @@
 
 <div id="rtEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-shield-check" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
-    <h5 class="mb-2">No Retention Data Yet</h5>
-    <p class="text-muted-custom">Upload workforce and resignation data with hire dates to see retention analysis here.</p>
+    <h5 class="mb-2">@L["RT_NoRetentionData"]</h5>
+    <p class="text-muted-custom">@L["RT_NoRetentionDataSub"]</p>
 </div>
 
-<div id="rtContent">
+<div id="rtContent"
+     data-no-active-headcount="@L["RT_NoActiveHeadcount"]"
+     data-milestone-desc="@L["RT_MilestoneCardDesc"]"
+     data-active-employees-suffix="@L["RT_ActiveEmployeesSuffix"]"
+     data-still-on-team="@L["RT_StillOnTeam"]"
+     data-no-data="@L["Common_NoData"]"
+     data-no-data-short="@L["Common_NoDataShort"]"
+     data-no-insights="@L["RT_NoInsights"]">
     <div class="d-flex align-items-center gap-2 mb-3">
         <i class="bi bi-lightbulb-fill" style="color:oklch(0.75 0.16 75)"></i>
         <h5 class="mb-0 fw-bold">@L["Common_SmartInsights"]</h5>
@@ -137,7 +144,7 @@
     <div class="chart-card mb-4" id="rtInsightsCard">
         <div id="rtInsights">
             <div class="text-center py-3 text-muted">
-                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
             </div>
         </div>
     </div>
@@ -182,12 +189,12 @@
                     <tr>
                         <th class="px-3 py-2">@L["Common_StoreName"]</th>
                         <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
-                        <th class="px-3 py-2" style="min-width:260px">Tenure Mix</th>
+                        <th class="px-3 py-2" style="min-width:260px">@L["RT_TenureMix"]</th>
                     </tr>
                 </thead>
                 <tbody id="rtTenureTableBody">
                     <tr><td colspan="3" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
             </table>
@@ -228,14 +235,14 @@
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Headcount</th>
-                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_AvgTenure"]</th>
                             </tr>
                         </thead>
                         <tbody id="rtOcTableBody">
-                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading...</td></tr>
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>@L["Common_Loading"]</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -245,20 +252,20 @@
             <div class="chart-card p-0" style="overflow:hidden">
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
-                    <div><h6 class="mb-0" id="rtOdTitle">Operation Directors</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                    <div><h6 class="mb-0" id="rtOdTitle">@L["Common_OperationDirectors"]</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Headcount</th>
-                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_AvgTenure"]</th>
                             </tr>
                         </thead>
                         <tbody id="rtOdTableBody">
-                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...</td></tr>
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>@L["Common_Loading"]</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -266,20 +273,20 @@
             <div class="chart-card p-0" style="overflow:hidden">
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
-                    <div><h6 class="mb-0" id="rtOmTitle">Operation Managers</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                    <div><h6 class="mb-0" id="rtOmTitle">@L["Common_OperationManagers"]</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Headcount</th>
-                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_AvgTenure"]</th>
                             </tr>
                         </thead>
                         <tbody id="rtOmTableBody">
-                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.16 25)"></div>Loading...</td></tr>
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.16 25)"></div>@L["Common_Loading"]</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -287,20 +294,20 @@
             <div class="chart-card p-0" style="overflow:hidden">
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
-                    <div><h6 class="mb-0" id="rtSocMgrTitle">Senior Operation Consultants</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
+                    <div><h6 class="mb-0" id="rtSocMgrTitle">@L["Common_SeniorOperationConsultants"]</h6><p class="mb-0">@L["Retention_RankedByTenure"]</p></div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Headcount</th>
-                                <th class="px-3 py-2 text-center">Avg. Tenure</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Headcount"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_AvgTenure"]</th>
                             </tr>
                         </thead>
                         <tbody id="rtSocMgrTableBody">
-                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...</td></tr>
+                            <tr><td colspan="4" class="text-center py-3 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>@L["Common_Loading"]</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -368,6 +375,7 @@
 <script>
 /* ── Retention page — Year + discrete cohort-Months multi-select, same
    filter components as Turnover/Comparisons/90-Day/Workforce. */
+const rtL = document.getElementById('rtContent').dataset;
 let rtYear = null, rtMonths = [], rtYearMonthsMap = {};
 let rtStoreFilter = '', rtOmFilter = '', rtOcFilter = '', rtSocFilter = '', rtOdFilter = '';
 
@@ -561,7 +569,7 @@ function rtRenderMilestones(items) {
     const el = document.getElementById('rtMilestoneCards');
     if (!items) { el.innerHTML = ''; return; }
     const total = items.reduce((s, b) => s + b.value, 0);
-    if (!total) { el.innerHTML = '<div class="text-muted small py-3">No active headcount data yet.</div>'; return; }
+    if (!total) { el.innerHTML = '<div class="text-muted small py-3">' + rtL.noActiveHeadcount + '</div>'; return; }
     const byLabel = {};
     items.forEach(b => { byLabel[b.label] = b.value; });
     el.innerHTML = Object.keys(ChartColors.RETENTION_TENURE_BUCKET_COLORS).map(label => {
@@ -572,8 +580,8 @@ function rtRenderMilestones(items) {
             <div class="kpi-icon"><i class="bi bi-people-fill" style="color:${color}"></i></div>
             <div class="kpi-value" style="color:${color}">${pct.toFixed(1)}%</div>
             <div class="kpi-label">${label}</div>
-            <div class="kpi-desc">Share of current headcount with this tenure</div>
-            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${value}/${total} active employees</div>
+            <div class="kpi-desc">${rtL.milestoneDesc}</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px">${value}/${total} ${rtL.activeEmployeesSuffix}</div>
         </div>`;
     }).join('');
 }
@@ -611,7 +619,7 @@ async function rtLoadSurvivalCurve() {
         data: {
             labels: data.map(d => d.label),
             datasets: [{
-                label: 'Still on the team',
+                label: rtL.stillOnTeam,
                 data: data.map(d => d.retentionRate),
                 borderColor: 'oklch(0.55 0.19 25)',
                 backgroundColor: 'oklch(0.55 0.19 25 / .15)',
@@ -682,7 +690,7 @@ async function rtLoadLeaderboard() {
    with a per-store breakdown table (or a single row when a store is picked). */
 function rtRenderTenureTable(rows) {
     const tbody = document.getElementById('rtTenureTableBody');
-    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-muted">No data for this period.</td></tr>'; return; }
+    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-muted">' + rtL.noData + '</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
         const total = r.buckets.reduce((s, b) => s + b.value, 0) || 1;
         const bucketColor = b => ChartColors.RETENTION_TENURE_BUCKET_COLORS[b.label] || ChartColors.hashColor(b.label);
@@ -768,7 +776,7 @@ async function rtLoadGenderChart() {
    metric is average tenure of the current team instead of turnover. ────── */
 function rtRenderManagerTenureRows(tbodyId, rows) {
     const tbody = document.getElementById(tbodyId);
-    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">No data.</td></tr>'; return; }
+    if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">' + rtL.noDataShort + '</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `<tr>
         <td class="px-3 py-2 fw-semibold">${r.name}</td>
         <td class="px-3 py-2 text-center">${r.stores}</td>
@@ -882,7 +890,7 @@ async function rtLoadHiringVolumeChart() {
 
 function rtRenderInsights(items) {
     const el = document.getElementById('rtInsights');
-    if (!items || !items.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">No insights available yet — upload more periods of data to enable trend analysis.</div>'; return; }
+    if (!items || !items.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">' + rtL.noInsights + '</div>'; return; }
     const colorMap = {
         danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
         success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: ChartColors.SEMANTIC.GOOD, text: ChartColors.SEMANTIC.GOOD },

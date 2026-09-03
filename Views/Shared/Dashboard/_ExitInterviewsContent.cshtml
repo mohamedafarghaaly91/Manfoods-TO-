@@ -125,11 +125,27 @@
 
 <div id="eiEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-chat-square-text" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
-    <h5 class="mb-2">No Exit Interview Data</h5>
-    <p class="text-muted-custom">Upload exit interview responses from the Data Management page to see analysis here.</p>
+    <h5 class="mb-2">@L["EI_NoExitData"]</h5>
+    <p class="text-muted-custom">@L["EI_NoExitDataSub"]</p>
 </div>
 
-<div id="eiContent">
+<div id="eiContent"
+     data-no-data-filters="@L["EI_NoDataForFilters"]"
+     data-driver-stat="@L["EI_DriverStat"]"
+     data-kpi-total-desc="@L["EI_KpiTotalDesc"]"
+     data-kpi-positive-desc="@L["EI_KpiPositiveDesc"]"
+     data-kpi-top-reason-desc="@L["EI_KpiTopReasonDesc"]"
+     data-kpi-return-desc="@L["EI_KpiReturnDesc"]"
+     data-no-data-short="@L["Common_NoDataShort"]"
+     data-no-interview-data="@L["EI_NoInterviewDataPeriod"]"
+     data-insight-sentiment-title="@L["EI_InsightSentimentTitle"]"
+     data-insight-sentiment-desc="@L["EI_InsightSentimentDesc"]"
+     data-insight-top-reason-title="@L["EI_InsightTopReasonTitle"]"
+     data-insight-top-reason-desc="@L["EI_InsightTopReasonDesc"]"
+     data-insight-weakest-title="@L["EI_InsightWeakestTitle"]"
+     data-insight-weakest-desc="@L["EI_InsightWeakestDesc"]"
+     data-insight-strongest-title="@L["EI_InsightStrongestTitle"]"
+     data-insight-strongest-desc="@L["EI_InsightStrongestDesc"]">
     <div id="eiSummaryCards" class="kpi-grid mb-4">
         <div class="kpi-spinner text-center py-3 w-100">
             <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
@@ -144,7 +160,7 @@
     <div class="chart-card mb-4" id="eiInsightsCard">
         <div id="eiInsights">
             <div class="text-center py-3 text-muted">
-                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
             </div>
         </div>
     </div>
@@ -207,7 +223,7 @@
             <div class="chart-card" id="eiDriversCard">
                 <div id="eiDriversContainer">
                     <div class="text-center py-3 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </div>
                 </div>
             </div>
@@ -250,7 +266,7 @@
                 </thead>
                 <tbody id="eiCommentsBody">
                     <tr><td colspan="4" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
             </table>
@@ -277,7 +293,7 @@
                 </thead>
                 <tbody id="eiChangeCommentsBody">
                     <tr><td colspan="3" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
             </table>
@@ -298,6 +314,7 @@
    filter components as Turnover/Retention/Scorecard/etc. Employee identity
    is never fetched or rendered anywhere on this page — only aggregated
    choice-question counts and anonymous free-text comments. */
+const eiL = document.getElementById('eiContent').dataset;
 let eiYear = null, eiMonths = [], eiYearMonthsMap = {};
 let eiStoreFilter = '', eiLeaderFilter = '', eiOcFilter = '', eiOmFilter = '';
 
@@ -648,12 +665,12 @@ async function eiLoadDrivers() {
     eiDriversData = await eiFetch('engagement-drivers');
     eiRenderDriversChart();
     const container = document.getElementById('eiDriversContainer');
-    if (!eiDriversData.length) { container.innerHTML = '<div class="text-center py-3 text-muted">No data for the selected filters.</div>'; return; }
+    if (!eiDriversData.length) { container.innerHTML = '<div class="text-center py-3 text-muted">' + eiL.noDataFilters + '</div>'; return; }
     container.innerHTML = eiDriversData.map(d => `
         <div class="mb-3">
             <div class="d-flex justify-content-between mb-1" style="font-size:12.5px">
                 <span class="fw-semibold">${d.label}</span>
-                <span class="ei-driver-stat" style="color:var(--text-3)">${d.positivePercent}% positive · ${d.totalResponses} responses</span>
+                <span class="ei-driver-stat" style="color:var(--text-3)">${eiL.driverStat.replace('{0}', d.positivePercent).replace('{1}', d.totalResponses)}</span>
             </div>
             <div style="height:8px;border-radius:20px;background:var(--bg-2);overflow:hidden">
                 <div style="height:100%;border-radius:20px;background:${eiDriverTone(d.positivePercent)};width:${d.positivePercent}%"></div>
@@ -677,16 +694,16 @@ function eiRenderSummary() {
     const returnPct = returnTotal > 0 ? Math.round(yes / returnTotal * 100) : 0;
 
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-chat-square-text-fill"></i></div><div class="kpi-value">${eiSentimentData.totalResponses}</div><div class="kpi-label">@L["EI_TotalInterviews"]</div><div class="kpi-desc">Exit interview forms matching the current filters</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-emoji-smile-fill"></i></div><div class="kpi-value" style="color:${eiDriverTone(eiSentimentData.positivePercent)}">${eiSentimentData.positivePercent.toFixed(1)}%</div><div class="kpi-label">@L["EI_PositiveSentiment"]</div><div class="kpi-desc">Combined "Would Return" + "Overall Experience" positive share</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-box-arrow-right"></i></div><div class="kpi-value" style="font-size:16px">${topReason ? topReason.label : '—'}</div><div class="kpi-label">@L["EI_TopReason"]</div><div class="kpi-desc">${topReason && reasonTotal > 0 ? Math.round(topReason.value / reasonTotal * 100) + '% of all reasons given' : 'No data'}</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-arrow-repeat"></i></div><div class="kpi-value" style="color:${eiDriverTone(returnPct)}">${returnPct}%</div><div class="kpi-label">@L["EI_WouldReturnRate"]</div><div class="kpi-desc">Share who said they'd work here again</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-chat-square-text-fill"></i></div><div class="kpi-value">${eiSentimentData.totalResponses}</div><div class="kpi-label">@L["EI_TotalInterviews"]</div><div class="kpi-desc">${eiL.kpiTotalDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-emoji-smile-fill"></i></div><div class="kpi-value" style="color:${eiDriverTone(eiSentimentData.positivePercent)}">${eiSentimentData.positivePercent.toFixed(1)}%</div><div class="kpi-label">@L["EI_PositiveSentiment"]</div><div class="kpi-desc">${eiL.kpiPositiveDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-box-arrow-right"></i></div><div class="kpi-value" style="font-size:16px">${topReason ? topReason.label : '—'}</div><div class="kpi-label">@L["EI_TopReason"]</div><div class="kpi-desc">${topReason && reasonTotal > 0 ? eiL.kpiTopReasonDesc.replace('{0}', Math.round(topReason.value / reasonTotal * 100)) : eiL.noDataShort}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-arrow-repeat"></i></div><div class="kpi-value" style="color:${eiDriverTone(returnPct)}">${returnPct}%</div><div class="kpi-label">@L["EI_WouldReturnRate"]</div><div class="kpi-desc">${eiL.kpiReturnDesc}</div></div>
     `;
 }
 
 function eiRenderInsights() {
     const el = document.getElementById('eiInsights');
-    if (!eiSentimentData || !eiSentimentData.totalResponses) { el.innerHTML = '<div class="text-muted" style="font-size:13px">No exit interview data for this period.</div>'; return; }
+    if (!eiSentimentData || !eiSentimentData.totalResponses) { el.innerHTML = '<div class="text-muted" style="font-size:13px">' + eiL.noInterviewData + '</div>'; return; }
     const colorMap = {
         danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
         success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: ChartColors.SEMANTIC.GOOD, text: ChartColors.SEMANTIC.GOOD },
@@ -697,8 +714,10 @@ function eiRenderInsights() {
 
     items.push({
         icon: 'bi-emoji-smile-fill', color: eiSentimentData.positivePercent >= 70 ? 'success' : eiSentimentData.positivePercent >= 40 ? 'warning' : 'danger',
-        title: 'Overall Sentiment',
-        description: `${eiSentimentData.positivePercent.toFixed(1)}% positive sentiment across ${eiSentimentData.totalResponses} exit interview(s).`,
+        title: eiL.insightSentimentTitle,
+        description: eiL.insightSentimentDesc
+            .replace('{0}', eiSentimentData.positivePercent.toFixed(1))
+            .replace('{1}', eiSentimentData.totalResponses),
     });
 
     const reasonTotal = eiReasonsData.reduce((s, d) => s + d.value, 0);
@@ -706,8 +725,12 @@ function eiRenderInsights() {
         const top = eiReasonsData[0];
         items.push({
             icon: 'bi-box-arrow-right', color: 'warning',
-            title: 'Leading Reason for Leaving',
-            description: `"${top.label}" accounts for ${Math.round(top.value / reasonTotal * 100)}% (${top.value} of ${reasonTotal}) of all reasons given.`,
+            title: eiL.insightTopReasonTitle,
+            description: eiL.insightTopReasonDesc
+                .replace('{0}', top.label)
+                .replace('{1}', Math.round(top.value / reasonTotal * 100))
+                .replace('{2}', top.value)
+                .replace('{3}', reasonTotal),
         });
     }
 
@@ -716,13 +739,19 @@ function eiRenderInsights() {
         const worst = eiDriversData[0];
         if (worst) items.push({
             icon: 'bi-exclamation-triangle-fill', color: 'danger',
-            title: 'Weakest Engagement Driver',
-            description: `"${worst.label}" has the lowest positive rate (${worst.positivePercent}%, ${worst.totalResponses} responses) — worth investigating.`,
+            title: eiL.insightWeakestTitle,
+            description: eiL.insightWeakestDesc
+                .replace('{0}', worst.label)
+                .replace('{1}', worst.positivePercent)
+                .replace('{2}', worst.totalResponses),
         });
         if (best && best.label !== worst?.label) items.push({
             icon: 'bi-hand-thumbs-up-fill', color: 'success',
-            title: 'Strongest Engagement Driver',
-            description: `"${best.label}" has the highest positive rate (${best.positivePercent}%, ${best.totalResponses} responses).`,
+            title: eiL.insightStrongestTitle,
+            description: eiL.insightStrongestDesc
+                .replace('{0}', best.label)
+                .replace('{1}', best.positivePercent)
+                .replace('{2}', best.totalResponses),
         });
     }
 

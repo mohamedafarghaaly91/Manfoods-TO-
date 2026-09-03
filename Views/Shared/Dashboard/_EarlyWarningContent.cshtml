@@ -125,12 +125,25 @@
      data-reason-type-peak-window="@L["EW_ReasonType_PeakWindow"]"
      data-reason-type-gender-history="@L["EW_ReasonType_GenderHistory"]"
      data-reason-type-exit-interview-score="@L["EW_ReasonType_ExitInterviewScore"]"
-     data-reason-type-store-leader-history="@L["EW_ReasonType_StoreLeaderHistory"]"></div>
+     data-reason-type-store-leader-history="@L["EW_ReasonType_StoreLeaderHistory"]"
+     data-kpi-in-watchlist-desc="@L["EW_KpiInWatchlistDesc"]"
+     data-kpi-high-risk-desc="@L["EW_KpiHighRiskDesc"]"
+     data-kpi-new-hire-window-desc="@L["EW_KpiNewHireWindowDesc"]"
+     data-kpi-company-baseline-desc="@L["EW_KpiBaselineDesc"]"
+     data-no-watchlist-period="@L["EW_NoWatchlistThisPeriod"]"
+     data-insight-high-risk-title="@L["EW_InsightHighRiskShareTitle"]"
+     data-insight-high-risk-desc="@L["EW_InsightHighRiskShareDesc"]"
+     data-insight-top-reason-title="@L["EW_InsightTopReasonTitle"]"
+     data-insight-top-reason-desc="@L["EW_InsightTopReasonDesc"]"
+     data-insight-top-store-title="@L["EW_InsightTopStoreTitle"]"
+     data-insight-top-store-desc="@L["EW_InsightTopStoreDesc"]"
+     data-insight-top-role-title="@L["EW_InsightTopRoleTitle"]"
+     data-insight-top-role-desc="@L["EW_InsightTopRoleDesc"]"></div>
 
 <div id="ewEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-shield-check" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
-    <h5 class="mb-2">No Active Employee Data Yet</h5>
-    <p class="text-muted-custom">Upload workforce data with hire dates to see the early-warning watchlist here.</p>
+    <h5 class="mb-2">@L["EW_NoActiveEmployeeData"]</h5>
+    <p class="text-muted-custom">@L["EW_NoActiveEmployeeDataSub"]</p>
 </div>
 
 <div id="ewContent">
@@ -148,7 +161,7 @@
     <div class="chart-card mb-4" id="ewInsightsCard">
         <div id="ewInsights">
             <div class="text-center py-3 text-muted">
-                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
             </div>
         </div>
     </div>
@@ -433,10 +446,10 @@ function ewRenderSummary(s) {
     const el = document.getElementById('ewSummaryCards');
     if (!s) { el.innerHTML = ''; return; }
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${s.totalWatchlist}</div><div class="kpi-label">${EW_L.kpiInWatchlist}</div><div class="kpi-desc">Active employees matching at least one risk factor</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${s.highRiskCount}</div><div class="kpi-label">${EW_L.kpiHighRisk}</div><div class="kpi-desc">4-5★ risk score (3+ matching risk factors)</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div><div class="kpi-value">${s.newHireWindowCount}</div><div class="kpi-label">${EW_L.kpiNewHireWindow}</div><div class="kpi-desc">Still within their first 90 days of hire</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${s.companyBaselineRate.toFixed(1)}%</div><div class="kpi-label">${EW_L.kpiCompanyBaseline}</div><div class="kpi-desc">Company-wide early-leaver rate used as the risk baseline</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${s.totalWatchlist}</div><div class="kpi-label">${EW_L.kpiInWatchlist}</div><div class="kpi-desc">${EW_L.kpiInWatchlistDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${s.highRiskCount}</div><div class="kpi-label">${EW_L.kpiHighRisk}</div><div class="kpi-desc">${EW_L.kpiHighRiskDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-hourglass-split"></i></div><div class="kpi-value">${s.newHireWindowCount}</div><div class="kpi-label">${EW_L.kpiNewHireWindow}</div><div class="kpi-desc">${EW_L.kpiNewHireWindowDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${s.companyBaselineRate.toFixed(1)}%</div><div class="kpi-label">${EW_L.kpiCompanyBaseline}</div><div class="kpi-desc">${EW_L.kpiCompanyBaselineDesc}</div></div>
     `;
 }
 
@@ -761,7 +774,7 @@ async function ewLoadTrendChart() {
    plain "what stands out" statements, no extra network calls. */
 function ewRenderInsights(rows) {
     const el = document.getElementById('ewInsights');
-    if (!rows || !rows.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">No one is on the watchlist for this period.</div>'; return; }
+    if (!rows || !rows.length) { el.innerHTML = '<div class="text-muted" style="font-size:13px">' + EW_L.noWatchlistPeriod + '</div>'; return; }
     const colorMap = {
         danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
         warning:   { bg: 'oklch(0.75 0.16 75 / .12)', border: ChartColors.SEMANTIC.WARNING, text: 'oklch(0.6 0.14 75)' },
@@ -772,8 +785,11 @@ function ewRenderInsights(rows) {
     const highRisk = rows.filter(r => r.stars >= 4);
     items.push({
         icon: 'bi-exclamation-triangle-fill', color: highRisk.length > 0 ? 'danger' : 'secondary',
-        title: 'High-Risk Share',
-        description: `${highRisk.length} of ${rows.length} watchlist entries (${Math.round(highRisk.length / rows.length * 100)}%) are high-risk (4-5★).`,
+        title: EW_L.insightHighRiskTitle,
+        description: EW_L.insightHighRiskDesc
+            .replace('{0}', highRisk.length)
+            .replace('{1}', rows.length)
+            .replace('{2}', Math.round(highRisk.length / rows.length * 100)),
     });
 
     const reasonCounts = {};
@@ -783,8 +799,11 @@ function ewRenderInsights(rows) {
         const label = ewReasonTypeLabel(topReason[0]);
         items.push({
             icon: 'bi-graph-up-arrow', color: 'warning',
-            title: 'Most Common Risk Factor',
-            description: `"${label}" is behind ${topReason[1]} of the ${rows.length} watchlist entries — the single biggest driver right now.`,
+            title: EW_L.insightTopReasonTitle,
+            description: EW_L.insightTopReasonDesc
+                .replace('{0}', label)
+                .replace('{1}', topReason[1])
+                .replace('{2}', rows.length),
         });
     }
 
@@ -794,8 +813,10 @@ function ewRenderInsights(rows) {
     if (topStore) {
         items.push({
             icon: 'bi-shop', color: 'danger',
-            title: 'Store Needing Attention',
-            description: `${topStore[0]} has ${topStore[1]} high-risk (4-5★) employee(s) — the most of any store right now.`,
+            title: EW_L.insightTopStoreTitle,
+            description: EW_L.insightTopStoreDesc
+                .replace('{0}', topStore[0])
+                .replace('{1}', topStore[1]),
         });
     }
 
@@ -805,8 +826,11 @@ function ewRenderInsights(rows) {
     if (topRole) {
         items.push({
             icon: 'bi-person-badge', color: 'secondary',
-            title: 'Most-Watched Role',
-            description: `${topRole[0]} makes up ${topRole[1]} of the ${rows.length} watchlist entries — more than any other role.`,
+            title: EW_L.insightTopRoleTitle,
+            description: EW_L.insightTopRoleDesc
+                .replace('{0}', topRole[0])
+                .replace('{1}', topRole[1])
+                .replace('{2}', rows.length),
         });
     }
 

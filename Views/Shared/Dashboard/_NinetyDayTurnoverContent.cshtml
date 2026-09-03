@@ -149,11 +149,27 @@
 
 <div id="ntdEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-hourglass-split" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
-    <h5 class="mb-2">No Cohort Data Yet</h5>
-    <p class="text-muted-custom">Upload workforce and resignation data with hire dates to see 90-day turnover here.</p>
+    <h5 class="mb-2">@L["NTD_NoCohortData"]</h5>
+    <p class="text-muted-custom">@L["NTD_NoCohortDataSub"]</p>
 </div>
 
-<div id="ntdContent">
+<div id="ntdContent"
+     data-kpi-hired="@L["NTD_KpiHired"]"
+     data-kpi-hired-desc="@L["NTD_KpiHiredDesc"]"
+     data-kpi-left="@L["NTD_KpiLeft"]"
+     data-kpi-left-desc="@L["NTD_KpiLeftDesc"]"
+     data-kpi-rate="@L["NTD_KpiRate"]"
+     data-kpi-rate-desc="@L["NTD_KpiRateDesc"]"
+     data-provisional-badge="@L["NTD_ProvisionalBadge"]"
+     data-kpi-range-note="@L["NTD_KpiRangeNote"]"
+     data-no-early-leavers="@L["NTD_NoEarlyLeavers"]"
+     data-early-leavers-suffix="@L["NTD_EarlyLeaversCountSuffix"]"
+     data-stores-suffix="@L["Common_StoresCountSuffix"]"
+     data-no-matching-stores="@L["Common_NoMatchingStores"]"
+     data-no-data="@L["Common_NoData"]"
+     data-no-insights="@L["NTD_NoInsights"]"
+     data-loading-short="@L["Common_LoadingShort"]"
+     data-no-data-available="@L["Common_NoDataAvailable"]">
     <!-- ── Smart Insights ─────────────────────────────────────── -->
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
@@ -162,12 +178,12 @@
     </div>
     <div id="ntdInsightsContainer" class="row g-3 mb-4">
         <div class="col-12 text-center py-3 text-muted">
-            <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading insights...
+            <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_LoadingInsights"]
         </div>
     </div>
 
     <div id="ntdProvisionalBanner" class="mb-3" style="display:none;background:oklch(0.75 0.16 75 / .12);border-left:3px solid oklch(0.75 0.16 75);border-radius:8px;padding:10px 14px;font-size:12.5px;color:oklch(0.5 0.14 75)">
-        <i class="bi bi-info-circle-fill me-1"></i>This cohort hasn't reached its 90-day mark yet — the rate is provisional and may still rise.
+        <i class="bi bi-info-circle-fill me-1"></i>@L["NTD_Provisional"]
     </div>
 
     <div id="ntdKpiCards" class="kpi-grid mb-4">
@@ -187,27 +203,27 @@
 
     <div class="chart-card mb-4">
         <div class="chart-header">
-            <h6 id="ntdTrendTitle">90-Day Turnover Trend</h6>
-            <p>Rate per hire-month cohort, all-time — dashed points are still provisional</p>
+            <h6 id="ntdTrendTitle">@L["Chart_NinetyDayTrend"]</h6>
+            <p>@L["Chart_NinetyDayTrendSub"]</p>
         </div>
         <div class="chart-body"><canvas id="ntdTrendChart" style="max-height:280px"></canvas></div>
     </div>
 
     <div class="chart-card mb-4">
-        <div class="chart-header"><h6 id="ntdByStoreTitle">By Store</h6><p>Top 10 stores by early-leaver rate for the selected cohort months — see the full comparison table below for all stores</p></div>
+        <div class="chart-header"><h6 id="ntdByStoreTitle">@L["Chart_ByStore"]</h6><p>@L["Chart_ByStoreNinetyDaySub"]</p></div>
         <div class="chart-body"><canvas id="ntdByStoreChart"></canvas></div>
     </div>
 
     <div class="row g-2 g-md-3 mb-4">
         <div class="col-6">
             <div class="chart-card h-100 p-2 p-md-3">
-                <div class="chart-header"><h6 id="ntdReasonsTitle">Reasons for Early Leaving</h6><p>From exit interviews, matched to this cohort's early leavers</p></div>
+                <div class="chart-header"><h6 id="ntdReasonsTitle">@L["NTD_ReasonsEarlyLeaving"]</h6><p>@L["NTD_ReasonsEarlyLeavingSub"]</p></div>
                 <div class="chart-body"><canvas id="ntdReasonsChart"></canvas></div>
             </div>
         </div>
         <div class="col-6">
             <div class="chart-card h-100 p-2 p-md-3 d-flex flex-column">
-                <div class="chart-header"><h6 id="ntdGenderTitle">Gender Breakdown</h6><p>Gender of early leavers for the selected cohort months</p></div>
+                <div class="chart-header"><h6 id="ntdGenderTitle">@L["Chart_GenderBreakdown"]</h6><p>@L["NTD_GenderSub"]</p></div>
                 <div class="tv-gender-body tv-gender-body-compact">
                     <div class="tv-gender-canvas-wrap"><canvas id="ntdGenderChart"></canvas></div>
                     <div class="tv-gender-list" id="ntdGenderStatsList"></div>
@@ -218,11 +234,11 @@
 
     <div class="charts-grid mb-4">
         <div class="chart-card">
-            <div class="chart-header"><h6 id="ntdJobTitleTitle">By Job Title</h6><p>Job titles of early leavers for the selected cohort months</p></div>
+            <div class="chart-header"><h6 id="ntdJobTitleTitle">@L["NTD_ByJobTitle"]</h6><p>@L["NTD_ByJobTitleSub"]</p></div>
             <div class="chart-body"><canvas id="ntdJobTitleChart"></canvas></div>
         </div>
         <div class="chart-card">
-            <div class="chart-header"><h6 id="ntdPayrollTitle">By Payroll Group</h6><p>Payroll groups of early leavers for the selected cohort months</p></div>
+            <div class="chart-header"><h6 id="ntdPayrollTitle">@L["NTD_ByPayroll"]</h6><p>@L["NTD_ByPayrollSub"]</p></div>
             <div class="chart-body"><canvas id="ntdPayrollGroupChart"></canvas></div>
         </div>
     </div>
@@ -231,11 +247,11 @@
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <div class="section-accent"></div>
-            <h5 class="mb-0 fw-bold" id="ntdStoreComparisonTitle">Store Comparison</h5>
+            <h5 class="mb-0 fw-bold" id="ntdStoreComparisonTitle">@L["Common_StoreComparison"]</h5>
             <span id="ntdStoreCountBadge" class="badge" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px"></span>
         </div>
         <input type="text" id="ntdStoreTableSearch" class="form-control form-control-sm"
-               placeholder="&#xF52A; Search store, OC, OM…" style="width:220px;border-radius:20px">
+               placeholder="&#xF52A; @L["Common_SearchStore"]" style="width:220px;border-radius:20px">
     </div>
     <div class="chart-card mb-4 p-0" style="overflow:hidden">
         <div class="table-responsive" style="max-height:400px;overflow-y:auto">
@@ -243,28 +259,28 @@
                 <thead style="background:oklch(0.965 0.008 255);border-bottom:2px solid oklch(0.92 0.008 255);position:sticky;top:0;z-index:1">
                     <tr>
                         <th class="ntd-sort px-3 py-2" data-col="storeName" style="cursor:pointer;min-width:160px">
-                            Store Name <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_StoreName"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="operationConsultant" style="cursor:pointer">
-                            OC <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_OC"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="operationManager" style="cursor:pointer">
-                            OM <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_OM"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2 text-center" data-col="totalHires" style="cursor:pointer">
-                            Hires <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["NTD_Hires"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2 text-center" data-col="earlyLeavers" style="cursor:pointer">
-                            Early Leavers <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["NTD_EarlyLeavers"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2 text-center" data-col="rate" style="cursor:pointer">
-                            90-Day Rate <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["NTD_Rate"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                     </tr>
                 </thead>
                 <tbody id="ntdStoreTableBody">
                     <tr><td colspan="6" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
             </table>
@@ -274,7 +290,7 @@
     <!-- ── OC / OM Analysis ───────────────────────────────────── -->
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
-        <h5 class="mb-0 fw-bold">By Operation Consultant &amp; Manager</h5>
+        <h5 class="mb-0 fw-bold">@L["Common_ByOcOm"]</h5>
     </div>
     <div class="row g-3 mb-4">
         <div class="col-lg-6">
@@ -282,24 +298,24 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.22 22)"><i class="bi bi-person-badge"></i></span>
                     <div>
-                        <h6 class="mb-0" id="ntdOcTitle">Operation Consultants</h6>
-                        <p class="mb-0">Ranked by average 90-day rate</p>
+                        <h6 class="mb-0" id="ntdOcTitle">@L["Common_OperationConsultants"]</h6>
+                        <p class="mb-0">@L["NTD_RankedByAvgRate"]</p>
                     </div>
                 </div>
                 <div class="table-responsive" style="flex:1;overflow-y:auto;min-height:0">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Hires</th>
-                                <th class="px-3 py-2 text-center">Early Leavers</th>
-                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Hires"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_EarlyLeavers"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Rate"]</th>
                             </tr>
                         </thead>
                         <tbody id="ntdOcTableBody">
                             <tr><td colspan="5" class="text-center py-3 text-muted">
-                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading...
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>@L["Common_Loading"]
                             </td></tr>
                         </tbody>
                     </table>
@@ -311,24 +327,24 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
                     <div>
-                        <h6 class="mb-0" id="ntdOdTitle">Operation Directors</h6>
-                        <p class="mb-0">Ranked by average 90-day rate</p>
+                        <h6 class="mb-0" id="ntdOdTitle">@L["Common_OperationDirectors"]</h6>
+                        <p class="mb-0">@L["NTD_RankedByAvgRate"]</p>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Hires</th>
-                                <th class="px-3 py-2 text-center">Early Leavers</th>
-                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Hires"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_EarlyLeavers"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Rate"]</th>
                             </tr>
                         </thead>
                         <tbody id="ntdOdTableBody">
                             <tr><td colspan="5" class="text-center py-3 text-muted">
-                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>Loading...
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 250)"></div>@L["Common_Loading"]
                             </td></tr>
                         </tbody>
                     </table>
@@ -338,24 +354,24 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
                     <div>
-                        <h6 class="mb-0" id="ntdOmTitle">Operation Managers</h6>
-                        <p class="mb-0">Ranked by average 90-day rate</p>
+                        <h6 class="mb-0" id="ntdOmTitle">@L["Common_OperationManagers"]</h6>
+                        <p class="mb-0">@L["NTD_RankedByAvgRate"]</p>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Hires</th>
-                                <th class="px-3 py-2 text-center">Early Leavers</th>
-                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Hires"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_EarlyLeavers"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Rate"]</th>
                             </tr>
                         </thead>
                         <tbody id="ntdOmTableBody">
                             <tr><td colspan="5" class="text-center py-3 text-muted">
-                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.16 25)"></div>Loading...
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.16 25)"></div>@L["Common_Loading"]
                             </td></tr>
                         </tbody>
                     </table>
@@ -365,24 +381,24 @@
                 <div class="chart-header stat-card-header">
                     <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
                     <div>
-                        <h6 class="mb-0" id="ntdSocTitle">Senior Operation Consultants</h6>
-                        <p class="mb-0">Ranked by average 90-day rate</p>
+                        <h6 class="mb-0" id="ntdSocTitle">@L["Common_SeniorOperationConsultants"]</h6>
+                        <p class="mb-0">@L["NTD_RankedByAvgRate"]</p>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:oklch(0.965 0.008 255)">
                             <tr>
-                                <th class="px-3 py-2">Name</th>
-                                <th class="px-3 py-2 text-center">Stores</th>
-                                <th class="px-3 py-2 text-center">Hires</th>
-                                <th class="px-3 py-2 text-center">Early Leavers</th>
-                                <th class="px-3 py-2 text-center">90-Day Rate</th>
+                                <th class="px-3 py-2">@L["Common_Name"]</th>
+                                <th class="px-3 py-2 text-center">@L["Common_Stores"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Hires"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_EarlyLeavers"]</th>
+                                <th class="px-3 py-2 text-center">@L["NTD_Rate"]</th>
                             </tr>
                         </thead>
                         <tbody id="ntdSocTableBody">
                             <tr><td colspan="5" class="text-center py-3 text-muted">
-                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>Loading...
+                                <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.55 0.2 300)"></div>@L["Common_Loading"]
                             </td></tr>
                         </tbody>
                     </table>
@@ -396,11 +412,11 @@
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <div class="section-accent"></div>
-            <h5 class="mb-0 fw-bold" id="ntdTrendMatrixTitle">Full Data Table</h5>
-            <span class="badge ms-1" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px">All Cohorts · 90-Day Rate</span>
+            <h5 class="mb-0 fw-bold" id="ntdTrendMatrixTitle">@L["Common_FullDataTable"]</h5>
+            <span class="badge ms-1" style="background:oklch(0.965 0.008 255);color:oklch(0.5 0.03 258);font-size:11px">@L["NTD_AllCohortsBadge"]</span>
         </div>
         <input type="text" id="ntdMatrixSearch" class="form-control form-control-sm"
-               placeholder="&#xF52A; Search store or OC…" style="width:220px;border-radius:20px">
+               placeholder="&#xF52A; @L["Common_SearchStoreOc"]" style="width:220px;border-radius:20px">
     </div>
     <div class="chart-card mb-4 p-0" style="overflow:hidden">
         <div id="ntdMatrixScroll" style="max-height:450px;overflow:auto">
@@ -408,17 +424,17 @@
                 <thead id="ntdMatrixHead" style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:2">
                     <tr>
                         <th class="px-3 py-2" style="min-width:50px;cursor:pointer" data-ndcol="oc"
-                            onclick="ndMxSort('oc')">OC <i id="ndMxi-oc" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                            onclick="ndMxSort('oc')">@L["Common_OC"] <i id="ndMxi-oc" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                         <th class="px-3 py-2" style="min-width:160px;cursor:pointer" data-ndcol="store"
-                            onclick="ndMxSort('store')">Store <i id="ndMxi-store" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                            onclick="ndMxSort('store')">@L["Common_Store"] <i id="ndMxi-store" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                         <!-- period columns injected by JS -->
                         <th class="px-3 py-2 text-center" style="min-width:70px;cursor:pointer;background:oklch(0.5 0.18 25 / .08)" data-ndcol="total"
-                            onclick="ndMxSort('total')">TOTAL <i id="ndMxi-total" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                            onclick="ndMxSort('total')">@L["Common_TotalUpper"] <i id="ndMxi-total" class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     </tr>
                 </thead>
                 <tbody id="ntdMatrixBody">
                     <tr><td colspan="3" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading…
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>@L["Common_LoadingShort"]
                     </td></tr>
                 </tbody>
             </table>
@@ -427,7 +443,7 @@
 
     <div class="d-flex align-items-center gap-2 mb-3">
         <div class="section-accent"></div>
-        <h5 class="mb-0 fw-bold">Early Leavers</h5>
+        <h5 class="mb-0 fw-bold">@L["NTD_EarlyLeavers"]</h5>
         <span id="ntdLeaversCountBadge" class="badge ms-1" style="background:var(--bg-2);color:var(--text-2);font-size:11px"></span>
     </div>
     <div class="chart-card p-0" style="overflow:hidden">
@@ -436,28 +452,28 @@
                 <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
                     <tr>
                         <th class="ntd-sort px-3 py-2" data-col="name" style="cursor:pointer">
-                            Name <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_Name"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="store" style="cursor:pointer">
-                            Store <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_Store"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="jobTitle" style="cursor:pointer">
-                            Job Title <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_JobTitle"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="hireDate" style="cursor:pointer">
-                            Hire Date <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_HireDate"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="resignationDate" style="cursor:pointer">
-                            Resignation Date <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
+                            @L["Common_ResignationDate"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i>
                         </th>
                         <th class="ntd-sort px-3 py-2" data-col="tenureDays" style="cursor:pointer">
-                            Tenure (days) <i class="bi bi-sort-up text-danger" style="font-size:10px"></i>
+                            @L["Common_TenureDays"] <i class="bi bi-sort-up text-danger" style="font-size:10px"></i>
                         </th>
                     </tr>
                 </thead>
                 <tbody id="ntdLeaversBody">
                     <tr><td colspan="6" class="text-center py-4 text-muted">
-                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>Loading...
+                        <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
             </table>
@@ -479,6 +495,7 @@
    Turnover and Comparisons pages). Store/OM/OC lists on this page are
    global (not period-scoped) since the underlying API already returns
    them unscoped. */
+const ntdL = document.getElementById('ntdContent').dataset;
 let ntdYear = null, ntdMonths = [], ntdYearMonthsMap = {};
 let ntdStoreFilter = '', ntdOmFilter = '', ntdOcFilter = '', ntdSocFilter = '', ntdOdFilter = '';
 
@@ -668,16 +685,16 @@ function ntdRenderKpis(kpi) {
     const el = document.getElementById('ntdKpiCards');
     if (!kpi) { el.innerHTML = ''; return; }
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${kpi.totalHires}</div><div class="kpi-label">Hired This Cohort</div><div class="kpi-desc">Employees hired in the selected cohort month(s)</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.earlyLeavers}</div><div class="kpi-label">Left Within 90 Days</div><div class="kpi-desc">Of this cohort, resigned within 90 days of hire</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${kpi.rate.toFixed(1)}%${kpi.isProvisional ? ' <span class=\'badge\' style=\'font-size:10px;background:oklch(0.75 0.16 75 / .18);color:oklch(0.5 0.14 75)\'>provisional</span>' : ''}</div><div class="kpi-label">90-Day Turnover Rate</div><div class="kpi-desc">Early leavers ÷ hires in this cohort</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${kpi.totalHires}</div><div class="kpi-label">${ntdL.kpiHired}</div><div class="kpi-desc">${ntdL.kpiHiredDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${kpi.earlyLeavers}</div><div class="kpi-label">${ntdL.kpiLeft}</div><div class="kpi-desc">${ntdL.kpiLeftDesc}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${kpi.rate.toFixed(1)}%${kpi.isProvisional ? ' <span class=\'badge\' style=\'font-size:10px;background:oklch(0.75 0.16 75 / .18);color:oklch(0.5 0.14 75)\'>${ntdL.provisionalBadge}</span>' : ''}</div><div class="kpi-label">${ntdL.kpiRate}</div><div class="kpi-desc">${ntdL.kpiRateDesc}</div></div>
     `;
     document.getElementById('ntdProvisionalBanner').style.display = kpi.isProvisional ? '' : 'none';
 }
 
 async function ntdLoadKpi() {
     const noteEl = document.getElementById('ntdKpiRangeNote');
-    if (noteEl) noteEl.innerHTML = ntdMonths.length > 1 ? rangeFilterBadge(true, true) + ' — cards above reflect every cohort month checked.' : '';
+    if (noteEl) noteEl.innerHTML = ntdMonths.length > 1 ? rangeFilterBadge(true, true) + ' ' + ntdL.kpiRangeNote : '';
     if (!ntdMonths.length) { ntdRenderKpis(null); return; }
     const kpi = await ntdFetch('kpi');
     ntdRenderKpis(kpi);
@@ -704,7 +721,7 @@ async function ntdLoadTrend() {
         data: {
             labels: data.map(d => d.label),
             datasets: [{
-                label: '90-Day Turnover Rate',
+                label: ntdL.kpiRate,
                 data: data.map(d => d.rate),
                 borderColor: 'oklch(0.5 0.18 25)',
                 backgroundColor: 'oklch(0.5 0.18 25 / .15)',
@@ -818,12 +835,12 @@ async function ntdLoadLeavers() {
     const badge = document.getElementById('ntdLeaversCountBadge');
     if (!ntdMonths.length) { ntdLeaversData = []; document.getElementById('ntdLeaversBody').innerHTML = ''; badge.textContent = ''; return; }
     ntdLeaversData = await ntdFetch('early-leavers') || [];
-    badge.textContent = ntdLeaversData.length + ' early leavers';
+    badge.textContent = ntdLeaversData.length + ' ' + ntdL.earlyLeaversSuffix;
     ntdRenderLeaversTable();
 }
 function ntdRenderLeaversTable() {
     const tbody = document.getElementById('ntdLeaversBody');
-    if (!ntdLeaversData.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No early leavers in this cohort.</td></tr>'; return; }
+    if (!ntdLeaversData.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">' + ntdL.noEarlyLeavers + '</td></tr>'; return; }
     const rows = ntdLeaversData.slice().sort((a, b) => {
         const va = a[ntdLeaversSortCol], vb = b[ntdLeaversSortCol];
         if (typeof va === 'string') return ntdLeaversSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -945,11 +962,11 @@ function ntdRenderStoreTable() {
     });
 
     const badge = document.getElementById('ntdStoreCountBadge');
-    if (badge) badge.textContent = rows.length + ' stores';
+    if (badge) badge.textContent = rows.length + ' ' + ntdL.storesSuffix;
 
     const tbody = document.getElementById('ntdStoreTableBody');
     if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No matching stores.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">' + ntdL.noMatchingStores + '</td></tr>';
         return;
     }
     tbody.innerHTML = rows.map(r => {
@@ -977,7 +994,7 @@ async function ntdLoadStoreComparison() {
 function ntdRenderOcOmTable(tbodyId, rows) {
     const tbody = document.getElementById(tbodyId);
     if (!rows || !rows.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">No data for this period.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-3 text-muted">' + ntdL.noData + '</td></tr>';
         return;
     }
     tbody.innerHTML = rows.map((r, i) => {
@@ -1017,7 +1034,7 @@ async function ntdLoadSmartInsights() {
     const items = await ntdFetch('smart-insights') || [];
 
     if (!items.length) {
-        container.innerHTML = '<div class="col-12"><div class="alert alert-secondary py-2">No insights available yet — upload more cohort data to enable trend analysis.</div></div>';
+        container.innerHTML = '<div class="col-12"><div class="alert alert-secondary py-2">' + ntdL.noInsights + '</div></div>';
         return;
     }
 
@@ -1129,7 +1146,7 @@ function ndMxRender() {
     const colSpan = 2 + ndMxData.periods.length + 1;
     if (!rows.length) {
         document.getElementById('ntdMatrixBody').innerHTML =
-            `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">No matching stores.</td></tr>`;
+            `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">${ntdL.noMatchingStores}</td></tr>`;
         return;
     }
 
@@ -1158,7 +1175,7 @@ function ndMxSort(col) {
 async function ntdLoadTrendMatrix() {
     ntdSetTitleBadge('ntdTrendMatrixTitle', false);
     const body = document.getElementById('ntdMatrixBody');
-    body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>Loading…</td></tr>';
+    body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>' + ntdL.loadingShort + '</td></tr>';
     const q = new URLSearchParams();
     if (ntdOmFilter) q.set('om', ntdOmFilter);
     if (ntdOcFilter) q.set('oc', ntdOcFilter);
@@ -1167,7 +1184,7 @@ async function ntdLoadTrendMatrix() {
     const r = await fetch(`/api/ninety-day-turnover/trend-matrix?${q.toString()}`);
     ndMxData = r.ok ? await r.json() : null;
     if (!ndMxData || !ndMxData.rows || !ndMxData.rows.length) {
-        body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">No data available.</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">' + ntdL.noDataAvailable + '</td></tr>';
         return;
     }
     ndMxBuildHeader(ndMxData.periods);

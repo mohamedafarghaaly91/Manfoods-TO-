@@ -420,9 +420,9 @@
   <data name="EI_NoDataForFilters" xml:space="preserve"><value>مفيش بيانات للفلاتر المختارة.</value></data>
   <data name="EI_NoCommentsForFilters" xml:space="preserve"><value>مفيش تعليقات للفلاتر المختارة.</value></data>
   <data name="Chart_NinetyDayTrend" xml:space="preserve"><value>اتجاه دوران 90 يوم</value></data>
-  <data name="Chart_NinetyDayTrendSub" xml:space="preserve"><value>المعدل لكل شهر توظيف — النقاط المتقطعة لا تزال مؤقتة</value></data>
+  <data name="Chart_NinetyDayTrendSub" xml:space="preserve"><value>المعدل لكل مجموعة شهر تعيين، لكل الفترات — النقاط المتقطعة ما زالت مؤقتة</value></data>
   <data name="Chart_ByStore" xml:space="preserve"><value>حسب الفرع</value></data>
-  <data name="Chart_ByStoreNinetyDaySub" xml:space="preserve"><value>معدل المغادرة المبكرة لشهر المجموعة المحدد</value></data>
+  <data name="Chart_ByStoreNinetyDaySub" xml:space="preserve"><value>أعلى 10 فروع في معدل المغادرة المبكرة لأشهر المجموعة المحددة — راجع جدول المقارنة الكامل بالأسفل لجميع الفروع</value></data>
   <data name="Chart_UsageTrend" xml:space="preserve"><value>اتجاه الاستخدام</value></data>
   <data name="Chart_AiInsights" xml:space="preserve"><value>تحليلات الذكاء الاصطناعي</value></data>
   <data name="Chart_AiInsightsSub" xml:space="preserve"><value>ربط مفتاح الذكاء الاصطناعي لتفعيل التوصيات الذكية.</value></data>
@@ -755,4 +755,130 @@
   <data name="ST_SortTurnoverAsc" xml:space="preserve"><value>نسبة الدوران (من الأقل للأكثر)</value></data>
   <data name="ST_SortTurnoverDesc" xml:space="preserve"><value>نسبة الدوران (من الأكثر للأقل)</value></data>
   <data name="ST_TurnoverRate" xml:space="preserve"><value>نسبة الدوران</value></data>
+
+  <!-- Shared table headers / states used across the dashboard pages -->
+  <data name="Common_Store" xml:space="preserve"><value>الفرع</value></data>
+  <data name="Common_Stores" xml:space="preserve"><value>الفروع</value></data>
+  <data name="Common_JobTitle" xml:space="preserve"><value>المسمى الوظيفي</value></data>
+  <data name="Common_HireDate" xml:space="preserve"><value>تاريخ التعيين</value></data>
+  <data name="Common_ResignationDate" xml:space="preserve"><value>تاريخ الاستقالة</value></data>
+  <data name="Common_TenureDays" xml:space="preserve"><value>مدة الخدمة (يوم)</value></data>
+  <data name="Common_AvgTenure" xml:space="preserve"><value>متوسط مدة الخدمة</value></data>
+  <data name="Common_OC" xml:space="preserve"><value>مستشار العمليات</value></data>
+  <data name="Common_OM" xml:space="preserve"><value>مدير العمليات</value></data>
+  <data name="Common_TotalUpper" xml:space="preserve"><value>الإجمالي</value></data>
+  <data name="Common_LoadingInsights" xml:space="preserve"><value>جاري تحميل التحليلات...</value></data>
+  <data name="Common_LoadingShort" xml:space="preserve"><value>جاري التحميل…</value></data>
+  <data name="Common_NoDataAvailable" xml:space="preserve"><value>لا توجد بيانات متاحة.</value></data>
+  <data name="Common_SearchStoreOc" xml:space="preserve"><value>ابحث عن فرع أو مستشار عمليات…</value></data>
+  <data name="Common_StoresCountSuffix" xml:space="preserve"><value>فرع</value></data>
+  <data name="Common_TotalHeadcount" xml:space="preserve"><value>إجمالي عدد الموظفين</value></data>
+  <data name="Common_TurnoverRate" xml:space="preserve"><value>معدل الدوران</value></data>
+  <data name="Common_RangeBadgeOn" xml:space="preserve"><value>يعكس النطاق المحدد</value></data>
+  <data name="Common_RangeBadgeOff" xml:space="preserve"><value>آخر فترة فقط</value></data>
+  <data name="Common_Logo" xml:space="preserve"><value>الشعار</value></data>
+  <data name="Common_ToggleMenu" xml:space="preserve"><value>إظهار/إخفاء القائمة</value></data>
+  <data name="Common_ToggleTheme" xml:space="preserve"><value>تبديل المظهر</value></data>
+  <data name="Common_Copy" xml:space="preserve"><value>نسخ</value></data>
+
+  <!-- 90-Day Turnover page -->
+  <data name="NTD_Hires" xml:space="preserve"><value>التعيينات</value></data>
+  <data name="NTD_EarlyLeavers" xml:space="preserve"><value>المغادرون مبكرًا</value></data>
+  <data name="NTD_Rate" xml:space="preserve"><value>معدل 90 يوم</value></data>
+  <data name="NTD_RankedByAvgRate" xml:space="preserve"><value>مرتبة حسب متوسط معدل 90 يوم</value></data>
+  <data name="NTD_ReasonsEarlyLeaving" xml:space="preserve"><value>أسباب المغادرة المبكرة</value></data>
+  <data name="NTD_ReasonsEarlyLeavingSub" xml:space="preserve"><value>من مقابلات إنهاء الخدمة، مطابَقة مع المغادرين مبكرًا في هذه المجموعة</value></data>
+  <data name="NTD_GenderSub" xml:space="preserve"><value>نوع المغادرين مبكرًا لأشهر المجموعة المحددة</value></data>
+  <data name="NTD_ByJobTitle" xml:space="preserve"><value>حسب المسمى الوظيفي</value></data>
+  <data name="NTD_ByJobTitleSub" xml:space="preserve"><value>المسميات الوظيفية للمغادرين مبكرًا لأشهر المجموعة المحددة</value></data>
+  <data name="NTD_ByPayroll" xml:space="preserve"><value>حسب مجموعة الرواتب</value></data>
+  <data name="NTD_ByPayrollSub" xml:space="preserve"><value>مجموعات الرواتب للمغادرين مبكرًا لأشهر المجموعة المحددة</value></data>
+  <data name="NTD_AllCohortsBadge" xml:space="preserve"><value>كل المجموعات · معدل 90 يوم</value></data>
+  <data name="NTD_KpiHired" xml:space="preserve"><value>المعيّنون في هذه المجموعة</value></data>
+  <data name="NTD_KpiHiredDesc" xml:space="preserve"><value>الموظفون الذين تم تعيينهم في أشهر المجموعة المحددة</value></data>
+  <data name="NTD_KpiLeft" xml:space="preserve"><value>غادروا خلال 90 يومًا</value></data>
+  <data name="NTD_KpiLeftDesc" xml:space="preserve"><value>من هذه المجموعة، استقالوا خلال 90 يومًا من التعيين</value></data>
+  <data name="NTD_ProvisionalBadge" xml:space="preserve"><value>مؤقت</value></data>
+  <data name="NTD_KpiRate" xml:space="preserve"><value>معدل دوران 90 يوم</value></data>
+  <data name="NTD_KpiRateDesc" xml:space="preserve"><value>المغادرون مبكرًا ÷ التعيينات في هذه المجموعة</value></data>
+  <data name="NTD_KpiRangeNote" xml:space="preserve"><value>— تعكس البطاقات أعلاه كل شهر مجموعة تم تحديده.</value></data>
+  <data name="NTD_NoEarlyLeavers" xml:space="preserve"><value>لا يوجد مغادرون مبكرًا في هذه المجموعة.</value></data>
+  <data name="NTD_NoInsights" xml:space="preserve"><value>لا توجد تحليلات متاحة بعد — قم برفع المزيد من بيانات المجموعات لتفعيل تحليل الاتجاهات.</value></data>
+  <data name="NTD_EarlyLeaversCountSuffix" xml:space="preserve"><value>مغادر مبكرًا</value></data>
+
+  <!-- Turnover page -->
+  <data name="TV_RankedByWeighted" xml:space="preserve"><value>مرتبة حسب معدل الدوران المرجّح</value></data>
+  <data name="TV_AllPeriodsBadge" xml:space="preserve"><value>كل الفترات · معدل الدوران %</value></data>
+  <data name="TV_PayrollSub" xml:space="preserve"><value>الاستقالات مجمّعة حسب مجموعة الرواتب</value></data>
+  <data name="TV_ReasonsSub" xml:space="preserve"><value>من مقابلات إنهاء الخدمة المقدَّمة عن الفترة المحددة</value></data>
+  <data name="TV_KpiResignationsDesc" xml:space="preserve"><value>إجمالي الاستقالات في الفترة المحددة</value></data>
+  <data name="TV_KpiTurnoverDesc" xml:space="preserve"><value>الاستقالات ÷ متوسط عدد الموظفين خلال الفترة</value></data>
+  <data name="TV_KpiTrend" xml:space="preserve"><value>الاتجاه مقارنة بالفترة السابقة</value></data>
+  <data name="TV_KpiTrendDesc" xml:space="preserve"><value>التغير في معدل الدوران مقارنة بالفترة السابقة المماثلة</value></data>
+  <data name="TV_KpiRangeNote" xml:space="preserve"><value>— تجمع البطاقات أعلاه كل فترة ضمن النطاق المحدد.</value></data>
+  <data name="TV_NoInsights" xml:space="preserve"><value>لا توجد تحليلات متاحة — قم برفع بيانات لعدة فترات لتفعيل تحليل الاتجاهات.</value></data>
+  <data name="TV_SpikeHeaderSingular" xml:space="preserve"><value>أعلى {0} فرع في الارتفاع مقارنة بالفترة السابقة</value></data>
+  <data name="TV_SpikeHeaderPlural" xml:space="preserve"><value>أعلى {0} فروع في الارتفاع مقارنة بالفترة السابقة</value></data>
+  <data name="Common_ResignationsCountSuffix" xml:space="preserve"><value>استقالة/استقالات</value></data>
+  <data name="Common_TurnoverPctLabel" xml:space="preserve"><value>معدل الدوران %</value></data>
+  <data name="Common_TurnoverOver100Info" xml:space="preserve"><value>قد تتجاوز نسبة الدوران 100% عندما يكون عدد الموظفين الذين غادروا خلال الفترة أكبر من متوسط عدد الموظفين الموجودين. هذا يعني أن معدل دوران الموظفين مرتفع، وليس خطأ في الحساب.</value></data>
+
+  <!-- Workforce page -->
+  <data name="WF_GenderMix" xml:space="preserve"><value>توزيع النوع</value></data>
+  <data name="WF_PayrollGroupMix" xml:space="preserve"><value>توزيع مجموعات الرواتب</value></data>
+  <data name="WF_HeadcountTurnoverByDirector" xml:space="preserve"><value>عدد الموظفين والدوران حسب المدير التنفيذي</value></data>
+  <data name="WF_HeadcountTurnoverByManager" xml:space="preserve"><value>عدد الموظفين والدوران حسب المدير</value></data>
+  <data name="WF_HeadcountTurnoverBySeniorConsultant" xml:space="preserve"><value>عدد الموظفين والدوران حسب المستشار الأول</value></data>
+  <data name="WF_KpiHeadcountDesc" xml:space="preserve"><value>الموظفون على القائمة النشطة خلال الفترة</value></data>
+  <data name="WF_KpiNewHiresDesc" xml:space="preserve"><value>الموظفون الذين تم تعيينهم خلال الفترة المحددة</value></data>
+  <data name="WF_KpiRangeNote" xml:space="preserve"><value>— تجمع البطاقات الثلاث أعلاه كل فترة ضمن النطاق المحدد.</value></data>
+  <data name="Common_EmployeesCountSuffix" xml:space="preserve"><value>موظف</value></data>
+
+  <!-- Retention page -->
+  <data name="RT_NoRetentionData" xml:space="preserve"><value>لا توجد بيانات احتفاظ بعد</value></data>
+  <data name="RT_NoRetentionDataSub" xml:space="preserve"><value>قم برفع بيانات القوى العاملة والاستقالات مع تواريخ التعيين لعرض تحليل الاحتفاظ هنا.</value></data>
+  <data name="RT_TenureMix" xml:space="preserve"><value>توزيع مدد الخدمة</value></data>
+  <data name="RT_NoActiveHeadcount" xml:space="preserve"><value>لا توجد بيانات لعدد الموظفين النشطين بعد.</value></data>
+  <data name="RT_MilestoneCardDesc" xml:space="preserve"><value>نسبة الموظفين الحاليين في هذه الفئة من مدة الخدمة</value></data>
+  <data name="RT_ActiveEmployeesSuffix" xml:space="preserve"><value>موظف نشط</value></data>
+  <data name="RT_StillOnTeam" xml:space="preserve"><value>ما زالوا ضمن الفريق</value></data>
+  <data name="RT_NoInsights" xml:space="preserve"><value>لا توجد تحليلات متاحة بعد — قم برفع بيانات لفترات إضافية لتفعيل تحليل الاتجاهات.</value></data>
+
+  <!-- Shared - short empty state -->
+  <data name="Common_NoDataShort" xml:space="preserve"><value>لا توجد بيانات.</value></data>
+
+  <!-- Early Warning page -->
+  <data name="EW_NoActiveEmployeeData" xml:space="preserve"><value>لا توجد بيانات موظفين نشطين بعد</value></data>
+  <data name="EW_NoActiveEmployeeDataSub" xml:space="preserve"><value>قم برفع بيانات القوى العاملة مع تواريخ التعيين لعرض قائمة الإنذار المبكر هنا.</value></data>
+  <data name="EW_KpiInWatchlistDesc" xml:space="preserve"><value>الموظفون النشطون الذين ينطبق عليهم عامل خطر واحد على الأقل</value></data>
+  <data name="EW_KpiHighRiskDesc" xml:space="preserve"><value>درجة خطورة 4-5★ (3 عوامل خطر أو أكثر)</value></data>
+  <data name="EW_KpiNewHireWindowDesc" xml:space="preserve"><value>ما زالوا ضمن أول 90 يومًا من التعيين</value></data>
+  <data name="EW_KpiBaselineDesc" xml:space="preserve"><value>معدل المغادرة المبكرة على مستوى الشركة المستخدم كخط أساس للخطورة</value></data>
+  <data name="EW_NoWatchlistThisPeriod" xml:space="preserve"><value>لا يوجد أحد في قائمة المتابعة لهذه الفترة.</value></data>
+  <data name="EW_InsightHighRiskShareTitle" xml:space="preserve"><value>نسبة الخطورة العالية</value></data>
+  <data name="EW_InsightHighRiskShareDesc" xml:space="preserve"><value>{0} من أصل {1} في قائمة المتابعة ({2}%) ضمن الخطورة العالية (4-5★).</value></data>
+  <data name="EW_InsightTopReasonTitle" xml:space="preserve"><value>أكثر عوامل الخطر شيوعًا</value></data>
+  <data name="EW_InsightTopReasonDesc" xml:space="preserve"><value>"{0}" وراء {1} من أصل {2} في قائمة المتابعة — وهو أكبر عامل مؤثر حاليًا.</value></data>
+  <data name="EW_InsightTopStoreTitle" xml:space="preserve"><value>فرع يحتاج إلى اهتمام</value></data>
+  <data name="EW_InsightTopStoreDesc" xml:space="preserve"><value>{0} لديه {1} من الموظفين ذوي الخطورة العالية (4-5★) — الأعلى بين كل الفروع حاليًا.</value></data>
+  <data name="EW_InsightTopRoleTitle" xml:space="preserve"><value>أكثر المسميات الوظيفية متابعةً</value></data>
+  <data name="EW_InsightTopRoleDesc" xml:space="preserve"><value>{0} يمثل {1} من أصل {2} في قائمة المتابعة — أكثر من أي مسمى وظيفي آخر.</value></data>
+
+  <!-- Exit Interviews page -->
+  <data name="EI_NoExitData" xml:space="preserve"><value>لا توجد بيانات مقابلات إنهاء خدمة</value></data>
+  <data name="EI_NoExitDataSub" xml:space="preserve"><value>قم برفع ردود مقابلات إنهاء الخدمة من صفحة إدارة البيانات لعرض التحليل هنا.</value></data>
+  <data name="EI_DriverStat" xml:space="preserve"><value>{0}% إيجابي · {1} رد</value></data>
+  <data name="EI_KpiTotalDesc" xml:space="preserve"><value>نماذج مقابلات إنهاء الخدمة المطابقة للفلاتر الحالية</value></data>
+  <data name="EI_KpiPositiveDesc" xml:space="preserve"><value>النسبة الإيجابية المجمّعة لسؤالي "هل تعود للعمل" و"التجربة العامة"</value></data>
+  <data name="EI_KpiTopReasonDesc" xml:space="preserve"><value>{0}% من إجمالي الأسباب المذكورة</value></data>
+  <data name="EI_KpiReturnDesc" xml:space="preserve"><value>نسبة من قالوا إنهم سيعودون للعمل هنا</value></data>
+  <data name="EI_NoInterviewDataPeriod" xml:space="preserve"><value>لا توجد بيانات مقابلات إنهاء خدمة لهذه الفترة.</value></data>
+  <data name="EI_InsightSentimentTitle" xml:space="preserve"><value>الانطباع العام</value></data>
+  <data name="EI_InsightSentimentDesc" xml:space="preserve"><value>{0}% انطباع إيجابي عبر {1} من مقابلات إنهاء الخدمة.</value></data>
+  <data name="EI_InsightTopReasonTitle" xml:space="preserve"><value>السبب الرئيسي للمغادرة</value></data>
+  <data name="EI_InsightTopReasonDesc" xml:space="preserve"><value>"{0}" يمثل {1}% ({2} من {3}) من إجمالي الأسباب المذكورة.</value></data>
+  <data name="EI_InsightWeakestTitle" xml:space="preserve"><value>أضعف محركات الاندماج</value></data>
+  <data name="EI_InsightWeakestDesc" xml:space="preserve"><value>"{0}" لديه أدنى نسبة إيجابية ({1}%، {2} رد) — يستحق الدراسة.</value></data>
+  <data name="EI_InsightStrongestTitle" xml:space="preserve"><value>أقوى محركات الاندماج</value></data>
+  <data name="EI_InsightStrongestDesc" xml:space="preserve"><value>"{0}" لديه أعلى نسبة إيجابية ({1}%، {2} رد).</value></data>
 </root>
