@@ -12,7 +12,6 @@ public interface IStoreActionPlanService
 
     /// <summary>Every store the given role/email can see, each with its current plan
     /// status ("Active" / "Resolved" / "None") and dynamically-resolved responsible party.</summary>
-    Task<List<StoreActionPlanSummaryDto>> GetAccessibleStoresWithStatusAsync(string role, string? email);
 
     /// <summary>Appends a note to the store's most recent plan. Caller must be
     /// Head_Manager or Operation_Consultant and have access to the store; fails if

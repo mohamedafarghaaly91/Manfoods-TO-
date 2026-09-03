@@ -19,27 +19,6 @@ public class StoreActionPlanApiController : ControllerBase
         _dashboard = dashboard;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetForStore([FromQuery] string store)
-    {
-        if (string.IsNullOrWhiteSpace(store)) return BadRequest("store is required.");
-
-        var role = HttpContext.Session.GetRole();
-        var email = HttpContext.Session.GetEmail();
-        var result = await _actionPlans.GetForStoreAsync(store, role, email);
-        if (result == null) return NotFound();
-
-        return Ok(result);
-    }
-
-    [HttpGet("stores")]
-    public async Task<IActionResult> GetAccessibleStores()
-    {
-        var role = HttpContext.Session.GetRole();
-        var email = HttpContext.Session.GetEmail();
-        return Ok(await _actionPlans.GetAccessibleStoresWithStatusAsync(role, email));
-    }
-
     [HttpPost("{store}/notes")]
     [RequireRole("Head_Manager", "Operation_Consultant")]
     public async Task<IActionResult> AddNote(string store, [FromBody] AddNoteRequest request)

@@ -135,50 +135,6 @@ public class StoreActionPlanService : IStoreActionPlanService
         };
     }
 
-    public async Task<List<StoreActionPlanSummaryDto>> GetAccessibleStoresWithStatusAsync(string role, string? email)
-    {
-        var storeRefs = await _stores.GetStoresAsync(null, null, role, email);
-        var storeNames = storeRefs.Select(s => s.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        if (storeNames.Count == 0) return new List<StoreActionPlanSummaryDto>();
-
-        var latestPeriod = await _db.StoreReferences
-            .OrderByDescending(s => s.Year).ThenByDescending(s => s.Month)
-            .Select(s => new { s.Month, s.Year })
-            .FirstOrDefaultAsync();
-
-        var latestRefsByStore = latestPeriod == null
-            ? new Dictionary<string, StoreReference>(StringComparer.OrdinalIgnoreCase)
-            : (await _db.StoreReferences
-                .Where(s => s.Month == latestPeriod.Month && s.Year == latestPeriod.Year && storeNames.Contains(s.StoreName))
-                .ToListAsync())
-                .GroupBy(s => s.StoreName, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-
-        var plansByStore = (await _db.StoreActionPlans
-                .Where(p => storeNames.Contains(p.StoreName))
-                .ToListAsync())
-            .GroupBy(p => p.StoreName, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(p => p.CreatedAt).First(), StringComparer.OrdinalIgnoreCase);
-
-        var result = new List<StoreActionPlanSummaryDto>();
-        foreach (var storeName in storeNames)
-        {
-            plansByStore.TryGetValue(storeName, out var plan);
-            latestRefsByStore.TryGetValue(storeName, out var reference);
-            var responsible = reference != null ? _storeAccess.ResolveResponsible(reference) : null;
-
-            result.Add(new StoreActionPlanSummaryDto
-            {
-                StoreName = storeName,
-                PlanStatus = plan?.Status ?? "None",
-                PlanId = plan?.Id,
-                ResponsibleName = responsible?.Name,
-                ResponsibleRole = responsible?.Role,
-            });
-        }
-        return result;
-    }
-
     // ────────────────────────────── Notes (write) ──────────────────────────────
 
     public async Task<(bool success, string message, ActionPlanNoteDto? note)> AddNoteAsync(

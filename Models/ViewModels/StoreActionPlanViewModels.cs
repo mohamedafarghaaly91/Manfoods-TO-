@@ -119,14 +119,3 @@ public class ActionCenterTrendPointDto
     public int Opened { get; set; }
     public int Resolved { get; set; }
 }
-
-/// <summary>One row per accessible store for the plan-overview list — status is
-/// "Active" / "Resolved" (most recent plan) / "None" (no plan on record).</summary>
-public class StoreActionPlanSummaryDto
-{
-    public string StoreName { get; set; } = "";
-    public string PlanStatus { get; set; } = "None";
-    public int? PlanId { get; set; }
-    public string? ResponsibleName { get; set; }
-    public string? ResponsibleRole { get; set; }
-}

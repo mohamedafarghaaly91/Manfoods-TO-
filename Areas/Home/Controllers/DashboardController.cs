@@ -41,10 +41,6 @@ public class DashboardController : Controller
 
     public IActionResult Scorecard() => View();
 
-    public IActionResult StoreActionPlans() => View();
-
-    public IActionResult StoreActionPlanDetail() => View();
-
     public IActionResult ActionCenter() => View();
 
     public IActionResult ActionCenterDetail() => View();
