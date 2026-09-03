@@ -28,6 +28,19 @@ public static class ReportCatalog
     {
         new ReportDefinition
         {
+            Id = "action-center", Section = "Store Operations", Title = "Action Center",
+            Description = "Company-wide action-plan status — active plans, this month's opened/resolved, resolution trend, top reasons, and per-store severity, ownership, and task progress.",
+            Icon = "bi-clipboard2-check-fill", IconBg = "oklch(0.6 0.22 22 / .10)", IconColor = "oklch(0.6 0.22 22)",
+        },
+        new ReportDefinition
+        {
+            Id = "stores-overview", Section = "Store Operations", Title = "Stores Overview",
+            Description = "Every store's Headcount, Turnover, Action Center status, and Early Warning high-risk count for the selected month — the single cross-page view of store health.",
+            Icon = "bi-shop", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesPeriod = true, UsesOmOc = true,
+        },
+        new ReportDefinition
+        {
             Id = "summary", Section = "Turnover & Workforce", Title = "Monthly Summary",
             Description = "Headcount, New Hires, Resignations, and Turnover Rate for the selected month — broken down by Job Title, Tenure, and Gender.",
             Icon = "bi-file-earmark-spreadsheet-fill", IconBg = "rgba(39,174,96,.12)", IconColor = "#27ae60",
@@ -46,6 +59,20 @@ public static class ReportCatalog
             Description = "Full data table — one row per store, one column per month, showing Turnover % across all available periods from the selected year onward, with an average column.",
             Icon = "bi-table", IconBg = "oklch(0.55 0.15 258 / .10)", IconColor = "oklch(0.5 0.15 258)",
             UsesYear = true, UsesMonths = true, UsesOmOc = true,
+        },
+        new ReportDefinition
+        {
+            Id = "workforce", Section = "Turnover & Workforce", Title = "Workforce",
+            Description = "Active workforce composition for the selected month — Headcount by Job Title, Payroll Group, Tenure, and Gender — plus the Headcount Trend over time.",
+            Icon = "bi-people-fill", IconBg = "oklch(0.6 0.13 250 / .10)", IconColor = "oklch(0.5 0.13 250)",
+            UsesPeriod = true, UsesStore = true, UsesOmOc = true,
+        },
+        new ReportDefinition
+        {
+            Id = "oc-om-comparison", Section = "Turnover & Workforce", Title = "OC / OM Comparison",
+            Description = "Stores, headcount, resignations, and average turnover rate rolled up by Operation Consultant, Operation Manager, Senior Operation Consultant, and Operation Director.",
+            Icon = "bi-people", IconBg = "oklch(0.55 0.15 258 / .10)", IconColor = "oklch(0.5 0.15 258)",
+            UsesPeriod = true, UsesOmOc = true,
         },
         new ReportDefinition
         {

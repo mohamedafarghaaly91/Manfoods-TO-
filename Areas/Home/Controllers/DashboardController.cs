@@ -124,6 +124,20 @@ public class DashboardController : Controller
                 return await DownloadWorkbookAsync(
                     await _reports.BuildNinetyDayTrendMatrixReportAsync(role, assignedName, om, oc, soc, od, months, year > 0 ? year : null),
                     "90_Day_Trend_Matrix_Report.xlsx");
+            case "action-center":
+                return await DownloadWorkbookAsync(await _reports.BuildActionCenterReportAsync(role, assignedName), "Action_Center_Report.xlsx");
+            case "stores-overview":
+                return await DownloadWorkbookAsync(
+                    await _reports.BuildStoresOverviewReportAsync(month, year, role, assignedName, om, oc, soc, od),
+                    $"Stores_Overview_{year}_{month:D2}.xlsx");
+            case "workforce":
+                return await DownloadWorkbookAsync(
+                    await _reports.BuildWorkforceReportAsync(month, year, role, assignedName, store, om, oc, soc, od),
+                    $"Workforce_Report_{year}_{month:D2}.xlsx");
+            case "oc-om-comparison":
+                return await DownloadWorkbookAsync(
+                    await _reports.BuildOcOmComparisonReportAsync(month, year, role, assignedName, om: om, oc: oc, soc: soc, od: od),
+                    $"OC_OM_Comparison_{year}_{month:D2}.xlsx");
             default:
                 return await DownloadWorkbookAsync(
                     await _reports.BuildSummaryReportAsync(month, year, role, assignedName, store),

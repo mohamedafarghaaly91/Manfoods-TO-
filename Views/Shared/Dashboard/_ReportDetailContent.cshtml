@@ -87,6 +87,9 @@
 }
 else
 {
+    var hasAnyFilter = rep.UsesPeriod || rep.UsesYear || rep.UsesStore || rep.UsesOmOc || rep.UsesMonths;
+    if (hasAnyFilter)
+    {
     <div class="card-dark mb-4" style="border-left:4px solid @rep.IconColor">
         <div class="d-flex align-items-center gap-2 mb-3">
             <i class="bi bi-funnel-fill" style="color:@rep.IconColor"></i>
@@ -257,6 +260,7 @@ else
             }
         </div>
     </div>
+    }
 
     <div class="card-dark text-center py-4">
         <button class="btn btn-primary btn-lg rep-dl-btn" onclick="rdDownload()">
