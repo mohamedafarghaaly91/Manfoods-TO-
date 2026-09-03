@@ -971,4 +971,54 @@
   <data name="Month_October" xml:space="preserve"><value>October</value></data>
   <data name="Month_November" xml:space="preserve"><value>November</value></data>
   <data name="Month_December" xml:space="preserve"><value>December</value></data>
+
+  <!-- Users page -->
+  <data name="Users_GenerateOtp" xml:space="preserve"><value>Generate OTP</value></data>
+  <data name="Users_GenerateRecoveryKeyTitle" xml:space="preserve"><value>Generate a new admin recovery key</value></data>
+  <data name="Users_DeleteConfirm" xml:space="preserve"><value>Delete user {0}?</value></data>
+  <data name="Users_RecoveryPasswordPrompt" xml:space="preserve"><value>Enter &lt;strong&gt;your own&lt;/strong&gt; admin password to generate a new recovery key. This replaces the current key everywhere — the old one stops working immediately.</value></data>
+  <data name="Users_YourPassword" xml:space="preserve"><value>Your password</value></data>
+  <data name="Users_SaveKeyWarning" xml:space="preserve"><value>Save this now — it will not be shown again, and the old key no longer works.</value></data>
+  <data name="Users_OtpFailed" xml:space="preserve"><value>Failed to generate OTP.</value></data>
+  <data name="Common_SomethingWentWrong" xml:space="preserve"><value>Something went wrong.</value></data>
+
+  <!-- Create user placeholder -->
+  <data name="Users_MinSixChars" xml:space="preserve"><value>Min. 6 characters</value></data>
+
+  <!-- Settings page (color rules) -->
+  <data name="Set_MetricTurnoverSub" xml:space="preserve"><value>Colors used everywhere a Turnover Rate % is shown (Store Comparison, OC/OM/OD tables, Full Data Table, Scorecard, store health cards).</value></data>
+  <data name="Set_MetricNinetySub" xml:space="preserve"><value>Colors used everywhere an early-leaver 90-Day Rate % is shown.</value></data>
+  <data name="Set_MetricRetentionTitle" xml:space="preserve"><value>Retention Rate</value></data>
+  <data name="Set_MetricRetentionSub" xml:space="preserve"><value>Colors used for retention milestone cards and the store retention ranking chart. Higher is better here, so order your rules the other way around.</value></data>
+  <data name="Set_MetricEwTitle" xml:space="preserve"><value>Early Warning Risk Stars</value></data>
+  <data name="Set_MetricEwSub" xml:space="preserve"><value>Colors used for the risk-score star badges on the Early Warning page (0-5 stars, not a %).</value></data>
+  <data name="Set_ColorNone" xml:space="preserve"><value>No color (plain text)</value></data>
+  <data name="Set_ColorGreen" xml:space="preserve"><value>Green</value></data>
+  <data name="Set_ColorYellow" xml:space="preserve"><value>Yellow</value></data>
+  <data name="Set_ColorOrange" xml:space="preserve"><value>Orange</value></data>
+  <data name="Set_ColorRed" xml:space="preserve"><value>Red</value></data>
+  <data name="Set_EverythingAbove" xml:space="preserve"><value>Everything above the last rule</value></data>
+  <data name="Set_UpTo" xml:space="preserve"><value>Up to</value></data>
+  <data name="Set_AddRule" xml:space="preserve"><value>Add rule</value></data>
+  <data name="Set_Saving" xml:space="preserve"><value>Saving...</value></data>
+  <data name="Set_SaveFailed" xml:space="preserve"><value>Save failed: </value></data>
+
+  <!-- Error page -->
+  <data name="Error_Title" xml:space="preserve"><value>Error.</value></data>
+  <data name="Error_Message" xml:space="preserve"><value>An error occurred while processing your request.</value></data>
+  <data name="Error_RequestId" xml:space="preserve"><value>Request ID:</value></data>
+
+  <!-- Account pages / page titles -->
+  <data name="Title_AdminSignIn" xml:space="preserve"><value>Admin Sign In</value></data>
+  <data name="Title_AdminRecovery" xml:space="preserve"><value>Admin Recovery</value></data>
+  <data name="Title_ForgotPassword" xml:space="preserve"><value>Forgot Password</value></data>
+  <data name="Title_SignIn" xml:space="preserve"><value>Sign In</value></data>
+  <data name="Recover_KeyPlaceholder" xml:space="preserve"><value>Paste your saved recovery key</value></data>
+  <data name="Common_NewPasswordPlaceholder" xml:space="preserve"><value>New password</value></data>
+  <data name="Common_ConfirmNewPasswordPlaceholder" xml:space="preserve"><value>Confirm new password</value></data>
+  <data name="FP_OtpPlaceholder" xml:space="preserve"><value>6-digit code</value></data>
+
+  <!-- Role labels shown in the sidebar user card -->
+  <data name="Role_OperationManager" xml:space="preserve"><value>Operation Manager</value></data>
+  <data name="Role_OperationConsultant" xml:space="preserve"><value>Operation Consultant</value></data>
 </root>

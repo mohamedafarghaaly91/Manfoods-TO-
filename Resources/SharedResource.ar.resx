@@ -972,4 +972,54 @@
   <data name="Month_October" xml:space="preserve"><value>أكتوبر</value></data>
   <data name="Month_November" xml:space="preserve"><value>نوفمبر</value></data>
   <data name="Month_December" xml:space="preserve"><value>ديسمبر</value></data>
+
+  <!-- Users page -->
+  <data name="Users_GenerateOtp" xml:space="preserve"><value>إنشاء رمز مؤقت</value></data>
+  <data name="Users_GenerateRecoveryKeyTitle" xml:space="preserve"><value>إنشاء مفتاح استرداد جديد للمسؤول</value></data>
+  <data name="Users_DeleteConfirm" xml:space="preserve"><value>حذف المستخدم {0}؟</value></data>
+  <data name="Users_RecoveryPasswordPrompt" xml:space="preserve"><value>أدخل &lt;strong&gt;كلمة مرورك أنت&lt;/strong&gt; كمسؤول لإنشاء مفتاح استرداد جديد. سيحل هذا محل المفتاح الحالي في كل مكان — ويتوقف المفتاح القديم عن العمل فورًا.</value></data>
+  <data name="Users_YourPassword" xml:space="preserve"><value>كلمة مرورك</value></data>
+  <data name="Users_SaveKeyWarning" xml:space="preserve"><value>احفظه الآن — لن يُعرض مرة أخرى، ولن يعمل المفتاح القديم بعد ذلك.</value></data>
+  <data name="Users_OtpFailed" xml:space="preserve"><value>تعذّر إنشاء الرمز المؤقت.</value></data>
+  <data name="Common_SomethingWentWrong" xml:space="preserve"><value>حدث خطأ ما.</value></data>
+
+  <!-- Create user placeholder -->
+  <data name="Users_MinSixChars" xml:space="preserve"><value>6 أحرف على الأقل</value></data>
+
+  <!-- Settings page (color rules) -->
+  <data name="Set_MetricTurnoverSub" xml:space="preserve"><value>الألوان المستخدمة في كل موضع يُعرض فيه معدل الدوران % (مقارنة الفروع، وجداول مستشاري ومديري العمليات، وجدول البيانات الكامل، وبطاقة الأداء، وبطاقات صحة الفروع).</value></data>
+  <data name="Set_MetricNinetySub" xml:space="preserve"><value>الألوان المستخدمة في كل موضع يُعرض فيه معدل المغادرة المبكرة خلال 90 يومًا %.</value></data>
+  <data name="Set_MetricRetentionTitle" xml:space="preserve"><value>معدل الاحتفاظ</value></data>
+  <data name="Set_MetricRetentionSub" xml:space="preserve"><value>الألوان المستخدمة لبطاقات مراحل الاحتفاظ ورسم ترتيب الفروع في الاحتفاظ. القيمة الأعلى أفضل هنا، لذا رتّب القواعد بالاتجاه المعاكس.</value></data>
+  <data name="Set_MetricEwTitle" xml:space="preserve"><value>نجوم خطورة الإنذار المبكر</value></data>
+  <data name="Set_MetricEwSub" xml:space="preserve"><value>الألوان المستخدمة لشارات نجوم درجة الخطورة في صفحة الإنذار المبكر (من 0 إلى 5 نجوم، وليست نسبة مئوية).</value></data>
+  <data name="Set_ColorNone" xml:space="preserve"><value>بدون لون (نص عادي)</value></data>
+  <data name="Set_ColorGreen" xml:space="preserve"><value>أخضر</value></data>
+  <data name="Set_ColorYellow" xml:space="preserve"><value>أصفر</value></data>
+  <data name="Set_ColorOrange" xml:space="preserve"><value>برتقالي</value></data>
+  <data name="Set_ColorRed" xml:space="preserve"><value>أحمر</value></data>
+  <data name="Set_EverythingAbove" xml:space="preserve"><value>كل ما هو أعلى من القاعدة الأخيرة</value></data>
+  <data name="Set_UpTo" xml:space="preserve"><value>حتى</value></data>
+  <data name="Set_AddRule" xml:space="preserve"><value>إضافة قاعدة</value></data>
+  <data name="Set_Saving" xml:space="preserve"><value>جاري الحفظ...</value></data>
+  <data name="Set_SaveFailed" xml:space="preserve"><value>فشل الحفظ: </value></data>
+
+  <!-- Error page -->
+  <data name="Error_Title" xml:space="preserve"><value>خطأ.</value></data>
+  <data name="Error_Message" xml:space="preserve"><value>حدث خطأ أثناء معالجة طلبك.</value></data>
+  <data name="Error_RequestId" xml:space="preserve"><value>معرّف الطلب:</value></data>
+
+  <!-- Account pages / page titles -->
+  <data name="Title_AdminSignIn" xml:space="preserve"><value>تسجيل دخول المسؤول</value></data>
+  <data name="Title_AdminRecovery" xml:space="preserve"><value>استرداد حساب المسؤول</value></data>
+  <data name="Title_ForgotPassword" xml:space="preserve"><value>نسيت كلمة المرور</value></data>
+  <data name="Title_SignIn" xml:space="preserve"><value>تسجيل الدخول</value></data>
+  <data name="Recover_KeyPlaceholder" xml:space="preserve"><value>الصق مفتاح الاسترداد المحفوظ لديك</value></data>
+  <data name="Common_NewPasswordPlaceholder" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
+  <data name="Common_ConfirmNewPasswordPlaceholder" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة</value></data>
+  <data name="FP_OtpPlaceholder" xml:space="preserve"><value>رمز من 6 أرقام</value></data>
+
+  <!-- Role labels shown in the sidebar user card -->
+  <data name="Role_OperationManager" xml:space="preserve"><value>مدير العمليات</value></data>
+  <data name="Role_OperationConsultant" xml:space="preserve"><value>مستشار العمليات</value></data>
 </root>

@@ -18,11 +18,16 @@ function isPeriodRangeActive() {
         && (fromPeriodMonth !== periodMonth || fromPeriodYear !== periodYear));
 }
 
+/* Localized UI strings for this file come from data-* attributes on <body>,
+   set from the resx in each area's _Layout.cshtml (same handoff pattern as
+   notifications.js). Fallbacks keep the file usable if an attribute is absent. */
+const DASH_L = document.body.dataset;
+
 function rangeFilterBadge(isRangeActive, affected) {
     if (!isRangeActive) return '';
     return affected
-        ? '<span class="range-filter-badge range-filter-badge-on"><i class="bi bi-check-circle-fill"></i>Reflects selected range</span>'
-        : '<span class="range-filter-badge range-filter-badge-off"><i class="bi bi-dash-circle"></i>Latest period only</span>';
+        ? '<span class="range-filter-badge range-filter-badge-on"><i class="bi bi-check-circle-fill"></i>' + (DASH_L.rangeBadgeOn || '') + '</span>'
+        : '<span class="range-filter-badge range-filter-badge-off"><i class="bi bi-dash-circle"></i>' + (DASH_L.rangeBadgeOff || '') + '</span>';
 }
 
 async function fetchJson(url) {
@@ -171,10 +176,10 @@ async function loadKpis() {
     const data = await fetchJson('/api/dashboard/kpis?' + buildQuery());
 
     kpiEl.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">Total Headcount</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">New Hires</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">Resignations</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(data.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">Turnover Rate</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${data.totalHeadcount||0}</div><div class="kpi-label">${DASH_L.kpiHeadcount || ''}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-success"><i class="bi bi-person-plus-fill"></i></div><div class="kpi-value text-success">${data.newHires||0}</div><div class="kpi-label">${DASH_L.kpiNewHires || ''}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${data.totalResignations||0}</div><div class="kpi-label">${DASH_L.kpiResignations || ''}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${(data.turnoverRate||0).toFixed(1)}%</div><div class="kpi-label">${DASH_L.kpiTurnoverRate || ''}</div></div>
     `;
 }
 
@@ -197,14 +202,14 @@ async function loadCharts() {
     jobTitleChart = mkChart(jobTitleChart, 'jobTitleChart', {
         type: 'bar',
         data: { labels: jobTitleLabels, datasets: [{ data: jobTitle.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(jobTitleLabels, null), borderRadius: 4 }] },
-        options: { indexAxis:'y', plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} resignation(s)`}}}, scales:{x:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}},y:{grid:{display:false},ticks:{color:'#5B5875'}}} }
+        options: { indexAxis:'y', plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} ${DASH_L.resignationsSuffix || ''}`}}}, scales:{x:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}},y:{grid:{display:false},ticks:{color:'#5B5875'}}} }
     });
 
     const tenureLabels = tenure.map(d=>d.label);
     tenureChart = mkChart(tenureChart, 'tenureChart', {
         type: 'bar',
         data: { labels: tenureLabels, datasets: [{ data: tenure.map(d=>d.value), backgroundColor: ChartColors.colorsByLabel(tenureLabels, null), borderRadius: 4 }] },
-        options: { plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} resignation(s)`}}}, scales:{x:{grid:{display:false},ticks:{color:'#5B5875'}},y:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}}} }
+        options: { plugins:{legend:{display:false}, tooltip:{enabled:true, callbacks:{label: c => ` ${c.formattedValue} ${DASH_L.resignationsSuffix || ''}`}}}, scales:{x:{grid:{display:false},ticks:{color:'#5B5875'}},y:{grid:{color:'#E4E2F5'},ticks:{color:'#5B5875'}}} }
     });
 
     const genderLabels = gender.map(d=>d.label);

@@ -20,23 +20,46 @@
 </div>
 
 @Html.AntiForgeryToken()
+<div id="setL" hidden
+     data-metric-turnover-title="@L["Common_TurnoverRate"]"
+     data-metric-turnover-sub="@L["Set_MetricTurnoverSub"]"
+     data-metric-ninety-title="@L["CMP_MetricNinetyRate"]"
+     data-metric-ninety-sub="@L["Set_MetricNinetySub"]"
+     data-metric-retention-title="@L["Set_MetricRetentionTitle"]"
+     data-metric-retention-sub="@L["Set_MetricRetentionSub"]"
+     data-metric-ew-title="@L["Set_MetricEwTitle"]"
+     data-metric-ew-sub="@L["Set_MetricEwSub"]"
+     data-color-none="@L["Set_ColorNone"]"
+     data-color-green="@L["Set_ColorGreen"]"
+     data-color-yellow="@L["Set_ColorYellow"]"
+     data-color-orange="@L["Set_ColorOrange"]"
+     data-color-red="@L["Set_ColorRed"]"
+     data-everything-above="@L["Set_EverythingAbove"]"
+     data-up-to="@L["Set_UpTo"]"
+     data-add-rule="@L["Set_AddRule"]"
+     data-save="@L["Common_Save"]"
+     data-saving="@L["Set_Saving"]"
+     data-saved="@L["AC_Saved"]"
+     data-save-failed="@L["Set_SaveFailed"]"></div>
 <div id="setSections"></div>
 
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
+const setL = document.getElementById('setL').dataset;
+
 const SET_METRICS = [
-    { key: 'turnover',   title: 'Turnover Rate',  sub: 'Colors used everywhere a Turnover Rate % is shown (Store Comparison, OC/OM/OD tables, Full Data Table, Scorecard, store health cards).' },
-    { key: 'ninety-day', title: '90-Day Rate',     sub: 'Colors used everywhere an early-leaver 90-Day Rate % is shown.' },
-    { key: 'retention',  title: 'Retention Rate',  sub: 'Colors used for retention milestone cards and the store retention ranking chart. Higher is better here, so order your rules the other way around.' },
-    { key: 'early-warning', title: 'Early Warning Risk Stars', sub: 'Colors used for the risk-score star badges on the Early Warning page (0-5 stars, not a %).', unit: '★', step: 1, max: 5 },
+    { key: 'turnover',   title: setL.metricTurnoverTitle,  sub: setL.metricTurnoverSub },
+    { key: 'ninety-day', title: setL.metricNinetyTitle,    sub: setL.metricNinetySub },
+    { key: 'retention',  title: setL.metricRetentionTitle, sub: setL.metricRetentionSub },
+    { key: 'early-warning', title: setL.metricEwTitle, sub: setL.metricEwSub, unit: '★', step: 1, max: 5 },
 ];
 
 const SET_COLOR_OPTIONS = [
-    { value: 'none',           label: 'No color (plain text)' },
-    { value: 'good',           label: 'Green' },
-    { value: 'warning',        label: 'Yellow' },
-    { value: 'warning_strong', label: 'Orange' },
-    { value: 'bad',            label: 'Red' },
+    { value: 'none',           label: setL.colorNone },
+    { value: 'good',           label: setL.colorGreen },
+    { value: 'warning',        label: setL.colorYellow },
+    { value: 'warning_strong', label: setL.colorOrange },
+    { value: 'bad',            label: setL.colorRed },
 ];
 
 const setState = {}; // metric -> array of { upTo, color }
@@ -61,14 +84,14 @@ function setRenderSection(metric) {
         const isLast = i === rules.length - 1;
         if (isLast) {
             return `<div class="set-rule-row" data-i="${i}">
-                <span style="min-width:160px;font-size:13px;color:var(--text-2)">Everything above the last rule</span>
+                <span style="min-width:160px;font-size:13px;color:var(--text-2)">${setL.everythingAbove}</span>
                 <span>&rarr;</span>
                 ${setColorSelectHtml(r.color)}
                 <span class="set-swatch" style="background:${setColorHex(r.color)}"></span>
             </div>`;
         }
         return `<div class="set-rule-row" data-i="${i}">
-            <span style="font-size:13px;color:var(--text-2)">Up to</span>
+            <span style="font-size:13px;color:var(--text-2)">${setL.upTo}</span>
             <input type="number" step="${metric.step ?? 0.1}" min="0" ${metric.max ? `max="${metric.max}"` : ''} class="form-control form-control-sm set-upto-input" value="${r.upTo}">
             <span style="font-size:13px;color:var(--text-2)">${metric.unit ?? '%'}</span>
             <span>&rarr;</span>
@@ -132,7 +155,7 @@ async function setSave(metric) {
     setState[metric.key] = sorted;
     setRenderSection(metric);
 
-    statusEl.textContent = 'Saving...';
+    statusEl.textContent = setL.saving;
     statusEl.style.color = 'var(--text-3)';
     try {
         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
@@ -141,11 +164,11 @@ async function setSave(metric) {
             headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
             body: JSON.stringify(sorted.map(r => ({ upTo: r.upTo === null ? null : r.upTo, color: r.color }))),
         });
-        if (!r.ok) { statusEl.textContent = 'Save failed: ' + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
-        statusEl.textContent = 'Saved.';
+        if (!r.ok) { statusEl.textContent = setL.saveFailed + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
+        statusEl.textContent = setL.saved;
         statusEl.style.color = ChartColors.SEMANTIC.GOOD;
     } catch (e) {
-        statusEl.textContent = 'Save failed: ' + e.message;
+        statusEl.textContent = setL.saveFailed + e.message;
         statusEl.style.color = ChartColors.SEMANTIC.BAD;
     }
 }
@@ -162,8 +185,8 @@ async function setInit() {
                 <div class="set-rules"></div>
                 <div class="set-preview" id="set-preview-${m.key}"></div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="btn btn-sm btn-outline-secondary set-add-btn"><i class="bi bi-plus-lg me-1"></i>Add rule</button>
-                    <button type="button" class="btn btn-sm btn-danger ms-2 set-save-btn">Save</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary set-add-btn"><i class="bi bi-plus-lg me-1"></i>${setL.addRule}</button>
+                    <button type="button" class="btn btn-sm btn-danger ms-2 set-save-btn">${setL.save}</button>
                     <span class="set-save-status" id="set-status-${m.key}"></span>
                 </div>
             </div>

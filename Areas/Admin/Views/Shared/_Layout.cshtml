@@ -24,7 +24,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — Workforce Insights Hub" : "Workforce Insights Hub – Crew Level")</title>
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " + L["Brand_Hub"].Value : L["Brand_HubCrewLevel"].Value)</title>
     <link rel="icon" type="image/png" href="~/images/mclogo.png"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
@@ -33,17 +33,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
     <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('mf-theme') || 'light');</script>
 </head>
-<body class="admin-theme" data-theme="light" data-area-prefix="@__areaPrefix">
+<body class="admin-theme" data-theme="light" data-area-prefix="@__areaPrefix"
+      data-range-badge-on="@L["Common_RangeBadgeOn"]" data-range-badge-off="@L["Common_RangeBadgeOff"]"
+      data-kpi-headcount="@L["Common_TotalHeadcount"]" data-kpi-new-hires="@L["Common_NewHires"]"
+      data-kpi-resignations="@L["Common_Resignations"]" data-kpi-turnover-rate="@L["Common_TurnoverRate"]"
+      data-resignations-suffix="@L["Common_ResignationsCountSuffix"]">
 <script>document.body.setAttribute('data-theme', localStorage.getItem('mf-theme') || 'light');</script>
 
 <div class="admin-shell">
     <!-- ══ GLOBAL HEADER — full-width, brand left, logo pinned top-right ══ -->
     <header class="admin-global-header">
         <a class="admin-global-brand" href="@__areaPrefix/dashboard/turnover" style="text-decoration:none">
-            <div class="admin-global-logo"><img src="/images/mclogo.png" alt="McDonald's"/></div>
+            <div class="admin-global-logo"><img src="/images/mclogo.png" alt="@L["Brand_McdEgypt"]"/></div>
             <div>
-                <div class="admin-global-brand-line1">McDonald's Egypt</div>
-                <div class="admin-global-brand-main">Crew Workforce Insights Hub</div>
+                <div class="admin-global-brand-line1">@L["Brand_McdEgypt"]</div>
+                <div class="admin-global-brand-main">@L["Brand_CrewHub"]</div>
             </div>
         </a>
         <div class="admin-global-right">
@@ -118,7 +122,7 @@
             <div class="admin-sidebar-avatar">@initials</div>
             <div class="admin-sidebar-user-details">
                 <div class="admin-sidebar-user-email">@userEmail</div>
-                <div class="admin-sidebar-user-role">@userRole.Replace("_"," ")</div>
+                <div class="admin-sidebar-user-role">@(string.IsNullOrEmpty(userRole) ? "" : L["Role_" + userRole.Replace("_", "")].Value)</div>
             </div>
             <button class="admin-sidebar-iconbtn theme-toggle" id="themeToggle" title="@L["Layout_DarkMode"] / @L["Layout_LightMode"]">
                 <i class="bi bi-moon-stars-fill icon-dark"></i>
@@ -144,7 +148,7 @@
     <!-- ══ MAIN ═══════════════════════════════════════════ -->
     <div class="admin-main">
         <header class="admin-topbar">
-            <button class="admin-hamburger" id="adminSidebarToggle" aria-label="Toggle menu">
+            <button class="admin-hamburger" id="adminSidebarToggle" aria-label="@L["Common_ToggleMenu"]">
                 <i class="bi bi-list"></i>
             </button>
         </header>

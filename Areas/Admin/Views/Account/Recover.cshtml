@@ -11,7 +11,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Admin Recovery — Workforce Insights Hub</title>
+    <title>@L["Title_AdminRecovery"] — @L["Brand_Hub"]</title>
     <link rel="icon" type="image/png" href="~/images/mclogo.png"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
@@ -76,19 +76,19 @@
 
                 <div class="field-wrap">
                     <label>@L["Recover_RecoveryKey"]</label>
-                    <input asp-for="RecoveryKey" type="password" placeholder="Paste your saved recovery key"/>
+                    <input asp-for="RecoveryKey" type="password" placeholder="@L["Recover_KeyPlaceholder"]"/>
                     <span asp-validation-for="RecoveryKey" class="text-danger small"></span>
                 </div>
 
                 <div class="field-wrap">
                     <label>@L["Recover_NewPassword"]</label>
-                    <input asp-for="NewPassword" type="password" placeholder="New password"/>
+                    <input asp-for="NewPassword" type="password" placeholder="@L["Common_NewPasswordPlaceholder"]"/>
                     <span asp-validation-for="NewPassword" class="text-danger small"></span>
                 </div>
 
                 <div class="field-wrap">
                     <label>@L["Recover_ConfirmPassword"]</label>
-                    <input asp-for="ConfirmPassword" type="password" placeholder="Confirm new password"/>
+                    <input asp-for="ConfirmPassword" type="password" placeholder="@L["Common_ConfirmNewPasswordPlaceholder"]"/>
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
 
