@@ -113,6 +113,29 @@
     </div>
 </div>
 
+@{
+    var turnoverGuide = new PageGuideViewModel
+    {
+        PageKey = "turnover",
+        Overview = L["Guide_Turnover_Overview"],
+        FilterNote = L["Guide_Turnover_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-calendar3", Title = L["Chart_TurnoverByMonth"], Body = L["Guide_Turnover_Chart_ByMonth"] },
+            new() { Icon = "bi-person-lines-fill", Title = L["Chart_TurnoverByJobTitle"], Body = L["Guide_Turnover_Chart_JobTitle"] },
+            new() { Icon = "bi-hourglass-split", Title = L["Chart_TurnoverByTenure"], Body = L["Guide_Turnover_Chart_Tenure"] },
+            new() { Icon = "bi-cash-coin", Title = L["Chart_TurnoverByPayroll"], Body = L["Guide_Turnover_Chart_Payroll"] },
+            new() { Icon = "bi-gender-ambiguous", Title = L["Chart_GenderBreakdown"], Body = L["Guide_Turnover_Chart_Gender"] },
+            new() { Icon = "bi-chat-left-text", Title = L["Chart_ReasonsForLeaving"], Body = L["Guide_Turnover_Chart_Reasons"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_MonthlyTrend"], Body = L["Guide_Turnover_Chart_Trend"] },
+            new() { Icon = "bi-table", Title = L["Common_StoreComparison"], Body = L["Guide_Turnover_Chart_StoreTable"] },
+            new() { Icon = "bi-people", Title = L["Common_ByOcOm"], Body = L["Guide_Turnover_Chart_OcOm"] },
+            new() { Icon = "bi-grid-3x3", Title = L["Common_FullDataTable"], Body = L["Guide_Turnover_Chart_Matrix"] },
+        }
+    };
+}
+@await Html.PartialAsync("_PageGuide", turnoverGuide)
+
 <!-- ── KPI Cards ───────────────────────────────────────────── -->
 <div id="kpiCards" class="kpi-grid mb-4">
     <div class="kpi-spinner text-center py-3 w-100">

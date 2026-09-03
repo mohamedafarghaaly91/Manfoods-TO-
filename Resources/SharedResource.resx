@@ -18,6 +18,10 @@
   <data name="Notif_Title" xml:space="preserve"><value>Notifications</value></data>
   <data name="Notif_Empty" xml:space="preserve"><value>You're all caught up — no alerts right now.</value></data>
 
+  <!-- Page Guide -->
+  <data name="Guide_TriggerLabel" xml:space="preserve"><value>Page Guide</value></data>
+  <data name="Guide_ChartsHeading" xml:space="preserve"><value>What each chart shows</value></data>
+
   <!-- Navigation -->
   <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
   <data name="Nav_MyWorkspace" xml:space="preserve"><value>My Workspace</value></data>
@@ -272,6 +276,18 @@
   <data name="Page_HomeDashboardSub" xml:space="preserve"><value>Workforce intelligence and turnover metrics</value></data>
   <data name="Page_Turnover" xml:space="preserve"><value>Turnover Analysis</value></data>
   <data name="Page_TurnoverSub" xml:space="preserve"><value>Deep-dive into resignation patterns and store performance</value></data>
+  <data name="Guide_Turnover_Overview" xml:space="preserve"><value>This page tracks how many employees resigned and how that compares to headcount, broken down by month, job title, tenure, payroll group, gender and store. The KPI cards and "Smart Insights" at the top summarize the selected period; everything below drills into it.</value></data>
+  <data name="Guide_Turnover_Chart_ByMonth" xml:space="preserve"><value>Turnover rate for every calendar month on record. Each bar = (resignations that month ÷ average headcount that month) × 100. This chart always shows full history and ignores the From/To period filter, so you can see long-term seasonality.</value></data>
+  <data name="Guide_Turnover_Chart_JobTitle" xml:space="preserve"><value>Resignations in the selected period grouped by job title, so you can see which roles are losing the most people.</value></data>
+  <data name="Guide_Turnover_Chart_Tenure" xml:space="preserve"><value>Resignations grouped by how long the employee had worked (e.g. under 3 months, 3-6 months...). Useful for spotting whether people are leaving early or after a longer stay.</value></data>
+  <data name="Guide_Turnover_Chart_Payroll" xml:space="preserve"><value>Resignations grouped by payroll group for the selected period.</value></data>
+  <data name="Guide_Turnover_Chart_Gender" xml:space="preserve"><value>Gender split of the resignations in the selected period, shown as a doughnut with counts and percentages on the side.</value></data>
+  <data name="Guide_Turnover_Chart_Reasons" xml:space="preserve"><value>Every resignation in the selected period grouped by the reason the employee gave for leaving.</value></data>
+  <data name="Guide_Turnover_Chart_Trend" xml:space="preserve"><value>Month-by-month turnover trend starting from the selected year onward — this always shows the full history from that year to the latest upload, regardless of the To period you pick.</value></data>
+  <data name="Guide_Turnover_Chart_StoreTable" xml:space="preserve"><value>Every store in the selected period with its headcount, new hires, resignations and turnover rate (resignations ÷ average headcount × 100). Click a column header to sort.</value></data>
+  <data name="Guide_Turnover_Chart_OcOm" xml:space="preserve"><value>Operation Consultants, Directors, Managers and Senior Consultants ranked by their weighted average turnover rate — the sum of resignations across all their stores divided by the sum of average headcount across those stores, not a simple average of each store's rate.</value></data>
+  <data name="Guide_Turnover_Chart_Matrix" xml:space="preserve"><value>A full matrix of every store against every period from the selected year to the latest upload — always shows the full year range, not just the From/To filter.</value></data>
+  <data name="Guide_Turnover_FilterNote" xml:space="preserve"><value>Choosing a Store, Operation Manager, Operation Consultant, Senior Operation Consultant or Operation Director filters every chart and table on this page to just that selection. The From/To period filter narrows the KPI cards, job title/tenure/payroll/gender/reasons charts and the store table — but the "Turnover Rate by Month", "Monthly Trend" chart and the full data matrix always show the complete history from the selected year onward, since they're built to show trends over time.</value></data>
   <data name="Page_Comparisons" xml:space="preserve"><value>Turnover Comparisons</value></data>
   <data name="Page_ComparisonsSub" xml:space="preserve"><value>Compare turnover and 90-day metrics between two periods</value></data>
   <data name="Comparisons_PeriodA" xml:space="preserve"><value>Period A</value></data>

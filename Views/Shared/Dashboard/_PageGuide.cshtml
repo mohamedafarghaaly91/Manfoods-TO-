@@ -1,0 +1,57 @@
+@model MvcApp.Models.ViewModels.PageGuideViewModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<MvcApp.Resources.SharedResource> L
+@{
+    var offcanvasId = $"pageGuide-{Model.PageKey}";
+}
+
+<!-- ── Page Guide: creative "compass" trigger + slide-in explainer drawer ── -->
+<button type="button" class="page-guide-orb" data-bs-toggle="offcanvas" data-bs-target="#@offcanvasId"
+        aria-controls="@offcanvasId" title="@L["Guide_TriggerLabel"]">
+    <span class="page-guide-orb-ring"></span>
+    <i class="bi bi-compass"></i>
+    <span class="page-guide-orb-label">@L["Guide_TriggerLabel"]</span>
+</button>
+
+<div class="offcanvas offcanvas-end page-guide-panel" tabindex="-1" id="@offcanvasId" aria-labelledby="@(offcanvasId)-label">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title d-flex align-items-center gap-2" id="@(offcanvasId)-label">
+            <i class="bi bi-compass" style="color:var(--red)"></i> @L["Guide_TriggerLabel"]
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p class="page-guide-overview">@Model.Overview</p>
+
+        @if (Model.Sections.Count > 0)
+        {
+            <h6 class="page-guide-subheading">@L["Guide_ChartsHeading"]</h6>
+            <div class="accordion page-guide-accordion" id="@(offcanvasId)-accordion">
+                @for (var i = 0; i < Model.Sections.Count; i++)
+                {
+                    var s = Model.Sections[i];
+                    var itemId = $"{offcanvasId}-item-{i}";
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button @(i == 0 ? "" : "collapsed")" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#@itemId">
+                                <i class="bi @s.Icon me-2" style="color:var(--red)"></i>@s.Title
+                            </button>
+                        </h2>
+                        <div id="@itemId" class="accordion-collapse collapse @(i == 0 ? "show" : "")"
+                             data-bs-parent="#@(offcanvasId)-accordion">
+                            <div class="accordion-body">@s.Body</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.FilterNote))
+        {
+            <div class="page-guide-filter-note">
+                <i class="bi bi-funnel"></i>
+                <span>@Model.FilterNote</span>
+            </div>
+        }
+    </div>
+</div>

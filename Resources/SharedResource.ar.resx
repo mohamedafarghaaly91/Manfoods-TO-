@@ -18,6 +18,10 @@
   <data name="Notif_Title" xml:space="preserve"><value>التنبيهات</value></data>
   <data name="Notif_Empty" xml:space="preserve"><value>مفيش تنبيهات دلوقتي — كل حاجة تمام.</value></data>
 
+  <!-- Page Guide -->
+  <data name="Guide_TriggerLabel" xml:space="preserve"><value>دليل الصفحة</value></data>
+  <data name="Guide_ChartsHeading" xml:space="preserve"><value>كل تشارت بيعرض ايه</value></data>
+
   <!-- Navigation -->
   <data name="Nav_Dashboard" xml:space="preserve"><value>لوحة التحكم</value></data>
   <data name="Nav_MyWorkspace" xml:space="preserve"><value>مساحتي</value></data>
@@ -272,6 +276,18 @@
   <data name="Page_HomeDashboardSub" xml:space="preserve"><value>ذكاء القوى العاملة ومقاييس معدل الدوران</value></data>
   <data name="Page_Turnover" xml:space="preserve"><value>تحليل معدل الدوران</value></data>
   <data name="Page_TurnoverSub" xml:space="preserve"><value>تحليل عميق لأنماط الاستقالات وأداء الفروع</value></data>
+  <data name="Guide_Turnover_Overview" xml:space="preserve"><value>الصفحة دي بتوضح عدد الموظفين اللي استقالوا ونسبة ده لعدد الموظفين الكلي، مقسّمة حسب الشهر والمسمى الوظيفي ومدة الخدمة وجروب الرواتب والجندر والفرع. كروت الـ KPI و"Smart Insights" فوق بتلخص الفترة المختارة، وكل اللي تحتها بيدخل في التفاصيل.</value></data>
+  <data name="Guide_Turnover_Chart_ByMonth" xml:space="preserve"><value>معدل الدوران لكل شهر متسجل. كل عمود = (عدد الاستقالات في الشهر ÷ متوسط عدد الموظفين في نفس الشهر) × 100. الشارت ده بيعرض كل التاريخ دايمًا ومش بيتأثر بفلتر "من/إلى"، عشان تقدر تشوف الاتجاه الموسمي على المدى الطويل.</value></data>
+  <data name="Guide_Turnover_Chart_JobTitle" xml:space="preserve"><value>الاستقالات في الفترة المختارة مقسّمة حسب المسمى الوظيفي، عشان تعرف أنهي وظيفة بتفقد ناس أكتر.</value></data>
+  <data name="Guide_Turnover_Chart_Tenure" xml:space="preserve"><value>الاستقالات مقسّمة حسب مدة خدمة الموظف (أقل من 3 شهور، من 3 لـ 6 شهور... إلخ)، عشان تعرف الناس بتسيب بدري ولا بعد فترة أطول.</value></data>
+  <data name="Guide_Turnover_Chart_Payroll" xml:space="preserve"><value>الاستقالات في الفترة المختارة مقسّمة حسب جروب الرواتب.</value></data>
+  <data name="Guide_Turnover_Chart_Gender" xml:space="preserve"><value>توزيع الاستقالات في الفترة المختارة حسب الجندر، معروض كدائرة مع الأعداد والنسب على الجنب.</value></data>
+  <data name="Guide_Turnover_Chart_Reasons" xml:space="preserve"><value>كل استقالة في الفترة المختارة مقسّمة حسب السبب اللي الموظف قاله.</value></data>
+  <data name="Guide_Turnover_Chart_Trend" xml:space="preserve"><value>اتجاه معدل الدوران شهر بشهر ابتداءً من السنة المختارة — الشارت ده دايمًا بيعرض كل التاريخ من السنة دي لحد آخر رفع بيانات، بغض النظر عن فلتر "إلى".</value></data>
+  <data name="Guide_Turnover_Chart_StoreTable" xml:space="preserve"><value>كل فرع في الفترة المختارة بعدد الموظفين والتعيينات الجديدة والاستقالات ومعدل الدوران (الاستقالات ÷ متوسط عدد الموظفين × 100). اضغط على اسم العمود عشان ترتب.</value></data>
+  <data name="Guide_Turnover_Chart_OcOm" xml:space="preserve"><value>الـ Operation Consultants والـ Directors والـ Managers والـ Senior Consultants مرتبين حسب متوسط معدل الدوران الموزون — يعني مجموع الاستقالات في كل فروعهم مقسومة على مجموع متوسط عدد الموظفين في نفس الفروع، مش متوسط بسيط لمعدل كل فرع لوحده.</value></data>
+  <data name="Guide_Turnover_Chart_Matrix" xml:space="preserve"><value>جدول شامل لكل فرع مقابل كل فترة من السنة المختارة لحد آخر رفع بيانات — دايمًا بيعرض السنة كاملة، مش بس فلتر "من/إلى".</value></data>
+  <data name="Guide_Turnover_FilterNote" xml:space="preserve"><value>اختيار فرع أو Operation Manager أو Operation Consultant أو Senior Operation Consultant أو Operation Director بيفلتر كل شارت وجدول في الصفحة على الاختيار ده بس. فلتر الفترة "من/إلى" بيضيّق كروت الـ KPI وشارتات المسمى الوظيفي ومدة الخدمة وجروب الرواتب والجندر وأسباب الاستقالة وجدول الفروع — لكن شارت "معدل الدوران بالشهر" وشارت "الاتجاه الشهري" والجدول الشامل بيفضلوا دايمًا يعرضوا كل التاريخ من السنة المختارة، لأنهم أساسًا مصممين يوضحوا الاتجاه على مدار الوقت.</value></data>
   <data name="Page_Comparisons" xml:space="preserve"><value>مقارنات معدل الدوران</value></data>
   <data name="Page_ComparisonsSub" xml:space="preserve"><value>قارن معدل الدوران ومؤشرات 90 يوم بين فترتين</value></data>
   <data name="Comparisons_PeriodA" xml:space="preserve"><value>الفترة A</value></data>
