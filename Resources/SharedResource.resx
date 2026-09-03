@@ -1007,6 +1007,25 @@
   <data name="Set_AddRule" xml:space="preserve"><value>Add rule</value></data>
   <data name="Set_Saving" xml:space="preserve"><value>Saving...</value></data>
   <data name="Set_SaveFailed" xml:space="preserve"><value>Save failed: </value></data>
+  <data name="Set_Tab_Colors" xml:space="preserve"><value>Colors &amp; Thresholds</value></data>
+  <data name="Set_Tab_Recommendations" xml:space="preserve"><value>Recommendations</value></data>
+  <data name="Set_RecSub" xml:space="preserve"><value>Edit the wording of the recommendations Action Center attaches to a store when it detects each problem — in both languages. Saving here updates the text everywhere it's shown, for every store, immediately.</value></data>
+  <data name="Set_RecTextEn" xml:space="preserve"><value>English</value></data>
+  <data name="Set_RecTextAr" xml:space="preserve"><value>Arabic</value></data>
+  <data name="Set_RecLastUpdated" xml:space="preserve"><value>Last edited</value></data>
+  <data name="Set_RecNeverEdited" xml:space="preserve"><value>Using the default text — never edited</value></data>
+  <data name="Set_RecGroup_HighTurnover" xml:space="preserve"><value>High Overall Turnover</value></data>
+  <data name="Set_RecGroup_EarlyTurnover90" xml:space="preserve"><value>Early Turnover (First 90 Days)</value></data>
+  <data name="Set_RecGroup_LowRetention6M" xml:space="preserve"><value>Low 6-Month Retention</value></data>
+  <data name="Set_RecGroup_LeadershipInstability" xml:space="preserve"><value>Leadership Instability</value></data>
+  <data name="Set_RecGroup_LowExitSentiment" xml:space="preserve"><value>Low Exit Sentiment</value></data>
+  <data name="Set_RecGroup_ReasonCompensation" xml:space="preserve"><value>Dominant Resignation Reason: Compensation</value></data>
+  <data name="Set_RecGroup_ReasonWorkload" xml:space="preserve"><value>Dominant Resignation Reason: Workload</value></data>
+  <data name="Set_RecGroup_ReasonManagement" xml:space="preserve"><value>Dominant Resignation Reason: Management</value></data>
+  <data name="Set_RecGroup_ReasonOnboarding" xml:space="preserve"><value>Dominant Resignation Reason: Onboarding</value></data>
+  <data name="Set_RecGroup_ReasonOther" xml:space="preserve"><value>Dominant Resignation Reason: Other</value></data>
+  <data name="Set_RecGroup_EarlyWarningWatchlist" xml:space="preserve"><value>Early-Warning Watchlist</value></data>
+  <data name="Set_RecGroup_NoDominantDriver" xml:space="preserve"><value>No Dominant Driver (Fallback)</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>Error.</value></data>
@@ -1100,4 +1119,5 @@
   <data name="Api_NoActivePlan" xml:space="preserve"><value>No active plan for this store.</value></data>
   <data name="Api_AtLeastOneRule" xml:space="preserve"><value>At least one rule is required.</value></data>
   <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>Exactly one rule must have an empty upper bound, and it must be the last one.</value></data>
+  <data name="Api_BothLanguagesRequired" xml:space="preserve"><value>Both English and Arabic text are required.</value></data>
 </root>

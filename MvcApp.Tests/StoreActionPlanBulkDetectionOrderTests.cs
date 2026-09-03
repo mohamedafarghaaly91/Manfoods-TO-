@@ -36,7 +36,8 @@ public class StoreActionPlanBulkDetectionOrderTests
             new NoOpNinetyDayTurnoverService(),
             new NoOpRetentionService(),
             new NoOpEarlyWarningService(),
-            new NoOpExitInterviewService());
+            new NoOpExitInterviewService(),
+            new RecommendationTemplateService(db));
     }
 
     /// <summary>Seeds one store/period with a fixed headcount and resignation

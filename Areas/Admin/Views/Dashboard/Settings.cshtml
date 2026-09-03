@@ -10,6 +10,23 @@
 .set-swatch { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1px solid rgba(0,0,0,.08); }
 .set-preview { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px; }
 .set-save-status { font-size: 12.5px; margin-inline-start: 10px; }
+
+.set-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--card-border); margin-bottom: 22px; }
+.set-tab-btn {
+    background: transparent; border: none; border-bottom: 2px solid transparent;
+    padding: 10px 4px; margin-inline-end: 22px; font-size: 14px; font-weight: 600;
+    color: var(--text-3); cursor: pointer;
+}
+.set-tab-btn.active { color: var(--red); border-bottom-color: var(--red); }
+.set-rec-group { margin-bottom: 22px; }
+.set-rec-row { display: flex; flex-direction: column; gap: 10px; padding: 16px 18px; }
+.set-rec-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@@media (max-width: 900px) { .set-rec-fields { grid-template-columns: 1fr; } }
+.set-rec-field label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-3); margin-bottom: 4px; display: block; }
+.set-rec-field textarea { width: 100%; min-height: 64px; resize: vertical; }
+.set-rec-field textarea[dir="rtl"] { text-align: right; }
+.set-rec-meta { font-size: 12px; color: var(--text-3); }
+.set-rec-actions { display: flex; align-items: center; gap: 10px; }
 </style>
 
 <div class="page-header">
@@ -17,6 +34,11 @@
         <h1 class="page-title">@L["Page_Settings"]</h1>
         <p class="page-subtitle">@L["Page_SettingsSub"]</p>
     </div>
+</div>
+
+<div class="set-tabs">
+    <button type="button" class="set-tab-btn active" id="setTabBtnColors" onclick="setShowTab('colors')">@L["Set_Tab_Colors"]</button>
+    <button type="button" class="set-tab-btn" id="setTabBtnRec" onclick="setShowTab('rec')">@L["Set_Tab_Recommendations"]</button>
 </div>
 
 @Html.AntiForgeryToken()
@@ -40,8 +62,32 @@
      data-save="@L["Common_Save"]"
      data-saving="@L["Set_Saving"]"
      data-saved="@L["AC_Saved"]"
-     data-save-failed="@L["Set_SaveFailed"]"></div>
-<div id="setSections"></div>
+     data-save-failed="@L["Set_SaveFailed"]"
+     data-rec-sub="@L["Set_RecSub"]"
+     data-rec-text-en="@L["Set_RecTextEn"]"
+     data-rec-text-ar="@L["Set_RecTextAr"]"
+     data-rec-last-updated="@L["Set_RecLastUpdated"]"
+     data-rec-never-edited="@L["Set_RecNeverEdited"]"
+     data-rec-group-high-turnover="@L["Set_RecGroup_HighTurnover"]"
+     data-rec-group-early-turnover90="@L["Set_RecGroup_EarlyTurnover90"]"
+     data-rec-group-low-retention6m="@L["Set_RecGroup_LowRetention6M"]"
+     data-rec-group-leadership-instability="@L["Set_RecGroup_LeadershipInstability"]"
+     data-rec-group-low-exit-sentiment="@L["Set_RecGroup_LowExitSentiment"]"
+     data-rec-group-reason-compensation="@L["Set_RecGroup_ReasonCompensation"]"
+     data-rec-group-reason-workload="@L["Set_RecGroup_ReasonWorkload"]"
+     data-rec-group-reason-management="@L["Set_RecGroup_ReasonManagement"]"
+     data-rec-group-reason-onboarding="@L["Set_RecGroup_ReasonOnboarding"]"
+     data-rec-group-reason-other="@L["Set_RecGroup_ReasonOther"]"
+     data-rec-group-early-warning-watchlist="@L["Set_RecGroup_EarlyWarningWatchlist"]"
+     data-rec-group-no-dominant-driver="@L["Set_RecGroup_NoDominantDriver"]"></div>
+
+<div id="setTabColors">
+    <div id="setSections"></div>
+</div>
+<div id="setTabRec" hidden>
+    <p class="text-muted-custom mb-4">@L["Set_RecSub"]</p>
+    <div id="setRecSections"></div>
+</div>
 
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
@@ -199,6 +245,116 @@ async function setInit() {
         setRenderSection(m);
         document.getElementById(`set-section-${m.key}`).querySelector('.set-add-btn').addEventListener('click', () => setAddRule(m));
         document.getElementById(`set-section-${m.key}`).querySelector('.set-save-btn').addEventListener('click', () => setSave(m));
+    }
+}
+
+function setShowTab(tab) {
+    document.getElementById('setTabColors').hidden = tab !== 'colors';
+    document.getElementById('setTabRec').hidden = tab !== 'rec';
+    document.getElementById('setTabBtnColors').classList.toggle('active', tab === 'colors');
+    document.getElementById('setTabBtnRec').classList.toggle('active', tab === 'rec');
+    if (tab === 'rec' && !setRecLoaded) setRecInit();
+}
+
+// ── Recommendations tab ──────────────────────────────────────────
+// Friendly group labels, keyed by "SignalCode|Category" — matches the same
+// (SignalCode, Category, Index) triple RecommendationTemplateService uses.
+const SET_REC_GROUP_LABELS = {
+    'HIGH_OVERALL_TURNOVER|Retention': setL.recGroupHighTurnover,
+    'EARLY_TURNOVER_90D|Onboarding': setL.recGroupEarlyTurnover90,
+    'LOW_RETENTION_6M|Retention': setL.recGroupLowRetention6m,
+    'LEADERSHIP_INSTABILITY|Leadership': setL.recGroupLeadershipInstability,
+    'LOW_EXIT_SENTIMENT|Culture': setL.recGroupLowExitSentiment,
+    'REASON_CONCENTRATION|Compensation': setL.recGroupReasonCompensation,
+    'REASON_CONCENTRATION|Workload': setL.recGroupReasonWorkload,
+    'REASON_CONCENTRATION|Management': setL.recGroupReasonManagement,
+    'REASON_CONCENTRATION|Onboarding': setL.recGroupReasonOnboarding,
+    'REASON_CONCENTRATION|Other': setL.recGroupReasonOther,
+    'EARLY_WARNING_WATCHLIST|Monitoring': setL.recGroupEarlyWarningWatchlist,
+    'NO_DOMINANT_DRIVER|General': setL.recGroupNoDominantDriver,
+};
+
+let setRecLoaded = false;
+let setRecTemplates = [];
+
+function setRecEsc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+function setRecRowId(t) { return `${t.signalCode}__${t.category}__${t.index}`; }
+
+function setRecRowHtml(t) {
+    const id = setRecRowId(t);
+    const updated = t.updatedAtUtc
+        ? `${setL.recLastUpdated}: ${new Date(t.updatedAtUtc).toLocaleString()}`
+        : setL.recNeverEdited;
+    return `<div class="card-dark set-rec-row" id="set-rec-row-${id}" data-signal="${setRecEsc(t.signalCode)}" data-category="${setRecEsc(t.category)}" data-index="${t.index}">
+        <div class="set-rec-fields">
+            <div class="set-rec-field">
+                <label>${setL.recTextEn}</label>
+                <textarea class="form-control set-rec-en" dir="ltr">${setRecEsc(t.textEn)}</textarea>
+            </div>
+            <div class="set-rec-field">
+                <label>${setL.recTextAr}</label>
+                <textarea class="form-control set-rec-ar" dir="rtl">${setRecEsc(t.textAr)}</textarea>
+            </div>
+        </div>
+        <div class="set-rec-actions">
+            <button type="button" class="btn btn-sm btn-danger set-rec-save-btn">${setL.save}</button>
+            <span class="set-rec-meta set-rec-updated">${updated}</span>
+            <span class="set-save-status set-rec-status"></span>
+        </div>
+    </div>`;
+}
+
+async function setRecSave(t) {
+    const row = document.getElementById(`set-rec-row-${setRecRowId(t)}`);
+    const statusEl = row.querySelector('.set-rec-status');
+    const textEn = row.querySelector('.set-rec-en').value.trim();
+    const textAr = row.querySelector('.set-rec-ar').value.trim();
+
+    statusEl.textContent = setL.saving;
+    statusEl.style.color = 'var(--text-3)';
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const r = await fetch('/api/settings/recommendation-templates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify({ signalCode: t.signalCode, category: t.category, index: t.index, textEn, textAr }),
+        });
+        if (!r.ok) { statusEl.textContent = setL.saveFailed + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
+        statusEl.textContent = setL.saved;
+        statusEl.style.color = ChartColors.SEMANTIC.GOOD;
+        row.querySelector('.set-rec-updated').textContent = `${setL.recLastUpdated}: ${new Date().toLocaleString()}`;
+    } catch (e) {
+        statusEl.textContent = setL.saveFailed + e.message;
+        statusEl.style.color = ChartColors.SEMANTIC.BAD;
+    }
+}
+
+async function setRecInit() {
+    setRecLoaded = true;
+    const container = document.getElementById('setRecSections');
+    const r = await fetch('/api/settings/recommendation-templates');
+    setRecTemplates = r.ok ? await r.json() : [];
+
+    const groups = new Map();
+    for (const t of setRecTemplates) {
+        const key = `${t.signalCode}|${t.category}`;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(t);
+    }
+
+    container.innerHTML = [...groups.entries()].map(([key, rows]) => `
+        <div class="chart-card set-card set-rec-group">
+            <div class="chart-header"><h6>${SET_REC_GROUP_LABELS[key] || key}</h6></div>
+            <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:14px">
+                ${rows.sort((a, b) => a.index - b.index).map(setRecRowHtml).join('')}
+            </div>
+        </div>
+    `).join('');
+
+    for (const t of setRecTemplates) {
+        document.getElementById(`set-rec-row-${setRecRowId(t)}`)
+            .querySelector('.set-rec-save-btn')
+            .addEventListener('click', () => setRecSave(t));
     }
 }
 

@@ -22,6 +22,7 @@ public class StoreActionPlanService : IStoreActionPlanService
     private readonly IRetentionService _retention;
     private readonly IEarlyWarningService _earlyWarning;
     private readonly IExitInterviewService _exitInterview;
+    private readonly IRecommendationTemplateService _templates;
 
     // Detection runs system-wide across every store regardless of who's logged
     // in, so it always calls the underlying analytics services unrestricted.
@@ -51,7 +52,8 @@ public class StoreActionPlanService : IStoreActionPlanService
         INinetyDayTurnoverService ninetyDay,
         IRetentionService retention,
         IEarlyWarningService earlyWarning,
-        IExitInterviewService exitInterview)
+        IExitInterviewService exitInterview,
+        IRecommendationTemplateService templates)
     {
         _db = db;
         _storeAccess = storeAccess;
@@ -61,6 +63,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         _retention = retention;
         _earlyWarning = earlyWarning;
         _exitInterview = exitInterview;
+        _templates = templates;
     }
 
     // ────────────────────────────── Read APIs ──────────────────────────────
@@ -92,6 +95,8 @@ public class StoreActionPlanService : IStoreActionPlanService
             .Where(r => r.StoreActionPlanId == plan.Id)
             .OrderBy(r => r.CreatedAt)
             .ToListAsync();
+        var recTemplates = await _templates.GetAllAsync();
+        var isArabic = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
         var notes = await _db.ActionPlanNotes
             .Where(n => n.StoreActionPlanId == plan.Id)
             .OrderBy(n => n.CreatedAt)
@@ -119,7 +124,7 @@ public class StoreActionPlanService : IStoreActionPlanService
                 Id = r.Id,
                 SignalCode = r.SignalCode,
                 Category = r.Category,
-                RecommendationText = r.RecommendationText,
+                RecommendationText = RecommendationTemplateService.Resolve(recTemplates, r.SignalCode, r.Category, r.RecommendationText, isArabic),
                 CreatedAt = r.CreatedAt,
                 IsCompleted = r.IsCompleted,
                 CompletedAt = r.CompletedAt,

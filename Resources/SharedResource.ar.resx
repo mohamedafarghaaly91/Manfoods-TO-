@@ -1008,6 +1008,25 @@
   <data name="Set_AddRule" xml:space="preserve"><value>إضافة قاعدة</value></data>
   <data name="Set_Saving" xml:space="preserve"><value>جاري الحفظ...</value></data>
   <data name="Set_SaveFailed" xml:space="preserve"><value>فشل الحفظ: </value></data>
+  <data name="Set_Tab_Colors" xml:space="preserve"><value>الألوان والحدود</value></data>
+  <data name="Set_Tab_Recommendations" xml:space="preserve"><value>التوصيات</value></data>
+  <data name="Set_RecSub" xml:space="preserve"><value>عدّل نص التوصيات اللي مركز العمليات يضيفها للفرع لما يكتشف كل مشكلة — باللغتين. الحفظ هنا بيحدّث النص في كل مكان بيظهر فيه، لكل الفروع، فورًا.</value></data>
+  <data name="Set_RecTextEn" xml:space="preserve"><value>الإنجليزية</value></data>
+  <data name="Set_RecTextAr" xml:space="preserve"><value>العربية</value></data>
+  <data name="Set_RecLastUpdated" xml:space="preserve"><value>آخر تعديل</value></data>
+  <data name="Set_RecNeverEdited" xml:space="preserve"><value>بيستخدم النص الافتراضي — لم يتم تعديله من قبل</value></data>
+  <data name="Set_RecGroup_HighTurnover" xml:space="preserve"><value>معدل دوران إجمالي مرتفع</value></data>
+  <data name="Set_RecGroup_EarlyTurnover90" xml:space="preserve"><value>ترك مبكر (أول 90 يوم)</value></data>
+  <data name="Set_RecGroup_LowRetention6M" xml:space="preserve"><value>احتفاظ منخفض بعد 6 أشهر</value></data>
+  <data name="Set_RecGroup_LeadershipInstability" xml:space="preserve"><value>عدم استقرار القيادة</value></data>
+  <data name="Set_RecGroup_LowExitSentiment" xml:space="preserve"><value>مشاعر خروج سلبية</value></data>
+  <data name="Set_RecGroup_ReasonCompensation" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: الرواتب</value></data>
+  <data name="Set_RecGroup_ReasonWorkload" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: ضغط العمل</value></data>
+  <data name="Set_RecGroup_ReasonManagement" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: الإدارة</value></data>
+  <data name="Set_RecGroup_ReasonOnboarding" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: التأهيل</value></data>
+  <data name="Set_RecGroup_ReasonOther" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: أخرى</value></data>
+  <data name="Set_RecGroup_EarlyWarningWatchlist" xml:space="preserve"><value>قائمة الإنذار المبكر</value></data>
+  <data name="Set_RecGroup_NoDominantDriver" xml:space="preserve"><value>لا يوجد سبب بارز (احتياطي)</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>خطأ.</value></data>
@@ -1101,4 +1120,5 @@
   <data name="Api_NoActivePlan" xml:space="preserve"><value>لا توجد خطة نشطة لهذا الفرع.</value></data>
   <data name="Api_AtLeastOneRule" xml:space="preserve"><value>مطلوب قاعدة واحدة على الأقل.</value></data>
   <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>يجب أن تحتوي قاعدة واحدة فقط على حد أعلى فارغ، وأن تكون القاعدة الأخيرة.</value></data>
+  <data name="Api_BothLanguagesRequired" xml:space="preserve"><value>النص بالإنجليزية والعربية مطلوبان معًا.</value></data>
 </root>

@@ -13,8 +13,14 @@ namespace MvcApp.Controllers.Api;
 public class SettingsApiController : ControllerBase
 {
     private readonly IColorRulesService _colorRules;
+    private readonly IRecommendationTemplateService _recTemplates;
     private readonly IStringLocalizer<SharedResource> _L;
-    public SettingsApiController(IColorRulesService colorRules, IStringLocalizer<SharedResource> localizer) { _colorRules = colorRules; _L = localizer; }
+    public SettingsApiController(IColorRulesService colorRules, IRecommendationTemplateService recTemplates, IStringLocalizer<SharedResource> localizer)
+    {
+        _colorRules = colorRules;
+        _recTemplates = recTemplates;
+        _L = localizer;
+    }
 
     [HttpGet("color-rules/{metric}")]
     public async Task<IActionResult> GetColorRules(string metric)
@@ -33,5 +39,33 @@ public class SettingsApiController : ControllerBase
 
         await _colorRules.SaveRulesAsync(metric, rules);
         return Ok();
+    }
+
+    [HttpGet("recommendation-templates")]
+    public async Task<IActionResult> GetRecommendationTemplates() => Ok(await _recTemplates.GetAllAsync());
+
+    public class SaveRecommendationTemplateRequest
+    {
+        public string SignalCode { get; set; } = "";
+        public string Category { get; set; } = "";
+        public int Index { get; set; }
+        public string TextEn { get; set; } = "";
+        public string TextAr { get; set; } = "";
+    }
+
+    [HttpPost("recommendation-templates"), ValidateAntiForgeryToken, RequireRole("Admin")]
+    public async Task<IActionResult> SaveRecommendationTemplate([FromBody] SaveRecommendationTemplateRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request?.TextEn) || string.IsNullOrWhiteSpace(request?.TextAr))
+            return BadRequest(_L["Api_BothLanguagesRequired"].Value);
+        try
+        {
+            await _recTemplates.SaveAsync(request.SignalCode, request.Category, request.Index, request.TextEn, request.TextAr);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
