@@ -245,12 +245,15 @@
         @L["SC_RollupSub"] — <span id="scRollupAvg"></span>
     </p>
 
-    <div class="row g-4 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-lg-6">
-            <div class="chart-card p-0" style="overflow:hidden">
-                <div class="chart-header px-3 pt-3"><h6>@L["SC_RollupByOc"]</h6></div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-                    <table class="table table-hover mb-0" style="font-size:13px">
+            <div class="chart-card p-0 h-100 d-flex flex-column" style="overflow:hidden;min-height:0">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 25)"><i class="bi bi-person-badge"></i></span>
+                    <div><h6 class="mb-0">@L["SC_RollupByOc"]</h6></div>
+                </div>
+                <div class="table-responsive" style="flex:1;overflow-y:auto;min-height:0">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
                         <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
                             <tr>
                                 <th class="px-3 py-2">@L["Common_OperationConsultants"]</th>
@@ -264,12 +267,15 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-6 d-flex flex-column gap-3">
             <div class="chart-card p-0" style="overflow:hidden">
-                <div class="chart-header px-3 pt-3"><h6>@L["SC_RollupByOm"]</h6></div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-                    <table class="table table-hover mb-0" style="font-size:13px">
-                        <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.6 0.16 25)"><i class="bi bi-person-gear"></i></span>
+                    <div><h6 class="mb-0">@L["SC_RollupByOm"]</h6></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:var(--bg-2)">
                             <tr>
                                 <th class="px-3 py-2">@L["Common_OperationManagers"]</th>
                                 <th class="px-3 py-2 text-center">@L["SC_TotalLeaders"]</th>
@@ -281,15 +287,14 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
             <div class="chart-card p-0" style="overflow:hidden">
-                <div class="chart-header px-3 pt-3"><h6>@L["SC_RollupBySoc"]</h6></div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-                    <table class="table table-hover mb-0" style="font-size:13px">
-                        <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.55 0.2 300)"><i class="bi bi-person-vcard"></i></span>
+                    <div><h6 class="mb-0">@L["SC_RollupBySoc"]</h6></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:var(--bg-2)">
                             <tr>
                                 <th class="px-3 py-2">@L["Common_SeniorOperationConsultants"]</th>
                                 <th class="px-3 py-2 text-center">@L["SC_TotalLeaders"]</th>
@@ -301,13 +306,14 @@
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6">
             <div class="chart-card p-0" style="overflow:hidden">
-                <div class="chart-header px-3 pt-3"><h6>@L["SC_RollupByOd"]</h6></div>
-                <div class="table-responsive" style="max-height:400px;overflow-y:auto">
-                    <table class="table table-hover mb-0" style="font-size:13px">
-                        <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
+                <div class="chart-header stat-card-header">
+                    <span class="stat-card-icon" style="--icon-color:oklch(0.5 0.18 250)"><i class="bi bi-person-workspace"></i></span>
+                    <div><h6 class="mb-0">@L["SC_RollupByOd"]</h6></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" style="font-size:13px">
+                        <thead style="background:var(--bg-2)">
                             <tr>
                                 <th class="px-3 py-2">@L["Common_OperationDirectors"]</th>
                                 <th class="px-3 py-2 text-center">@L["SC_TotalLeaders"]</th>
