@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using MvcApp.Data;
 using MvcApp.Models;
@@ -115,7 +116,7 @@ public class StoreActionPlanService : IStoreActionPlanService
             BaselineTurnoverRate = plan.BaselineTurnoverRate,
             BaselineEarlyLeaverRate = plan.BaselineEarlyLeaverRate,
             BaselineRetentionRate = plan.BaselineRetentionRate,
-            DetectedIssuesSummary = plan.DetectedIssuesSummary,
+            DetectedIssuesSummary = EvidenceTranslator.Translate(plan.DetectedIssuesSummary, isArabic),
             HealthyStreakCount = plan.HealthyStreakCount,
             ResponsibleParty = responsible,
             CanAddNotes = canAddNotes,
@@ -333,6 +334,67 @@ public class StoreActionPlanService : IStoreActionPlanService
         public double? EarlyLeaverRate;
         public double? RetentionRate;
         public List<FiredSignal> Signals { get; } = new();
+    }
+
+    /// <summary>Translates the plain-English "Detected Issues" sentences
+    /// (StoreActionPlan.DetectedIssuesSummary — one per fired signal, newline-
+    /// joined, accumulated over time) to Arabic for display, without touching
+    /// what's stored. Each sentence always has one of the 8 fixed shapes below
+    /// (produced only by the Evidence interpolations in ComputeSignalsAsync),
+    /// so a sentence is translated by extracting its numbers with a regex that
+    /// mirrors that exact shape and re-formatting them into the Arabic
+    /// equivalent — same live numbers, translated wording. A line that matches
+    /// none of the 8 patterns (unexpected/legacy data) is left as-is rather
+    /// than risk mistranslating it.</summary>
+    private static class EvidenceTranslator
+    {
+        private static readonly (Regex Pattern, Func<Match, string> ToArabic)[] Rules =
+        {
+            (new Regex(@"^Overall turnover rate (?<rate>[\d.]+)% \(headcount (?<hc>\d+)\) is at or above the (?<th>\d+)% threshold\.$"),
+                m => $"معدل الدوران الإجمالي {m.Groups["rate"].Value}% (عدد الموظفين {m.Groups["hc"].Value}) يساوي أو يتجاوز حد الـ {m.Groups["th"].Value}%."),
+
+            (new Regex(@"^Early turnover \(within 90 days\) is (?<rate>[\d.]+)% \((?<early>\d+) of (?<total>\d+) hires\)\.$"),
+                m => $"الترك المبكر (خلال 90 يوم) {m.Groups["rate"].Value}% ({m.Groups["early"].Value} من أصل {m.Groups["total"].Value} توظيف)."),
+
+            (new Regex(@"^6-month retention is (?<rate>[\d.]+)% \((?<retained>\d+) of (?<total>\d+) hires\), below the (?<th>\d+)% threshold\.$"),
+                m => $"معدل الاحتفاظ بعد 6 أشهر {m.Groups["rate"].Value}% ({m.Groups["retained"].Value} من أصل {m.Groups["total"].Value} توظيف)، أقل من حد الـ {m.Groups["th"].Value}%."),
+
+            (new Regex(@"^(?<n>\d+) different Store Leaders recorded in the last (?<m>\d+) months\.$"),
+                m => $"تسجيل {m.Groups["n"].Value} قادة فروع مختلفين خلال آخر {m.Groups["m"].Value} أشهر."),
+
+            (new Regex(@"^Positive exit sentiment is (?<pct>[\d.]+)% across (?<n>\d+) exit interviews\.$"),
+                m => $"نسبة المشاعر الإيجابية عند الخروج {m.Groups["pct"].Value}% من أصل {m.Groups["n"].Value} مقابلة خروج."),
+
+            // The quoted label is already Arabic verbatim from the exit-interview
+            // form (see MapReasonToRecommendations) — only the English scaffold
+            // around it is translated.
+            // The trailing percent may or may not have a space before "%" depending
+            // on which culture was active when P0 formatted it — tolerate either.
+            (new Regex("^\"(?<label>.+)\" is cited in (?<value>\\d+) of (?<total>\\d+) exit interviews \\((?<pct>\\d+)\\s?%\\)\\.$"),
+                m => $"\"{m.Groups["label"].Value}\" هو السبب الأكثر تكرارًا في {m.Groups["value"].Value} من أصل {m.Groups["total"].Value} مقابلة خروج ({m.Groups["pct"].Value}%)."),
+
+            (new Regex(@"^(?<n>\d+) currently active employees are flagged high-risk on the early-warning watchlist\.$"),
+                m => $"{m.Groups["n"].Value} موظف نشط حاليًا مصنّف كمخاطرة عالية في قائمة الإنذار المبكر."),
+
+            (new Regex(@"^Turnover is elevated but no specific driver stands out from the available data\.$"),
+                _ => "معدل الدوران مرتفع لكن لا يوجد سبب محدد بارز من البيانات المتاحة."),
+        };
+
+        public static string Translate(string englishSummary, bool arabic)
+        {
+            if (!arabic || string.IsNullOrEmpty(englishSummary)) return englishSummary;
+
+            var lines = englishSummary.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                foreach (var (pattern, toArabic) in Rules)
+                {
+                    var match = pattern.Match(lines[i]);
+                    if (match.Success) { lines[i] = toArabic(match); break; }
+                }
+            }
+            return string.Join("\n", lines);
+        }
     }
 
     private async Task<PeriodMetrics> ComputeSignalsAsync(string storeName, int month, int year)
