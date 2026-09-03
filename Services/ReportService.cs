@@ -357,6 +357,38 @@ public class ReportService : IReportService
     }
 
     // ── Retention ───────────────────────────────────────────
+    /// <summary>Retention has 5 sheets that each answer a different question
+    /// about the same underlying data — without this legend the sheet names
+    /// alone don't make that distinction obvious.</summary>
+    private static void AddRetentionGuideSheet(XLWorkbook wb)
+    {
+        var ws = AddSheet(wb, "Guide - Read Me First");
+        StyleHeader(ws, new[] { "Sheet", "What It Shows" });
+        var rows = new (string Sheet, string Desc)[]
+        {
+            ("Retention Milestones", "One row per fixed milestone (90 Days, 6 Months, 1 Year, etc.) — what % of everyone hired long enough ago to have reached that milestone is still employed today. \"Through Cohort\" is the most recent hire-month old enough to be measured at that milestone."),
+            ("Survival Curve", "Retention rate at every single day since hire (Day 0 through the longest tenure with enough data), across all hires — shows the shape of when people actually tend to leave (e.g. a cliff at 90 days)."),
+            ("Retention Trend", "One row per hire-cohort month, showing that cohort's retention rate at each milestone (6 Months, 1 Year, etc.) — lets you compare whether newer cohorts are retaining better or worse than older ones. \"Provisional\" = Yes means that cohort hasn't been employed long enough yet for that milestone to be a final number — it can still change."),
+            ("Store Leaderboard (1yr)", "Each store's 1-year retention rate, ranked highest to lowest."),
+            ("Workforce Tenure", "The CURRENT active workforce grouped by how long they've been employed (tenure bucket) — a snapshot, not a rate."),
+            ("Retention Insights", "Auto-generated plain-language callouts (e.g. notable stores or trends) based on the data in the other sheets."),
+        };
+        for (int i = 0; i < rows.Length; i++)
+        {
+            ws.Cell(i + 2, 1).Value = rows[i].Sheet;
+            ws.Cell(i + 2, 1).Style.Font.Bold = true;
+            ws.Cell(i + 2, 2).Value = rows[i].Desc;
+            ws.Cell(i + 2, 2).Style.Alignment.WrapText = true;
+        }
+        Finalize(ws);
+        // Overrides Finalize's AdjustToContents (which measures wrapped text
+        // badly — it sizes to the single longest unbroken word) with fixed
+        // widths, then lets rows grow tall enough for the wrapped paragraphs.
+        ws.Column(1).Width = 24;
+        ws.Column(2).Width = 90;
+        ws.Rows().AdjustToContents();
+    }
+
     private async Task AddRetentionSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? store = null)
     {
         var milestones = await _retention.GetMilestonesAsync(store, role, assignedName);
@@ -365,6 +397,8 @@ public class ReportService : IReportService
         var leaderboard = await _retention.GetStoreLeaderboardAsync(role, assignedName);
         var tenureDist = await _retention.GetTenureDistributionAsync(store, role, assignedName);
         var insights = await _retention.GetInsightsAsync(store, role, assignedName);
+
+        AddRetentionGuideSheet(wb);
 
         var wsMilestones = AddSheet(wb, "Retention Milestones");
         StyleHeader(wsMilestones, new[] { "Days", "Retention Rate", "Total Hires", "Retained", "Through Cohort" });
