@@ -112,6 +112,7 @@
   <data name="DM_MonthlyData" xml:space="preserve"><value>بيانات القوى العاملة الشهرية</value></data>
   <data name="DM_MonthlyDataSub" xml:space="preserve"><value>الأكتيف ليست والاستقالات ومرجع الفروع بيترفعوا مع بعض كوحدة واحدة</value></data>
   <data name="DM_MonthlyDataRequirement" xml:space="preserve"><value>الثلاث ملفات مطلوبين مع بعض — مينفعش ترفع واحد أو اتنين وتسيب الباقي. لو الشهر ده عنده بيانات بالفعل، الرفع تاني هيستبدلها بالكامل.</value></data>
+  <data name="DM_PeriodExistsConfirm" xml:space="preserve"><value>الشهر ده عنده بيانات مرفوعة بالفعل. لو كملت هيتم حذف السجلات والملفات الحالية نهائيًا واستبدالها بالرفعة الجديدة دي. تكمل؟</value></data>
   <data name="UL_ActiveEmployees" xml:space="preserve"><value>الأكتيف ليست</value></data>
   <data name="UL_ActiveEmployeesSub" xml:space="preserve"><value>كل الموظفين الشغالين في الشهر</value></data>
   <data name="UL_Resignations" xml:space="preserve"><value>الاستقالات</value></data>

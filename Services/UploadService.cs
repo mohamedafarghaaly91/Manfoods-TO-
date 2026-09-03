@@ -154,62 +154,92 @@ public class UploadService : IUploadService
         return ms.ToArray();
     }
 
-    private static List<ActiveEmployee> ParseActiveEmployees(byte[] fileBytes, int month, int year)
+    /// <summary>Row-quality issues found while parsing — a row is still imported
+    /// (a blank Store or unreadable date isn't a reason to drop real headcount/
+    /// resignation data), but these counts let the upload result tell the admin
+    /// what to go fix instead of those rows just silently vanishing from every
+    /// store-scoped report.</summary>
+    private record ParseIssues(int MissingStore, int MissingOrInvalidHireDate, int MissingOrInvalidResignationDate = 0);
+
+    private static (List<ActiveEmployee> Records, ParseIssues Issues) ParseActiveEmployees(byte[] fileBytes, int month, int year)
     {
         using var ms = new MemoryStream(fileBytes);
         using var wb = new XLWorkbook(ms);
         var ws = wb.Worksheet(1);
 
         var records = new List<ActiveEmployee>();
+        int missingStore = 0, badHireDate = 0;
         foreach (var row in ws.RowsUsed().Skip(1))
         {
             var empId = Col(row, ws, "Employee ID", "EmployeeID", "employee_id", "ID", "id");
             var name = Col(row, ws, "Name", "Employee Name", "name");
             if (string.IsNullOrEmpty(empId) && string.IsNullOrEmpty(name)) continue;
 
+            var store = Col(row, ws, "Store", "store");
+            var hireDate = ColDate(row, ws, "Hire Date", "HireDate", "hire_date", "Join Date");
+            if (string.IsNullOrWhiteSpace(store)) missingStore++;
+            if (hireDate == null) badHireDate++;
+
             records.Add(new ActiveEmployee
             {
                 Month = month, Year = year,
                 EmployeeId = empId, Name = name,
-                Store = Col(row, ws, "Store", "store"),
+                Store = store,
                 JobTitle = Col(row, ws, "Job Title", "JobTitle", "Position", "job_title"),
                 Grade = Col(row, ws, "Grade", "grade"),
                 PayrollGroup = Col(row, ws, "Payroll Group", "PayrollGroup", "payroll_group"),
                 CostCenter = Col(row, ws, "Cost Center", "CostCenter", "cost_center"),
                 Gender = Col(row, ws, "Gender", "gender"),
-                HireDate = ColDate(row, ws, "Hire Date", "HireDate", "hire_date", "Join Date"),
+                HireDate = hireDate,
             });
         }
-        return records;
+        return (records, new ParseIssues(missingStore, badHireDate));
     }
 
-    private static List<Resignation> ParseResignations(byte[] fileBytes, int month, int year)
+    private static (List<Resignation> Records, ParseIssues Issues) ParseResignations(byte[] fileBytes, int month, int year)
     {
         using var ms = new MemoryStream(fileBytes);
         using var wb = new XLWorkbook(ms);
         var ws = wb.Worksheet(1);
 
         var records = new List<Resignation>();
+        int missingStore = 0, badHireDate = 0, badResignDate = 0;
         foreach (var row in ws.RowsUsed().Skip(1))
         {
             var empId = Col(row, ws, "Employee ID", "EmployeeID", "employee_id", "ID");
             var name = Col(row, ws, "Name", "Employee Name", "name");
             if (string.IsNullOrEmpty(empId) && string.IsNullOrEmpty(name)) continue;
 
+            var store = Col(row, ws, "Store", "store");
+            var hireDate = ColDate(row, ws, "Hire Date", "HireDate", "hire_date", "Join Date");
+            var resignDate = ColDate(row, ws, "Resignation Date", "ResignationDate", "resignation_date", "Last Day");
+            if (string.IsNullOrWhiteSpace(store)) missingStore++;
+            if (hireDate == null) badHireDate++;
+            if (resignDate == null) badResignDate++;
+
             records.Add(new Resignation
             {
                 Month = month, Year = year,
                 EmployeeId = empId, Name = name,
-                Store = Col(row, ws, "Store", "store"),
+                Store = store,
                 JobTitle = Col(row, ws, "Job Title", "JobTitle", "Position", "job_title"),
                 Gender = Col(row, ws, "Gender", "gender"),
-                HireDate = ColDate(row, ws, "Hire Date", "HireDate", "hire_date", "Join Date"),
-                ResignationDate = ColDate(row, ws, "Resignation Date", "ResignationDate", "resignation_date", "Last Day"),
+                HireDate = hireDate,
+                ResignationDate = resignDate,
                 PayrollGroup = Col(row, ws, "Payroll Group", "PayrollGroup", "payroll_group"),
                 CostCenter = Col(row, ws, "Cost Center", "CostCenter", "cost_center"),
             });
         }
-        return records;
+        return (records, new ParseIssues(missingStore, badHireDate, badResignDate));
+    }
+
+    private static string? DescribeIssues(string sectionLabel, ParseIssues issues)
+    {
+        var parts = new List<string>();
+        if (issues.MissingStore > 0) parts.Add($"{issues.MissingStore} missing Store");
+        if (issues.MissingOrInvalidHireDate > 0) parts.Add($"{issues.MissingOrInvalidHireDate} with an unreadable Hire Date");
+        if (issues.MissingOrInvalidResignationDate > 0) parts.Add($"{issues.MissingOrInvalidResignationDate} with an unreadable Resignation Date");
+        return parts.Count == 0 ? null : $"{sectionLabel}: {string.Join(", ", parts)} — those rows were still imported but won't show up correctly in store-scoped or tenure-based reports.";
     }
 
     private static List<StoreReference> ParseStoreReference(byte[] fileBytes, int month, int year)
@@ -244,7 +274,7 @@ public class UploadService : IUploadService
         return records;
     }
 
-    public async Task<(bool, string, Dictionary<string, int>)> UploadPeriodDataAsync(
+    public async Task<(bool, string, Dictionary<string, int>, string?)> UploadPeriodDataAsync(
         IFormFile activeEmployeesFile, IFormFile resignationsFile, IFormFile storeReferenceFile,
         int month, int year, string uploadedBy)
     {
@@ -258,8 +288,8 @@ public class UploadService : IUploadService
 
         // Parsed before the transaction opens — a bad workbook throws here and
         // nothing has touched the database, so partial uploads are impossible.
-        var activeRecords = ParseActiveEmployees(activeBytes, month, year);
-        var resignRecords = ParseResignations(resignBytes, month, year);
+        var (activeRecords, activeIssues) = ParseActiveEmployees(activeBytes, month, year);
+        var (resignRecords, resignIssues) = ParseResignations(resignBytes, month, year);
         var storeRecords = ParseStoreReference(storeBytes, month, year);
 
         await using var tx = await _db.Database.BeginTransactionAsync();
@@ -293,18 +323,30 @@ public class UploadService : IUploadService
         };
 
         var message = $"Uploaded {activeRecords.Count} active employees, {resignRecords.Count} resignations, and {storeRecords.Count} store references.";
-        // Logged for diagnostics only — not shown in the portal, per admin request.
-        var unmatchedWarning = await BuildUnmatchedRoleEmailWarningAsync(storeRecords);
-        if (unmatchedWarning != null) _logger.LogWarning("{Warning}", unmatchedWarning);
 
-        return (true, message, counts);
+        var warningLines = new[]
+        {
+            DescribeIssues("Active Employees", activeIssues),
+            DescribeIssues("Resignations", resignIssues),
+            await BuildUnmatchedRoleEmailWarningAsync(storeRecords),
+        }.Where(w => w != null).ToList();
+        var warning = warningLines.Count == 0 ? null : string.Join("\n", warningLines);
+        if (warning != null) _logger.LogWarning("{Warning}", warning);
+
+        return (true, message, counts, warning);
     }
+
+    public async Task<List<(int Month, int Year)>> GetExistingPeriodKeysAsync() =>
+        (await _db.UploadLogs.Where(l => PeriodFileTypes.Contains(l.FileType))
+            .Select(l => new { l.Month, l.Year }).Distinct().ToListAsync())
+            .Select(x => (x.Month, x.Year)).ToList();
 
     // Flags OM/OC/Head Manager emails in the just-uploaded store reference
     // batch that don't match any user account with the matching role, so the
     // admin can create or fix that account before the person complains their
     // stores are missing. Driven by IStoreAccessService's role map, grouped by
-    // role, so a future role needs no change here.
+    // role, so a future role needs no change here. Surfaced as a warning banner
+    // on the Uploads page (see UploadPeriodDataAsync/UpdateSingleFileAsync).
     private async Task<string?> BuildUnmatchedRoleEmailWarningAsync(List<StoreReference> storeRecords)
     {
         var lines = new List<string>();
@@ -325,7 +367,7 @@ public class UploadService : IUploadService
             lines.Add($"⚠ Missing {label}s: {unmatched.Count} email(s) don't match any account: {string.Join(", ", unmatched)}.");
         }
 
-        return lines.Count == 0 ? null : string.Join(" ", lines);
+        return lines.Count == 0 ? null : string.Join("\n", lines);
     }
 
     private static string NormalizeHeader(string s) => Regex.Replace(s ?? "", @"\s+", " ").Trim();
@@ -604,7 +646,7 @@ public class UploadService : IUploadService
         };
     }
 
-    public async Task<(bool, string)> UpdateSingleFileAsync(
+    public async Task<(bool, string, string?)> UpdateSingleFileAsync(
         string fileType, int month, int year, IFormFile file, string uploadedBy)
     {
         ValidateFile(file);
@@ -617,7 +659,7 @@ public class UploadService : IUploadService
         {
             case "active_employees":
                 await _db.ActiveEmployees.Where(e => e.Month == month && e.Year == year).ExecuteDeleteAsync();
-                var activeRecords = ParseActiveEmployees(fileBytes, month, year);
+                var (activeRecords, activeIssues) = ParseActiveEmployees(fileBytes, month, year);
                 if (activeRecords.Count > 0) await _db.ActiveEmployees.AddRangeAsync(activeRecords);
                 await _db.UploadLogs.Where(l => l.FileType == "active_employees" && l.Month == month && l.Year == year).ExecuteDeleteAsync();
                 _db.UploadLogs.Add(new UploadLog { FileType = "active_employees", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
@@ -625,11 +667,11 @@ public class UploadService : IUploadService
                 await tx.CommitAsync();
                 InvalidateScorecardHistoricalCache();
                 FireAndForgetDetection(month, year, $"Active Employees — {new DateTime(year, month, 1):MMMM yyyy}");
-                return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.");
+                return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.", DescribeIssues("Active Employees", activeIssues));
 
             case "resignations":
                 await _db.Resignations.Where(r => r.Month == month && r.Year == year).ExecuteDeleteAsync();
-                var resignRecords = ParseResignations(fileBytes, month, year);
+                var (resignRecords, resignIssues) = ParseResignations(fileBytes, month, year);
                 if (resignRecords.Count > 0) await _db.Resignations.AddRangeAsync(resignRecords);
                 await _db.UploadLogs.Where(l => l.FileType == "resignations" && l.Month == month && l.Year == year).ExecuteDeleteAsync();
                 _db.UploadLogs.Add(new UploadLog { FileType = "resignations", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
@@ -637,7 +679,7 @@ public class UploadService : IUploadService
                 await tx.CommitAsync();
                 InvalidateScorecardHistoricalCache();
                 FireAndForgetDetection(month, year, $"Resignations — {new DateTime(year, month, 1):MMMM yyyy}");
-                return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.");
+                return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.", DescribeIssues("Resignations", resignIssues));
 
             case "store_reference":
                 await _db.StoreReferences.Where(s => s.Month == month && s.Year == year).ExecuteDeleteAsync();
@@ -648,10 +690,11 @@ public class UploadService : IUploadService
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
                 FireAndForgetDetection(month, year, $"Store Reference — {new DateTime(year, month, 1):MMMM yyyy}");
-                return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.");
+                var storeWarning = await BuildUnmatchedRoleEmailWarningAsync(storeRecords);
+                return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.", storeWarning);
 
             default:
-                return (false, "Unknown file type.");
+                return (false, "Unknown file type.", null);
         }
     }
 

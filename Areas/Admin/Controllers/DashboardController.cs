@@ -164,10 +164,11 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
-    public async Task<IActionResult> Uploads(int page = 1, string sort = "date", string dir = "desc", string? success = null, string? error = null)
+    public async Task<IActionResult> Uploads(int page = 1, string sort = "date", string dir = "desc", string? success = null, string? error = null, string? warning = null)
     {
         if (success != null) ViewData["Success"] = success;
         if (error != null) ViewData["Error"] = error;
+        if (warning != null) ViewData["Warning"] = warning;
         return await UploadsViewAsync(page, sort, dir);
     }
 
@@ -180,6 +181,7 @@ public class DashboardController : Controller
         ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
         ViewBag.TotalCount = total;
+        ViewBag.ExistingPeriods = await _uploads.GetExistingPeriodKeysAsync();
         return View("Uploads", items);
     }
 
@@ -191,8 +193,8 @@ public class DashboardController : Controller
     // no visible error before (see the earlier direct-render fix); a query
     // parameter has no such dependency. This app has a single admin user, so
     // the exact exception message is shown as-is rather than a generic one.
-    private IActionResult RedirectToUploads(string? success = null, string? error = null) =>
-        RedirectToAction("Uploads", new { success, error });
+    private IActionResult RedirectToUploads(string? success = null, string? error = null, string? warning = null) =>
+        RedirectToAction("Uploads", new { success, error, warning });
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> UploadPeriodData(MvcApp.Models.ViewModels.PeriodUploadViewModel vm)
@@ -204,8 +206,8 @@ public class DashboardController : Controller
         try
         {
             var email = HttpContext.Session.GetEmail();
-            var (_, msg, _) = await _uploads.UploadPeriodDataAsync(vm.ActiveEmployeesFile, vm.ResignationsFile, vm.StoreReferenceFile, vm.Month, vm.Year, email);
-            return RedirectToUploads(success: msg);
+            var (_, msg, _, warning) = await _uploads.UploadPeriodDataAsync(vm.ActiveEmployeesFile, vm.ResignationsFile, vm.StoreReferenceFile, vm.Month, vm.Year, email);
+            return RedirectToUploads(success: msg, warning: warning);
         }
         catch (Exception ex)
         {
@@ -225,8 +227,8 @@ public class DashboardController : Controller
         try
         {
             var email = HttpContext.Session.GetEmail();
-            var (_, msg) = await _uploads.UpdateSingleFileAsync(vm.FileType, vm.Month, vm.Year, vm.File, email);
-            return RedirectToUploads(success: msg);
+            var (_, msg, warning) = await _uploads.UpdateSingleFileAsync(vm.FileType, vm.Month, vm.Year, vm.File, email);
+            return RedirectToUploads(success: msg, warning: warning);
         }
         catch (Exception ex)
         {

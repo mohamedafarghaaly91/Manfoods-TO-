@@ -146,11 +146,18 @@
                 // TempData+RedirectToAction pattern.
                 var successMessage = ViewData["Success"] ?? TempData["Success"];
                 var errorMessage = ViewData["Error"] ?? TempData["Error"];
+                var warningMessage = ViewData["Warning"] ?? TempData["Warning"];
             }
             @if (successMessage != null)
             {
                 <div class="alert-banner alert-success-banner">
                     <i class="bi bi-check-circle-fill me-2"></i>@successMessage
+                </div>
+            }
+            @if (warningMessage != null)
+            {
+                <div class="alert-banner alert-warning-banner">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@warningMessage
                 </div>
             }
             @if (errorMessage != null)

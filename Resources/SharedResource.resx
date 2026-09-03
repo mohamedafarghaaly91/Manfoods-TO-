@@ -112,6 +112,7 @@
   <data name="DM_MonthlyData" xml:space="preserve"><value>Monthly Workforce Data</value></data>
   <data name="DM_MonthlyDataSub" xml:space="preserve"><value>Active Employees, Resignations, and Store Reference are uploaded together as one unit</value></data>
   <data name="DM_MonthlyDataRequirement" xml:space="preserve"><value>All three files are required together — you can't upload just one or two and leave the rest out. If this month already has data, uploading again replaces it completely.</value></data>
+  <data name="DM_PeriodExistsConfirm" xml:space="preserve"><value>This month already has data uploaded. Continuing will permanently delete its current records and files and replace them with this new upload. Continue?</value></data>
   <data name="UL_ActiveEmployees" xml:space="preserve"><value>Active Employees</value></data>
   <data name="UL_ActiveEmployeesSub" xml:space="preserve"><value>Full active headcount for the month</value></data>
   <data name="UL_Resignations" xml:space="preserve"><value>Resignations</value></data>

@@ -7,9 +7,13 @@ public interface IUploadService
     /// one month, atomically: either all three parse and save, or none of them
     /// do. Replaces any existing data for that month/year for all three types.
     /// </summary>
-    Task<(bool success, string message, Dictionary<string, int> rowCounts)> UploadPeriodDataAsync(
+    Task<(bool success, string message, Dictionary<string, int> rowCounts, string? warning)> UploadPeriodDataAsync(
         IFormFile activeEmployeesFile, IFormFile resignationsFile, IFormFile storeReferenceFile,
         int month, int year, string uploadedBy);
+
+    /// <summary>Month/year pairs that already have period data uploaded — lets the
+    /// upload form warn before an upload silently replaces an existing period.</summary>
+    Task<List<(int Month, int Year)>> GetExistingPeriodKeysAsync();
 
     Task<(bool success, string message, int rows)> UploadExitInterviewsAsync(IFormFile file, string uploadedBy);
 
@@ -33,6 +37,6 @@ public interface IUploadService
     /// store_reference) for a period that already exists, leaving the
     /// other two files untouched.
     /// </summary>
-    Task<(bool success, string message)> UpdateSingleFileAsync(
+    Task<(bool success, string message, string? warning)> UpdateSingleFileAsync(
         string fileType, int month, int year, IFormFile file, string uploadedBy);
 }

@@ -11,6 +11,9 @@
         var nextDir = (currentSort == col && currentDir == "asc") ? "desc" : "asc";
         return $"?page=1&sort={col}&dir={nextDir}";
     };
+    var existingPeriods = ((List<(int Month, int Year)>)(ViewBag.ExistingPeriods ?? new List<(int Month, int Year)>()))
+        .Select(p => new { month = p.Month, year = p.Year }).ToList();
+    var existingPeriodsJson = System.Text.Json.JsonSerializer.Serialize(existingPeriods);
 }
 
 <style>
@@ -210,7 +213,7 @@
     </div>
 
     <form id="dmPeriodForm" asp-area="Admin" asp-controller="Dashboard" asp-action="UploadPeriodData" method="post" enctype="multipart/form-data"
-          data-change-label="@L["DM_ChangeFile"]" data-requirement-text="@L["DM_MonthlyDataRequirement"]">
+          data-change-label="@L["DM_ChangeFile"]" data-requirement-text="@L["DM_MonthlyDataRequirement"]" data-period-exists-confirm="@L["DM_PeriodExistsConfirm"]">
         @Html.AntiForgeryToken()
         <div class="d-flex gap-2 mb-3">
             <div class="dm-select-wrap">
@@ -492,6 +495,12 @@ function dmSetupDropzone(zoneId) {
 
 ['dmZone1', 'dmZone2', 'dmZone3', 'dmZoneExit'].forEach(dmSetupDropzone);
 
+/* Month/year combos that already have data — re-uploading one deletes and
+   replaces its rows (and the old Excel files themselves) with no other undo,
+   so this is the one point where the admin must explicitly confirm before
+   that happens. */
+const dmExistingPeriods = @Html.Raw(existingPeriodsJson);
+
 document.getElementById('dmPeriodForm').addEventListener('submit', function (e) {
     const inputs = this.querySelectorAll('input[type="file"]');
     const missing = Array.from(inputs).some(i => !i.files || i.files.length === 0);
@@ -500,8 +509,15 @@ document.getElementById('dmPeriodForm').addEventListener('submit', function (e) 
         e.preventDefault();
         errorEl.textContent = this.dataset.requirementText;
         errorEl.style.display = 'block';
-    } else {
-        errorEl.style.display = 'none';
+        return;
+    }
+    errorEl.style.display = 'none';
+
+    const month = parseInt(this.querySelector('select[name="Month"]').value);
+    const year = parseInt(this.querySelector('select[name="Year"]').value);
+    const exists = dmExistingPeriods.some(p => p.month === month && p.year === year);
+    if (exists && !confirm(this.dataset.periodExistsConfirm)) {
+        e.preventDefault();
     }
 });
 
