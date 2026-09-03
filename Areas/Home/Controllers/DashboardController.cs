@@ -84,7 +84,7 @@ public class DashboardController : Controller
     // Mirrors Areas/Admin/Controllers/DashboardController.Export exactly (same IReportService
     // calls) so the shared Reports view's download buttons work under the Home area too.
     [HttpGet("home/dashboard/export")]
-    public async Task<IActionResult> Export(int month, int year, string reportType = "summary",
+    public async Task<IActionResult> Export(int month, int year, string reportType = "stores-overview",
         string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var role = HttpContext.Session.GetRole();
@@ -135,9 +135,7 @@ public class DashboardController : Controller
                     await _reports.BuildOcOmComparisonReportAsync(month, year, role, assignedName, om: om, oc: oc, soc: soc, od: od),
                     $"OC_OM_Comparison_{year}_{month:D2}.xlsx");
             default:
-                return await DownloadWorkbookAsync(
-                    await _reports.BuildSummaryReportAsync(month, year, role, assignedName, store),
-                    $"Summary_Report_{year}_{month:D2}.xlsx");
+                return NotFound();
         }
     }
 }

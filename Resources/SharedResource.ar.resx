@@ -934,8 +934,6 @@
   <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>حالة خطط العمل على مستوى الشركة — الخطط النشطة، ما تم فتحه/إغلاقه هذا الشهر، اتجاه الإغلاق، أبرز الأسباب، ودرجة الخطورة والمسؤولية وتقدم المهام لكل فرع.</value></data>
   <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>نظرة عامة على الفروع</value></data>
   <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>عدد الموظفين ومعدل الدوران وحالة مركز الإجراءات وعدد حالات الخطورة العالية في الإنذار المبكر لكل فرع خلال الشهر المحدد — عرض موحّد لصحة الفروع.</value></data>
-  <data name="Rep_Title_Summary" xml:space="preserve"><value>الملخص الشهري</value></data>
-  <data name="Rep_Desc_Summary" xml:space="preserve"><value>عدد الموظفين والتعيينات الجديدة والاستقالات ومعدل الدوران للشهر المحدد — موزّعة حسب المسمى الوظيفي ومدة الخدمة والنوع.</value></data>
   <data name="Rep_Title_Stores" xml:space="preserve"><value>مقارنة الفروع</value></data>
   <data name="Rep_Desc_Stores" xml:space="preserve"><value>عرض متجاور لكل الفروع خلال الشهر المحدد — عدد الموظفين والتعيينات والاستقالات ومعدل الدوران لكل فرع.</value></data>
   <data name="Rep_Title_TrendMatrix" xml:space="preserve"><value>مصفوفة اتجاه الدوران</value></data>

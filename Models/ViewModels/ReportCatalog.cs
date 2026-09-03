@@ -48,14 +48,6 @@ public static class ReportCatalog
         },
         new ReportDefinition
         {
-            Id = "summary", Section = "Turnover & Workforce", Title = "Monthly Summary",
-            Description = "Headcount, New Hires, Resignations, and Turnover Rate for the selected month — broken down by Job Title, Tenure, and Gender.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Summary", DescriptionKey = "Rep_Desc_Summary",
-            Icon = "bi-file-earmark-spreadsheet-fill", IconBg = "rgba(39,174,96,.12)", IconColor = "#27ae60",
-            UsesPeriod = true, UsesStore = true,
-        },
-        new ReportDefinition
-        {
             Id = "stores", Section = "Turnover & Workforce", Title = "Store Comparison",
             Description = "Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.",
             SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Stores", DescriptionKey = "Rep_Desc_Stores",

@@ -933,8 +933,6 @@
   <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>Company-wide action-plan status — active plans, this month's opened/resolved, resolution trend, top reasons, and per-store severity, ownership, and task progress.</value></data>
   <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>Stores Overview</value></data>
   <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>Every store's Headcount, Turnover, Action Center status, and Early Warning high-risk count for the selected month — the single cross-page view of store health.</value></data>
-  <data name="Rep_Title_Summary" xml:space="preserve"><value>Monthly Summary</value></data>
-  <data name="Rep_Desc_Summary" xml:space="preserve"><value>Headcount, New Hires, Resignations, and Turnover Rate for the selected month — broken down by Job Title, Tenure, and Gender.</value></data>
   <data name="Rep_Title_Stores" xml:space="preserve"><value>Store Comparison</value></data>
   <data name="Rep_Desc_Stores" xml:space="preserve"><value>Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.</value></data>
   <data name="Rep_Title_TrendMatrix" xml:space="preserve"><value>Turnover Trend Matrix</value></data>
