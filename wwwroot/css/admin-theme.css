@@ -273,10 +273,11 @@ body.admin-theme .empty-state { color: var(--text-3); }
     font-family: 'Times New Roman', Times, serif; letter-spacing: -.01em;
     margin-top: 3px;
 }
-.admin-global-logo {
+.admin-global-right {
     position: absolute; top: 50%; right: 32px; transform: translateY(-50%);
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: center; gap: 18px;
 }
+.admin-global-logo { display: flex; align-items: center; justify-content: center; }
 .admin-global-logo img { height: var(--global-logo-h); width: auto; object-fit: contain; }
 
 .admin-body { display: flex; flex: 1; min-height: 0; gap: 20px; }
@@ -363,7 +364,7 @@ body.admin-theme .admin-nav-link {
     body.admin-theme { --global-header-h: 76px; --global-logo-h: 52px; }
     .admin-global-brand { left: 18px; }
     .admin-global-brand-main { font-size: 16px; }
-    .admin-global-logo { right: 18px; }
+    .admin-global-right { right: 18px; gap: 12px; }
 
     .admin-sidebar {
         position: fixed; left: 0; top: var(--global-header-h);

@@ -15,6 +15,8 @@
   <data name="Layout_SignOut" xml:space="preserve"><value>Sign Out</value></data>
   <data name="Layout_DarkMode" xml:space="preserve"><value>Dark Mode</value></data>
   <data name="Layout_LightMode" xml:space="preserve"><value>Light Mode</value></data>
+  <data name="Notif_Title" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Notif_Empty" xml:space="preserve"><value>You're all caught up — no alerts right now.</value></data>
 
   <!-- Navigation -->
   <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
