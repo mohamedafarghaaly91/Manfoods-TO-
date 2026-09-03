@@ -257,11 +257,12 @@ body.admin-theme .empty-state { color: var(--text-3); }
     border-bottom: 1px solid var(--nav-border);
     box-shadow: var(--shadow-lg);
 }
-/* Both pinned with physical (not logical) left/right so the text stays
-   top-left and the logo stays top-right regardless of LTR/RTL. */
+/* Pinned physical (not logical) left so the brand block stays top-left
+   regardless of LTR/RTL. The logo sits before the two text lines, in a row,
+   so it reads "logo, then name" either way. */
 .admin-global-brand {
     position: absolute; top: 50%; left: 32px; transform: translateY(-50%);
-    display: flex; flex-direction: column; justify-content: center;
+    display: flex; flex-direction: row; align-items: center; gap: 14px;
     text-decoration: none;
 }
 .admin-global-brand-line1 {
