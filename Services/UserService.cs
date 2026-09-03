@@ -10,17 +10,35 @@ namespace MvcApp.Services;
 public class UserService : IUserService
 {
     private readonly AppDbContext _db;
+    private readonly IStoreAccessService _storeAccess;
 
-    public UserService(AppDbContext db) => _db = db;
+    public UserService(AppDbContext db, IStoreAccessService storeAccess)
+    {
+        _db = db;
+        _storeAccess = storeAccess;
+    }
 
     private static UserViewModel ToVm(User u) => new()
     {
-        Id = u.Id, Email = u.Email, Phone = u.Phone, Role = u.Role,
+        Id = u.Id, Email = u.Email, Phone = u.Phone, Role = u.Role, AssignedName = u.AssignedName ?? "",
         HasPassword = !string.IsNullOrEmpty(u.PasswordHash), CreatedAt = u.CreatedAt
     };
 
-    public async Task<List<UserViewModel>> GetAllAsync() =>
-        (await _db.Users.OrderBy(u => u.CreatedAt).ToListAsync()).Select(ToVm).ToList();
+    public async Task<List<UserViewModel>> GetAllAsync()
+    {
+        var users = (await _db.Users.OrderBy(u => u.CreatedAt).ToListAsync()).Select(ToVm).ToList();
+
+        // Store-restricted roles only — Admin/User aren't matched against
+        // StoreReference, so leave MatchedStoreCount null for them (there's
+        // nothing meaningful to count).
+        foreach (var u in users.Where(u => _storeAccess.IsRestrictedRole(u.Role)))
+        {
+            var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(u.Role, u.Email);
+            u.MatchedStoreCount = accessible?.Count ?? 0;
+        }
+
+        return users;
+    }
 
     public async Task<UserViewModel?> GetByIdAsync(int id)
     {
@@ -34,6 +52,7 @@ public class UserService : IUserService
         {
             Email = vm.Email.ToLower(),
             Phone = vm.Phone,
+            AssignedName = vm.AssignedName?.Trim() ?? "",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
             Role = vm.Role,
         };
@@ -42,23 +61,36 @@ public class UserService : IUserService
         return ToVm(user);
     }
 
-    public async Task<UserViewModel?> UpdateAsync(int id, EditUserViewModel vm)
+    private async Task<bool> IsLastAdminAsync() => await _db.Users.CountAsync(u => u.Role == "Admin") <= 1;
+
+    public async Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm)
     {
         var user = await _db.Users.FindAsync(id);
-        if (user == null) return null;
+        if (user == null) return (null, null);
+
+        if (user.Role == "Admin" && vm.Role != "Admin" && await IsLastAdminAsync())
+            return (null, "last-admin");
+
         user.Email = vm.Email.ToLower();
         user.Phone = vm.Phone;
+        user.AssignedName = vm.AssignedName?.Trim() ?? "";
         user.Role = vm.Role;
         if (!string.IsNullOrEmpty(vm.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
         await _db.SaveChangesAsync();
-        return ToVm(user);
+        return (ToVm(user), null);
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<(bool success, string? error)> DeleteAsync(int id)
     {
         var user = await _db.Users.FindAsync(id);
-        if (user != null) { _db.Users.Remove(user); await _db.SaveChangesAsync(); }
+        if (user == null) return (false, null);
+        if (user.Role == "Admin" && await IsLastAdminAsync())
+            return (false, "last-admin");
+
+        _db.Users.Remove(user);
+        await _db.SaveChangesAsync();
+        return (true, null);
     }
 
     public async Task<bool> VerifyRecoveryKeyAsync(string key)
@@ -108,6 +140,12 @@ public class UserService : IUserService
         return "";
     }
 
+    private static readonly string[] ValidRoles =
+    {
+        "Admin", "User", "Operation_Manager", "Operation_Consultant",
+        "Head_Manager", "Senior_Operation_Consultant", "Operation_Director",
+    };
+
     public async Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file)
     {
         const long maxBytes = 10 * 1024 * 1024;
@@ -132,6 +170,8 @@ public class UserService : IUserService
         {
             var email = Col(row, ws, "Email", "email").ToLower();
             var phone = Col(row, ws, "Phone", "Phone Number", "phone");
+            var assignedName = Col(row, ws, "Assigned Name", "AssignedName", "Name", "Display Name");
+            var roleRaw = Col(row, ws, "Role", "role");
             if (string.IsNullOrWhiteSpace(email)) continue;
 
             // Skip accounts that already exist (by email) so re-uploading a
@@ -139,7 +179,8 @@ public class UserService : IUserService
             // duplicates too.
             if (existingEmails.Contains(email) || !seenInFile.Add(email)) { skipped++; continue; }
 
-            toAdd.Add(new User { Email = email, Phone = phone, Role = "User", PasswordHash = null });
+            var role = ValidRoles.FirstOrDefault(r => string.Equals(r, roleRaw, StringComparison.OrdinalIgnoreCase)) ?? "User";
+            toAdd.Add(new User { Email = email, Phone = phone, AssignedName = assignedName, Role = role, PasswordHash = null });
         }
 
         if (toAdd.Count > 0)

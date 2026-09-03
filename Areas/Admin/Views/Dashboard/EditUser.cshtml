@@ -8,34 +8,61 @@
     <a href="/admin/dashboard/users" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>@L["Common_Back"]</a>
 </div>
 
-<div class="card-dark" style="max-width:520px">
+<div class="card-dark" style="max-width:640px">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <div class="card-icon" style="width:48px;height:48px;font-size:18px;border-radius:50%">
+            @((string.IsNullOrWhiteSpace(Model.AssignedName) ? Model.Email : Model.AssignedName).Substring(0,1).ToUpper())
+        </div>
+        <div><h6 class="mb-0">@(string.IsNullOrWhiteSpace(Model.AssignedName) ? Model.Email : Model.AssignedName)</h6><p class="text-muted-custom mb-0 small">@Model.Email</p></div>
+    </div>
     <form asp-area="Admin" asp-controller="Dashboard" asp-action="EditUser" asp-route-id="@Model.Id" method="post">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="alert-banner alert-error-banner mb-3"></div>
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label-dark">@L["Common_Email"]</label>
-            <input asp-for="Email" class="form-control form-control-dark"/>
-            <span asp-validation-for="Email" class="text-danger small"></span>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label-dark">@L["Common_Email"]</label>
+                <input asp-for="Email" class="form-control form-control-dark"/>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Phone" class="form-label-dark">@L["Common_Phone"]</label>
+                <input asp-for="Phone" class="form-control form-control-dark"/>
+                <span asp-validation-for="Phone" class="text-danger small"></span>
+            </div>
         </div>
+
         <div class="mb-3">
-            <label asp-for="Phone" class="form-label-dark">@L["Common_Phone"]</label>
-            <input asp-for="Phone" class="form-control form-control-dark"/>
-            <span asp-validation-for="Phone" class="text-danger small"></span>
+            <label asp-for="AssignedName" class="form-label-dark">@L["Users_AssignedName"]</label>
+            <input asp-for="AssignedName" class="form-control form-control-dark" placeholder="@L["Users_AssignedNamePlaceholder"]"/>
+            <p class="text-muted-custom small mt-1 mb-0">@L["Users_AssignedNameHelp"]</p>
         </div>
-        <div class="mb-3">
-            <label asp-for="Password" class="form-label-dark">@L["EU_NewPasswordNote"]</label>
-            <input asp-for="Password" type="password" class="form-control form-control-dark" placeholder="••••••••"/>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="Password" class="form-label-dark">@L["EU_NewPasswordNote"]</label>
+                <input asp-for="Password" type="password" class="form-control form-control-dark" placeholder="••••••••"/>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ConfirmPassword" class="form-label-dark">@L["Users_ConfirmNewPassword"]</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control form-control-dark" placeholder="••••••••"/>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
         </div>
+
         <div class="mb-4">
             <label asp-for="Role" class="form-label-dark">@L["Common_Role"]</label>
             <select asp-for="Role" class="form-select form-select-dark">
-                <option value="Admin">Admin</option>
-                <option value="User">User</option>
-                <option value="Operation_Manager">Operation Manager</option>
-                <option value="Operation_Consultant">Operation Consultant</option>
-                <option value="Head_Manager">Head Manager</option>
-                <option value="Senior_Operation_Consultant">Senior Operation Consultant</option>
-                <option value="Operation_Director">Operation Director</option>
+                <option value="Admin">@L["Role_Admin"]</option>
+                <option value="User">@L["Role_User"]</option>
+                <optgroup label="@L["Users_KpiRestricted"]">
+                    <option value="Operation_Manager">@L["Common_OperationManager"]</option>
+                    <option value="Operation_Consultant">@L["Common_OperationConsultant"]</option>
+                    <option value="Head_Manager">@L["Role_HeadManager"]</option>
+                    <option value="Senior_Operation_Consultant">@L["Role_SeniorOperationConsultant"]</option>
+                    <option value="Operation_Director">@L["Role_OperationDirector"]</option>
+                </optgroup>
             </select>
         </div>
         <button type="submit" class="btn btn-primary w-100">@L["EU_SaveChanges"]</button>

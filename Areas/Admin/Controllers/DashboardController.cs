@@ -410,7 +410,7 @@ public class DashboardController : Controller
         {
             fileName = "Template_Bulk_Users.xlsx";
             var ws = wb.AddWorksheet("Users");
-            var headers = new[] { "Email", "Phone" };
+            var headers = new[] { "Email", "Phone", "Assigned Name", "Role" };
             for (int i = 0; i < headers.Length; i++)
             {
                 var cell = ws.Cell(1, i + 1);
@@ -421,7 +421,11 @@ public class DashboardController : Controller
                 cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             }
             ws.Cell(2, 1).Value = "ahmed@manfoods.com"; ws.Cell(2, 2).Value = "+201012345678";
+            ws.Cell(2, 3).Value = "Ahmed Mohamed"; ws.Cell(2, 4).Value = "Operation_Consultant";
             ws.Cell(3, 1).Value = "sara@manfoods.com"; ws.Cell(3, 2).Value = "+201098765432";
+            ws.Cell(3, 3).Value = "Sara Ali"; ws.Cell(3, 4).Value = "User";
+            ws.Cell(5, 1).Value = "Assigned Name and Role are optional — leave blank and the account is created as a plain \"User\". Valid Role values: Admin, User, Operation_Manager, Operation_Consultant, Head_Manager, Senior_Operation_Consultant, Operation_Director.";
+            ws.Cell(5, 1).Style.Font.Italic = true;
             ws.Columns().AdjustToContents();
         }
         else
@@ -486,7 +490,7 @@ public class DashboardController : Controller
     {
         var user = await _users.GetByIdAsync(id);
         if (user == null) return NotFound();
-        return View(new MvcApp.Models.ViewModels.EditUserViewModel { Id = user.Id, Email = user.Email, Phone = user.Phone, Role = user.Role });
+        return View(new MvcApp.Models.ViewModels.EditUserViewModel { Id = user.Id, Email = user.Email, Phone = user.Phone, Role = user.Role, AssignedName = user.AssignedName });
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
@@ -494,7 +498,13 @@ public class DashboardController : Controller
     {
         vm.Id = id;
         if (!ModelState.IsValid) return View(vm);
-        await _users.UpdateAsync(id, vm);
+        var (updated, error) = await _users.UpdateAsync(id, vm);
+        if (error == "last-admin")
+        {
+            TempData["Error"] = "Can't change the role of the last remaining Admin account.";
+            return RedirectToAction("EditUser", new { id });
+        }
+        if (updated == null) return NotFound();
         TempData["Success"] = "User updated.";
         return RedirectToAction("Users");
     }
@@ -502,8 +512,10 @@ public class DashboardController : Controller
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        await _users.DeleteAsync(id);
-        TempData["Success"] = "User deleted.";
+        var (success, error) = await _users.DeleteAsync(id);
+        TempData[success ? "Success" : "Error"] = error == "last-admin"
+            ? "Can't delete the last remaining Admin account."
+            : (success ? "User deleted." : "User not found.");
         return RedirectToAction("Users");
     }
 

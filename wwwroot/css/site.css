@@ -545,10 +545,17 @@ html, body {
     font-size: 11px; font-weight: 600; white-space: nowrap;
 }
 .role-badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-.role-admin-full           { background: var(--gold-light);  color: var(--gold);    border: 1px solid rgba(167,139,250,.25); }
-.role-admin-read           { background: var(--info-bg);     color: #93c5fd;        border: 1px solid rgba(59,130,246,.25); }
-.role-operation-manager    { background: var(--success-bg);  color: #86efac;        border: 1px solid rgba(34,197,94,.25); }
-.role-operation-consultant { background: var(--info-bg);     color: #a5b4fc;        border: 1px solid rgba(99,102,241,.25); }
+/* Keyed to the exact User.Role string values (see Models/User.cs) so a Razor
+   `role-@user.Role` class always resolves to a real color — the previous
+   set of classes here (role-admin-full/role-admin-read/...) never matched
+   any actual role value and every badge rendered colorless. */
+.role-Admin                          { background: var(--gold-light);   color: var(--gold);    border: 1px solid rgba(167,139,250,.25); }
+.role-User                           { background: rgba(148,163,184,.12); color: #94a3b8;       border: 1px solid rgba(148,163,184,.25); }
+.role-Operation_Manager              { background: var(--success-bg);   color: var(--success); border: 1px solid rgba(34,197,94,.25); }
+.role-Operation_Consultant           { background: var(--info-bg);      color: var(--info);    border: 1px solid rgba(59,130,246,.25); }
+.role-Head_Manager                   { background: var(--danger-bg);    color: var(--danger);  border: 1px solid rgba(239,68,68,.25); }
+.role-Senior_Operation_Consultant    { background: var(--warning-bg);   color: var(--warning); border: 1px solid rgba(245,158,11,.25); }
+.role-Operation_Director             { background: rgba(109,93,251,.12); color: var(--red);    border: 1px solid rgba(109,93,251,.25); }
 
 /* ══ EMPTY STATE ══════════════════════════════════════ */
 .empty-state { text-align: center; padding: 60px 0; color: var(--text-3); }
@@ -864,10 +871,13 @@ a:hover { color: #fff; }
 
 /* Badges in light mode */
 [data-theme="light"] .badge-type { background: rgba(109,93,251,.08); color: var(--red); border-color: rgba(109,93,251,.2); }
-[data-theme="light"] .role-admin-full { background: rgba(167,139,250,.12); color: #B45309; border-color: rgba(167,139,250,.3); }
-[data-theme="light"] .role-admin-read { background: rgba(37,99,235,.08); color: #2563EB; border-color: rgba(37,99,235,.2); }
-[data-theme="light"] .role-operation-manager { background: rgba(22,163,74,.08); color: #15803d; border-color: rgba(22,163,74,.2); }
-[data-theme="light"] .role-operation-consultant { background: rgba(99,102,241,.08); color: #4F46E5; border-color: rgba(99,102,241,.2); }
+[data-theme="light"] .role-Admin { background: rgba(167,139,250,.12); color: #B45309; border-color: rgba(167,139,250,.3); }
+[data-theme="light"] .role-User { background: rgba(148,163,184,.12); color: #475569; border-color: rgba(148,163,184,.3); }
+[data-theme="light"] .role-Operation_Manager { background: rgba(22,163,74,.08); color: #15803d; border-color: rgba(22,163,74,.2); }
+[data-theme="light"] .role-Operation_Consultant { background: rgba(37,99,235,.08); color: #2563EB; border-color: rgba(37,99,235,.2); }
+[data-theme="light"] .role-Head_Manager { background: rgba(220,38,38,.08); color: #DC2626; border-color: rgba(220,38,38,.2); }
+[data-theme="light"] .role-Senior_Operation_Consultant { background: rgba(217,119,6,.08); color: #D97706; border-color: rgba(217,119,6,.2); }
+[data-theme="light"] .role-Operation_Director { background: rgba(109,93,251,.08); color: #6D5DFB; border-color: rgba(109,93,251,.2); }
 
 /* KPI card in light mode */
 [data-theme="light"] .kpi-card::after { background: rgba(109,93,251,.04); }

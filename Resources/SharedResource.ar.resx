@@ -241,6 +241,7 @@
   <data name="Common_Role" xml:space="preserve"><value>الدور</value></data>
   <data name="Common_Status" xml:space="preserve"><value>الحالة</value></data>
   <data name="Common_Actions" xml:space="preserve"><value>الإجراءات</value></data>
+  <data name="Common_Created" xml:space="preserve"><value>تاريخ الإنشاء</value></data>
   <data name="Common_SearchStore" xml:space="preserve"><value>بحث في الفرع، مستشار، مدير...</value></data>
   <data name="Common_SearchComments" xml:space="preserve"><value>بحث في التعليقات...</value></data>
   <data name="Common_SmartInsights" xml:space="preserve"><value>تحليلات ذكية</value></data>
@@ -474,12 +475,35 @@
   <data name="Users_GenerateKey" xml:space="preserve"><value>توليد مفتاح جديد</value></data>
   <data name="Users_NewRecoveryKey" xml:space="preserve"><value>مفتاح الاسترداد الجديد</value></data>
   <data name="Users_SaveKey" xml:space="preserve"><value>حفظته — إغلاق</value></data>
+  <data name="Users_KpiTotal" xml:space="preserve"><value>إجمالي المستخدمين</value></data>
+  <data name="Users_KpiTotalDesc" xml:space="preserve"><value>كل الحسابات بجميع الأدوار</value></data>
+  <data name="Users_KpiActiveDesc" xml:space="preserve"><value>عندهم كلمة مرور ويقدروا يدخلوا</value></data>
+  <data name="Users_KpiPendingDesc" xml:space="preserve"><value>مستنيين تفعيل بالـ OTP</value></data>
+  <data name="Users_KpiAdmins" xml:space="preserve"><value>الأدمنز</value></data>
+  <data name="Users_KpiAdminsDesc" xml:space="preserve"><value>صلاحية كاملة على كل الصفحات والإعدادات</value></data>
+  <data name="Users_KpiRestricted" xml:space="preserve"><value>مقيدين بمطاعم</value></data>
+  <data name="Users_KpiRestrictedDesc" xml:space="preserve"><value>مربوطين بمطاعم معينة عن طريق الإيميل</value></data>
+  <data name="Users_SearchPlaceholder" xml:space="preserve"><value>ابحث بالإيميل أو الاسم...</value></data>
+  <data name="Users_FilterAllRoles" xml:space="preserve"><value>كل الأدوار</value></data>
+  <data name="Users_NoResults" xml:space="preserve"><value>مفيش مستخدمين مطابقين للبحث.</value></data>
+  <data name="Users_AssignedName" xml:space="preserve"><value>الاسم المعروض</value></data>
+  <data name="Users_AssignedNamePlaceholder" xml:space="preserve"><value>مثال: أحمد محمد</value></data>
+  <data name="Users_AssignedNameHelp" xml:space="preserve"><value>بيظهر في كل البورتال بدل الإيميل — في ملاحظات Action Center، وكاسم معروض في هيدر منطقة Home.</value></data>
+  <data name="Users_ConfirmNewPassword" xml:space="preserve"><value>تأكيد كلمة المرور</value></data>
+  <data name="Users_MatchedStores" xml:space="preserve"><value>المطاعم المطابقة</value></data>
+  <data name="Users_MatchedStoresHelp" xml:space="preserve"><value>عدد المطاعم اللي الإيميل ده مطابقها دلوقتي في بيانات المطاعم — 0 يعني اليوزر هيلاقي البورتال فاضي.</value></data>
+  <data name="Users_NotStoreRestricted" xml:space="preserve"><value>غير مقيد بمطاعم</value></data>
 
   <!-- Create/Edit User -->
   <data name="CU_SelectRole" xml:space="preserve"><value>اختر الدور...</value></data>
   <data name="CU_CreateUser" xml:space="preserve"><value>إنشاء مستخدم</value></data>
   <data name="EU_NewPasswordNote" xml:space="preserve"><value>كلمة المرور الجديدة (اتركه فارغًا للإبقاء عليها)</value></data>
   <data name="EU_SaveChanges" xml:space="preserve"><value>حفظ التغييرات</value></data>
+  <data name="Role_Admin" xml:space="preserve"><value>أدمن</value></data>
+  <data name="Role_User" xml:space="preserve"><value>مستخدم</value></data>
+  <data name="Role_HeadManager" xml:space="preserve"><value>هيد مانجر</value></data>
+  <data name="Role_SeniorOperationConsultant" xml:space="preserve"><value>سينيور أوبريشن كونسلتنت</value></data>
+  <data name="Role_OperationDirector" xml:space="preserve"><value>أوبريشن دايركتور</value></data>
 
   <!-- Reports -->
   <data name="Rep_TurnoverWorkforce" xml:space="preserve"><value>الدوران والقوى العاملة</value></data>
