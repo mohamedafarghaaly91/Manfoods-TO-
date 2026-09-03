@@ -205,6 +205,7 @@
 
   <!-- Common UI -->
   <data name="Common_Loading" xml:space="preserve"><value>Loading...</value></data>
+  <data name="Common_NoMatches" xml:space="preserve"><value>No matches</value></data>
   <data name="Common_HireMonth" xml:space="preserve"><value>Hire Month</value></data>
   <data name="Common_All" xml:space="preserve"><value>All</value></data>
   <data name="Common_OperationManager" xml:space="preserve"><value>Operation Manager</value></data>
@@ -538,6 +539,30 @@
   <data name="SC_FlaggedLeaders" xml:space="preserve"><value>Flagged</value></data>
   <data name="SC_FlaggedPercent" xml:space="preserve"><value>Flagged %</value></data>
   <data name="SC_AverageTurnover" xml:space="preserve"><value>Average leader turnover in this window</value></data>
+  <data name="SC_KpiTotalLeaders" xml:space="preserve"><value>Store Leaders</value></data>
+  <data name="SC_KpiTotalLeadersDesc" xml:space="preserve"><value>Active store leaders in the selected window</value></data>
+  <data name="SC_KpiTotalHeadcount" xml:space="preserve"><value>Total Headcount</value></data>
+  <data name="SC_KpiTotalHeadcountDesc" xml:space="preserve"><value>Employees under these leaders' stores</value></data>
+  <data name="SC_KpiAvgTurnover" xml:space="preserve"><value>Average Turnover</value></data>
+  <data name="SC_KpiFlaggedLeaders" xml:space="preserve"><value>Above Average</value></data>
+  <data name="SC_KpiFlaggedLeadersDesc" xml:space="preserve"><value>Leaders with turnover above the company average</value></data>
+  <data name="SC_InsightBestLeaderTitle" xml:space="preserve"><value>Best Performing Leader</value></data>
+  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>turnover — the healthiest store leader this period.</value></data>
+  <data name="SC_InsightWorstLeaderTitle" xml:space="preserve"><value>Leader Needing Attention</value></data>
+  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>turnover — the store leader needing the most attention this period.</value></data>
+  <data name="SC_InsightTopOcTitle" xml:space="preserve"><value>Operation Consultant to Watch</value></data>
+  <data name="SC_InsightTopOcDesc" xml:space="preserve"><value>of their store leaders have above-average turnover.</value></data>
+  <data name="SC_InsightTopOmTitle" xml:space="preserve"><value>Operation Manager to Watch</value></data>
+  <data name="SC_InsightTopOmDesc" xml:space="preserve"><value>of their store leaders have above-average turnover.</value></data>
+  <data name="SC_NoInsights" xml:space="preserve"><value>No insights available yet for the current selection.</value></data>
+  <data name="SC_EmptyTitle" xml:space="preserve"><value>No Scorecard Data Yet</value></data>
+  <data name="SC_EmptyDesc" xml:space="preserve"><value>Upload store-reference, workforce, and resignation data to see scorecard rankings here.</value></data>
+  <data name="SC_NoDataForWindow" xml:space="preserve"><value>Not enough data to calculate this scorecard yet.</value></data>
+  <data name="SC_NoRollupData" xml:space="preserve"><value>No data.</value></data>
+  <data name="SC_NoSentimentData" xml:space="preserve"><value>No data</value></data>
+  <data name="SC_ChartTurnoverRateLabel" xml:space="preserve"><value>Turnover Rate</value></data>
+  <data name="SC_TooltipTransferredTo" xml:space="preserve"><value>→ Transferred to</value></data>
+  <data name="SC_TooltipStore" xml:space="preserve"><value>Store:</value></data>
 
   <!-- Early Warning -->
   <data name="EW_WatchList" xml:space="preserve"><value>Watch List</value></data>

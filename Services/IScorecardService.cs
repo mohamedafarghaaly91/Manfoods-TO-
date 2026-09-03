@@ -23,5 +23,5 @@ public interface IScorecardService
     /// their currently-assigned Store Leaders have above-average turnover
     /// (within the resolved window) — surfaces portfolio-level leadership
     /// problems rather than individual store noise.</summary>
-    Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? months = null, int? year = null);
+    Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null);
 }

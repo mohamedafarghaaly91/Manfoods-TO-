@@ -44,9 +44,10 @@ public class ScorecardApiController : ControllerBase
     }
 
     [HttpGet("rollup")]
-    public async Task<IActionResult> Rollup([FromQuery] string? months = null, [FromQuery] int? year = null)
+    public async Task<IActionResult> Rollup([FromQuery] string? om = null, [FromQuery] string? oc = null,
+        [FromQuery] string? soc = null, [FromQuery] string? od = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetRollupAsync(role, assignedName, months, year));
+        return Ok(await _scorecard.GetRollupAsync(role, assignedName, om, oc, soc, od, months, year));
     }
 }

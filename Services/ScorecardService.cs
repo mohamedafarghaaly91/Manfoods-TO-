@@ -298,10 +298,10 @@ public class ScorecardService : IScorecardService
         return result;
     }
 
-    public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? months = null, int? year = null)
+    public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
         var result = new ScorecardRollupResult();
-        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, null, null, null, null, months, year);
+        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, om, oc, soc, od, months, year);
         if (leaderAggregates.Count == 0) return result;
 
         var leaderRates = leaderAggregates.Select(kv =>

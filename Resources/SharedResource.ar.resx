@@ -205,6 +205,7 @@
 
   <!-- Common UI -->
   <data name="Common_Loading" xml:space="preserve"><value>جاري التحميل...</value></data>
+  <data name="Common_NoMatches" xml:space="preserve"><value>لا توجد نتائج</value></data>
   <data name="Common_HireMonth" xml:space="preserve"><value>شهر التعيين</value></data>
   <data name="Common_All" xml:space="preserve"><value>الكل</value></data>
   <data name="Common_OperationManager" xml:space="preserve"><value>مدير العمليات</value></data>
@@ -538,6 +539,30 @@
   <data name="SC_FlaggedLeaders" xml:space="preserve"><value>الأعلى من المتوسط</value></data>
   <data name="SC_FlaggedPercent" xml:space="preserve"><value>نسبة الأعلى من المتوسط</value></data>
   <data name="SC_AverageTurnover" xml:space="preserve"><value>متوسط معدل الدوران للقادة في هذه الفترة</value></data>
+  <data name="SC_KpiTotalLeaders" xml:space="preserve"><value>قادة الفروع</value></data>
+  <data name="SC_KpiTotalLeadersDesc" xml:space="preserve"><value>عدد قادة الفروع النشطين في الفترة المختارة</value></data>
+  <data name="SC_KpiTotalHeadcount" xml:space="preserve"><value>إجمالي الموظفين</value></data>
+  <data name="SC_KpiTotalHeadcountDesc" xml:space="preserve"><value>عدد الموظفين تحت فروع هؤلاء القادة</value></data>
+  <data name="SC_KpiAvgTurnover" xml:space="preserve"><value>متوسط الدوران</value></data>
+  <data name="SC_KpiFlaggedLeaders" xml:space="preserve"><value>أعلى من المتوسط</value></data>
+  <data name="SC_KpiFlaggedLeadersDesc" xml:space="preserve"><value>قادة معدل الدوران عندهم أعلى من متوسط الشركة</value></data>
+  <data name="SC_InsightBestLeaderTitle" xml:space="preserve"><value>أفضل قائد فرع</value></data>
+  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>معدل دوران — أفضل قائد فرع في هذه الفترة.</value></data>
+  <data name="SC_InsightWorstLeaderTitle" xml:space="preserve"><value>قائد فرع محتاج متابعة</value></data>
+  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>معدل دوران — القائد الأكثر احتياجًا للمتابعة في هذه الفترة.</value></data>
+  <data name="SC_InsightTopOcTitle" xml:space="preserve"><value>أوبريشن كونسلتنت محتاج متابعة</value></data>
+  <data name="SC_InsightTopOcDesc" xml:space="preserve"><value>من قادة الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
+  <data name="SC_InsightTopOmTitle" xml:space="preserve"><value>أوبريشن مانجر محتاج متابعة</value></data>
+  <data name="SC_InsightTopOmDesc" xml:space="preserve"><value>من قادة الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
+  <data name="SC_NoInsights" xml:space="preserve"><value>مفيش رؤى كافية للاختيار الحالي لسه.</value></data>
+  <data name="SC_EmptyTitle" xml:space="preserve"><value>لا توجد بيانات سكور كارد بعد</value></data>
+  <data name="SC_EmptyDesc" xml:space="preserve"><value>ارفع بيانات المطاعم والقوى العاملة والاستقالات عشان تشوف ترتيب السكور كارد هنا.</value></data>
+  <data name="SC_NoDataForWindow" xml:space="preserve"><value>مفيش بيانات كفاية لحساب الـ Scorecard ده لسه.</value></data>
+  <data name="SC_NoRollupData" xml:space="preserve"><value>لا توجد بيانات.</value></data>
+  <data name="SC_NoSentimentData" xml:space="preserve"><value>لا يوجد بيانات</value></data>
+  <data name="SC_ChartTurnoverRateLabel" xml:space="preserve"><value>معدل الدوران</value></data>
+  <data name="SC_TooltipTransferredTo" xml:space="preserve"><value>→ انتقل إلى</value></data>
+  <data name="SC_TooltipStore" xml:space="preserve"><value>الفرع:</value></data>
 
   <!-- Early Warning -->
   <data name="EW_WatchList" xml:space="preserve"><value>قائمة المتابعة</value></data>
