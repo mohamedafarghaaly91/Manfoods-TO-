@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
+using Microsoft.Extensions.Localization;
+using MvcApp.Resources;
 
 namespace MvcApp.Areas.Admin.Controllers;
 
@@ -18,8 +20,9 @@ public class DashboardController : Controller
     private readonly IReportService _reports;
     private readonly IBackgroundJobTracker _jobTracker;
     private readonly ILogger<DashboardController> _logger;
+    private readonly IStringLocalizer<SharedResource> _L;
 
-    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports, IBackgroundJobTracker jobTracker, ILogger<DashboardController> logger)
+    public DashboardController(IUploadService uploads, IUserService users, IDashboardService dashboard, IStoreService stores, IOtpService otp, IReportService reports, IBackgroundJobTracker jobTracker, ILogger<DashboardController> logger, IStringLocalizer<SharedResource> localizer)
     {
         _uploads = uploads;
         _users = users;
@@ -29,6 +32,7 @@ public class DashboardController : Controller
         _reports = reports;
         _jobTracker = jobTracker;
         _logger = logger;
+        _L = localizer;
     }
 
     [HttpGet("admin/dashboard/background-jobs")]
@@ -197,7 +201,7 @@ public class DashboardController : Controller
     {
         if (!ModelState.IsValid || vm.ActiveEmployeesFile == null || vm.ResignationsFile == null || vm.StoreReferenceFile == null)
         {
-            return RedirectToUploads(error: "الرجاء رفع الثلاث ملفات (الأكتيف ليست، الاستقالات، ومرجع الفروع) مع تحديد الشهر والسنة — الثلاثة مطلوبين معًا.");
+            return RedirectToUploads(error: _L["Msg_UploadThreeFiles"].Value);
         }
         try
         {
@@ -208,7 +212,7 @@ public class DashboardController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Period data upload failed for {Month}/{Year}", vm.Month, vm.Year);
-            return RedirectToUploads(error: $"فشل رفع بيانات {vm.Month}/{vm.Year}: {ex.Message}");
+            return RedirectToUploads(error: string.Format(_L["Msg_UploadPeriodFailed"].Value, vm.Month, vm.Year, ex.Message));
         }
     }
 
@@ -218,7 +222,7 @@ public class DashboardController : Controller
         var validTypes = new[] { "active_employees", "resignations", "store_reference" };
         if (!ModelState.IsValid || vm.File == null || !validTypes.Contains(vm.FileType))
         {
-            return RedirectToUploads(error: "الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.");
+            return RedirectToUploads(error: _L["Msg_SelectFileTypeAndExcel"].Value);
         }
         try
         {
@@ -229,14 +233,14 @@ public class DashboardController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Single file update failed for {FileType} {Month}/{Year}", vm.FileType, vm.Month, vm.Year);
-            return RedirectToUploads(error: $"فشل تحديث ملف {vm.FileType} لـ {vm.Month}/{vm.Year}: {ex.Message}");
+            return RedirectToUploads(error: string.Format(_L["Msg_UpdateFileFailed"].Value, vm.FileType, vm.Month, vm.Year, ex.Message));
         }
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> UploadExitInterviews(MvcApp.Models.ViewModels.ExitInterviewUploadViewModel vm)
     {
-        if (!ModelState.IsValid || vm.File == null) return RedirectToUploads(error: "Please select a file.");
+        if (!ModelState.IsValid || vm.File == null) return RedirectToUploads(error: _L["Msg_SelectFile"].Value);
         try
         {
             var email = HttpContext.Session.GetEmail();
@@ -246,7 +250,7 @@ public class DashboardController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exit interviews upload failed");
-            return RedirectToUploads(error: $"فشل رفع بيانات مقابلات الخروج: {ex.Message}");
+            return RedirectToUploads(error: string.Format(_L["Msg_ExitUploadFailed"].Value, ex.Message));
         }
     }
 
@@ -460,7 +464,7 @@ public class DashboardController : Controller
     public async Task<IActionResult> DeleteUploadLog(int id)
     {
         await _uploads.DeleteLogAsync(id);
-        TempData["Success"] = "Upload log and associated data deleted.";
+        TempData["Success"] = _L["Msg_UploadLogDeleted"].Value;
         return RedirectToAction("Uploads");
     }
 
@@ -479,7 +483,7 @@ public class DashboardController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
         await _users.CreateAsync(vm);
-        TempData["Success"] = "User created successfully.";
+        TempData["Success"] = _L["Msg_UserCreated"].Value;
         return RedirectToAction("Users");
     }
 
@@ -499,11 +503,11 @@ public class DashboardController : Controller
         var (updated, error) = await _users.UpdateAsync(id, vm);
         if (error == "last-admin")
         {
-            TempData["Error"] = "Can't change the role of the last remaining Admin account.";
+            TempData["Error"] = _L["Msg_LastAdminRole"].Value;
             return RedirectToAction("EditUser", new { id });
         }
         if (updated == null) return NotFound();
-        TempData["Success"] = "User updated.";
+        TempData["Success"] = _L["Msg_UserUpdated"].Value;
         return RedirectToAction("Users");
     }
 
@@ -512,21 +516,21 @@ public class DashboardController : Controller
     {
         var (success, error) = await _users.DeleteAsync(id);
         TempData[success ? "Success" : "Error"] = error == "last-admin"
-            ? "Can't delete the last remaining Admin account."
-            : (success ? "User deleted." : "User not found.");
+            ? _L["Msg_LastAdminDelete"].Value
+            : (success ? _L["Msg_UserDeleted"].Value : _L["Msg_UserNotFound"].Value);
         return RedirectToAction("Users");
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> UploadBulkUsers(MvcApp.Models.ViewModels.BulkUserUploadViewModel vm)
     {
-        if (!ModelState.IsValid || vm.File == null) { TempData["Error"] = "Please select a file."; return RedirectToAction("Users"); }
+        if (!ModelState.IsValid || vm.File == null) { TempData["Error"] = _L["Msg_SelectFile"].Value; return RedirectToAction("Users"); }
         try
         {
             var (created, skipped) = await _users.UploadBulkUsersAsync(vm.File);
-            TempData["Success"] = $"Created {created} pending user(s)." + (skipped > 0 ? $" Skipped {skipped} (already existed)." : "");
+            TempData["Success"] = string.Format(_L["Msg_BulkUsersCreated"].Value, created) + (skipped > 0 ? string.Format(_L["Msg_BulkUsersSkipped"].Value, skipped) : "");
         }
-        catch { TempData["Error"] = "Upload failed. Please check the file format and try again."; }
+        catch { TempData["Error"] = _L["Msg_BulkUploadFailed"].Value; }
         return RedirectToAction("Users");
     }
 
@@ -534,7 +538,7 @@ public class DashboardController : Controller
     public async Task<IActionResult> GenerateBulkOtps()
     {
         var (count, bytes) = await _otp.GenerateBulkOtpsAsync();
-        if (count == 0) { TempData["Error"] = "No pending users need an OTP right now."; return RedirectToAction("Users"); }
+        if (count == 0) { TempData["Error"] = _L["Msg_NoPendingOtps"].Value; return RedirectToAction("Users"); }
         return File(bytes,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"Bulk_OTPs_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx");
@@ -553,7 +557,7 @@ public class DashboardController : Controller
     {
         var email = HttpContext.Session.GetEmail();
         var key = await _users.RegenerateRecoveryKeyAsync(email, password);
-        if (key == null) return Json(new { error = "Incorrect password." });
+        if (key == null) return Json(new { error = _L["Msg_IncorrectPassword"].Value });
         return Json(new { key });
     }
 }

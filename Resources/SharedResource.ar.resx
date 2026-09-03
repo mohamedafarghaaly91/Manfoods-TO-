@@ -1022,4 +1022,54 @@
   <!-- Role labels shown in the sidebar user card -->
   <data name="Role_OperationManager" xml:space="preserve"><value>مدير العمليات</value></data>
   <data name="Role_OperationConsultant" xml:space="preserve"><value>مستشار العمليات</value></data>
+
+  <!-- Form validation messages (DataAnnotations, resolved via SharedResource) -->
+  <data name="Val_EmailRequired" xml:space="preserve"><value>البريد الإلكتروني مطلوب</value></data>
+  <data name="Val_PasswordRequired" xml:space="preserve"><value>كلمة المرور مطلوبة</value></data>
+  <data name="Val_CurrentPasswordRequired" xml:space="preserve"><value>كلمة المرور الحالية مطلوبة</value></data>
+  <data name="Val_NewPasswordRequired" xml:space="preserve"><value>كلمة المرور الجديدة مطلوبة</value></data>
+  <data name="Val_PasswordMin8" xml:space="preserve"><value>يجب أن تتكون كلمة المرور من 8 أحرف على الأقل</value></data>
+  <data name="Val_PasswordMin6" xml:space="preserve"><value>يجب أن تتكون كلمة المرور من 6 أحرف على الأقل</value></data>
+  <data name="Val_ConfirmNewPassword" xml:space="preserve"><value>يرجى تأكيد كلمة المرور الجديدة</value></data>
+  <data name="Val_PasswordsDoNotMatch" xml:space="preserve"><value>كلمتا المرور غير متطابقتين</value></data>
+  <data name="Val_PhoneOrEmailRequired" xml:space="preserve"><value>أدخل رقم هاتفك أو بريدك الإلكتروني</value></data>
+  <data name="Val_OtpRequired" xml:space="preserve"><value>أدخل الرمز المؤقت الذي وصلك</value></data>
+  <data name="Val_AdminEmailRequired" xml:space="preserve"><value>البريد الإلكتروني للمسؤول مطلوب</value></data>
+  <data name="Val_RecoveryKeyRequired" xml:space="preserve"><value>مفتاح الاسترداد مطلوب</value></data>
+
+  <!-- Controller flash / auth messages -->
+  <data name="Msg_InvalidCredentials" xml:space="preserve"><value>البريد الإلكتروني أو كلمة المرور غير صحيحة</value></data>
+  <data name="Msg_AdminOnly" xml:space="preserve"><value>تم رفض الوصول. مطلوب بيانات اعتماد مسؤول.</value></data>
+  <data name="Msg_AdminUseAdminPortal" xml:space="preserve"><value>يجب على حسابات المسؤولين استخدام بوابة المسؤول.</value></data>
+  <data name="Msg_InvalidRecoveryKey" xml:space="preserve"><value>مفتاح الاسترداد غير صحيح.</value></data>
+  <data name="Msg_NoAdminWithEmail" xml:space="preserve"><value>لا يوجد حساب مسؤول بهذا البريد الإلكتروني.</value></data>
+  <data name="Msg_AdminPasswordReset" xml:space="preserve"><value>تمت إعادة تعيين كلمة مرور المسؤول بنجاح. يمكنك تسجيل الدخول الآن.</value></data>
+  <data name="Msg_CurrentPasswordIncorrect" xml:space="preserve"><value>كلمة المرور الحالية غير صحيحة</value></data>
+  <data name="Msg_PasswordChanged" xml:space="preserve"><value>تم تغيير كلمة المرور بنجاح.</value></data>
+  <data name="Msg_UploadLogDeleted" xml:space="preserve"><value>تم حذف سجل الرفع والبيانات المرتبطة به.</value></data>
+  <data name="Msg_UserCreated" xml:space="preserve"><value>تم إنشاء المستخدم بنجاح.</value></data>
+  <data name="Msg_LastAdminRole" xml:space="preserve"><value>لا يمكن تغيير دور آخر حساب مسؤول متبقٍ.</value></data>
+  <data name="Msg_UserUpdated" xml:space="preserve"><value>تم تحديث المستخدم.</value></data>
+  <data name="Msg_LastAdminDelete" xml:space="preserve"><value>لا يمكن حذف آخر حساب مسؤول متبقٍ.</value></data>
+  <data name="Msg_UserDeleted" xml:space="preserve"><value>تم حذف المستخدم.</value></data>
+  <data name="Msg_UserNotFound" xml:space="preserve"><value>لم يتم العثور على المستخدم.</value></data>
+  <data name="Msg_SelectFile" xml:space="preserve"><value>يرجى اختيار ملف.</value></data>
+  <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>تم إنشاء {0} مستخدم قيد التفعيل.</value></data>
+  <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> تم تخطي {0} (موجود مسبقًا).</value></data>
+  <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>فشل الرفع. يرجى التحقق من تنسيق الملف والمحاولة مرة أخرى.</value></data>
+  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>لا يوجد مستخدمون قيد التفعيل بحاجة إلى رمز مؤقت حاليًا.</value></data>
+  <data name="Msg_IncorrectPassword" xml:space="preserve"><value>كلمة المرور غير صحيحة.</value></data>
+  <data name="Msg_UploadThreeFiles" xml:space="preserve"><value>الرجاء رفع الثلاث ملفات (الأكتيف ليست، الاستقالات، ومرجع الفروع) مع تحديد الشهر والسنة — الثلاثة مطلوبين معًا.</value></data>
+  <data name="Msg_UploadPeriodFailed" xml:space="preserve"><value>فشل رفع بيانات {0}/{1}: {2}</value></data>
+  <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.</value></data>
+  <data name="Msg_UpdateFileFailed" xml:space="preserve"><value>فشل تحديث ملف {0} لـ {1}/{2}: {3}</value></data>
+  <data name="Msg_ExitUploadFailed" xml:space="preserve"><value>فشل رفع بيانات مقابلات الخروج: {0}</value></data>
+
+  <!-- API error messages surfaced in the UI -->
+  <data name="Api_NoteTextRequired" xml:space="preserve"><value>نص الملاحظة مطلوب.</value></data>
+  <data name="Api_StoreRequired" xml:space="preserve"><value>الفرع مطلوب.</value></data>
+  <data name="Api_RecommendationNotPermitted" xml:space="preserve"><value>غير مسموح أو التوصية غير موجودة.</value></data>
+  <data name="Api_NoActivePlan" xml:space="preserve"><value>لا توجد خطة نشطة لهذا الفرع.</value></data>
+  <data name="Api_AtLeastOneRule" xml:space="preserve"><value>مطلوب قاعدة واحدة على الأقل.</value></data>
+  <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>يجب أن تحتوي قاعدة واحدة فقط على حد أعلى فارغ، وأن تكون القاعدة الأخيرة.</value></data>
 </root>

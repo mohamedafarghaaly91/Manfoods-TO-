@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
+using Microsoft.Extensions.Localization;
+using MvcApp.Resources;
 
 namespace MvcApp.Controllers.Api;
 
@@ -12,18 +14,20 @@ public class StoreActionPlanApiController : ControllerBase
 {
     private readonly IStoreActionPlanService _actionPlans;
     private readonly IDashboardService _dashboard;
+    private readonly IStringLocalizer<SharedResource> _L;
 
-    public StoreActionPlanApiController(IStoreActionPlanService actionPlans, IDashboardService dashboard)
+    public StoreActionPlanApiController(IStoreActionPlanService actionPlans, IDashboardService dashboard, IStringLocalizer<SharedResource> localizer)
     {
         _actionPlans = actionPlans;
         _dashboard = dashboard;
+        _L = localizer;
     }
 
     [HttpPost("{store}/notes")]
     [RequireRole("Head_Manager", "Operation_Consultant")]
     public async Task<IActionResult> AddNote(string store, [FromBody] AddNoteRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request?.NoteText)) return BadRequest("Note text is required.");
+        if (string.IsNullOrWhiteSpace(request?.NoteText)) return BadRequest(_L["Api_NoteTextRequired"].Value);
 
         var role = HttpContext.Session.GetRole();
         var email = HttpContext.Session.GetEmail();
@@ -94,7 +98,7 @@ public class StoreActionPlanApiController : ControllerBase
     [HttpGet("action-center/detail")]
     public async Task<IActionResult> GetActionCenterDetail([FromQuery] string store)
     {
-        if (string.IsNullOrWhiteSpace(store)) return BadRequest("store is required.");
+        if (string.IsNullOrWhiteSpace(store)) return BadRequest(_L["Api_StoreRequired"].Value);
 
         var role = HttpContext.Session.GetRole();
         var email = HttpContext.Session.GetEmail();
@@ -113,7 +117,7 @@ public class StoreActionPlanApiController : ControllerBase
         var actorName = HttpContext.Session.GetAssignedName() ?? email ?? "";
 
         var success = await _actionPlans.ToggleRecommendationAsync(id, request?.IsCompleted ?? false, role, email, actorName);
-        if (!success) return BadRequest("Not permitted or recommendation not found.");
+        if (!success) return BadRequest(_L["Api_RecommendationNotPermitted"].Value);
 
         return Ok();
     }
@@ -124,7 +128,7 @@ public class StoreActionPlanApiController : ControllerBase
     {
         var role = HttpContext.Session.GetRole();
         var success = await _actionPlans.SetAssignmentAsync(store, request?.AssignedToName, request?.TargetResolutionDate, role);
-        if (!success) return BadRequest("No active plan for this store.");
+        if (!success) return BadRequest(_L["Api_NoActivePlan"].Value);
 
         return Ok();
     }

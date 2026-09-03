@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
 using MvcApp.Services;
+using Microsoft.Extensions.Localization;
+using MvcApp.Resources;
 
 namespace MvcApp.Controllers.Api;
 
@@ -11,7 +13,8 @@ namespace MvcApp.Controllers.Api;
 public class SettingsApiController : ControllerBase
 {
     private readonly IColorRulesService _colorRules;
-    public SettingsApiController(IColorRulesService colorRules) { _colorRules = colorRules; }
+    private readonly IStringLocalizer<SharedResource> _L;
+    public SettingsApiController(IColorRulesService colorRules, IStringLocalizer<SharedResource> localizer) { _colorRules = colorRules; _L = localizer; }
 
     [HttpGet("color-rules/{metric}")]
     public async Task<IActionResult> GetColorRules(string metric)
@@ -24,9 +27,9 @@ public class SettingsApiController : ControllerBase
     public async Task<IActionResult> SaveColorRules(string metric, [FromBody] List<ColorRule> rules)
     {
         if (!ColorRulesService.Metrics.Contains(metric, StringComparer.OrdinalIgnoreCase)) return NotFound();
-        if (rules == null || rules.Count == 0) return BadRequest("At least one rule is required.");
+        if (rules == null || rules.Count == 0) return BadRequest(_L["Api_AtLeastOneRule"].Value);
         if (rules.Count(r => r.UpTo == null) != 1 || rules[^1].UpTo != null)
-            return BadRequest("Exactly one rule must have an empty upper bound, and it must be the last one.");
+            return BadRequest(_L["Api_OneOpenEndedRule"].Value);
 
         await _colorRules.SaveRulesAsync(metric, rules);
         return Ok();

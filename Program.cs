@@ -16,7 +16,11 @@ builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 
 builder.Services.AddLocalization(opts => opts.ResourcesPath = "");
 builder.Services.AddControllersWithViews()
-    .AddViewLocalization();
+    .AddViewLocalization()
+    // DataAnnotations ErrorMessage strings on the view models are resx keys,
+    // resolved against the same SharedResource pair the views use.
+    .AddDataAnnotationsLocalization(o => o.DataAnnotationLocalizerProvider =
+        (type, factory) => factory.Create(typeof(MvcApp.Resources.SharedResource)));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddMemoryCache();

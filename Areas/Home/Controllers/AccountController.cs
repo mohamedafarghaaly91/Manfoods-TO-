@@ -4,6 +4,8 @@ using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
 using MvcApp.Services;
+using Microsoft.Extensions.Localization;
+using MvcApp.Resources;
 
 namespace MvcApp.Areas.Home.Controllers;
 
@@ -12,7 +14,8 @@ public class AccountController : Controller
 {
     private readonly IAuthService _auth;
     private readonly IOtpService _otp;
-    public AccountController(IAuthService auth, IOtpService otp) { _auth = auth; _otp = otp; }
+    private readonly IStringLocalizer<SharedResource> _L;
+    public AccountController(IAuthService auth, IOtpService otp, IStringLocalizer<SharedResource> localizer) { _auth = auth; _otp = otp; _L = localizer; }
 
     [HttpGet("/login")]
     public IActionResult Login()
@@ -29,11 +32,11 @@ public class AccountController : Controller
         if (!ModelState.IsValid) return View(vm);
 
         var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password);
-        if (user == null) { ModelState.AddModelError("", "Invalid email or password"); return View(vm); }
+        if (user == null) { ModelState.AddModelError("", _L["Msg_InvalidCredentials"]); return View(vm); }
 
         if (user.Role == "Admin")
         {
-            ModelState.AddModelError("", "Admin accounts must use the admin portal.");
+            ModelState.AddModelError("", _L["Msg_AdminUseAdminPortal"]);
             return View(vm);
         }
 
@@ -76,8 +79,8 @@ public class AccountController : Controller
         var userId = HttpContext.Session.GetUserId();
         if (userId == null) return Redirect("/login");
         var ok = await _auth.ChangePasswordAsync(userId.Value, vm.CurrentPassword, vm.NewPassword);
-        if (!ok) { ModelState.AddModelError("CurrentPassword", "Current password is incorrect"); return View(vm); }
-        TempData["Success"] = "Password changed successfully.";
+        if (!ok) { ModelState.AddModelError("CurrentPassword", _L["Msg_CurrentPasswordIncorrect"]); return View(vm); }
+        TempData["Success"] = _L["Msg_PasswordChanged"].Value;
         return RedirectToAction("ChangePassword");
     }
 }

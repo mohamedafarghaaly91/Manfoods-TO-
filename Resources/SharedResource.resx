@@ -1021,4 +1021,54 @@
   <!-- Role labels shown in the sidebar user card -->
   <data name="Role_OperationManager" xml:space="preserve"><value>Operation Manager</value></data>
   <data name="Role_OperationConsultant" xml:space="preserve"><value>Operation Consultant</value></data>
+
+  <!-- Form validation messages (DataAnnotations, resolved via SharedResource) -->
+  <data name="Val_EmailRequired" xml:space="preserve"><value>Email is required</value></data>
+  <data name="Val_PasswordRequired" xml:space="preserve"><value>Password is required</value></data>
+  <data name="Val_CurrentPasswordRequired" xml:space="preserve"><value>Current password is required</value></data>
+  <data name="Val_NewPasswordRequired" xml:space="preserve"><value>New password is required</value></data>
+  <data name="Val_PasswordMin8" xml:space="preserve"><value>Password must be at least 8 characters</value></data>
+  <data name="Val_PasswordMin6" xml:space="preserve"><value>Password must be at least 6 characters</value></data>
+  <data name="Val_ConfirmNewPassword" xml:space="preserve"><value>Please confirm your new password</value></data>
+  <data name="Val_PasswordsDoNotMatch" xml:space="preserve"><value>Passwords do not match</value></data>
+  <data name="Val_PhoneOrEmailRequired" xml:space="preserve"><value>Enter your phone or email</value></data>
+  <data name="Val_OtpRequired" xml:space="preserve"><value>Enter the OTP you received</value></data>
+  <data name="Val_AdminEmailRequired" xml:space="preserve"><value>Admin email is required</value></data>
+  <data name="Val_RecoveryKeyRequired" xml:space="preserve"><value>Recovery key is required</value></data>
+
+  <!-- Controller flash / auth messages -->
+  <data name="Msg_InvalidCredentials" xml:space="preserve"><value>Invalid email or password</value></data>
+  <data name="Msg_AdminOnly" xml:space="preserve"><value>Access denied. Admin credentials required.</value></data>
+  <data name="Msg_AdminUseAdminPortal" xml:space="preserve"><value>Admin accounts must use the admin portal.</value></data>
+  <data name="Msg_InvalidRecoveryKey" xml:space="preserve"><value>Invalid recovery key.</value></data>
+  <data name="Msg_NoAdminWithEmail" xml:space="preserve"><value>No admin account with that email.</value></data>
+  <data name="Msg_AdminPasswordReset" xml:space="preserve"><value>Admin password reset successfully. You can now sign in.</value></data>
+  <data name="Msg_CurrentPasswordIncorrect" xml:space="preserve"><value>Current password is incorrect</value></data>
+  <data name="Msg_PasswordChanged" xml:space="preserve"><value>Password changed successfully.</value></data>
+  <data name="Msg_UploadLogDeleted" xml:space="preserve"><value>Upload log and associated data deleted.</value></data>
+  <data name="Msg_UserCreated" xml:space="preserve"><value>User created successfully.</value></data>
+  <data name="Msg_LastAdminRole" xml:space="preserve"><value>Can't change the role of the last remaining Admin account.</value></data>
+  <data name="Msg_UserUpdated" xml:space="preserve"><value>User updated.</value></data>
+  <data name="Msg_LastAdminDelete" xml:space="preserve"><value>Can't delete the last remaining Admin account.</value></data>
+  <data name="Msg_UserDeleted" xml:space="preserve"><value>User deleted.</value></data>
+  <data name="Msg_UserNotFound" xml:space="preserve"><value>User not found.</value></data>
+  <data name="Msg_SelectFile" xml:space="preserve"><value>Please select a file.</value></data>
+  <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>Created {0} pending user(s).</value></data>
+  <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> Skipped {0} (already existed).</value></data>
+  <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>Upload failed. Please check the file format and try again.</value></data>
+  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>No pending users need an OTP right now.</value></data>
+  <data name="Msg_IncorrectPassword" xml:space="preserve"><value>Incorrect password.</value></data>
+  <data name="Msg_UploadThreeFiles" xml:space="preserve"><value>Please upload all three files (Active Employees, Resignations, and Store Reference) and pick the month and year — all three are required together.</value></data>
+  <data name="Msg_UploadPeriodFailed" xml:space="preserve"><value>Upload of {0}/{1} data failed: {2}</value></data>
+  <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>Please choose a file type and select a valid Excel file.</value></data>
+  <data name="Msg_UpdateFileFailed" xml:space="preserve"><value>Updating the {0} file for {1}/{2} failed: {3}</value></data>
+  <data name="Msg_ExitUploadFailed" xml:space="preserve"><value>Exit interview data upload failed: {0}</value></data>
+
+  <!-- API error messages surfaced in the UI -->
+  <data name="Api_NoteTextRequired" xml:space="preserve"><value>Note text is required.</value></data>
+  <data name="Api_StoreRequired" xml:space="preserve"><value>store is required.</value></data>
+  <data name="Api_RecommendationNotPermitted" xml:space="preserve"><value>Not permitted or recommendation not found.</value></data>
+  <data name="Api_NoActivePlan" xml:space="preserve"><value>No active plan for this store.</value></data>
+  <data name="Api_AtLeastOneRule" xml:space="preserve"><value>At least one rule is required.</value></data>
+  <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>Exactly one rule must have an empty upper bound, and it must be the last one.</value></data>
 </root>
