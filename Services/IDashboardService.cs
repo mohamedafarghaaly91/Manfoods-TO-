@@ -45,4 +45,7 @@ public interface IDashboardService
     /// the detailed sheet on the Workforce report.</summary>
     Task<List<EmployeeDetailRow>> GetEmployeeDetailsAsync(int month, int year, string? store, string role, string? assignedName,
         string? om = null, string? oc = null, string? soc = null, string? od = null);
+    /// <summary>Row-level resignation listing across every uploaded period —
+    /// the detailed sheet on the Turnover report.</summary>
+    Task<List<ResignationDetailRow>> GetResignationDetailsAsync(string? store, string role, string? assignedName);
 }

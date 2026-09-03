@@ -93,6 +93,14 @@ public static class ReportCatalog
         },
         new ReportDefinition
         {
+            Id = "turnover", Section = "Turnover & Workforce", Title = "Turnover",
+            Description = "Company-wide turnover trend across every uploaded period, the latest period broken down by store, the full resignation list, and aggregated breakdowns by job title and tenure.",
+            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Turnover", DescriptionKey = "Rep_Desc_Turnover",
+            Icon = "bi-arrow-down-up", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesStore = true,
+        },
+        new ReportDefinition
+        {
             Id = "ninety-day", Section = "Deep Analytics", Title = "90-Day Turnover",
             Description = "Cohort trend, full list of early leavers, by-store rates, and aggregated reasons — across all available periods.",
             SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_NinetyDay", DescriptionKey = "Rep_Desc_NinetyDay",

@@ -197,6 +197,87 @@ public class ReportService : IReportService
         return wb;
     }
 
+    // ── Turnover (mirrors the 90-Day Turnover report's shape: a company-wide
+    // trend across every uploaded period, the latest period broken down by
+    // store, and the full detailed record list) ─────────────────────
+    private async Task AddTurnoverSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? store = null)
+    {
+        var periods = (await _dashboard.GetAvailablePeriodsAsync())
+            .OrderBy(p => p.Year).ThenBy(p => p.Month).ToList();
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+
+        var wsTrend = AddSheet(wb, "Turnover Trend");
+        StyleHeader(wsTrend, new[] { "Period", "Headcount", "New Hires", "Resignations", "Turnover Rate" });
+        for (int i = 0; i < periods.Count; i++)
+        {
+            var p = periods[i];
+            var kpi = await _dashboard.GetKpisAsync(p.Month, p.Year, store, role, assignedName);
+            wsTrend.Cell(i + 2, 1).Value = $"{p.Month:D2}-{p.Year}";
+            SetIntCell(wsTrend.Cell(i + 2, 2), kpi.TotalHeadcount);
+            SetIntCell(wsTrend.Cell(i + 2, 3), kpi.NewHires);
+            SetIntCell(wsTrend.Cell(i + 2, 4), kpi.TotalResignations);
+            SetPercentCell(wsTrend.Cell(i + 2, 5), kpi.TurnoverRate);
+        }
+        Finalize(wsTrend);
+
+        if (periods.Count > 0)
+        {
+            var latest = periods[^1]; // ordered oldest→newest above, so the latest is last
+            var byStore = await _dashboard.GetStoreComparisonAsync(latest.Month, latest.Year, role, assignedName);
+            var wsByStore = AddSheet(wb, $"Turnover By Store ({latest.Month}-{latest.Year})");
+            StyleHeader(wsByStore, new[] { "Store", "Period" }.Concat(LeadershipHeaders)
+                .Concat(new[] { "Headcount", "New Hires", "Resignations", "Turnover Rate" }).ToArray());
+            for (int i = 0; i < byStore.Count; i++)
+            {
+                var row = byStore[i];
+                wsByStore.Cell(i + 2, 1).Value = row.StoreName;
+                wsByStore.Cell(i + 2, 2).Value = $"{latest.Month:D2}-{latest.Year}";
+                int col = WriteLeadershipCells(wsByStore, i + 2, 3, leadership, row.StoreName);
+                SetIntCell(wsByStore.Cell(i + 2, col), row.Headcount);
+                SetIntCell(wsByStore.Cell(i + 2, col + 1), row.NewHires);
+                SetIntCell(wsByStore.Cell(i + 2, col + 2), row.Resignations);
+                SetPercentCell(wsByStore.Cell(i + 2, col + 3), row.TurnoverRate);
+            }
+            Finalize(wsByStore);
+        }
+
+        var resignations = await _dashboard.GetResignationDetailsAsync(store, role, assignedName);
+        var wsResignations = AddSheet(wb, "Resignations (All)");
+        StyleHeader(wsResignations, new[] { "Period", "Name", "Store" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Job Title", "Gender", "Hire Date", "Resignation Date", "Tenure (days)" }).ToArray());
+        for (int i = 0; i < resignations.Count; i++)
+        {
+            var r = resignations[i];
+            wsResignations.Cell(i + 2, 1).Value = $"{r.Month:D2}-{r.Year}";
+            wsResignations.Cell(i + 2, 2).Value = r.Name;
+            wsResignations.Cell(i + 2, 3).Value = r.Store;
+            int col = WriteLeadershipCells(wsResignations, i + 2, 4, leadership, r.Store);
+            wsResignations.Cell(i + 2, col).Value = r.JobTitle;
+            wsResignations.Cell(i + 2, col + 1).Value = r.Gender;
+            if (r.HireDate.HasValue) SetDateCell(wsResignations.Cell(i + 2, col + 2), r.HireDate.Value);
+            else wsResignations.Cell(i + 2, col + 2).Value = "—";
+            if (r.ResignationDate.HasValue) SetDateCell(wsResignations.Cell(i + 2, col + 3), r.ResignationDate.Value);
+            else wsResignations.Cell(i + 2, col + 3).Value = "—";
+            if (r.HireDate.HasValue && r.ResignationDate.HasValue)
+                SetIntCell(wsResignations.Cell(i + 2, col + 4), r.ResignationDate.Value.DayNumber - r.HireDate.Value.DayNumber);
+            else
+                wsResignations.Cell(i + 2, col + 4).Value = "—";
+        }
+        Finalize(wsResignations);
+
+        var byJobTitle = await _dashboard.GetTurnoverByJobTitleAsync(null, null, store, role, assignedName);
+        var byTenure = await _dashboard.GetTurnoverByTenureAsync(null, null, store, role, assignedName);
+        WriteLabelValueSheet(wb, "Turnover By Job Title", "Job Title", "Resignations", byJobTitle);
+        WriteLabelValueSheet(wb, "Turnover By Tenure", "Tenure Bucket", "Resignations", byTenure);
+    }
+
+    public async Task<XLWorkbook> BuildTurnoverReportAsync(string role, string? assignedName, string? store = null)
+    {
+        var wb = new XLWorkbook();
+        await AddTurnoverSheetsAsync(wb, role, assignedName, store);
+        return wb;
+    }
+
     // ── 90-Day Turnover ─────────────────────────────────────
     private async Task AddNinetyDaySheetsAsync(XLWorkbook wb, string role, string? assignedName, string? store = null)
     {

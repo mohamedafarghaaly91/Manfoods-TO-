@@ -137,6 +137,8 @@ public class DashboardController : Controller
                 return await DownloadWorkbookAsync(
                     await _reports.BuildStoreComparisonReportAsync(month, year, role, assignedName, om, oc, soc, od),
                     $"Store_Comparison_{year}_{month:D2}.xlsx");
+            case "turnover":
+                return await DownloadWorkbookAsync(await _reports.BuildTurnoverReportAsync(role, assignedName, store), "Turnover_Report.xlsx");
             case "ninety-day":
                 return await DownloadWorkbookAsync(await _reports.BuildNinetyDayReportAsync(role, assignedName, store), "90_Day_Turnover_Report.xlsx");
             case "retention":

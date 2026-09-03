@@ -945,6 +945,8 @@
   <data name="Rep_Desc_Workforce" xml:space="preserve"><value>Active workforce composition for the selected month — Headcount by Job Title, Payroll Group, Tenure, and Gender — plus the Headcount Trend over time.</value></data>
   <data name="Rep_Title_OcOmComparison" xml:space="preserve"><value>OC / OM Comparison</value></data>
   <data name="Rep_Desc_OcOmComparison" xml:space="preserve"><value>Stores, headcount, resignations, and average turnover rate rolled up by Operation Consultant, Operation Manager, Senior Operation Consultant, and Operation Director.</value></data>
+  <data name="Rep_Title_Turnover" xml:space="preserve"><value>Turnover</value></data>
+  <data name="Rep_Desc_Turnover" xml:space="preserve"><value>Company-wide turnover trend across every uploaded period, the latest period broken down by store, the full resignation list, and aggregated breakdowns by job title and tenure.</value></data>
   <data name="Rep_Title_NinetyDay" xml:space="preserve"><value>90-Day Turnover</value></data>
   <data name="Rep_Desc_NinetyDay" xml:space="preserve"><value>Cohort trend, full list of early leavers, by-store rates, and aggregated reasons — across all available periods.</value></data>
   <data name="Rep_Title_NinetyDayTrendMatrix" xml:space="preserve"><value>90-Day Trend Matrix</value></data>

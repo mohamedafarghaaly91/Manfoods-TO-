@@ -946,6 +946,8 @@
   <data name="Rep_Desc_Workforce" xml:space="preserve"><value>تركيبة القوى العاملة النشطة للشهر المحدد — عدد الموظفين حسب المسمى الوظيفي ومجموعة الرواتب ومدة الخدمة والنوع — إضافة إلى اتجاه عدد الموظفين عبر الزمن.</value></data>
   <data name="Rep_Title_OcOmComparison" xml:space="preserve"><value>مقارنة مستشاري ومديري العمليات</value></data>
   <data name="Rep_Desc_OcOmComparison" xml:space="preserve"><value>الفروع وعدد الموظفين والاستقالات ومتوسط معدل الدوران مجمّعة حسب مستشار العمليات ومدير العمليات ومستشار العمليات الأول ومدير العمليات التنفيذي.</value></data>
+  <data name="Rep_Title_Turnover" xml:space="preserve"><value>معدل الدوران</value></data>
+  <data name="Rep_Desc_Turnover" xml:space="preserve"><value>اتجاه معدل الدوران على مستوى الشركة عبر كل فترة تم رفعها، وتفصيل آخر فترة حسب الفرع، وقائمة الاستقالات الكاملة، وتوزيعات مجمّعة حسب المسمى الوظيفي ومدة الخدمة.</value></data>
   <data name="Rep_Title_NinetyDay" xml:space="preserve"><value>دوران 90 يومًا</value></data>
   <data name="Rep_Desc_NinetyDay" xml:space="preserve"><value>اتجاه المجموعات، وقائمة كاملة بالمغادرين مبكرًا، والمعدلات حسب الفرع، والأسباب المجمّعة — لكل الفترات المتاحة.</value></data>
   <data name="Rep_Title_NinetyDayTrendMatrix" xml:space="preserve"><value>مصفوفة اتجاه 90 يومًا</value></data>

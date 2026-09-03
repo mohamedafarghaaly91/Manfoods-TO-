@@ -120,3 +120,17 @@ public class EmployeeDetailRow
     public string Gender { get; set; } = "";
     public DateOnly? HireDate { get; set; }
 }
+
+/// <summary>One resignation row for the Turnover report's detailed sheet.</summary>
+public class ResignationDetailRow
+{
+    public int Month { get; set; }
+    public int Year { get; set; }
+    public string EmployeeId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Store { get; set; } = "";
+    public string JobTitle { get; set; } = "";
+    public string Gender { get; set; } = "";
+    public DateOnly? HireDate { get; set; }
+    public DateOnly? ResignationDate { get; set; }
+}

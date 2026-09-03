@@ -1119,4 +1119,29 @@ public class DashboardService : IDashboardService
             })
             .ToListAsync();
     }
+
+    public async Task<List<ResignationDetailRow>> GetResignationDetailsAsync(string? store, string role, string? assignedName)
+    {
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, null, null);
+        var stores = MultiValueFilter.Split(store);
+
+        var q = _db.Resignations.AsQueryable();
+        if (accessible != null) q = q.Where(r => accessible.Contains(r.Store));
+        if (stores != null) q = q.Where(r => stores.Contains(r.Store));
+
+        return await q.OrderByDescending(r => r.Year).ThenByDescending(r => r.Month).ThenBy(r => r.Name)
+            .Select(r => new ResignationDetailRow
+            {
+                Month = r.Month,
+                Year = r.Year,
+                EmployeeId = r.EmployeeId,
+                Name = r.Name,
+                Store = r.Store,
+                JobTitle = r.JobTitle,
+                Gender = r.Gender,
+                HireDate = r.HireDate,
+                ResignationDate = r.ResignationDate,
+            })
+            .ToListAsync();
+    }
 }
