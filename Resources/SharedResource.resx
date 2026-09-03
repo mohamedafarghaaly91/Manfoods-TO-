@@ -927,11 +927,11 @@
 
   <!-- Reports catalog + month names -->
   <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>Store Operations</value></data>
-  <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>Turnover &amp; Workforce</value></data>
+  <data name="Rep_Section_Turnover" xml:space="preserve"><value>Turnover</value></data>
   <data name="Rep_Section_Comparison" xml:space="preserve"><value>Comparison</value></data>
   <data name="Rep_Title_Comparisons" xml:space="preserve"><value>Comparison</value></data>
   <data name="Rep_Desc_Comparisons" xml:space="preserve"><value>Side-by-side Period A vs Period B — Headcount, New Hires, Resignations, Turnover Rate, and 90-Day Early Leave Rate, company-wide and per store.</value></data>
-  <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>Deep Analytics</value></data>
+  <data name="Rep_Section_PerformanceRisk" xml:space="preserve"><value>Performance &amp; Risk</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
   <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>Per-store action-plan status — severity, signals, age, ownership, and task progress for every accessible store.</value></data>

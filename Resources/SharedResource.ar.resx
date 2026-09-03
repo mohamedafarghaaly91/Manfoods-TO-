@@ -928,11 +928,11 @@
 
   <!-- Reports catalog + month names -->
   <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>عمليات الفروع</value></data>
-  <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>الدوران والقوى العاملة</value></data>
+  <data name="Rep_Section_Turnover" xml:space="preserve"><value>معدل الدوران</value></data>
   <data name="Rep_Section_Comparison" xml:space="preserve"><value>المقارنة</value></data>
   <data name="Rep_Title_Comparisons" xml:space="preserve"><value>المقارنة</value></data>
   <data name="Rep_Desc_Comparisons" xml:space="preserve"><value>مقارنة جنبًا إلى جنب بين الفترة A والفترة B — عدد الموظفين، التعيينات الجديدة، الاستقالات، معدل الدوران، ومعدل ترك العمل خلال 90 يوم، على مستوى الشركة وكل فرع.</value></data>
-  <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>التحليلات المتعمقة</value></data>
+  <data name="Rep_Section_PerformanceRisk" xml:space="preserve"><value>الأداء والمخاطر</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>مركز الإجراءات</value></data>
   <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>حالة خطة العمل لكل فرع — الخطورة، الإشارات، العمر، المسؤولية، وتقدم المهام لكل فرع متاح.</value></data>

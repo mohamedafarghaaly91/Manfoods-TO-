@@ -33,8 +33,11 @@ public class ReportDefinition
 
 public static class ReportCatalog
 {
+    // Order below is also the display order within each Section on the Reports
+    // page (ReportCatalog.All.GroupBy(r => r.Section), in first-seen order).
     public static readonly List<ReportDefinition> All = new()
     {
+        // ── Store Operations ──────────────────────────────────
         new ReportDefinition
         {
             Id = "action-center", Section = "Store Operations", Title = "Action Center",
@@ -53,28 +56,56 @@ public static class ReportCatalog
         },
         new ReportDefinition
         {
-            Id = "stores", Section = "Turnover & Workforce", Title = "Store Comparison",
-            Description = "Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Stores", DescriptionKey = "Rep_Desc_Stores",
-            Icon = "bi-shop-window", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesPeriod = true, UsesOmOc = true,
+            Id = "workforce", Section = "Store Operations", Title = "Workforce",
+            Description = "Detailed employee-level roster plus active workforce composition for the selected month — Headcount by Job Title, Payroll Group, Tenure, and Gender — and the Headcount Trend over time.",
+            SectionKey = "Rep_Section_StoreOperations", TitleKey = "Rep_Title_Workforce", DescriptionKey = "Rep_Desc_Workforce",
+            Icon = "bi-people-fill", IconBg = "oklch(0.6 0.13 250 / .10)", IconColor = "oklch(0.5 0.13 250)",
+            UsesPeriod = true, UsesStore = true, UsesOmOc = true,
+        },
+
+        // ── Turnover ──────────────────────────────────────────
+        new ReportDefinition
+        {
+            Id = "turnover", Section = "Turnover", Title = "Turnover",
+            Description = "Company-wide turnover trend across every uploaded period, the latest period broken down by store, the full resignation list, and aggregated breakdowns by job title and tenure.",
+            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_Turnover", DescriptionKey = "Rep_Desc_Turnover",
+            Icon = "bi-arrow-down-up", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesStore = true,
         },
         new ReportDefinition
         {
-            Id = "trend-matrix", Section = "Turnover & Workforce", Title = "Turnover Trend Matrix",
-            Description = "Full data table — one row per store, one column per month, showing Turnover % across all available periods from the selected year onward, with an average column.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_TrendMatrix", DescriptionKey = "Rep_Desc_TrendMatrix",
+            Id = "trend-matrix", Section = "Turnover", Title = "Turnover Trend Matrix",
+            Description = "Full data table — one row per store, one column per month, showing Turnover % across all available periods from the selected year onward, with a total column.",
+            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_TrendMatrix", DescriptionKey = "Rep_Desc_TrendMatrix",
             Icon = "bi-table", IconBg = "oklch(0.55 0.15 258 / .10)", IconColor = "oklch(0.5 0.15 258)",
             UsesYear = true, UsesMonths = true, UsesOmOc = true,
         },
         new ReportDefinition
         {
-            Id = "workforce", Section = "Turnover & Workforce", Title = "Workforce",
-            Description = "Active workforce composition for the selected month — Headcount by Job Title, Payroll Group, Tenure, and Gender — plus the Headcount Trend over time.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Workforce", DescriptionKey = "Rep_Desc_Workforce",
-            Icon = "bi-people-fill", IconBg = "oklch(0.6 0.13 250 / .10)", IconColor = "oklch(0.5 0.13 250)",
-            UsesPeriod = true, UsesStore = true, UsesOmOc = true,
+            Id = "ninety-day", Section = "Turnover", Title = "90-Day Turnover",
+            Description = "Cohort trend, full list of early leavers, by-store rates, and aggregated reasons — across all available periods.",
+            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_NinetyDay", DescriptionKey = "Rep_Desc_NinetyDay",
+            Icon = "bi-hourglass-split", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesStore = true,
         },
+        new ReportDefinition
+        {
+            Id = "ninety-day-trend-matrix", Section = "Turnover", Title = "90-Day Trend Matrix",
+            Description = "Full data table — one row per store, one column per hire-cohort month, showing the 90-day early-leave rate across all available cohorts, with a total column.",
+            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_NinetyDayTrendMatrix", DescriptionKey = "Rep_Desc_NinetyDayTrendMatrix",
+            Icon = "bi-table", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesYear = true, UsesMonths = true, UsesOmOc = true,
+        },
+        new ReportDefinition
+        {
+            Id = "stores", Section = "Turnover", Title = "Store Comparison",
+            Description = "Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.",
+            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_Stores", DescriptionKey = "Rep_Desc_Stores",
+            Icon = "bi-shop-window", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesPeriod = true, UsesOmOc = true,
+        },
+
+        // ── Comparison ────────────────────────────────────────
         new ReportDefinition
         {
             Id = "comparisons", Section = "Comparison", Title = "Comparison",
@@ -85,60 +116,40 @@ public static class ReportCatalog
         },
         new ReportDefinition
         {
-            Id = "oc-om-comparison", Section = "Turnover & Workforce", Title = "OC / OM Comparison",
+            Id = "oc-om-comparison", Section = "Comparison", Title = "OC / OM Comparison",
             Description = "Stores, headcount, resignations, and average turnover rate rolled up by Operation Consultant, Operation Manager, Senior Operation Consultant, and Operation Director.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_OcOmComparison", DescriptionKey = "Rep_Desc_OcOmComparison",
+            SectionKey = "Rep_Section_Comparison", TitleKey = "Rep_Title_OcOmComparison", DescriptionKey = "Rep_Desc_OcOmComparison",
             Icon = "bi-people", IconBg = "oklch(0.55 0.15 258 / .10)", IconColor = "oklch(0.5 0.15 258)",
             UsesPeriod = true, UsesOmOc = true,
         },
+
+        // ── Performance & Risk ────────────────────────────────
         new ReportDefinition
         {
-            Id = "turnover", Section = "Turnover & Workforce", Title = "Turnover",
-            Description = "Company-wide turnover trend across every uploaded period, the latest period broken down by store, the full resignation list, and aggregated breakdowns by job title and tenure.",
-            SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Turnover", DescriptionKey = "Rep_Desc_Turnover",
-            Icon = "bi-arrow-down-up", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesStore = true,
-        },
-        new ReportDefinition
-        {
-            Id = "ninety-day", Section = "Deep Analytics", Title = "90-Day Turnover",
-            Description = "Cohort trend, full list of early leavers, by-store rates, and aggregated reasons — across all available periods.",
-            SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_NinetyDay", DescriptionKey = "Rep_Desc_NinetyDay",
-            Icon = "bi-hourglass-split", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesStore = true,
-        },
-        new ReportDefinition
-        {
-            Id = "ninety-day-trend-matrix", Section = "Deep Analytics", Title = "90-Day Trend Matrix",
-            Description = "Full data table — one row per store, one column per hire-cohort month, showing the 90-day early-leave rate across all available cohorts, with an average column.",
-            SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_NinetyDayTrendMatrix", DescriptionKey = "Rep_Desc_NinetyDayTrendMatrix",
-            Icon = "bi-table", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesYear = true, UsesMonths = true, UsesOmOc = true,
-        },
-        new ReportDefinition
-        {
-            Id = "retention", Section = "Deep Analytics", Title = "Retention",
+            Id = "retention", Section = "Performance & Risk", Title = "Retention",
             Description = "Milestone rates (90d–5yr), survival curve, multi-year trend, store leaderboard, and workforce tenure distribution.",
-            SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_Retention", DescriptionKey = "Rep_Desc_Retention",
+            SectionKey = "Rep_Section_PerformanceRisk", TitleKey = "Rep_Title_Retention", DescriptionKey = "Rep_Desc_Retention",
             Icon = "bi-graph-up-arrow", IconBg = "oklch(0.75 0.15 85 / .12)", IconColor = "oklch(0.6 0.13 82)",
             UsesStore = true,
         },
         new ReportDefinition
         {
-            Id = "scorecard", Section = "Deep Analytics", Title = "Scorecard",
+            Id = "scorecard", Section = "Performance & Risk", Title = "Scorecard",
             Description = "KPI rankings for Store Leaders, Operation Consultants, and Operation Managers — Turnover, 90-Day, Retention, and Exit Sentiment.",
-            SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_Scorecard", DescriptionKey = "Rep_Desc_Scorecard",
+            SectionKey = "Rep_Section_PerformanceRisk", TitleKey = "Rep_Title_Scorecard", DescriptionKey = "Rep_Desc_Scorecard",
             Icon = "bi-award-fill", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
             UsesYear = true, UsesMonths = true, UsesOmOc = true,
         },
         new ReportDefinition
         {
-            Id = "early-warning", Section = "Deep Analytics", Title = "Early Warning",
+            Id = "early-warning", Section = "Performance & Risk", Title = "Early Warning",
             Description = "At-risk employee watchlist with ★ risk stars (7 scoring criteria), flagged reasons, hire date, and tenure — scoped to the selected store(s).",
-            SectionKey = "Rep_Section_DeepAnalytics", TitleKey = "Rep_Title_EarlyWarning", DescriptionKey = "Rep_Desc_EarlyWarning",
+            SectionKey = "Rep_Section_PerformanceRisk", TitleKey = "Rep_Title_EarlyWarning", DescriptionKey = "Rep_Desc_EarlyWarning",
             Icon = "bi-exclamation-diamond-fill", IconBg = "oklch(0.6 0.22 22 / .10)", IconColor = "oklch(0.6 0.22 22)",
             UsesStore = true,
         },
+
+        // ── Exit Interviews ───────────────────────────────────
         new ReportDefinition
         {
             Id = "exit-interviews", Section = "Exit Interviews", Title = "Exit Interviews Report",
