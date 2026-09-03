@@ -497,6 +497,10 @@ public class UploadService : IUploadService
         var storeRefs = storeNames.Count == 0
             ? new List<StoreReference>()
             : await _db.StoreReferences.Where(s => storeNames.Contains(s.StoreName)).ToListAsync();
+        // Tracks rows whose "المطعم" value has no matching Store Reference —
+        // those rows keep Store but end up with a blank Store Leader/OC/OM,
+        // usually because the two files spell the same store differently.
+        var unmatchedStoreNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var (_, employeeId, completed, interview) in parsed)
         {
@@ -534,6 +538,10 @@ public class UploadService : IUploadService
                 interview.OperationConsultant = refMatch.OperationConsultant;
                 interview.OperationManager = refMatch.OperationManager;
             }
+            else
+            {
+                unmatchedStoreNames.Add(interview.Store);
+            }
         }
 
         // Upsert by Forms response id: re-exporting the full response history
@@ -552,6 +560,8 @@ public class UploadService : IUploadService
         var message = missingStore > 0
             ? string.Format(_L["Msg_ExitProcessedWithMissingStore"].Value, parsed.Count, missingStore)
             : string.Format(_L["Msg_ExitProcessed"].Value, parsed.Count);
+        if (unmatchedStoreNames.Count > 0)
+            message += " " + string.Format(_L["Msg_ExitUnmatchedStores"].Value, unmatchedStoreNames.Count, string.Join(", ", unmatchedStoreNames.OrderBy(s => s)));
         return (true, message, parsed.Count);
     }
 

@@ -1073,6 +1073,7 @@
   <data name="Msg_UnmatchedRoleEmails" xml:space="preserve"><value>⚠ {0} مفقود: {1} إيميل غير مطابق لأي حساب: {2}.</value></data>
   <data name="Msg_ExitProcessedWithMissingStore" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج ({1} بدون فرع محدد — تحقق من عمود "المطعم" لهذه الصفوف)</value></data>
   <data name="Msg_ExitProcessed" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج</value></data>
+  <data name="Msg_ExitUnmatchedStores" xml:space="preserve"><value>{0} اسم فرع غير مطابق لأي سجل في مرجع الفروع، فهذه الصفوف بدون قائد فرع/OC/OM: {1}.</value></data>
   <data name="Msg_JobActiveEmployees" xml:space="preserve"><value>الموظفون النشطون — {0}</value></data>
   <data name="Msg_UpdatedActiveEmployees" xml:space="preserve"><value>تم تحديث الموظفين النشطين لشهر {0} — {1} سجل.</value></data>
   <data name="Msg_JobResignations" xml:space="preserve"><value>الاستقالات — {0}</value></data>

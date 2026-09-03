@@ -1072,6 +1072,7 @@
   <data name="Msg_UnmatchedRoleEmails" xml:space="preserve"><value>⚠ Missing {0}s: {1} email(s) don't match any account: {2}.</value></data>
   <data name="Msg_ExitProcessedWithMissingStore" xml:space="preserve"><value>Processed {0} exit interview responses ({1} missing a Store — check the "المطعم" column for those rows)</value></data>
   <data name="Msg_ExitProcessed" xml:space="preserve"><value>Processed {0} exit interview responses</value></data>
+  <data name="Msg_ExitUnmatchedStores" xml:space="preserve"><value>{0} store name(s) don't match any Store Reference entry, so those rows are missing Store Leader/OC/OM: {1}.</value></data>
   <data name="Msg_JobActiveEmployees" xml:space="preserve"><value>Active Employees — {0}</value></data>
   <data name="Msg_UpdatedActiveEmployees" xml:space="preserve"><value>Updated Active Employees for {0} — {1} records.</value></data>
   <data name="Msg_JobResignations" xml:space="preserve"><value>Resignations — {0}</value></data>

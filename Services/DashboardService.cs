@@ -64,6 +64,17 @@ public class DashboardService : IDashboardService
             if (parsed.Count > 0) return parsed;
         }
 
+        // A year-only selection (no specific month, no explicit months list, no
+        // from-range) means "the whole year" to every year+months-style caller
+        // (Scorecard, Early Warning, Exit Interviews) — falling through to the
+        // month-snapshot default below silently narrowed it to whatever the
+        // server's wall-clock month happens to be right now, which is usually
+        // empty for the selected year and made those reports look broken.
+        if (year.HasValue && !month.HasValue && !fromMonth.HasValue && !fromYear.HasValue)
+        {
+            return Enumerable.Range(1, 12).Select(m => (Month: m, Year: year.Value)).ToList();
+        }
+
         var toMonth = month ?? DateTime.Now.Month;
         var toYear  = year  ?? DateTime.Now.Year;
         return ExpandRangeKeys(fromMonth ?? toMonth, fromYear ?? toYear, toMonth, toYear)
