@@ -86,14 +86,21 @@ public class DashboardService : IDashboardService
 
     // Stores whose Operation Manager / Operation Consultant (as of the given period) match the filter.
     // Returns null when no OM/OC filter is set (caller should skip the store-list filter entirely).
+    // om/oc/soc/od are comma-separated multi-select values (see MultiValueFilter) — a plain "==" equality
+    // check here would silently match zero stores whenever more than one value was selected upstream
+    // (Reports/dashboard filter panels always send a CSV, even for a single choice).
     private async Task<List<string>?> GetStoresForOmOcAsync(int month, int year, string? om, string? oc, string? soc = null, string? od = null)
     {
-        if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
+        var oms = MultiValueFilter.Split(om);
+        var ocs = MultiValueFilter.Split(oc);
+        var socs = MultiValueFilter.Split(soc);
+        var ods = MultiValueFilter.Split(od);
+        if (oms == null && ocs == null && socs == null && ods == null) return null;
         var q = _db.StoreReferences.Where(s => s.Month == month && s.Year == year);
-        if (!string.IsNullOrEmpty(om)) q = q.Where(s => s.OperationManager == om);
-        if (!string.IsNullOrEmpty(oc)) q = q.Where(s => s.OperationConsultant == oc);
-        if (!string.IsNullOrEmpty(soc)) q = q.Where(s => s.SeniorOperationConsultant == soc);
-        if (!string.IsNullOrEmpty(od)) q = q.Where(s => s.OperationDirector == od);
+        if (oms != null) q = q.Where(s => oms.Contains(s.OperationManager));
+        if (ocs != null) q = q.Where(s => ocs.Contains(s.OperationConsultant));
+        if (socs != null) q = q.Where(s => socs.Contains(s.SeniorOperationConsultant));
+        if (ods != null) q = q.Where(s => ods.Contains(s.OperationDirector));
         return await q.Select(s => s.StoreName).Distinct().ToListAsync();
     }
 
@@ -1073,5 +1080,32 @@ public class DashboardService : IDashboardService
             })
             .OrderByDescending(r => r.Headcount)
             .ToList();
+    }
+
+    public async Task<List<EmployeeDetailRow>> GetEmployeeDetailsAsync(int month, int year, string? store, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null)
+    {
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, month, year);
+        var stores = MultiValueFilter.Split(store);
+        var omOcStores = stores == null ? await GetStoresForOmOcAsync(month, year, om, oc, soc, od) : null;
+
+        var q = _db.ActiveEmployees.Where(e => e.Month == month && e.Year == year);
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+        if (stores != null) q = q.Where(e => stores.Contains(e.Store));
+        else if (omOcStores != null) q = q.Where(e => omOcStores.Contains(e.Store));
+
+        return await q.OrderBy(e => e.Store).ThenBy(e => e.Name)
+            .Select(e => new EmployeeDetailRow
+            {
+                EmployeeId = e.EmployeeId,
+                Name = e.Name,
+                Store = e.Store,
+                JobTitle = e.JobTitle,
+                Grade = e.Grade,
+                PayrollGroup = e.PayrollGroup,
+                Gender = e.Gender,
+                HireDate = e.HireDate,
+            })
+            .ToListAsync();
     }
 }

@@ -931,7 +931,7 @@
   <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>التحليلات المتعمقة</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>مركز الإجراءات</value></data>
-  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>حالة خطط العمل على مستوى الشركة — الخطط النشطة، ما تم فتحه/إغلاقه هذا الشهر، اتجاه الإغلاق، أبرز الأسباب، ودرجة الخطورة والمسؤولية وتقدم المهام لكل فرع.</value></data>
+  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>حالة خطة العمل لكل فرع — الخطورة، الإشارات، العمر، المسؤولية، وتقدم المهام لكل فرع متاح.</value></data>
   <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>نظرة عامة على الفروع</value></data>
   <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>عدد الموظفين ومعدل الدوران وحالة مركز الإجراءات وعدد حالات الخطورة العالية في الإنذار المبكر لكل فرع خلال الشهر المحدد — عرض موحّد لصحة الفروع.</value></data>
   <data name="Rep_Title_Stores" xml:space="preserve"><value>مقارنة الفروع</value></data>

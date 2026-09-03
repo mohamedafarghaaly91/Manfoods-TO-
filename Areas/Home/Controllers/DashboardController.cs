@@ -121,7 +121,7 @@ public class DashboardController : Controller
                     await _reports.BuildNinetyDayTrendMatrixReportAsync(role, assignedName, om, oc, soc, od, months, year > 0 ? year : null),
                     "90_Day_Trend_Matrix_Report.xlsx");
             case "action-center":
-                return await DownloadWorkbookAsync(await _reports.BuildActionCenterReportAsync(role, assignedName), "Action_Center_Report.xlsx");
+                return await DownloadWorkbookAsync(await _reports.BuildActionCenterReportAsync(role, assignedName, om, oc, soc, od), "Action_Center_Report.xlsx");
             case "stores-overview":
                 return await DownloadWorkbookAsync(
                     await _reports.BuildStoresOverviewReportAsync(month, year, role, assignedName, om, oc, soc, od),

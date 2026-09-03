@@ -34,9 +34,10 @@ public static class ReportCatalog
         new ReportDefinition
         {
             Id = "action-center", Section = "Store Operations", Title = "Action Center",
-            Description = "Company-wide action-plan status — active plans, this month's opened/resolved, resolution trend, top reasons, and per-store severity, ownership, and task progress.",
+            Description = "Per-store action-plan status — severity, signals, age, ownership, and task progress for every accessible store.",
             SectionKey = "Rep_Section_StoreOperations", TitleKey = "Rep_Title_ActionCenter", DescriptionKey = "Rep_Desc_ActionCenter",
             Icon = "bi-clipboard2-check-fill", IconBg = "oklch(0.6 0.22 22 / .10)", IconColor = "oklch(0.6 0.22 22)",
+            UsesOmOc = true,
         },
         new ReportDefinition
         {

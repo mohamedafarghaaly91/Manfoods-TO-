@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using MvcApp.Models;
 using MvcApp.Models.ViewModels;
 
 namespace MvcApp.Services;
@@ -11,6 +12,12 @@ public class ReportService : IReportService
     private const string PercentFormat = "0.0%";
     private const string DateFormat = "yyyy-mm-dd";
 
+    /// <summary>Column order requested for every store-scoped report row:
+    /// Head Manager, Operation Consultant, Senior Operation Consultant,
+    /// Operation Manager, Operation Director.</summary>
+    private static readonly string[] LeadershipHeaders =
+        { "Head Manager", "Operation Consultant", "Senior Operation Consultant", "Operation Manager", "Operation Director" };
+
     private readonly IDashboardService _dashboard;
     private readonly INinetyDayTurnoverService _ninetyDay;
     private readonly IRetentionService _retention;
@@ -18,6 +25,7 @@ public class ReportService : IReportService
     private readonly IScorecardService _scorecard;
     private readonly IEarlyWarningService _earlyWarning;
     private readonly IStoreActionPlanService _actionPlans;
+    private readonly IStoreService _stores;
 
     public ReportService(
         IDashboardService dashboard,
@@ -26,7 +34,8 @@ public class ReportService : IReportService
         IExitInterviewService exitInterviews,
         IScorecardService scorecard,
         IEarlyWarningService earlyWarning,
-        IStoreActionPlanService actionPlans)
+        IStoreActionPlanService actionPlans,
+        IStoreService stores)
     {
         _dashboard = dashboard;
         _ninetyDay = ninetyDay;
@@ -35,6 +44,34 @@ public class ReportService : IReportService
         _scorecard = scorecard;
         _earlyWarning = earlyWarning;
         _actionPlans = actionPlans;
+        _stores = stores;
+    }
+
+    /// <summary>Latest known Head Manager/OC/SOC/OM/OD per store, scoped to what
+    /// this role/user can see — looked up once per report build and reused to
+    /// enrich every store-scoped sheet, since none of the underlying per-report
+    /// services (90-day, retention, exit interviews, early warning…) carry all
+    /// five leadership fields on their own row types.</summary>
+    private async Task<Dictionary<string, StoreReference>> BuildLeadershipMapAsync(string role, string? assignedName)
+    {
+        var all = await _stores.GetStoresAsync(null, null, role, assignedName);
+        return all
+            .GroupBy(s => s.StoreName)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year * 100 + s.Month).First());
+    }
+
+    /// <summary>Writes the 5 leadership cells (Head Manager, OC, SOC, OM, OD) for
+    /// a store starting at <paramref name="col"/> and returns the next free
+    /// column index.</summary>
+    private static int WriteLeadershipCells(IXLWorksheet ws, int row, int col, Dictionary<string, StoreReference> map, string? storeName)
+    {
+        map.TryGetValue(storeName ?? "", out var s);
+        ws.Cell(row, col).Value = s?.HeadManager ?? "—";
+        ws.Cell(row, col + 1).Value = s?.OperationConsultant ?? "—";
+        ws.Cell(row, col + 2).Value = s?.SeniorOperationConsultant ?? "—";
+        ws.Cell(row, col + 3).Value = s?.OperationManager ?? "—";
+        ws.Cell(row, col + 4).Value = s?.OperationDirector ?? "—";
+        return col + 5;
     }
 
     private static void StyleHeader(IXLWorksheet ws, string[] headers)
@@ -134,18 +171,21 @@ public class ReportService : IReportService
     private async Task AddStoreComparisonSheetAsync(XLWorkbook wb, int month, int year, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var rows = await _dashboard.GetStoreComparisonAsync(month, year, role, assignedName, om: om, oc: oc, soc: soc, od: od);
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        var period = $"{month:D2}-{year}";
         var ws = AddSheet(wb, "Store Comparison");
-        StyleHeader(ws, new[] { "Store", "OC", "OM", "Headcount", "New Hires", "Resignations", "Turnover Rate" });
+        StyleHeader(ws, new[] { "Store", "Period" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Headcount", "New Hires", "Resignations", "Turnover Rate" }).ToArray());
         for (int r = 0; r < rows.Count; r++)
         {
             var row = rows[r];
             ws.Cell(r + 2, 1).Value = row.StoreName;
-            ws.Cell(r + 2, 2).Value = row.OperationConsultant;
-            ws.Cell(r + 2, 3).Value = row.OperationManager;
-            SetIntCell(ws.Cell(r + 2, 4), row.Headcount);
-            SetIntCell(ws.Cell(r + 2, 5), row.NewHires);
-            SetIntCell(ws.Cell(r + 2, 6), row.Resignations);
-            SetPercentCell(ws.Cell(r + 2, 7), row.TurnoverRate);
+            ws.Cell(r + 2, 2).Value = period;
+            int col = WriteLeadershipCells(ws, r + 2, 3, leadership, row.StoreName);
+            SetIntCell(ws.Cell(r + 2, col), row.Headcount);
+            SetIntCell(ws.Cell(r + 2, col + 1), row.NewHires);
+            SetIntCell(ws.Cell(r + 2, col + 2), row.Resignations);
+            SetPercentCell(ws.Cell(r + 2, col + 3), row.TurnoverRate);
         }
         Finalize(ws);
     }
@@ -176,15 +216,29 @@ public class ReportService : IReportService
         }
         Finalize(wsTrend);
 
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+
         if (periods.Count > 0)
         {
             var latest = periods[0]; // most recent first, per GetCohortPeriodsAsync contract
             var byStore = await _ninetyDay.GetByStoreAsync(latest.Month, latest.Year, role, assignedName);
-            WriteLabelValueSheet(wb, $"90D By Store ({latest.Month}-{latest.Year})", "Store", "Early Leave Rate", byStore, asPercent: true);
+            var wsByStore = AddSheet(wb, $"90D By Store ({latest.Month}-{latest.Year})");
+            StyleHeader(wsByStore, new[] { "Store", "Period" }.Concat(LeadershipHeaders).Concat(new[] { "Early Leave Rate" }).ToArray());
+            int bi = 2;
+            foreach (var item in byStore)
+            {
+                wsByStore.Cell(bi, 1).Value = item.Label;
+                wsByStore.Cell(bi, 2).Value = $"{latest.Month:D2}-{latest.Year}";
+                int c = WriteLeadershipCells(wsByStore, bi, 3, leadership, item.Label);
+                SetPercentCell(wsByStore.Cell(bi, c), item.Value);
+                bi++;
+            }
+            Finalize(wsByStore);
         }
 
         var wsLeavers = AddSheet(wb, "90D Early Leavers (All)");
-        StyleHeader(wsLeavers, new[] { "Cohort", "Name", "Store", "Job Title", "Hire Date", "Resignation Date", "Tenure (days)" });
+        StyleHeader(wsLeavers, new[] { "Cohort", "Name", "Store" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Job Title", "Hire Date", "Resignation Date", "Tenure (days)" }).ToArray());
         int row = 2;
         var reasonTotals = new Dictionary<string, int>();
         foreach (var p in periods)
@@ -196,10 +250,11 @@ public class ReportService : IReportService
                 wsLeavers.Cell(row, 1).Value = cohortLabel;
                 wsLeavers.Cell(row, 2).Value = lv.Name;
                 wsLeavers.Cell(row, 3).Value = lv.Store;
-                wsLeavers.Cell(row, 4).Value = lv.JobTitle;
-                SetDateCell(wsLeavers.Cell(row, 5), lv.HireDate);
-                SetDateCell(wsLeavers.Cell(row, 6), lv.ResignationDate);
-                SetIntCell(wsLeavers.Cell(row, 7), lv.TenureDays);
+                int c = WriteLeadershipCells(wsLeavers, row, 4, leadership, lv.Store);
+                wsLeavers.Cell(row, c).Value = lv.JobTitle;
+                SetDateCell(wsLeavers.Cell(row, c + 1), lv.HireDate);
+                SetDateCell(wsLeavers.Cell(row, c + 2), lv.ResignationDate);
+                SetIntCell(wsLeavers.Cell(row, c + 3), lv.TenureDays);
                 row++;
             }
 
@@ -270,7 +325,18 @@ public class ReportService : IReportService
         }
         Finalize(wsTrend);
 
-        WriteLabelValueSheet(wb, "Store Leaderboard (1yr)", "Store", "Retention Rate", leaderboard, asPercent: true);
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        var wsLeaderboard = AddSheet(wb, "Store Leaderboard (1yr)");
+        StyleHeader(wsLeaderboard, new[] { "Store", "Period" }.Concat(LeadershipHeaders).Concat(new[] { "Retention Rate" }).ToArray());
+        for (int i = 0; i < leaderboard.Count; i++)
+        {
+            wsLeaderboard.Cell(i + 2, 1).Value = leaderboard[i].Label;
+            wsLeaderboard.Cell(i + 2, 2).Value = "Trailing 1 Year";
+            int c = WriteLeadershipCells(wsLeaderboard, i + 2, 3, leadership, leaderboard[i].Label);
+            SetPercentCell(wsLeaderboard.Cell(i + 2, c), leaderboard[i].Value);
+        }
+        Finalize(wsLeaderboard);
+
         WriteLabelValueSheet(wb, "Workforce Tenure", "Tenure Bucket", "Employees", tenureDist);
 
         var wsInsights = AddSheet(wb, "Retention Insights");
@@ -317,16 +383,19 @@ public class ReportService : IReportService
         }
         Finalize(wsDrivers);
 
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
         var wsComments = AddSheet(wb, "EI Comments (Anonymous)");
-        StyleHeader(wsComments, new[] { "Store", "Store Leader", "Question", "Comment", "Submitted At" });
+        StyleHeader(wsComments, new[] { "Store", "Store Leader" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Question", "Comment", "Submitted At" }).ToArray());
         for (int i = 0; i < comments.Count; i++)
         {
             var c = comments[i];
             wsComments.Cell(i + 2, 1).Value = c.Store;
             wsComments.Cell(i + 2, 2).Value = c.StoreLeader;
-            wsComments.Cell(i + 2, 3).Value = c.QuestionLabel;
-            wsComments.Cell(i + 2, 4).Value = c.Text;
-            SetDateCell(wsComments.Cell(i + 2, 5), c.SubmittedAt);
+            int col = WriteLeadershipCells(wsComments, i + 2, 3, leadership, c.Store);
+            wsComments.Cell(i + 2, col).Value = c.QuestionLabel;
+            wsComments.Cell(i + 2, col + 1).Value = c.Text;
+            SetDateCell(wsComments.Cell(i + 2, col + 2), c.SubmittedAt);
         }
         Finalize(wsComments);
     }
@@ -338,24 +407,39 @@ public class ReportService : IReportService
         return wb;
     }
 
+    /// <summary>Human-readable description of a Year+Months filter selection,
+    /// for reports whose rows are rolled up across a period range rather than
+    /// tied to one specific month.</summary>
+    private static string DescribePeriodScope(string? months, int? year)
+    {
+        if (!year.HasValue) return "All Periods";
+        var monthList = MultiValueFilter.Split(months);
+        if (monthList == null || monthList.Count == 0) return $"{year} (All Months)";
+        var names = monthList.Select(m => int.TryParse(m, out var mi) && mi is >= 1 and <= 12
+            ? System.Globalization.CultureInfo.InvariantCulture.DateTimeFormat.GetMonthName(mi) : m);
+        return $"{year} ({string.Join(", ", names)})";
+    }
+
     // ── Scorecard ───────────────────────────────────────────
     private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
         var rows = await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, soc, od, months, year);
+        var period = DescribePeriodScope(months, year);
         var ws = AddSheet(wb, sheetName);
-        StyleHeader(ws, new[] { nameHeader, "Stores", "Headcount", "Turnover Rate", "90-Day Early Leave", "180-Day Retention", "Exit Sentiment", "Exit Responses" });
+        StyleHeader(ws, new[] { nameHeader, "Period", "Stores", "Headcount", "Turnover Rate", "90-Day Early Leave", "180-Day Retention", "Exit Sentiment", "Exit Responses" });
         for (int i = 0; i < rows.Count; i++)
         {
             var r = rows[i];
             ws.Cell(i + 2, 1).Value = r.Name;
-            SetIntCell(ws.Cell(i + 2, 2), r.StoreCount);
-            SetIntCell(ws.Cell(i + 2, 3), r.Headcount);
-            SetPercentCell(ws.Cell(i + 2, 4), r.TurnoverRate);
-            SetPercentCell(ws.Cell(i + 2, 5), r.EarlyLeaver90Rate);
-            SetPercentCell(ws.Cell(i + 2, 6), r.Retention180Rate);
-            if (r.ExitResponseCount > 0) SetPercentCell(ws.Cell(i + 2, 7), r.ExitSentimentPercent);
-            else ws.Cell(i + 2, 7).Value = "—";
-            SetIntCell(ws.Cell(i + 2, 8), r.ExitResponseCount);
+            ws.Cell(i + 2, 2).Value = period;
+            SetIntCell(ws.Cell(i + 2, 3), r.StoreCount);
+            SetIntCell(ws.Cell(i + 2, 4), r.Headcount);
+            SetPercentCell(ws.Cell(i + 2, 5), r.TurnoverRate);
+            SetPercentCell(ws.Cell(i + 2, 6), r.EarlyLeaver90Rate);
+            SetPercentCell(ws.Cell(i + 2, 7), r.Retention180Rate);
+            if (r.ExitResponseCount > 0) SetPercentCell(ws.Cell(i + 2, 8), r.ExitSentimentPercent);
+            else ws.Cell(i + 2, 8).Value = "—";
+            SetIntCell(ws.Cell(i + 2, 9), r.ExitResponseCount);
         }
         Finalize(ws);
     }
@@ -388,19 +472,24 @@ public class ReportService : IReportService
         wsSummary.Cell(5, 1).Value = "Company Baseline Early-Leave Rate"; SetPercentCell(wsSummary.Cell(5, 2), summary.CompanyBaselineRate);
         Finalize(wsSummary);
 
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        var asOf = DateOnly.FromDateTime(DateTime.Now).ToString(DateFormat);
         var wsWatchlist = AddSheet(wb, "Early Warning Watchlist");
-        StyleHeader(wsWatchlist, new[] { "Name", "Store", "Job Title", "Hire Date", "Tenure (days)", "Risk Stars (1-5)", "Raw Score", "Reasons" });
+        StyleHeader(wsWatchlist, new[] { "Name", "Store", "Period" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Job Title", "Hire Date", "Tenure (days)", "Risk Stars (1-5)", "Raw Score", "Reasons" }).ToArray());
         for (int i = 0; i < watchlist.Count; i++)
         {
             var w = watchlist[i];
             wsWatchlist.Cell(i + 2, 1).Value = w.Name;
             wsWatchlist.Cell(i + 2, 2).Value = w.Store;
-            wsWatchlist.Cell(i + 2, 3).Value = w.JobTitle;
-            SetDateCell(wsWatchlist.Cell(i + 2, 4), w.HireDate);
-            SetIntCell(wsWatchlist.Cell(i + 2, 5), w.TenureDays);
-            wsWatchlist.Cell(i + 2, 6).Value = new string('★', w.Stars) + new string('☆', 5 - w.Stars);
-            SetIntCell(wsWatchlist.Cell(i + 2, 7), w.RiskScore);
-            wsWatchlist.Cell(i + 2, 8).Value = string.Join(" | ", w.Reasons.Select(r => r.Type));
+            wsWatchlist.Cell(i + 2, 3).Value = $"As Of {asOf}";
+            int col = WriteLeadershipCells(wsWatchlist, i + 2, 4, leadership, w.Store);
+            wsWatchlist.Cell(i + 2, col).Value = w.JobTitle;
+            SetDateCell(wsWatchlist.Cell(i + 2, col + 1), w.HireDate);
+            SetIntCell(wsWatchlist.Cell(i + 2, col + 2), w.TenureDays);
+            wsWatchlist.Cell(i + 2, col + 3).Value = new string('★', w.Stars) + new string('☆', 5 - w.Stars);
+            SetIntCell(wsWatchlist.Cell(i + 2, col + 4), w.RiskScore);
+            wsWatchlist.Cell(i + 2, col + 5).Value = string.Join(" | ", w.Reasons.Select(r => r.Type));
         }
         Finalize(wsWatchlist);
     }
@@ -413,11 +502,12 @@ public class ReportService : IReportService
     }
 
     // ── Trend Matrix ─────────────────────────────────────────
-    private static void WriteTrendMatrixSheet(XLWorkbook wb, string sheetName, TrendMatrixResult result)
+    private static void WriteTrendMatrixSheet(XLWorkbook wb, string sheetName, TrendMatrixResult result, Dictionary<string, StoreReference> leadership)
     {
         var ws = AddSheet(wb, sheetName);
 
-        var headerList = new List<string> { "OC", "OM", "Store" };
+        var headerList = new List<string> { "Store" };
+        headerList.AddRange(LeadershipHeaders);
         headerList.AddRange(result.Periods);
         headerList.Add("Total");
         StyleHeader(ws, headerList.ToArray());
@@ -425,9 +515,8 @@ public class ReportService : IReportService
         for (int i = 0; i < result.Rows.Count; i++)
         {
             var row = result.Rows[i];
-            ws.Cell(i + 2, 1).Value = row.OperationConsultant;
-            ws.Cell(i + 2, 2).Value = row.OperationManager;
-            ws.Cell(i + 2, 3).Value = row.StoreName;
+            ws.Cell(i + 2, 1).Value = row.StoreName;
+            int col = WriteLeadershipCells(ws, i + 2, 2, leadership, row.StoreName);
             // Sum of this row's own displayed period rates (not an average/pooled
             // rate) — matches the "Total" column on the Turnover/90-Day Turnover
             // dashboard pages (mxTotalRate), which replaced their old AVG column.
@@ -436,15 +525,15 @@ public class ReportService : IReportService
             {
                 if (row.PeriodRates.TryGetValue(result.Periods[p], out var rate) && rate.HasValue)
                 {
-                    SetPercentCell(ws.Cell(i + 2, 4 + p), rate.Value);
+                    SetPercentCell(ws.Cell(i + 2, col + p), rate.Value);
                     total += rate.Value;
                 }
                 else
                 {
-                    ws.Cell(i + 2, 4 + p).Value = "—";
+                    ws.Cell(i + 2, col + p).Value = "—";
                 }
             }
-            SetPercentCell(ws.Cell(i + 2, 4 + result.Periods.Count), total);
+            SetPercentCell(ws.Cell(i + 2, col + result.Periods.Count), total);
         }
         Finalize(ws);
     }
@@ -452,7 +541,8 @@ public class ReportService : IReportService
     private async Task AddTrendMatrixSheetAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null)
     {
         var result = await _dashboard.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, sinceYear, months);
-        WriteTrendMatrixSheet(wb, "Turnover Trend Matrix", result);
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        WriteTrendMatrixSheet(wb, "Turnover Trend Matrix", result, leadership);
     }
 
     public async Task<XLWorkbook> BuildTrendMatrixReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null)
@@ -467,68 +557,67 @@ public class ReportService : IReportService
     {
         var wb = new XLWorkbook();
         var result = await _ninetyDay.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, months, sinceYear);
-        WriteTrendMatrixSheet(wb, "90-Day Trend Matrix", result);
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        WriteTrendMatrixSheet(wb, "90-Day Trend Matrix", result, leadership);
         return wb;
     }
 
     // ── Action Center ────────────────────────────────────────
-    private async Task AddActionCenterSheetsAsync(XLWorkbook wb, string role, string? assignedName)
+    // Exports only the store-level "AC Stores" sheet (per the reports rework —
+    // the company-wide Summary/Top Reasons/By Region/Monthly Trend sheets were
+    // dropped since they're already visible on the Action Center dashboard
+    // page itself and just duplicated it in the export).
+    private async Task AddActionCenterSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
-        var summary = await _actionPlans.GetActionCenterSummaryAsync(role, assignedName);
         var stores = await _actionPlans.GetActionCenterStoresAsync(role, assignedName);
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
 
-        var wsSummary = AddSheet(wb, "AC Summary");
-        StyleHeader(wsSummary, new[] { "Metric", "Value" });
-        wsSummary.Cell(2, 1).Value = "Total Active Plans"; SetIntCell(wsSummary.Cell(2, 2), summary.TotalActive);
-        wsSummary.Cell(3, 1).Value = "Opened This Month"; SetIntCell(wsSummary.Cell(3, 2), summary.OpenedThisMonth);
-        wsSummary.Cell(4, 1).Value = "Resolved This Month"; SetIntCell(wsSummary.Cell(4, 2), summary.ResolvedThisMonth);
-        wsSummary.Cell(5, 1).Value = "Avg. Days to Resolution";
-        if (summary.AvgDaysToResolution.HasValue) SetIntCell(wsSummary.Cell(5, 2), (int)Math.Round(summary.AvgDaysToResolution.Value));
-        else wsSummary.Cell(5, 2).Value = "—";
-        wsSummary.Cell(6, 1).Value = "Stalled Plans"; SetIntCell(wsSummary.Cell(6, 2), summary.StalledCount);
-        wsSummary.Cell(7, 1).Value = "Chronic Stores"; SetIntCell(wsSummary.Cell(7, 2), summary.ChronicCount);
-        wsSummary.Cell(8, 1).Value = "Critical Severity"; SetIntCell(wsSummary.Cell(8, 2), summary.CriticalCount);
-        Finalize(wsSummary);
-
-        WriteLabelValueSheet(wb, "AC Top Reasons", "Category", "Active Plans", summary.TopReasons);
-        WriteLabelValueSheet(wb, "AC By Region (OM)", "Operation Manager", "Active Plans", summary.ByRegion);
-
-        var wsTrend = AddSheet(wb, "AC Monthly Trend");
-        StyleHeader(wsTrend, new[] { "Month", "Opened", "Resolved" });
-        for (int i = 0; i < summary.MonthlyTrend.Count; i++)
+        var oms = MultiValueFilter.Split(om);
+        var ocs = MultiValueFilter.Split(oc);
+        var socs = MultiValueFilter.Split(soc);
+        var ods = MultiValueFilter.Split(od);
+        if (oms != null || ocs != null || socs != null || ods != null)
         {
-            var t = summary.MonthlyTrend[i];
-            wsTrend.Cell(i + 2, 1).Value = t.Label;
-            SetIntCell(wsTrend.Cell(i + 2, 2), t.Opened);
-            SetIntCell(wsTrend.Cell(i + 2, 3), t.Resolved);
+            stores = stores.Where(s =>
+            {
+                leadership.TryGetValue(s.StoreName, out var l);
+                if (oms != null && !oms.Contains(l?.OperationManager ?? "")) return false;
+                if (ocs != null && !ocs.Contains(l?.OperationConsultant ?? "")) return false;
+                if (socs != null && !socs.Contains(l?.SeniorOperationConsultant ?? "")) return false;
+                if (ods != null && !ods.Contains(l?.OperationDirector ?? "")) return false;
+                return true;
+            }).ToList();
         }
-        Finalize(wsTrend);
 
+        var asOf = DateOnly.FromDateTime(DateTime.Now).ToString(DateFormat);
         var wsStores = AddSheet(wb, "AC Stores");
-        StyleHeader(wsStores, new[] { "Store", "Plan Status", "Severity", "Signals", "Age (days)", "Chronic", "Stalled", "Trend", "Responsible", "Assigned To", "Target Date", "Tasks Done" });
+        StyleHeader(wsStores, new[] { "Store", "Period" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Plan Status", "Severity", "Signals", "Age (days)", "Chronic", "Stalled", "Trend", "Responsible", "Assigned To", "Target Date", "Tasks Done" }).ToArray());
         for (int i = 0; i < stores.Count; i++)
         {
             var s = stores[i];
             wsStores.Cell(i + 2, 1).Value = s.StoreName;
-            wsStores.Cell(i + 2, 2).Value = s.PlanStatus;
-            wsStores.Cell(i + 2, 3).Value = s.Severity;
-            SetIntCell(wsStores.Cell(i + 2, 4), s.SignalCount);
-            SetIntCell(wsStores.Cell(i + 2, 5), s.AgeDays);
-            wsStores.Cell(i + 2, 6).Value = s.IsChronic ? "Yes" : "No";
-            wsStores.Cell(i + 2, 7).Value = s.IsStalled ? "Yes" : "No";
-            wsStores.Cell(i + 2, 8).Value = s.Trend;
-            wsStores.Cell(i + 2, 9).Value = s.ResponsibleName ?? "—";
-            wsStores.Cell(i + 2, 10).Value = s.AssignedToName ?? "—";
-            SetDateCell(wsStores.Cell(i + 2, 11), s.TargetResolutionDate?.ToDateTime(TimeOnly.MinValue));
-            wsStores.Cell(i + 2, 12).Value = s.TasksTotal > 0 ? $"{s.TasksCompleted}/{s.TasksTotal}" : "—";
+            wsStores.Cell(i + 2, 2).Value = $"As Of {asOf}";
+            int col = WriteLeadershipCells(wsStores, i + 2, 3, leadership, s.StoreName);
+            wsStores.Cell(i + 2, col).Value = s.PlanStatus;
+            wsStores.Cell(i + 2, col + 1).Value = s.Severity;
+            SetIntCell(wsStores.Cell(i + 2, col + 2), s.SignalCount);
+            SetIntCell(wsStores.Cell(i + 2, col + 3), s.AgeDays);
+            wsStores.Cell(i + 2, col + 4).Value = s.IsChronic ? "Yes" : "No";
+            wsStores.Cell(i + 2, col + 5).Value = s.IsStalled ? "Yes" : "No";
+            wsStores.Cell(i + 2, col + 6).Value = s.Trend;
+            wsStores.Cell(i + 2, col + 7).Value = s.ResponsibleName ?? "—";
+            wsStores.Cell(i + 2, col + 8).Value = s.AssignedToName ?? "—";
+            SetDateCell(wsStores.Cell(i + 2, col + 9), s.TargetResolutionDate?.ToDateTime(TimeOnly.MinValue));
+            wsStores.Cell(i + 2, col + 10).Value = s.TasksTotal > 0 ? $"{s.TasksCompleted}/{s.TasksTotal}" : "—";
         }
         Finalize(wsStores);
     }
 
-    public async Task<XLWorkbook> BuildActionCenterReportAsync(string role, string? assignedName)
+    public async Task<XLWorkbook> BuildActionCenterReportAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var wb = new XLWorkbook();
-        await AddActionCenterSheetsAsync(wb, role, assignedName);
+        await AddActionCenterSheetsAsync(wb, role, assignedName, om, oc, soc, od);
         return wb;
     }
 
@@ -543,22 +632,25 @@ public class ReportService : IReportService
         var highRiskByStore = watchlist.Where(w => w.Stars >= 4)
             .GroupBy(w => w.Store).ToDictionary(g => g.Key, g => g.Count());
 
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        var period = $"{month:D2}-{year}";
         var ws = AddSheet(wb, "Stores Overview");
-        StyleHeader(ws, new[] { "Store", "OC", "OM", "Headcount", "New Hires", "Resignations", "Turnover Rate", "Action Plan Status", "Severity", "High-Risk Employees" });
+        StyleHeader(ws, new[] { "Store", "Period" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Headcount", "New Hires", "Resignations", "Turnover Rate", "Action Plan Status", "Severity", "High-Risk Employees" }).ToArray());
         for (int i = 0; i < comparison.Count; i++)
         {
             var row = comparison[i];
             ws.Cell(i + 2, 1).Value = row.StoreName;
-            ws.Cell(i + 2, 2).Value = row.OperationConsultant;
-            ws.Cell(i + 2, 3).Value = row.OperationManager;
-            SetIntCell(ws.Cell(i + 2, 4), row.Headcount);
-            SetIntCell(ws.Cell(i + 2, 5), row.NewHires);
-            SetIntCell(ws.Cell(i + 2, 6), row.Resignations);
-            SetPercentCell(ws.Cell(i + 2, 7), row.TurnoverRate);
+            ws.Cell(i + 2, 2).Value = period;
+            int col = WriteLeadershipCells(ws, i + 2, 3, leadership, row.StoreName);
+            SetIntCell(ws.Cell(i + 2, col), row.Headcount);
+            SetIntCell(ws.Cell(i + 2, col + 1), row.NewHires);
+            SetIntCell(ws.Cell(i + 2, col + 2), row.Resignations);
+            SetPercentCell(ws.Cell(i + 2, col + 3), row.TurnoverRate);
             var ac = acByStore.GetValueOrDefault(row.StoreName);
-            ws.Cell(i + 2, 8).Value = ac?.PlanStatus ?? "None";
-            ws.Cell(i + 2, 9).Value = ac?.Severity ?? "None";
-            SetIntCell(ws.Cell(i + 2, 10), highRiskByStore.GetValueOrDefault(row.StoreName));
+            ws.Cell(i + 2, col + 4).Value = ac?.PlanStatus ?? "None";
+            ws.Cell(i + 2, col + 5).Value = ac?.Severity ?? "None";
+            SetIntCell(ws.Cell(i + 2, col + 6), highRiskByStore.GetValueOrDefault(row.StoreName));
         }
         Finalize(ws);
     }
@@ -573,12 +665,37 @@ public class ReportService : IReportService
     // ── Workforce ────────────────────────────────────────────
     private async Task AddWorkforceSheetsAsync(XLWorkbook wb, int month, int year, string role, string? assignedName, string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null)
     {
+        var details = await _dashboard.GetEmployeeDetailsAsync(month, year, store, role, assignedName, om, oc, soc, od);
         var kpi = await _dashboard.GetKpisAsync(month, year, store, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var byJobTitle = await _dashboard.GetHeadcountByJobTitleAsync(month, year, store, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var byPayrollGroup = await _dashboard.GetHeadcountByPayrollGroupAsync(month, year, store, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var byTenure = await _dashboard.GetHeadcountByTenureAsync(month, year, store, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var byGender = await _dashboard.GetGenderBreakdownAsync(month, year, store, role, assignedName, om: om, oc: oc, soc: soc, od: od);
         var trend = await _dashboard.GetHeadcountTrendAsync(store, role, assignedName, om, oc, soc, od, sinceYear);
+
+        // Detailed employee-level roster — first sheet, so opening the file lands
+        // on the raw data before the aggregated breakdowns further in.
+        var leadership = await BuildLeadershipMapAsync(role, assignedName);
+        var period = $"{month:D2}-{year}";
+        var wsDetail = AddSheet(wb, "Workforce Detail");
+        StyleHeader(wsDetail, new[] { "Employee ID", "Name", "Store", "Period" }.Concat(LeadershipHeaders)
+            .Concat(new[] { "Job Title", "Grade", "Payroll Group", "Gender", "Hire Date" }).ToArray());
+        for (int i = 0; i < details.Count; i++)
+        {
+            var e = details[i];
+            wsDetail.Cell(i + 2, 1).Value = e.EmployeeId;
+            wsDetail.Cell(i + 2, 2).Value = e.Name;
+            wsDetail.Cell(i + 2, 3).Value = e.Store;
+            wsDetail.Cell(i + 2, 4).Value = period;
+            int col = WriteLeadershipCells(wsDetail, i + 2, 5, leadership, e.Store);
+            wsDetail.Cell(i + 2, col).Value = e.JobTitle;
+            wsDetail.Cell(i + 2, col + 1).Value = e.Grade;
+            wsDetail.Cell(i + 2, col + 2).Value = e.PayrollGroup;
+            wsDetail.Cell(i + 2, col + 3).Value = e.Gender;
+            if (e.HireDate.HasValue) SetDateCell(wsDetail.Cell(i + 2, col + 4), e.HireDate.Value);
+            else wsDetail.Cell(i + 2, col + 4).Value = "—";
+        }
+        Finalize(wsDetail);
 
         var wsKpi = AddSheet(wb, "Workforce KPIs");
         StyleHeader(wsKpi, new[] { "Metric", "Value" });
@@ -611,18 +728,19 @@ public class ReportService : IReportService
     }
 
     // ── OC/OM Comparison ─────────────────────────────────────
-    private static void WriteOcOmSheet(XLWorkbook wb, string sheetName, string nameHeader, List<OcOmRow> rows)
+    private static void WriteOcOmSheet(XLWorkbook wb, string sheetName, string nameHeader, List<OcOmRow> rows, string period)
     {
         var ws = AddSheet(wb, sheetName);
-        StyleHeader(ws, new[] { nameHeader, "Stores", "Headcount", "Resignations", "Avg. Turnover Rate" });
+        StyleHeader(ws, new[] { nameHeader, "Period", "Stores", "Headcount", "Resignations", "Avg. Turnover Rate" });
         for (int i = 0; i < rows.Count; i++)
         {
             var r = rows[i];
             ws.Cell(i + 2, 1).Value = r.Name;
-            SetIntCell(ws.Cell(i + 2, 2), r.StoreCount);
-            SetIntCell(ws.Cell(i + 2, 3), r.TotalHeadcount);
-            SetIntCell(ws.Cell(i + 2, 4), r.TotalResignations);
-            SetPercentCell(ws.Cell(i + 2, 5), r.AvgTurnoverRate);
+            ws.Cell(i + 2, 2).Value = period;
+            SetIntCell(ws.Cell(i + 2, 3), r.StoreCount);
+            SetIntCell(ws.Cell(i + 2, 4), r.TotalHeadcount);
+            SetIntCell(ws.Cell(i + 2, 5), r.TotalResignations);
+            SetPercentCell(ws.Cell(i + 2, 6), r.AvgTurnoverRate);
         }
         Finalize(ws);
     }
@@ -630,10 +748,13 @@ public class ReportService : IReportService
     private async Task AddOcOmComparisonSheetsAsync(XLWorkbook wb, int month, int year, string role, string? assignedName, int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
     {
         var result = await _dashboard.GetOcOmAnalysisAsync(month, year, role, assignedName, fromMonth, fromYear, om, oc, soc, od, months);
-        WriteOcOmSheet(wb, "By Operation Consultant", "Operation Consultant", result.OcRows);
-        WriteOcOmSheet(wb, "By Operation Manager", "Operation Manager", result.OmRows);
-        WriteOcOmSheet(wb, "By Senior Op. Consultant", "Senior Operation Consultant", result.SocRows);
-        WriteOcOmSheet(wb, "By Operation Director", "Operation Director", result.OdRows);
+        var period = (fromMonth.HasValue && fromYear.HasValue && (fromMonth != month || fromYear != year))
+            ? $"{fromMonth:D2}-{fromYear} to {month:D2}-{year}"
+            : $"{month:D2}-{year}";
+        WriteOcOmSheet(wb, "By Operation Consultant", "Operation Consultant", result.OcRows, period);
+        WriteOcOmSheet(wb, "By Operation Manager", "Operation Manager", result.OmRows, period);
+        WriteOcOmSheet(wb, "By Senior Op. Consultant", "Senior Operation Consultant", result.SocRows, period);
+        WriteOcOmSheet(wb, "By Operation Director", "Operation Director", result.OdRows, period);
     }
 
     public async Task<XLWorkbook> BuildOcOmComparisonReportAsync(int month, int year, string role, string? assignedName, int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)

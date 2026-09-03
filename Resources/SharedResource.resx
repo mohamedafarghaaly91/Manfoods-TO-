@@ -930,7 +930,7 @@
   <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>Deep Analytics</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
-  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>Company-wide action-plan status — active plans, this month's opened/resolved, resolution trend, top reasons, and per-store severity, ownership, and task progress.</value></data>
+  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>Per-store action-plan status — severity, signals, age, ownership, and task progress for every accessible store.</value></data>
   <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>Stores Overview</value></data>
   <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>Every store's Headcount, Turnover, Action Center status, and Early Warning high-risk count for the selected month — the single cross-page view of store health.</value></data>
   <data name="Rep_Title_Stores" xml:space="preserve"><value>Store Comparison</value></data>

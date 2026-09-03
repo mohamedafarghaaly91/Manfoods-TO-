@@ -107,3 +107,16 @@ public class StoreHeadcountRow
     public Dictionary<string, int> GenderBreakdown { get; set; } = new();
     public Dictionary<string, int> PayrollGroupBreakdown { get; set; } = new();
 }
+
+/// <summary>One active-employee row for the Workforce report's detailed sheet.</summary>
+public class EmployeeDetailRow
+{
+    public string EmployeeId { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Store { get; set; } = "";
+    public string JobTitle { get; set; } = "";
+    public string Grade { get; set; } = "";
+    public string PayrollGroup { get; set; } = "";
+    public string Gender { get; set; } = "";
+    public DateOnly? HireDate { get; set; }
+}
