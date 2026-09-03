@@ -1063,6 +1063,29 @@
   <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>Please choose a file type and select a valid Excel file.</value></data>
   <data name="Msg_UpdateFileFailed" xml:space="preserve"><value>Updating the {0} file for {1}/{2} failed: {3}</value></data>
   <data name="Msg_ExitUploadFailed" xml:space="preserve"><value>Exit interview data upload failed: {0}</value></data>
+  <data name="Msg_FileTooLarge" xml:space="preserve"><value>File size exceeds the 10 MB limit.</value></data>
+  <data name="Msg_OnlyExcelFiles" xml:space="preserve"><value>Only Excel files (.xlsx / .xls) are allowed.</value></data>
+  <data name="Msg_IssueMissingStore" xml:space="preserve"><value>{0} missing Store</value></data>
+  <data name="Msg_IssueBadHireDate" xml:space="preserve"><value>{0} with an unreadable Hire Date</value></data>
+  <data name="Msg_IssueBadResignDate" xml:space="preserve"><value>{0} with an unreadable Resignation Date</value></data>
+  <data name="Msg_IssuesSummary" xml:space="preserve"><value>{0}: {1} — those rows were still imported but won't show up correctly in store-scoped or tenure-based reports.</value></data>
+  <data name="Msg_JobMonthlyData" xml:space="preserve"><value>Monthly Data — {0}</value></data>
+  <data name="Msg_UploadPeriodSuccess" xml:space="preserve"><value>Uploaded {0} active employees, {1} resignations, and {2} store references.</value></data>
+  <data name="Msg_UnmatchedRoleEmails" xml:space="preserve"><value>⚠ Missing {0}s: {1} email(s) don't match any account: {2}.</value></data>
+  <data name="Msg_ExitProcessedWithMissingStore" xml:space="preserve"><value>Processed {0} exit interview responses ({1} missing a Store — check the "المطعم" column for those rows)</value></data>
+  <data name="Msg_ExitProcessed" xml:space="preserve"><value>Processed {0} exit interview responses</value></data>
+  <data name="Msg_JobActiveEmployees" xml:space="preserve"><value>Active Employees — {0}</value></data>
+  <data name="Msg_UpdatedActiveEmployees" xml:space="preserve"><value>Updated Active Employees for {0} — {1} records.</value></data>
+  <data name="Msg_JobResignations" xml:space="preserve"><value>Resignations — {0}</value></data>
+  <data name="Msg_UpdatedResignations" xml:space="preserve"><value>Updated Resignations for {0} — {1} records.</value></data>
+  <data name="Msg_JobStoreReference" xml:space="preserve"><value>Store Reference — {0}</value></data>
+  <data name="Msg_UpdatedStoreReference" xml:space="preserve"><value>Updated Store Reference for {0} — {1} records.</value></data>
+  <data name="Msg_UnknownFileType" xml:space="preserve"><value>Unknown file type.</value></data>
+  <data name="Msg_NoAccountFound" xml:space="preserve"><value>No account found with that email or phone.</value></data>
+  <data name="Msg_NoActiveOtp" xml:space="preserve"><value>No active OTP for this account. Ask your admin for a new one.</value></data>
+  <data name="Msg_TooManyOtpAttempts" xml:space="preserve"><value>Too many wrong attempts. Ask your admin for a new OTP.</value></data>
+  <data name="Msg_IncorrectOtpCode" xml:space="preserve"><value>Incorrect code. {0} attempt(s) left.</value></data>
+  <data name="Msg_PasswordSetSuccess" xml:space="preserve"><value>Password set successfully. You can now log in.</value></data>
 
   <!-- API error messages surfaced in the UI -->
   <data name="Api_NoteTextRequired" xml:space="preserve"><value>Note text is required.</value></data>

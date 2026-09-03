@@ -1064,6 +1064,29 @@
   <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.</value></data>
   <data name="Msg_UpdateFileFailed" xml:space="preserve"><value>فشل تحديث ملف {0} لـ {1}/{2}: {3}</value></data>
   <data name="Msg_ExitUploadFailed" xml:space="preserve"><value>فشل رفع بيانات مقابلات الخروج: {0}</value></data>
+  <data name="Msg_FileTooLarge" xml:space="preserve"><value>حجم الملف يتجاوز الحد الأقصى 10 ميجابايت.</value></data>
+  <data name="Msg_OnlyExcelFiles" xml:space="preserve"><value>يُسمح فقط بملفات إكسيل (.xlsx / .xls).</value></data>
+  <data name="Msg_IssueMissingStore" xml:space="preserve"><value>{0} بدون فرع محدد</value></data>
+  <data name="Msg_IssueBadHireDate" xml:space="preserve"><value>{0} بتاريخ تعيين غير مقروء</value></data>
+  <data name="Msg_IssueBadResignDate" xml:space="preserve"><value>{0} بتاريخ استقالة غير مقروء</value></data>
+  <data name="Msg_IssuesSummary" xml:space="preserve"><value>{0}: {1} — تم استيراد هذه الصفوف رغم ذلك، لكنها لن تظهر بشكل صحيح في التقارير المرتبطة بالفروع أو مدة الخدمة.</value></data>
+  <data name="Msg_JobMonthlyData" xml:space="preserve"><value>بيانات شهرية — {0}</value></data>
+  <data name="Msg_UploadPeriodSuccess" xml:space="preserve"><value>تم رفع {0} موظف نشط، و{1} استقالة، و{2} مرجع فرع.</value></data>
+  <data name="Msg_UnmatchedRoleEmails" xml:space="preserve"><value>⚠ {0} مفقود: {1} إيميل غير مطابق لأي حساب: {2}.</value></data>
+  <data name="Msg_ExitProcessedWithMissingStore" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج ({1} بدون فرع محدد — تحقق من عمود "المطعم" لهذه الصفوف)</value></data>
+  <data name="Msg_ExitProcessed" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج</value></data>
+  <data name="Msg_JobActiveEmployees" xml:space="preserve"><value>الموظفون النشطون — {0}</value></data>
+  <data name="Msg_UpdatedActiveEmployees" xml:space="preserve"><value>تم تحديث الموظفين النشطين لشهر {0} — {1} سجل.</value></data>
+  <data name="Msg_JobResignations" xml:space="preserve"><value>الاستقالات — {0}</value></data>
+  <data name="Msg_UpdatedResignations" xml:space="preserve"><value>تم تحديث الاستقالات لشهر {0} — {1} سجل.</value></data>
+  <data name="Msg_JobStoreReference" xml:space="preserve"><value>مرجع الفروع — {0}</value></data>
+  <data name="Msg_UpdatedStoreReference" xml:space="preserve"><value>تم تحديث مرجع الفروع لشهر {0} — {1} سجل.</value></data>
+  <data name="Msg_UnknownFileType" xml:space="preserve"><value>نوع ملف غير معروف.</value></data>
+  <data name="Msg_NoAccountFound" xml:space="preserve"><value>لا يوجد حساب بهذا البريد الإلكتروني أو رقم الهاتف.</value></data>
+  <data name="Msg_NoActiveOtp" xml:space="preserve"><value>لا يوجد رمز تحقق فعّال لهذا الحساب. اطلب من المسؤول رمزًا جديدًا.</value></data>
+  <data name="Msg_TooManyOtpAttempts" xml:space="preserve"><value>محاولات خاطئة كثيرة جدًا. اطلب من المسؤول رمز تحقق جديد.</value></data>
+  <data name="Msg_IncorrectOtpCode" xml:space="preserve"><value>رمز غير صحيح. متبقي {0} محاولة.</value></data>
+  <data name="Msg_PasswordSetSuccess" xml:space="preserve"><value>تم تعيين كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.</value></data>
 
   <!-- API error messages surfaced in the UI -->
   <data name="Api_NoteTextRequired" xml:space="preserve"><value>نص الملاحظة مطلوب.</value></data>

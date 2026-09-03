@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
@@ -19,10 +21,11 @@ public class UploadService : IUploadService
     private readonly IBackgroundJobTracker _jobTracker;
     private readonly IMemoryCache _cache;
     private readonly ILogger<UploadService> _logger;
+    private readonly IStringLocalizer<SharedResource> _L;
 
     private static readonly HashSet<string> PeriodFileTypes = new() { "active_employees", "resignations", "store_reference" };
 
-    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, IBackgroundJobTracker jobTracker, IMemoryCache cache, ILogger<UploadService> logger)
+    public UploadService(AppDbContext db, IStoreAccessService storeAccess, IServiceScopeFactory scopeFactory, IBackgroundJobTracker jobTracker, IMemoryCache cache, ILogger<UploadService> logger, IStringLocalizer<SharedResource> localizer)
     {
         _db = db;
         _storeAccess = storeAccess;
@@ -30,6 +33,7 @@ public class UploadService : IUploadService
         _jobTracker = jobTracker;
         _cache = cache;
         _logger = logger;
+        _L = localizer;
     }
 
     // ActiveEmployees/Resignations changed — every cached full-table read derived
@@ -129,14 +133,14 @@ public class UploadService : IUploadService
         return null;
     }
 
-    private static void ValidateFile(IFormFile file)
+    private void ValidateFile(IFormFile file)
     {
         const long maxBytes = 10 * 1024 * 1024; // 10 MB
         if (file.Length > maxBytes)
-            throw new InvalidOperationException("File size exceeds the 10 MB limit.");
+            throw new InvalidOperationException(_L["Msg_FileTooLarge"].Value);
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (ext != ".xlsx" && ext != ".xls")
-            throw new InvalidOperationException("Only Excel files (.xlsx / .xls) are allowed.");
+            throw new InvalidOperationException(_L["Msg_OnlyExcelFiles"].Value);
     }
 
     private static string GetContentType(string fileName) =>
@@ -233,13 +237,13 @@ public class UploadService : IUploadService
         return (records, new ParseIssues(missingStore, badHireDate, badResignDate));
     }
 
-    private static string? DescribeIssues(string sectionLabel, ParseIssues issues)
+    private string? DescribeIssues(string sectionLabel, ParseIssues issues)
     {
         var parts = new List<string>();
-        if (issues.MissingStore > 0) parts.Add($"{issues.MissingStore} missing Store");
-        if (issues.MissingOrInvalidHireDate > 0) parts.Add($"{issues.MissingOrInvalidHireDate} with an unreadable Hire Date");
-        if (issues.MissingOrInvalidResignationDate > 0) parts.Add($"{issues.MissingOrInvalidResignationDate} with an unreadable Resignation Date");
-        return parts.Count == 0 ? null : $"{sectionLabel}: {string.Join(", ", parts)} — those rows were still imported but won't show up correctly in store-scoped or tenure-based reports.";
+        if (issues.MissingStore > 0) parts.Add(string.Format(_L["Msg_IssueMissingStore"].Value, issues.MissingStore));
+        if (issues.MissingOrInvalidHireDate > 0) parts.Add(string.Format(_L["Msg_IssueBadHireDate"].Value, issues.MissingOrInvalidHireDate));
+        if (issues.MissingOrInvalidResignationDate > 0) parts.Add(string.Format(_L["Msg_IssueBadResignDate"].Value, issues.MissingOrInvalidResignationDate));
+        return parts.Count == 0 ? null : string.Format(_L["Msg_IssuesSummary"].Value, sectionLabel, string.Join(", ", parts));
     }
 
     private static List<StoreReference> ParseStoreReference(byte[] fileBytes, int month, int year)
@@ -313,7 +317,7 @@ public class UploadService : IUploadService
         await tx.CommitAsync();
         InvalidateScorecardHistoricalCache();
 
-        FireAndForgetDetection(month, year, $"Monthly Data — {new DateTime(year, month, 1):MMMM yyyy}");
+        FireAndForgetDetection(month, year, string.Format(_L["Msg_JobMonthlyData"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy")));
 
         var counts = new Dictionary<string, int>
         {
@@ -322,12 +326,12 @@ public class UploadService : IUploadService
             ["store_reference"] = storeRecords.Count,
         };
 
-        var message = $"Uploaded {activeRecords.Count} active employees, {resignRecords.Count} resignations, and {storeRecords.Count} store references.";
+        var message = string.Format(_L["Msg_UploadPeriodSuccess"].Value, activeRecords.Count, resignRecords.Count, storeRecords.Count);
 
         var warningLines = new[]
         {
-            DescribeIssues("Active Employees", activeIssues),
-            DescribeIssues("Resignations", resignIssues),
+            DescribeIssues(_L["UL_ActiveEmployees"].Value, activeIssues),
+            DescribeIssues(_L["Common_Resignations"].Value, resignIssues),
             await BuildUnmatchedRoleEmailWarningAsync(storeRecords),
         }.Where(w => w != null).ToList();
         var warning = warningLines.Count == 0 ? null : string.Join("\n", warningLines);
@@ -364,7 +368,7 @@ public class UploadService : IUploadService
             if (unmatched.Count == 0) continue;
 
             var label = role.Replace("_", " ");
-            lines.Add($"⚠ Missing {label}s: {unmatched.Count} email(s) don't match any account: {string.Join(", ", unmatched)}.");
+            lines.Add(string.Format(_L["Msg_UnmatchedRoleEmails"].Value, label, unmatched.Count, string.Join(", ", unmatched)));
         }
 
         return lines.Count == 0 ? null : string.Join("\n", lines);
@@ -546,8 +550,8 @@ public class UploadService : IUploadService
 
         var missingStore = parsed.Count(p => string.IsNullOrWhiteSpace(p.Row.Store));
         var message = missingStore > 0
-            ? $"Processed {parsed.Count} exit interview responses ({missingStore} missing a Store — check the \"المطعم\" column for those rows)"
-            : $"Processed {parsed.Count} exit interview responses";
+            ? string.Format(_L["Msg_ExitProcessedWithMissingStore"].Value, parsed.Count, missingStore)
+            : string.Format(_L["Msg_ExitProcessed"].Value, parsed.Count);
         return (true, message, parsed.Count);
     }
 
@@ -666,8 +670,8 @@ public class UploadService : IUploadService
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
                 InvalidateScorecardHistoricalCache();
-                FireAndForgetDetection(month, year, $"Active Employees — {new DateTime(year, month, 1):MMMM yyyy}");
-                return (true, $"Updated Active Employees for {new DateTime(year, month, 1):MMMM yyyy} — {activeRecords.Count} records.", DescribeIssues("Active Employees", activeIssues));
+                FireAndForgetDetection(month, year, string.Format(_L["Msg_JobActiveEmployees"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy")));
+                return (true, string.Format(_L["Msg_UpdatedActiveEmployees"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy"), activeRecords.Count), DescribeIssues(_L["UL_ActiveEmployees"].Value, activeIssues));
 
             case "resignations":
                 await _db.Resignations.Where(r => r.Month == month && r.Year == year).ExecuteDeleteAsync();
@@ -678,8 +682,8 @@ public class UploadService : IUploadService
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
                 InvalidateScorecardHistoricalCache();
-                FireAndForgetDetection(month, year, $"Resignations — {new DateTime(year, month, 1):MMMM yyyy}");
-                return (true, $"Updated Resignations for {new DateTime(year, month, 1):MMMM yyyy} — {resignRecords.Count} records.", DescribeIssues("Resignations", resignIssues));
+                FireAndForgetDetection(month, year, string.Format(_L["Msg_JobResignations"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy")));
+                return (true, string.Format(_L["Msg_UpdatedResignations"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy"), resignRecords.Count), DescribeIssues(_L["Common_Resignations"].Value, resignIssues));
 
             case "store_reference":
                 await _db.StoreReferences.Where(s => s.Month == month && s.Year == year).ExecuteDeleteAsync();
@@ -689,12 +693,12 @@ public class UploadService : IUploadService
                 _db.UploadLogs.Add(new UploadLog { FileType = "store_reference", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
-                FireAndForgetDetection(month, year, $"Store Reference — {new DateTime(year, month, 1):MMMM yyyy}");
+                FireAndForgetDetection(month, year, string.Format(_L["Msg_JobStoreReference"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy")));
                 var storeWarning = await BuildUnmatchedRoleEmailWarningAsync(storeRecords);
-                return (true, $"Updated Store Reference for {new DateTime(year, month, 1):MMMM yyyy} — {storeRecords.Count} records.", storeWarning);
+                return (true, string.Format(_L["Msg_UpdatedStoreReference"].Value, new DateTime(year, month, 1).ToString("MMMM yyyy"), storeRecords.Count), storeWarning);
 
             default:
-                return (false, "Unknown file type.", null);
+                return (false, _L["Msg_UnknownFileType"].Value, null);
         }
     }
 

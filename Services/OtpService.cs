@@ -1,17 +1,20 @@
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
 public class OtpService : IOtpService
 {
     private readonly AppDbContext _db;
+    private readonly IStringLocalizer<SharedResource> _L;
     private static readonly TimeSpan Expiry = TimeSpan.FromHours(4);
     private const int MaxFailedAttempts = 5;
 
-    public OtpService(AppDbContext db) => _db = db;
+    public OtpService(AppDbContext db, IStringLocalizer<SharedResource> localizer) { _db = db; _L = localizer; }
 
     private static string GenerateCode() => Random.Shared.Next(0, 1_000_000).ToString("D6");
 
@@ -88,13 +91,13 @@ public class OtpService : IOtpService
         identifier = identifier.Trim();
         var user = await _db.Users.FirstOrDefaultAsync(u =>
             u.Role != "Admin" && (u.Email == identifier.ToLower() || u.Phone == identifier));
-        if (user == null) return (false, "No account found with that email or phone.");
+        if (user == null) return (false, _L["Msg_NoAccountFound"].Value);
 
         var otp = await _db.PasswordResetOtps
             .Where(o => o.UserId == user.Id && !o.IsUsed && o.ExpiresAt > DateTime.UtcNow)
             .OrderByDescending(o => o.CreatedAt)
             .FirstOrDefaultAsync();
-        if (otp == null) return (false, "No active OTP for this account. Ask your admin for a new one.");
+        if (otp == null) return (false, _L["Msg_NoActiveOtp"].Value);
 
         if (otp.OtpCode != otpCode.Trim())
         {
@@ -102,13 +105,13 @@ public class OtpService : IOtpService
             if (otp.FailedAttempts >= MaxFailedAttempts) otp.IsUsed = true;
             await _db.SaveChangesAsync();
             return otp.IsUsed
-                ? (false, "Too many wrong attempts. Ask your admin for a new OTP.")
-                : (false, $"Incorrect code. {MaxFailedAttempts - otp.FailedAttempts} attempt(s) left.");
+                ? (false, _L["Msg_TooManyOtpAttempts"].Value)
+                : (false, string.Format(_L["Msg_IncorrectOtpCode"].Value, MaxFailedAttempts - otp.FailedAttempts));
         }
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         otp.IsUsed = true;
         await _db.SaveChangesAsync();
-        return (true, "Password set successfully. You can now log in.");
+        return (true, _L["Msg_PasswordSetSuccess"].Value);
     }
 }
