@@ -880,4 +880,95 @@
   <data name="EI_InsightWeakestDesc" xml:space="preserve"><value>"{0}" has the lowest positive rate ({1}%, {2} responses) — worth investigating.</value></data>
   <data name="EI_InsightStrongestTitle" xml:space="preserve"><value>Strongest Engagement Driver</value></data>
   <data name="EI_InsightStrongestDesc" xml:space="preserve"><value>"{0}" has the highest positive rate ({1}%, {2} responses).</value></data>
+
+  <!-- Comparisons page -->
+  <data name="CMP_TurnoverByStoreSub" xml:space="preserve"><value>Top 8 stores by combined A+B turnover — or a single A vs B bar if a store is selected in either panel</value></data>
+  <data name="CMP_NinetyByStoreSub" xml:space="preserve"><value>Top 8 stores by combined A+B 90-day rate — or a single A vs B bar if a store is selected in either panel</value></data>
+  <data name="CMP_TurnoverA" xml:space="preserve"><value>Turnover% A</value></data>
+  <data name="CMP_TurnoverB" xml:space="preserve"><value>Turnover% B</value></data>
+  <data name="CMP_NinetyA" xml:space="preserve"><value>90-Day% A</value></data>
+  <data name="CMP_NinetyB" xml:space="preserve"><value>90-Day% B</value></data>
+  <data name="CMP_ChangeAB" xml:space="preserve"><value>Change (A−B)</value></data>
+  <data name="CMP_TurnoverDiffTitle" xml:space="preserve"><value>Turnover% A − Turnover% B</value></data>
+  <data name="CMP_NinetyDiffTitle" xml:space="preserve"><value>90-Day% A − 90-Day% B</value></data>
+  <data name="CMP_KpiHeadcountDesc" xml:space="preserve"><value>Employees on the active roster</value></data>
+  <data name="CMP_KpiNewHiresDesc" xml:space="preserve"><value>Employees hired in the period</value></data>
+  <data name="CMP_KpiResignationsDesc" xml:space="preserve"><value>Total resignations in the period</value></data>
+  <data name="CMP_KpiTurnoverDesc" xml:space="preserve"><value>Resignations ÷ average headcount</value></data>
+  <data name="CMP_KpiEarlyLeavers" xml:space="preserve"><value>90-Day Early Leavers</value></data>
+  <data name="CMP_KpiEarlyLeaversDesc" xml:space="preserve"><value>Resigned within 90 days of hire</value></data>
+  <data name="CMP_KpiNinetyRateDesc" xml:space="preserve"><value>Early leavers ÷ hires in the cohort</value></data>
+  <data name="CMP_DeltaSuffix" xml:space="preserve"><value>(A−B)</value></data>
+  <data name="CMP_Overall" xml:space="preserve"><value>Overall</value></data>
+  <data name="CMP_TitleNoChange" xml:space="preserve"><value>{0}: No Change</value></data>
+  <data name="CMP_TitleImproved" xml:space="preserve"><value>{0} Improved</value></data>
+  <data name="CMP_TitleWorsened" xml:space="preserve"><value>{0} Worsened</value></data>
+  <data name="CMP_InsightDesc" xml:space="preserve"><value>&lt;b&gt;{0}&lt;/b&gt;: {1}% vs &lt;b&gt;{2}&lt;/b&gt;: {3}% — {4}.</value></data>
+  <data name="CMP_Unchanged" xml:space="preserve"><value>essentially unchanged</value></data>
+  <data name="CMP_Better" xml:space="preserve"><value>↓ {0}pt better</value></data>
+  <data name="CMP_Worse" xml:space="preserve"><value>↑ {0}pt worse</value></data>
+  <data name="CMP_MoverTitleImproved" xml:space="preserve"><value>Most Improved Store: {0}</value></data>
+  <data name="CMP_MoverTitleWorsened" xml:space="preserve"><value>Most Worsened Store: {0}</value></data>
+  <data name="CMP_MoverDescImproved" xml:space="preserve"><value>Turnover {0}% ({1}) vs {2}% ({3}) — ↓ {4}pt.</value></data>
+  <data name="CMP_MoverDescWorsened" xml:space="preserve"><value>Turnover {0}% ({1}) vs {2}% ({3}) — ↑ {4}pt.</value></data>
+  <data name="CMP_MetricNinetyRate" xml:space="preserve"><value>90-Day Rate</value></data>
+
+  <!-- Branding and common misc -->
+  <data name="Brand_Hub" xml:space="preserve"><value>Workforce Insights Hub</value></data>
+  <data name="Brand_CrewLevel" xml:space="preserve"><value>Crew Level</value></data>
+  <data name="Brand_HubCrewLevel" xml:space="preserve"><value>Workforce Insights Hub – Crew Level</value></data>
+  <data name="Brand_McdEgypt" xml:space="preserve"><value>McDonald's Egypt</value></data>
+  <data name="Brand_CrewHub" xml:space="preserve"><value>Crew Workforce Insights Hub</value></data>
+  <data name="Common_Error" xml:space="preserve"><value>Error</value></data>
+  <data name="AC_EarlyLeaverPct" xml:space="preserve"><value>Early Leaver %</value></data>
+  <data name="AC_Signals" xml:space="preserve"><value>Signals</value></data>
+  <data name="AC_SignalsAxis" xml:space="preserve"><value># signals</value></data>
+
+  <!-- Reports catalog + month names -->
+  <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>Store Operations</value></data>
+  <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>Turnover &amp; Workforce</value></data>
+  <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>Deep Analytics</value></data>
+  <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
+  <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
+  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>Company-wide action-plan status — active plans, this month's opened/resolved, resolution trend, top reasons, and per-store severity, ownership, and task progress.</value></data>
+  <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>Stores Overview</value></data>
+  <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>Every store's Headcount, Turnover, Action Center status, and Early Warning high-risk count for the selected month — the single cross-page view of store health.</value></data>
+  <data name="Rep_Title_Summary" xml:space="preserve"><value>Monthly Summary</value></data>
+  <data name="Rep_Desc_Summary" xml:space="preserve"><value>Headcount, New Hires, Resignations, and Turnover Rate for the selected month — broken down by Job Title, Tenure, and Gender.</value></data>
+  <data name="Rep_Title_Stores" xml:space="preserve"><value>Store Comparison</value></data>
+  <data name="Rep_Desc_Stores" xml:space="preserve"><value>Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.</value></data>
+  <data name="Rep_Title_TrendMatrix" xml:space="preserve"><value>Turnover Trend Matrix</value></data>
+  <data name="Rep_Desc_TrendMatrix" xml:space="preserve"><value>Full data table — one row per store, one column per month, showing Turnover % across all available periods from the selected year onward, with an average column.</value></data>
+  <data name="Rep_Title_Workforce" xml:space="preserve"><value>Workforce</value></data>
+  <data name="Rep_Desc_Workforce" xml:space="preserve"><value>Active workforce composition for the selected month — Headcount by Job Title, Payroll Group, Tenure, and Gender — plus the Headcount Trend over time.</value></data>
+  <data name="Rep_Title_OcOmComparison" xml:space="preserve"><value>OC / OM Comparison</value></data>
+  <data name="Rep_Desc_OcOmComparison" xml:space="preserve"><value>Stores, headcount, resignations, and average turnover rate rolled up by Operation Consultant, Operation Manager, Senior Operation Consultant, and Operation Director.</value></data>
+  <data name="Rep_Title_NinetyDay" xml:space="preserve"><value>90-Day Turnover</value></data>
+  <data name="Rep_Desc_NinetyDay" xml:space="preserve"><value>Cohort trend, full list of early leavers, by-store rates, and aggregated reasons — across all available periods.</value></data>
+  <data name="Rep_Title_NinetyDayTrendMatrix" xml:space="preserve"><value>90-Day Trend Matrix</value></data>
+  <data name="Rep_Desc_NinetyDayTrendMatrix" xml:space="preserve"><value>Full data table — one row per store, one column per hire-cohort month, showing the 90-day early-leave rate across all available cohorts, with an average column.</value></data>
+  <data name="Rep_Title_Retention" xml:space="preserve"><value>Retention</value></data>
+  <data name="Rep_Desc_Retention" xml:space="preserve"><value>Milestone rates (90d–5yr), survival curve, multi-year trend, store leaderboard, and workforce tenure distribution.</value></data>
+  <data name="Rep_Title_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
+  <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>KPI rankings for Store Leaders, Operation Consultants, and Operation Managers — Turnover, 90-Day, Retention, and Exit Sentiment.</value></data>
+  <data name="Rep_Title_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>
+  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>At-risk employee watchlist with ★ risk stars (7 scoring criteria), flagged reasons, hire date, and tenure — scoped to the selected store(s).</value></data>
+  <data name="Rep_Title_ExitInterviews" xml:space="preserve"><value>Exit Interviews Report</value></data>
+  <data name="Rep_Desc_ExitInterviews" xml:space="preserve"><value>Reasons for leaving, engagement drivers, workload ratings, overall experience, and anonymous comments — aggregated across all periods matching the selected filters.</value></data>
+  <data name="Rep_UploadPayrollHint" xml:space="preserve"><value>Upload payroll data to unlock all reports.</value></data>
+  <data name="Rep_NotFound" xml:space="preserve"><value>Report not found</value></data>
+  <data name="Rep_Filters" xml:space="preserve"><value>Filters</value></data>
+  <data name="Rep_FiltersHint" xml:space="preserve"><value>— leave a filter empty for "all"</value></data>
+  <data name="Month_January" xml:space="preserve"><value>January</value></data>
+  <data name="Month_February" xml:space="preserve"><value>February</value></data>
+  <data name="Month_March" xml:space="preserve"><value>March</value></data>
+  <data name="Month_April" xml:space="preserve"><value>April</value></data>
+  <data name="Month_May" xml:space="preserve"><value>May</value></data>
+  <data name="Month_June" xml:space="preserve"><value>June</value></data>
+  <data name="Month_July" xml:space="preserve"><value>July</value></data>
+  <data name="Month_August" xml:space="preserve"><value>August</value></data>
+  <data name="Month_September" xml:space="preserve"><value>September</value></data>
+  <data name="Month_October" xml:space="preserve"><value>October</value></data>
+  <data name="Month_November" xml:space="preserve"><value>November</value></data>
+  <data name="Month_December" xml:space="preserve"><value>December</value></data>
 </root>

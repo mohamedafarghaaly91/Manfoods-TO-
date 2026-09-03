@@ -881,4 +881,95 @@
   <data name="EI_InsightWeakestDesc" xml:space="preserve"><value>"{0}" لديه أدنى نسبة إيجابية ({1}%، {2} رد) — يستحق الدراسة.</value></data>
   <data name="EI_InsightStrongestTitle" xml:space="preserve"><value>أقوى محركات الاندماج</value></data>
   <data name="EI_InsightStrongestDesc" xml:space="preserve"><value>"{0}" لديه أعلى نسبة إيجابية ({1}%، {2} رد).</value></data>
+
+  <!-- Comparisons page -->
+  <data name="CMP_TurnoverByStoreSub" xml:space="preserve"><value>أعلى 8 فروع حسب الدوران المجمّع لـ A+B — أو عمود واحد A مقابل B عند اختيار فرع في أي من اللوحتين</value></data>
+  <data name="CMP_NinetyByStoreSub" xml:space="preserve"><value>أعلى 8 فروع حسب معدل 90 يوم المجمّع لـ A+B — أو عمود واحد A مقابل B عند اختيار فرع في أي من اللوحتين</value></data>
+  <data name="CMP_TurnoverA" xml:space="preserve"><value>معدل الدوران% A</value></data>
+  <data name="CMP_TurnoverB" xml:space="preserve"><value>معدل الدوران% B</value></data>
+  <data name="CMP_NinetyA" xml:space="preserve"><value>معدل 90 يوم% A</value></data>
+  <data name="CMP_NinetyB" xml:space="preserve"><value>معدل 90 يوم% B</value></data>
+  <data name="CMP_ChangeAB" xml:space="preserve"><value>الفرق (A−B)</value></data>
+  <data name="CMP_TurnoverDiffTitle" xml:space="preserve"><value>معدل الدوران% A − معدل الدوران% B</value></data>
+  <data name="CMP_NinetyDiffTitle" xml:space="preserve"><value>معدل 90 يوم% A − معدل 90 يوم% B</value></data>
+  <data name="CMP_KpiHeadcountDesc" xml:space="preserve"><value>الموظفون على القائمة النشطة</value></data>
+  <data name="CMP_KpiNewHiresDesc" xml:space="preserve"><value>الموظفون الذين تم تعيينهم في الفترة</value></data>
+  <data name="CMP_KpiResignationsDesc" xml:space="preserve"><value>إجمالي الاستقالات في الفترة</value></data>
+  <data name="CMP_KpiTurnoverDesc" xml:space="preserve"><value>الاستقالات ÷ متوسط عدد الموظفين</value></data>
+  <data name="CMP_KpiEarlyLeavers" xml:space="preserve"><value>المغادرون خلال 90 يومًا</value></data>
+  <data name="CMP_KpiEarlyLeaversDesc" xml:space="preserve"><value>استقالوا خلال 90 يومًا من التعيين</value></data>
+  <data name="CMP_KpiNinetyRateDesc" xml:space="preserve"><value>المغادرون مبكرًا ÷ التعيينات في المجموعة</value></data>
+  <data name="CMP_DeltaSuffix" xml:space="preserve"><value>(A−B)</value></data>
+  <data name="CMP_Overall" xml:space="preserve"><value>الإجمالي العام</value></data>
+  <data name="CMP_TitleNoChange" xml:space="preserve"><value>{0}: بدون تغيير</value></data>
+  <data name="CMP_TitleImproved" xml:space="preserve"><value>تحسّن {0}</value></data>
+  <data name="CMP_TitleWorsened" xml:space="preserve"><value>تراجع {0}</value></data>
+  <data name="CMP_InsightDesc" xml:space="preserve"><value>&lt;b&gt;{0}&lt;/b&gt;: {1}% مقابل &lt;b&gt;{2}&lt;/b&gt;: {3}% — {4}.</value></data>
+  <data name="CMP_Unchanged" xml:space="preserve"><value>دون تغيير يُذكر</value></data>
+  <data name="CMP_Better" xml:space="preserve"><value>↓ أفضل بمقدار {0} نقطة</value></data>
+  <data name="CMP_Worse" xml:space="preserve"><value>↑ أسوأ بمقدار {0} نقطة</value></data>
+  <data name="CMP_MoverTitleImproved" xml:space="preserve"><value>أكثر فرع تحسّنًا: {0}</value></data>
+  <data name="CMP_MoverTitleWorsened" xml:space="preserve"><value>أكثر فرع تراجعًا: {0}</value></data>
+  <data name="CMP_MoverDescImproved" xml:space="preserve"><value>الدوران {0}% ({1}) مقابل {2}% ({3}) — ↓ {4} نقطة.</value></data>
+  <data name="CMP_MoverDescWorsened" xml:space="preserve"><value>الدوران {0}% ({1}) مقابل {2}% ({3}) — ↑ {4} نقطة.</value></data>
+  <data name="CMP_MetricNinetyRate" xml:space="preserve"><value>معدل 90 يوم</value></data>
+
+  <!-- Branding and common misc -->
+  <data name="Brand_Hub" xml:space="preserve"><value>مركز رؤى القوى العاملة</value></data>
+  <data name="Brand_CrewLevel" xml:space="preserve"><value>مستوى طاقم العمل</value></data>
+  <data name="Brand_HubCrewLevel" xml:space="preserve"><value>مركز رؤى القوى العاملة – مستوى طاقم العمل</value></data>
+  <data name="Brand_McdEgypt" xml:space="preserve"><value>ماكدونالدز مصر</value></data>
+  <data name="Brand_CrewHub" xml:space="preserve"><value>مركز رؤى القوى العاملة لطاقم العمل</value></data>
+  <data name="Common_Error" xml:space="preserve"><value>خطأ</value></data>
+  <data name="AC_EarlyLeaverPct" xml:space="preserve"><value>نسبة المغادرة المبكرة %</value></data>
+  <data name="AC_Signals" xml:space="preserve"><value>المؤشرات</value></data>
+  <data name="AC_SignalsAxis" xml:space="preserve"><value>عدد المؤشرات</value></data>
+
+  <!-- Reports catalog + month names -->
+  <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>عمليات الفروع</value></data>
+  <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>الدوران والقوى العاملة</value></data>
+  <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>التحليلات المتعمقة</value></data>
+  <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
+  <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>مركز الإجراءات</value></data>
+  <data name="Rep_Desc_ActionCenter" xml:space="preserve"><value>حالة خطط العمل على مستوى الشركة — الخطط النشطة، ما تم فتحه/إغلاقه هذا الشهر، اتجاه الإغلاق، أبرز الأسباب، ودرجة الخطورة والمسؤولية وتقدم المهام لكل فرع.</value></data>
+  <data name="Rep_Title_StoresOverview" xml:space="preserve"><value>نظرة عامة على الفروع</value></data>
+  <data name="Rep_Desc_StoresOverview" xml:space="preserve"><value>عدد الموظفين ومعدل الدوران وحالة مركز الإجراءات وعدد حالات الخطورة العالية في الإنذار المبكر لكل فرع خلال الشهر المحدد — عرض موحّد لصحة الفروع.</value></data>
+  <data name="Rep_Title_Summary" xml:space="preserve"><value>الملخص الشهري</value></data>
+  <data name="Rep_Desc_Summary" xml:space="preserve"><value>عدد الموظفين والتعيينات الجديدة والاستقالات ومعدل الدوران للشهر المحدد — موزّعة حسب المسمى الوظيفي ومدة الخدمة والنوع.</value></data>
+  <data name="Rep_Title_Stores" xml:space="preserve"><value>مقارنة الفروع</value></data>
+  <data name="Rep_Desc_Stores" xml:space="preserve"><value>عرض متجاور لكل الفروع خلال الشهر المحدد — عدد الموظفين والتعيينات والاستقالات ومعدل الدوران لكل فرع.</value></data>
+  <data name="Rep_Title_TrendMatrix" xml:space="preserve"><value>مصفوفة اتجاه الدوران</value></data>
+  <data name="Rep_Desc_TrendMatrix" xml:space="preserve"><value>جدول بيانات كامل — صف لكل فرع وعمود لكل شهر، يعرض معدل الدوران % لكل الفترات المتاحة بدءًا من السنة المحددة، مع عمود للمتوسط.</value></data>
+  <data name="Rep_Title_Workforce" xml:space="preserve"><value>القوى العاملة</value></data>
+  <data name="Rep_Desc_Workforce" xml:space="preserve"><value>تركيبة القوى العاملة النشطة للشهر المحدد — عدد الموظفين حسب المسمى الوظيفي ومجموعة الرواتب ومدة الخدمة والنوع — إضافة إلى اتجاه عدد الموظفين عبر الزمن.</value></data>
+  <data name="Rep_Title_OcOmComparison" xml:space="preserve"><value>مقارنة مستشاري ومديري العمليات</value></data>
+  <data name="Rep_Desc_OcOmComparison" xml:space="preserve"><value>الفروع وعدد الموظفين والاستقالات ومتوسط معدل الدوران مجمّعة حسب مستشار العمليات ومدير العمليات ومستشار العمليات الأول ومدير العمليات التنفيذي.</value></data>
+  <data name="Rep_Title_NinetyDay" xml:space="preserve"><value>دوران 90 يومًا</value></data>
+  <data name="Rep_Desc_NinetyDay" xml:space="preserve"><value>اتجاه المجموعات، وقائمة كاملة بالمغادرين مبكرًا، والمعدلات حسب الفرع، والأسباب المجمّعة — لكل الفترات المتاحة.</value></data>
+  <data name="Rep_Title_NinetyDayTrendMatrix" xml:space="preserve"><value>مصفوفة اتجاه 90 يومًا</value></data>
+  <data name="Rep_Desc_NinetyDayTrendMatrix" xml:space="preserve"><value>جدول بيانات كامل — صف لكل فرع وعمود لكل شهر مجموعة تعيين، يعرض معدل المغادرة خلال 90 يومًا لكل المجموعات المتاحة، مع عمود للمتوسط.</value></data>
+  <data name="Rep_Title_Retention" xml:space="preserve"><value>الاحتفاظ</value></data>
+  <data name="Rep_Desc_Retention" xml:space="preserve"><value>معدلات المراحل (من 90 يومًا إلى 5 سنوات)، ومنحنى البقاء، والاتجاه متعدد السنوات، وترتيب الفروع، وتوزيع مدد خدمة القوى العاملة.</value></data>
+  <data name="Rep_Title_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
+  <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>ترتيب مؤشرات الأداء لقادة الفروع ومستشاري العمليات ومديري العمليات — الدوران و90 يومًا والاحتفاظ وانطباع إنهاء الخدمة.</value></data>
+  <data name="Rep_Title_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
+  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>قائمة متابعة الموظفين المعرضين للخطر مع نجوم الخطورة ★ (7 معايير تقييم)، والأسباب المرصودة، وتاريخ التعيين، ومدة الخدمة — للفروع المحددة.</value></data>
+  <data name="Rep_Title_ExitInterviews" xml:space="preserve"><value>تقرير مقابلات إنهاء الخدمة</value></data>
+  <data name="Rep_Desc_ExitInterviews" xml:space="preserve"><value>أسباب المغادرة، ومحركات الاندماج، وتقييمات عبء العمل، والتجربة العامة، والتعليقات المجهولة — مجمّعة عبر كل الفترات المطابقة للفلاتر المحددة.</value></data>
+  <data name="Rep_UploadPayrollHint" xml:space="preserve"><value>قم برفع بيانات الرواتب لإتاحة جميع التقارير.</value></data>
+  <data name="Rep_NotFound" xml:space="preserve"><value>التقرير غير موجود</value></data>
+  <data name="Rep_Filters" xml:space="preserve"><value>الفلاتر</value></data>
+  <data name="Rep_FiltersHint" xml:space="preserve"><value>— اترك الفلتر فارغًا لتحديد "الكل"</value></data>
+  <data name="Month_January" xml:space="preserve"><value>يناير</value></data>
+  <data name="Month_February" xml:space="preserve"><value>فبراير</value></data>
+  <data name="Month_March" xml:space="preserve"><value>مارس</value></data>
+  <data name="Month_April" xml:space="preserve"><value>أبريل</value></data>
+  <data name="Month_May" xml:space="preserve"><value>مايو</value></data>
+  <data name="Month_June" xml:space="preserve"><value>يونيو</value></data>
+  <data name="Month_July" xml:space="preserve"><value>يوليو</value></data>
+  <data name="Month_August" xml:space="preserve"><value>أغسطس</value></data>
+  <data name="Month_September" xml:space="preserve"><value>سبتمبر</value></data>
+  <data name="Month_October" xml:space="preserve"><value>أكتوبر</value></data>
+  <data name="Month_November" xml:space="preserve"><value>نوفمبر</value></data>
+  <data name="Month_December" xml:space="preserve"><value>ديسمبر</value></data>
 </root>

@@ -6,18 +6,20 @@
     if (rep == null)
     {
         <div class="card-dark text-center py-5">
-            <h5 class="mb-1">Report not found</h5>
+            <h5 class="mb-1">@L["Rep_NotFound"]</h5>
         </div>
         return;
     }
-    ViewData["Title"] = rep.Title;
+    ViewData["Title"] = L[rep.TitleKey].Value;
     var stores      = (ViewBag.Stores              as List<string>) ?? new List<string>();
     var oms         = (ViewBag.OperationManagers   as List<string>) ?? new List<string>();
     var ocs         = (ViewBag.OperationConsultants as List<string>) ?? new List<string>();
     var socs        = (ViewBag.SeniorOperationConsultants as List<string>) ?? new List<string>();
     var ods         = (ViewBag.OperationDirectors  as List<string>) ?? new List<string>();
-    var monthNames  = new[] { "January","February","March","April","May","June",
-                               "July","August","September","October","November","December" };
+    var monthNames  = new[] { L["Month_January"].Value, L["Month_February"].Value, L["Month_March"].Value,
+                              L["Month_April"].Value, L["Month_May"].Value, L["Month_June"].Value,
+                              L["Month_July"].Value, L["Month_August"].Value, L["Month_September"].Value,
+                              L["Month_October"].Value, L["Month_November"].Value, L["Month_December"].Value };
     var latest      = Model?.OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).FirstOrDefault();
     var years       = Model?.Select(p => p.Year).Distinct().OrderByDescending(y => y).ToList() ?? new List<int>();
     var periodsJson = System.Text.Json.JsonSerializer.Serialize(
@@ -71,8 +73,8 @@
             <i class="bi @rep.Icon" style="font-size:1.5rem;color:@rep.IconColor"></i>
         </div>
         <div>
-            <h1 class="page-title">@rep.Title</h1>
-            <p class="page-subtitle">@rep.Description</p>
+            <h1 class="page-title">@L[rep.TitleKey]</h1>
+            <p class="page-subtitle">@L[rep.DescriptionKey]</p>
         </div>
     </div>
 </div>
@@ -82,7 +84,7 @@
     <div class="card-dark text-center py-5">
         <i class="bi bi-file-earmark-bar-graph-fill d-block mb-3" style="font-size:3rem;color:oklch(0.5 0.18 25)"></i>
         <h5 class="mb-1">@L["Rep_UploadFirst"]</h5>
-        <p class="text-muted-custom mb-0 small">Upload payroll data to unlock all reports.</p>
+        <p class="text-muted-custom mb-0 small">@L["Rep_UploadPayrollHint"]</p>
     </div>
 }
 else
@@ -93,8 +95,8 @@ else
     <div class="card-dark mb-4" style="border-left:4px solid @rep.IconColor">
         <div class="d-flex align-items-center gap-2 mb-3">
             <i class="bi bi-funnel-fill" style="color:@rep.IconColor"></i>
-            <span class="fw-semibold" style="font-size:14px">Filters</span>
-            <span class="text-muted-custom small">— leave a filter empty for "all"</span>
+            <span class="fw-semibold" style="font-size:14px">@L["Rep_Filters"]</span>
+            <span class="text-muted-custom small">@L["Rep_FiltersHint"]</span>
             <button type="button" class="reset-filters-btn ms-auto" onclick="rdResetFilters()">
                 <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
             </button>
@@ -332,8 +334,7 @@ const rdSocMs    = rdCreateMultiselect('soc');
 const rdOdMs     = rdCreateMultiselect('od');
 const rdMonthsMs = rdCreateMultiselect('months');
 
-const RD_MONTH_NAMES = ["January","February","March","April","May","June",
-                         "July","August","September","October","November","December"];
+const RD_MONTH_NAMES = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthNames));
 
 /* Months multiselect is tied to the "since year" select — options are
    whichever months actually have data in that year. */

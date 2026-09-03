@@ -280,15 +280,43 @@
     </div>
 </div>
 
-<div class="cmp-kpi-grid mb-4" id="cmpKpiGrid"></div>
+<div class="cmp-kpi-grid mb-4" id="cmpKpiGrid"
+     data-kpi-headcount="@L["Common_Headcount"]"
+     data-kpi-headcount-desc="@L["CMP_KpiHeadcountDesc"]"
+     data-kpi-new-hires="@L["Common_NewHires"]"
+     data-kpi-new-hires-desc="@L["CMP_KpiNewHiresDesc"]"
+     data-kpi-resignations="@L["Common_Resignations"]"
+     data-kpi-resignations-desc="@L["CMP_KpiResignationsDesc"]"
+     data-kpi-turnover="@L["Common_TurnoverPctLabel"]"
+     data-kpi-turnover-desc="@L["CMP_KpiTurnoverDesc"]"
+     data-kpi-early-leavers="@L["CMP_KpiEarlyLeavers"]"
+     data-kpi-early-leavers-desc="@L["CMP_KpiEarlyLeaversDesc"]"
+     data-kpi-ninety-rate="@L["NTD_KpiRate"]"
+     data-kpi-ninety-rate-desc="@L["CMP_KpiNinetyRateDesc"]"
+     data-delta-suffix="@L["CMP_DeltaSuffix"]"
+     data-overall="@L["CMP_Overall"]"
+     data-metric-turnover-rate="@L["Common_TurnoverRate"]"
+     data-metric-ninety-rate="@L["CMP_MetricNinetyRate"]"
+     data-title-no-change="@L["CMP_TitleNoChange"]"
+     data-title-improved="@L["CMP_TitleImproved"]"
+     data-title-worsened="@L["CMP_TitleWorsened"]"
+     data-insight-desc="@L["CMP_InsightDesc"]"
+     data-unchanged="@L["CMP_Unchanged"]"
+     data-better="@L["CMP_Better"]"
+     data-worse="@L["CMP_Worse"]"
+     data-mover-title-improved="@L["CMP_MoverTitleImproved"]"
+     data-mover-title-worsened="@L["CMP_MoverTitleWorsened"]"
+     data-mover-desc-improved="@L["CMP_MoverDescImproved"]"
+     data-mover-desc-worsened="@L["CMP_MoverDescWorsened"]"
+     data-no-data-short="@L["Common_NoDataShort"]"></div>
 
 <div class="charts-grid mb-4">
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_TurnoverByStoreCompare"]</h6><p>Top 8 stores by combined A+B turnover — or a single A vs B bar if a store is selected in either panel</p></div>
+        <div class="chart-header"><h6>@L["Chart_TurnoverByStoreCompare"]</h6><p>@L["CMP_TurnoverByStoreSub"]</p></div>
         <div class="chart-body"><canvas id="cmpTurnoverChart"></canvas></div>
     </div>
     <div class="chart-card">
-        <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6><p>Top 8 stores by combined A+B 90-day rate — or a single A vs B bar if a store is selected in either panel</p></div>
+        <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6><p>@L["CMP_NinetyByStoreSub"]</p></div>
         <div class="chart-body"><canvas id="cmpNinetyChart"></canvas></div>
     </div>
 </div>
@@ -304,12 +332,12 @@
             <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
                 <tr>
                     <th class="cmp-sort px-3 py-2" data-col="store" style="cursor:pointer">@L["Common_StoreName"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="ta" style="cursor:pointer">Turnover% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="tb" style="cursor:pointer">Turnover% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="dt" style="cursor:pointer" title="Turnover% A − Turnover% B">Change (A−B) <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="na" style="cursor:pointer">90-Day% A <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="nb" style="cursor:pointer">90-Day% B <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
-                    <th class="cmp-sort px-3 py-2 text-center" data-col="dn" style="cursor:pointer" title="90-Day% A − 90-Day% B">Change (A−B) <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="ta" style="cursor:pointer">@L["CMP_TurnoverA"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="tb" style="cursor:pointer">@L["CMP_TurnoverB"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dt" style="cursor:pointer" title="@L["CMP_TurnoverDiffTitle"]">@L["CMP_ChangeAB"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="na" style="cursor:pointer">@L["CMP_NinetyA"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="nb" style="cursor:pointer">@L["CMP_NinetyB"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
+                    <th class="cmp-sort px-3 py-2 text-center" data-col="dn" style="cursor:pointer" title="@L["CMP_NinetyDiffTitle"]">@L["CMP_ChangeAB"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                 </tr>
             </thead>
             <tbody id="cmpTableBody">
@@ -328,6 +356,7 @@
    dashboard.js's period/store selects or buildQuery/loadAll (those target
    #periodSelect etc. which don't exist here, so they safely no-op). */
 
+const cmpL = document.getElementById('cmpKpiGrid').dataset;
 const panels = {
     A: { year: null, months: [], store: '', om: '', oc: '', soc: '', od: '', yearMonthsMap: {} },
     B: { year: null, months: [], store: '', om: '', oc: '', soc: '', od: '', yearMonthsMap: {} }
@@ -586,17 +615,17 @@ function cmpDeltaBadge(a, b, lowerIsBetter) {
     if (lowerIsBetter === false) cls = delta >= 0 ? 'good' : 'bad';
     const sign = delta > 0 ? '+' : '';
     const icon = delta > 0 ? 'bi-arrow-up-short' : delta < 0 ? 'bi-arrow-down-short' : 'bi-dash';
-    return `<span class="cmp-kpi-delta ${cls}"><i class="bi ${icon}"></i>${sign}${delta.toFixed(1)} (A−B)</span>`;
+    return `<span class="cmp-kpi-delta ${cls}"><i class="bi ${icon}"></i>${sign}${delta.toFixed(1)} ${cmpL.deltaSuffix}</span>`;
 }
 
 function cmpRenderKpis(dataA, dataB) {
     const metrics = [
-        { label: 'Headcount',           desc: 'Employees on the active roster',              a: dataA.kpi.totalHeadcount,      b: dataB.kpi.totalHeadcount,      fmt: v => v,                  lowerIsBetter: null },
-        { label: 'New Hires',           desc: 'Employees hired in the period',               a: dataA.kpi.newHires,            b: dataB.kpi.newHires,            fmt: v => v,                  lowerIsBetter: false },
-        { label: 'Resignations',        desc: 'Total resignations in the period',            a: dataA.kpi.totalResignations,   b: dataB.kpi.totalResignations,   fmt: v => v,                  lowerIsBetter: true },
-        { label: 'Turnover %',          desc: 'Resignations ÷ average headcount',            a: dataA.kpi.turnoverRate,        b: dataB.kpi.turnoverRate,        fmt: v => v.toFixed(1) + '%', lowerIsBetter: true },
-        { label: '90-Day Early Leavers',desc: 'Resigned within 90 days of hire',             a: dataA.ninety.earlyLeavers,     b: dataB.ninety.earlyLeavers,     fmt: v => v,                  lowerIsBetter: true },
-        { label: '90-Day Turnover Rate',desc: 'Early leavers ÷ hires in the cohort',         a: dataA.ninety.rate,             b: dataB.ninety.rate,             fmt: v => v.toFixed(1) + '%', lowerIsBetter: true }
+        { label: cmpL.kpiHeadcount,     desc: cmpL.kpiHeadcountDesc,     a: dataA.kpi.totalHeadcount,      b: dataB.kpi.totalHeadcount,      fmt: v => v,                  lowerIsBetter: null },
+        { label: cmpL.kpiNewHires,      desc: cmpL.kpiNewHiresDesc,      a: dataA.kpi.newHires,            b: dataB.kpi.newHires,            fmt: v => v,                  lowerIsBetter: false },
+        { label: cmpL.kpiResignations,  desc: cmpL.kpiResignationsDesc,  a: dataA.kpi.totalResignations,   b: dataB.kpi.totalResignations,   fmt: v => v,                  lowerIsBetter: true },
+        { label: cmpL.kpiTurnover,      desc: cmpL.kpiTurnoverDesc,      a: dataA.kpi.turnoverRate,        b: dataB.kpi.turnoverRate,        fmt: v => v.toFixed(1) + '%', lowerIsBetter: true },
+        { label: cmpL.kpiEarlyLeavers,  desc: cmpL.kpiEarlyLeaversDesc,  a: dataA.ninety.earlyLeavers,     b: dataB.ninety.earlyLeavers,     fmt: v => v,                  lowerIsBetter: true },
+        { label: cmpL.kpiNinetyRate,    desc: cmpL.kpiNinetyRateDesc,    a: dataA.ninety.rate,             b: dataB.ninety.rate,             fmt: v => v.toFixed(1) + '%', lowerIsBetter: true }
     ];
 
     document.getElementById('cmpKpiGrid').innerHTML = metrics.map(m => `
@@ -620,8 +649,13 @@ function cmpInsightCard(metric, aVal, bVal) {
     const color = flat ? { bg: '#f8f9fa', border: '#6c757d', text: '#6c757d' }
                 : improved ? { bg: '#f0fff4', border: '#198754', text: '#198754' }
                 : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
-    const title = flat ? `${metric}: No Change` : `${metric} ${improved ? 'Improved' : 'Worsened'}`;
-    const desc = `<b>${cmpLabel('A')}</b>: ${aVal.toFixed(1)}% vs <b>${cmpLabel('B')}</b>: ${bVal.toFixed(1)}% — ${flat ? 'essentially unchanged' : `${improved ? '↓' : '↑'} ${Math.abs(delta).toFixed(1)}pt ${improved ? 'better' : 'worse'}`}.`;
+    const title = (flat ? cmpL.titleNoChange : improved ? cmpL.titleImproved : cmpL.titleWorsened).replace('{0}', metric);
+    const tail = flat ? cmpL.unchanged
+        : (improved ? cmpL.better : cmpL.worse).replace('{0}', Math.abs(delta).toFixed(1));
+    const desc = cmpL.insightDesc
+        .replace('{0}', cmpLabel('A')).replace('{1}', aVal.toFixed(1))
+        .replace('{2}', cmpLabel('B')).replace('{3}', bVal.toFixed(1))
+        .replace('{4}', tail);
     return cmpInsightCardHtml(icon, color, title, desc);
 }
 
@@ -652,15 +686,18 @@ function cmpMoverInsightCard(dataA, dataB) {
     const icon  = improved ? 'bi-trophy-fill' : 'bi-exclamation-triangle-fill';
     const color = improved ? { bg: '#f0fff4', border: '#198754', text: '#198754' }
                             : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
-    const title = `Most ${improved ? 'Improved' : 'Worsened'} Store: ${biggest.store}`;
-    const desc = `Turnover ${biggest.ta.toFixed(1)}% (${cmpLabel('A')}) vs ${biggest.tb.toFixed(1)}% (${cmpLabel('B')}) — ${improved ? '↓' : '↑'} ${Math.abs(biggest.dt).toFixed(1)}pt.`;
+    const title = (improved ? cmpL.moverTitleImproved : cmpL.moverTitleWorsened).replace('{0}', biggest.store);
+    const desc = (improved ? cmpL.moverDescImproved : cmpL.moverDescWorsened)
+        .replace('{0}', biggest.ta.toFixed(1)).replace('{1}', cmpLabel('A'))
+        .replace('{2}', biggest.tb.toFixed(1)).replace('{3}', cmpLabel('B'))
+        .replace('{4}', Math.abs(biggest.dt).toFixed(1));
     return cmpInsightCardHtml(icon, color, title, desc);
 }
 
 function cmpRenderInsight(dataA, dataB) {
     document.getElementById('cmpInsightContainer').innerHTML =
-        cmpInsightCard('Turnover Rate', dataA.kpi.turnoverRate, dataB.kpi.turnoverRate) +
-        cmpInsightCard('90-Day Rate', dataA.ninety.rate, dataB.ninety.rate) +
+        cmpInsightCard(cmpL.metricTurnoverRate, dataA.kpi.turnoverRate, dataB.kpi.turnoverRate) +
+        cmpInsightCard(cmpL.metricNinetyRate, dataA.ninety.rate, dataB.ninety.rate) +
         cmpMoverInsightCard(dataA, dataB);
 }
 
@@ -676,7 +713,7 @@ function cmpBuildSeries(dataA, dataB, storeKey, overallA, overallB) {
             .slice(0, 8);
         return { labels: stores, seriesA: stores.map(s => mapA[s] || 0), seriesB: stores.map(s => mapB[s] || 0) };
     }
-    return { labels: ['Overall'], seriesA: [overallA], seriesB: [overallB] };
+    return { labels: [cmpL.overall], seriesA: [overallA], seriesB: [overallB] };
 }
 
 function cmpRenderCharts(dataA, dataB) {
@@ -744,7 +781,7 @@ function cmpRenderTable(dataA, dataB) {
 
 function cmpRenderTableRows() {
     if (!cmpTableRows.length) {
-        document.getElementById('cmpTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No data.</td></tr>`;
+        document.getElementById('cmpTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${cmpL.noDataShort}</td></tr>`;
         return;
     }
     const rateBadge = (rules, v) => (v === undefined || v === null) ? '<span class="text-muted">—</span>' : ChartColors.rateBadgeHtml(rules, v);

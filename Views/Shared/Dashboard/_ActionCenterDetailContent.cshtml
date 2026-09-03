@@ -33,6 +33,12 @@
 </div>
 
 <div id="acdContent"
+     data-chart-turnover="@L["Common_TurnoverPctLabel"]"
+     data-chart-early-leaver="@L["AC_EarlyLeaverPct"]"
+     data-chart-signals="@L["AC_Signals"]"
+     data-chart-signals-axis="@L["AC_SignalsAxis"]"
+     data-brand-hub="@L["Brand_Hub"]"
+     data-error="@L["Common_Error"]"
      data-status-active="@L["SAP_StatusActive"]"
      data-status-resolved="@L["SAP_StatusResolved"]"
      data-status-none="@L["SAP_StatusNone"]"
@@ -125,9 +131,9 @@ function acdRenderTrendChart(snapshots) {
         data: {
             labels: snapshots.map(s => s.label),
             datasets: [
-                { label: 'Turnover %', data: snapshots.map(s => s.turnoverRate), borderColor: ChartColors.SEMANTIC.BAD, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
-                { label: 'Early Leaver %', data: snapshots.map(s => s.earlyLeaverRate), borderColor: ChartColors.SEMANTIC.WARNING, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
-                { label: 'Signals', data: snapshots.map(s => s.signalCount), borderColor: 'var(--text-3)', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, yAxisID: 'y1', borderDash: [4, 3] },
+                { label: ACD_D.chartTurnover, data: snapshots.map(s => s.turnoverRate), borderColor: ChartColors.SEMANTIC.BAD, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
+                { label: ACD_D.chartEarlyLeaver, data: snapshots.map(s => s.earlyLeaverRate), borderColor: ChartColors.SEMANTIC.WARNING, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
+                { label: ACD_D.chartSignals, data: snapshots.map(s => s.signalCount), borderColor: 'var(--text-3)', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, yAxisID: 'y1', borderDash: [4, 3] },
             ]
         },
         options: {
@@ -135,7 +141,7 @@ function acdRenderTrendChart(snapshots) {
             plugins: { legend: { display: true, position: 'bottom' }, datalabels: { display: false } },
             scales: {
                 y:  { beginAtZero: true, position: 'left', title: { display: true, text: '%' } },
-                y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 }, title: { display: true, text: '# signals' } },
+                y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { precision: 0 }, title: { display: true, text: ACD_D.chartSignalsAxis } },
             }
         }
     });
@@ -145,7 +151,7 @@ function acdRender(data) {
     const d = ACD_D;
 
     document.getElementById('acdStoreName').textContent = data.storeName;
-    document.title = data.storeName + ' — Workforce Insights Hub';
+    document.title = data.storeName + ' — ' + ACD_D.brandHub;
 
     const statusMeta = sapStatusMeta(data.status, { active: d.statusActive, resolved: d.statusResolved, none: d.statusNone });
     const sevMeta = ACD_SEVERITY_META[data.severity] || ACD_SEVERITY_META.None;
@@ -369,7 +375,7 @@ async function acdSaveAssignment() {
     } catch {
         msgEl.style.display = 'block';
         msgEl.style.color = 'oklch(0.6 0.22 22)';
-        msgEl.textContent = 'Error';
+        msgEl.textContent = ACD_D.error;
     } finally {
         btn.disabled = false;
     }
@@ -410,7 +416,7 @@ async function acdManualClose() {
     } catch {
         msgEl.style.display = 'block';
         msgEl.style.color = 'oklch(0.6 0.22 22)';
-        msgEl.textContent = 'Error';
+        msgEl.textContent = ACD_D.error;
         btn.disabled = false;
     }
 }
