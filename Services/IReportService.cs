@@ -16,4 +16,11 @@ public interface IReportService
     Task<XLWorkbook> BuildStoresOverviewReportAsync(int month, int year, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null);
     Task<XLWorkbook> BuildWorkforceReportAsync(int month, int year, string role, string? assignedName, string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null);
     Task<XLWorkbook> BuildOcOmComparisonReportAsync(int month, int year, string role, string? assignedName, int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null);
+    /// <summary>Period A vs Period B comparison — mirrors the Comparisons dashboard
+    /// page's own two-sided filter shape (independent year/months/store/OM/OC/SOC/OD
+    /// per side). A null side value falls back to that side's dashboard-page default
+    /// (A = latest year, all months; B = the same months one year earlier).</summary>
+    Task<XLWorkbook> BuildComparisonReportAsync(string role, string? assignedName,
+        int? yearA = null, string? monthsA = null, string? storeA = null, string? omA = null, string? ocA = null, string? socA = null, string? odA = null,
+        int? yearB = null, string? monthsB = null, string? storeB = null, string? omB = null, string? ocB = null, string? socB = null, string? odB = null);
 }

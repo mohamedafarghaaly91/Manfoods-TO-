@@ -25,6 +25,10 @@ public class ReportDefinition
     /// <summary>Multi-select Months filter, tied to the Year field — narrows which
     /// month columns appear in a trend-matrix-style export.</summary>
     public bool UsesMonths { get; set; }
+    /// <summary>Two independent Period A / Period B filter panels (year, months,
+    /// store, OM/OC/SOC/OD) — the Comparison report's own filter shape, distinct
+    /// from every other report's single filter set.</summary>
+    public bool UsesComparisonAB { get; set; }
 }
 
 public static class ReportCatalog
@@ -70,6 +74,14 @@ public static class ReportCatalog
             SectionKey = "Rep_Section_TurnoverWorkforce", TitleKey = "Rep_Title_Workforce", DescriptionKey = "Rep_Desc_Workforce",
             Icon = "bi-people-fill", IconBg = "oklch(0.6 0.13 250 / .10)", IconColor = "oklch(0.5 0.13 250)",
             UsesPeriod = true, UsesStore = true, UsesOmOc = true,
+        },
+        new ReportDefinition
+        {
+            Id = "comparisons", Section = "Comparison", Title = "Comparison",
+            Description = "Side-by-side Period A vs Period B — Headcount, New Hires, Resignations, Turnover Rate, and 90-Day Early Leave Rate, company-wide and per store.",
+            SectionKey = "Rep_Section_Comparison", TitleKey = "Rep_Title_Comparisons", DescriptionKey = "Rep_Desc_Comparisons",
+            Icon = "bi-arrow-left-right", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
+            UsesComparisonAB = true,
         },
         new ReportDefinition
         {

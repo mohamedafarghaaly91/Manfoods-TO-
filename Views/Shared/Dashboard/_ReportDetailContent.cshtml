@@ -89,8 +89,88 @@
 }
 else
 {
-    var hasAnyFilter = rep.UsesPeriod || rep.UsesYear || rep.UsesStore || rep.UsesOmOc || rep.UsesMonths;
-    if (hasAnyFilter)
+    var hasAnyFilter = rep.UsesPeriod || rep.UsesYear || rep.UsesStore || rep.UsesOmOc || rep.UsesMonths || rep.UsesComparisonAB;
+    if (rep.UsesComparisonAB)
+    {
+    <div class="card-dark mb-4" style="border-left:4px solid @rep.IconColor">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-funnel-fill" style="color:@rep.IconColor"></i>
+            <span class="fw-semibold" style="font-size:14px">@L["Rep_Filters"]</span>
+            <span class="text-muted-custom small">@L["CMP_ReportFiltersHint"]</span>
+            <button type="button" class="reset-filters-btn ms-auto" onclick="rdResetFilters()">
+                <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
+            </button>
+        </div>
+        <div class="row g-3">
+            @foreach (var side in new[] { "a", "b" })
+            {
+                <div class="col-lg-6">
+                    <div class="card-dark" style="border:1px solid var(--card-border);padding:14px">
+                        <div class="fw-bold mb-2" style="font-size:13px">@(side == "a" ? "A" : "B")</div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_Year"]</label>
+                                <select id="rd-year-@side" class="form-select form-select-dark form-select-sm" onchange="rdUpdateComparisonMonths('@side')"></select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_AllMonths"]</label>
+                                <div class="rd-multiselect" id="rd-months-@(side)-ms" data-all-label="@L["Common_AllMonths"]">
+                                    <button type="button" class="rd-multiselect-trigger" id="rd-months-@(side)-trigger">
+                                        <span class="rd-multiselect-chips" id="rd-months-@(side)-chips">@L["Common_AllMonths"]</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                    <div class="rd-multiselect-panel" id="rd-months-@(side)-panel">
+                                        <div class="rd-multiselect-actions">
+                                            <button type="button" class="rd-ms-action" id="rd-months-@(side)-selectall">@L["Common_SelectAll"]</button>
+                                            <button type="button" class="rd-ms-action" id="rd-months-@(side)-clearall">@L["Common_ClearAll"]</button>
+                                        </div>
+                                        <div id="rd-months-@(side)-options"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_StoreName"]</label>
+                                <select id="rd-store-@side" class="form-select form-select-dark form-select-sm">
+                                    <option value="">@L["Common_AllStores"]</option>
+                                    @foreach (var s in stores) { <option value="@s">@s</option> }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_OperationManager"]</label>
+                                <select id="rd-om-@side" class="form-select form-select-dark form-select-sm">
+                                    <option value="">@L["Common_AllOperationManagers"]</option>
+                                    @foreach (var m in oms) { <option value="@m">@m</option> }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_OperationConsultant"]</label>
+                                <select id="rd-oc-@side" class="form-select form-select-dark form-select-sm">
+                                    <option value="">@L["Common_AllOperationConsultants"]</option>
+                                    @foreach (var c in ocs) { <option value="@c">@c</option> }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_SeniorOperationConsultants"]</label>
+                                <select id="rd-soc-@side" class="form-select form-select-dark form-select-sm">
+                                    <option value="">@L["Common_SeniorOperationConsultants"]</option>
+                                    @foreach (var sc in socs) { <option value="@sc">@sc</option> }
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted-custom mb-1">@L["Common_OperationDirectors"]</label>
+                                <select id="rd-od-@side" class="form-select form-select-dark form-select-sm">
+                                    <option value="">@L["Common_OperationDirectors"]</option>
+                                    @foreach (var d in ods) { <option value="@d">@d</option> }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    }
+    else if (hasAnyFilter)
     {
     <div class="card-dark mb-4" style="border-left:4px solid @rep.IconColor">
         <div class="d-flex align-items-center gap-2 mb-3">
@@ -355,10 +435,60 @@ function rdResetFilters() {
     const sinceYearEl = document.getElementById('rd-since-year');
     if (sinceYearEl) { sinceYearEl.selectedIndex = 0; rdUpdateMonthsMultiselect(); }
     ['months', 'store', 'om', 'oc', 'soc', 'od'].forEach(p => document.getElementById(`rd-${p}-clearall`)?.click());
+    if (RD_REPORT_ID === 'comparisons') rdInitComparisonSides();
+}
+
+/* Comparison (Period A vs Period B) report — independent year/months/store/
+   OM/OC/SOC/OD per side. Leaving a side's Year unset (the "Default" option)
+   lets the server pick the same default as the Comparisons dashboard page
+   (A = latest year, all months; B = the same months one year earlier). */
+const rdYears = Array.from(new Set(rdPeriods.map(p => p.year))).sort((a, b) => b - a);
+const rdMonthsAMs = rdCreateMultiselect('months-a');
+const rdMonthsBMs = rdCreateMultiselect('months-b');
+
+function rdUpdateComparisonMonths(side) {
+    const yearEl = document.getElementById(`rd-year-${side}`);
+    const ms = side === 'a' ? rdMonthsAMs : rdMonthsBMs;
+    if (!yearEl || !yearEl.value) { ms.setOptionsHtml(''); return; }
+    const year = parseInt(yearEl.value);
+    const months = rdPeriods.filter(p => p.year === year).map(p => p.month).sort((a, b) => a - b);
+    ms.setOptionsHtml(months.map(m =>
+        `<label class="rd-ms-option"><input type="checkbox" value="${m}" data-label="${RD_MONTH_NAMES[m - 1]}"><span>${RD_MONTH_NAMES[m - 1]}</span></label>`
+    ).join(''));
+}
+
+function rdInitComparisonSides() {
+    ['a', 'b'].forEach(side => {
+        const yearEl = document.getElementById(`rd-year-${side}`);
+        if (!yearEl) return;
+        yearEl.innerHTML = '<option value="">' + '@L["Common_Default"]' + '</option>'
+            + rdYears.map(y => `<option value="${y}">${y}</option>`).join('');
+        ['store', 'om', 'oc', 'soc', 'od'].forEach(f => { const el = document.getElementById(`rd-${f}-${side}`); if (el) el.selectedIndex = 0; });
+        rdUpdateComparisonMonths(side);
+    });
 }
 
 function rdDownload() {
     const p = new URLSearchParams({ reportType: RD_REPORT_ID });
+
+    if (RD_REPORT_ID === 'comparisons') {
+        const yearA = document.getElementById('rd-year-a')?.value;
+        if (yearA) p.set('year', yearA);
+        const monthsA = rdMonthsAMs.getSelected();
+        if (monthsA.length) p.set('months', monthsA.join(','));
+        const yearB = document.getElementById('rd-year-b')?.value;
+        if (yearB) p.set('yearB', yearB);
+        const monthsB = rdMonthsBMs.getSelected();
+        if (monthsB.length) p.set('monthsB', monthsB.join(','));
+        ['store', 'om', 'oc', 'soc', 'od'].forEach(f => {
+            const a = document.getElementById(`rd-${f}-a`)?.value;
+            if (a) p.set(f, a);
+            const b = document.getElementById(`rd-${f}-b`)?.value;
+            if (b) p.set(f === 'store' ? 'storeB' : `${f}B`, b);
+        });
+        window.location.href = __AREA_PREFIX + '/dashboard/export?' + p.toString();
+        return;
+    }
 
     const yearEl = document.getElementById('rd-year');
     const monthEl = document.getElementById('rd-month');
@@ -390,4 +520,5 @@ function rdDownload() {
 
 rdUpdateMonths();
 rdUpdateMonthsMultiselect();
+if (RD_REPORT_ID === 'comparisons') rdInitComparisonSides();
 </script>

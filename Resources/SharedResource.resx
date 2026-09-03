@@ -260,6 +260,7 @@
   <data name="Common_SelectYear" xml:space="preserve"><value>Select Year</value></data>
   <data name="Common_SelectMonths" xml:space="preserve"><value>Select Months</value></data>
   <data name="Common_AllMonths" xml:space="preserve"><value>All Months</value></data>
+  <data name="Common_Default" xml:space="preserve"><value>Default</value></data>
   <data name="Common_SelectAll" xml:space="preserve"><value>Select All</value></data>
   <data name="Common_ClearAll" xml:space="preserve"><value>Clear</value></data>
   <data name="Common_ResetFilters" xml:space="preserve"><value>Reset Filters</value></data>
@@ -927,6 +928,9 @@
   <!-- Reports catalog + month names -->
   <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>Store Operations</value></data>
   <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>Turnover &amp; Workforce</value></data>
+  <data name="Rep_Section_Comparison" xml:space="preserve"><value>Comparison</value></data>
+  <data name="Rep_Title_Comparisons" xml:space="preserve"><value>Comparison</value></data>
+  <data name="Rep_Desc_Comparisons" xml:space="preserve"><value>Side-by-side Period A vs Period B — Headcount, New Hires, Resignations, Turnover Rate, and 90-Day Early Leave Rate, company-wide and per store.</value></data>
   <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>Deep Analytics</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>Action Center</value></data>
@@ -957,6 +961,7 @@
   <data name="Rep_NotFound" xml:space="preserve"><value>Report not found</value></data>
   <data name="Rep_Filters" xml:space="preserve"><value>Filters</value></data>
   <data name="Rep_FiltersHint" xml:space="preserve"><value>— leave a filter empty for "all"</value></data>
+  <data name="CMP_ReportFiltersHint" xml:space="preserve"><value>— pick what each side (A and B) is comparing; leave a field empty for "all"</value></data>
   <data name="Month_January" xml:space="preserve"><value>January</value></data>
   <data name="Month_February" xml:space="preserve"><value>February</value></data>
   <data name="Month_March" xml:space="preserve"><value>March</value></data>

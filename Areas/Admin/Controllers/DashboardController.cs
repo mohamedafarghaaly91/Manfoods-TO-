@@ -107,7 +107,8 @@ public class DashboardController : Controller
 
     [HttpGet("admin/dashboard/export")]
     public async Task<IActionResult> Export(int month, int year, string reportType = "stores-overview",
-        string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null)
+        string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null,
+        int? yearB = null, string? monthsB = null, string? storeB = null, string? omB = null, string? ocB = null, string? socB = null, string? odB = null)
     {
         var role = HttpContext.Session.GetRole();
         var assignedName = HttpContext.Session.GetEmail();
@@ -117,9 +118,21 @@ public class DashboardController : Controller
         soc = string.IsNullOrWhiteSpace(soc) ? null : soc;
         od = string.IsNullOrWhiteSpace(od) ? null : od;
         months = string.IsNullOrWhiteSpace(months) ? null : months;
+        storeB = string.IsNullOrWhiteSpace(storeB) ? null : storeB;
+        omB = string.IsNullOrWhiteSpace(omB) ? null : omB;
+        ocB = string.IsNullOrWhiteSpace(ocB) ? null : ocB;
+        socB = string.IsNullOrWhiteSpace(socB) ? null : socB;
+        odB = string.IsNullOrWhiteSpace(odB) ? null : odB;
+        monthsB = string.IsNullOrWhiteSpace(monthsB) ? null : monthsB;
 
         switch (reportType)
         {
+            case "comparisons":
+                return await DownloadWorkbookAsync(
+                    await _reports.BuildComparisonReportAsync(role, assignedName,
+                        year > 0 ? year : null, months, store, om, oc, soc, od,
+                        yearB, monthsB, storeB, omB, ocB, socB, odB),
+                    "Comparison_Report.xlsx");
             case "stores":
                 return await DownloadWorkbookAsync(
                     await _reports.BuildStoreComparisonReportAsync(month, year, role, assignedName, om, oc, soc, od),

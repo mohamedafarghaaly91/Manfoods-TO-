@@ -260,6 +260,7 @@
   <data name="Common_SelectYear" xml:space="preserve"><value>اختر السنة</value></data>
   <data name="Common_SelectMonths" xml:space="preserve"><value>اختر الشهور</value></data>
   <data name="Common_AllMonths" xml:space="preserve"><value>كل الشهور</value></data>
+  <data name="Common_Default" xml:space="preserve"><value>افتراضي</value></data>
   <data name="Common_SelectAll" xml:space="preserve"><value>اختيار الكل</value></data>
   <data name="Common_ClearAll" xml:space="preserve"><value>إلغاء التحديد</value></data>
   <data name="Common_ResetFilters" xml:space="preserve"><value>إعادة تعيين الفلاتر</value></data>
@@ -928,6 +929,9 @@
   <!-- Reports catalog + month names -->
   <data name="Rep_Section_StoreOperations" xml:space="preserve"><value>عمليات الفروع</value></data>
   <data name="Rep_Section_TurnoverWorkforce" xml:space="preserve"><value>الدوران والقوى العاملة</value></data>
+  <data name="Rep_Section_Comparison" xml:space="preserve"><value>المقارنة</value></data>
+  <data name="Rep_Title_Comparisons" xml:space="preserve"><value>المقارنة</value></data>
+  <data name="Rep_Desc_Comparisons" xml:space="preserve"><value>مقارنة جنبًا إلى جنب بين الفترة A والفترة B — عدد الموظفين، التعيينات الجديدة، الاستقالات، معدل الدوران، ومعدل ترك العمل خلال 90 يوم، على مستوى الشركة وكل فرع.</value></data>
   <data name="Rep_Section_DeepAnalytics" xml:space="preserve"><value>التحليلات المتعمقة</value></data>
   <data name="Rep_Section_ExitInterviews" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
   <data name="Rep_Title_ActionCenter" xml:space="preserve"><value>مركز الإجراءات</value></data>
@@ -958,6 +962,7 @@
   <data name="Rep_NotFound" xml:space="preserve"><value>التقرير غير موجود</value></data>
   <data name="Rep_Filters" xml:space="preserve"><value>الفلاتر</value></data>
   <data name="Rep_FiltersHint" xml:space="preserve"><value>— اترك الفلتر فارغًا لتحديد "الكل"</value></data>
+  <data name="CMP_ReportFiltersHint" xml:space="preserve"><value>— حدد ما تتم مقارنته في كل جانب (A وB)؛ اترك الحقل فارغًا لتحديد "الكل"</value></data>
   <data name="Month_January" xml:space="preserve"><value>يناير</value></data>
   <data name="Month_February" xml:space="preserve"><value>فبراير</value></data>
   <data name="Month_March" xml:space="preserve"><value>مارس</value></data>
