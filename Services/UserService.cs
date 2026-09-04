@@ -160,11 +160,13 @@ public class UserService : IUserService
         return "";
     }
 
-    private static readonly string[] ValidRoles =
+    private static readonly string[] ValidRolesArray =
     {
         "Admin", "User", "Operation_Manager", "Operation_Consultant",
         "Head_Manager", "Senior_Operation_Consultant", "Operation_Director",
     };
+
+    public IReadOnlyList<string> ValidRoles => ValidRolesArray;
 
     public async Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file)
     {
@@ -199,7 +201,12 @@ public class UserService : IUserService
             // duplicates too.
             if (existingEmails.Contains(email) || !seenInFile.Add(email)) { skipped++; continue; }
 
-            var role = ValidRoles.FirstOrDefault(r => string.Equals(r, roleRaw, StringComparison.OrdinalIgnoreCase)) ?? "User";
+            // A blank Role cell defaults to "User" (unchanged). A non-blank
+            // Role that doesn't match a known value is kept as-is (not
+            // silently coerced to "User") so the account gets no data access
+            // (see StoreAccessService) and the typo stays visible to Admin.
+            var matched = ValidRolesArray.FirstOrDefault(r => string.Equals(r, roleRaw, StringComparison.OrdinalIgnoreCase));
+            var role = matched ?? (string.IsNullOrWhiteSpace(roleRaw) ? "User" : roleRaw);
             toAdd.Add(new User { Email = email, Phone = phone, AssignedName = assignedName, Role = role, PasswordHash = null });
         }
 

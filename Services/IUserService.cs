@@ -5,6 +5,11 @@ namespace MvcApp.Services;
 
 public interface IUserService
 {
+    /// <summary>The full set of role values the app recognizes — the same
+    /// list Bulk User Upload validates a Role cell against, and what the
+    /// downloadable template's Role-column dropdown offers.</summary>
+    IReadOnlyList<string> ValidRoles { get; }
+
     Task<List<UserViewModel>> GetAllAsync();
     Task<UserViewModel?> GetByIdAsync(int id);
     /// <summary>Returns (null, "duplicate-email") when a user with this email

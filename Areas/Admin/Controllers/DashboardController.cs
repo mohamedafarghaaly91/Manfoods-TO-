@@ -442,6 +442,15 @@ public class DashboardController : Controller
             ws.Cell(3, 3).Value = "Sara Ali"; ws.Cell(3, 4).Value = "User";
             ws.Cell(5, 1).Value = "Assigned Name and Role are optional — leave blank and the account is created as a plain \"User\". Valid Role values: Admin, User, Operation_Manager, Operation_Consultant, Head_Manager, Senior_Operation_Consultant, Operation_Director.";
             ws.Cell(5, 1).Style.Font.Italic = true;
+
+            // Role column dropdown, restricted to the roles the app recognizes.
+            var roleList = string.Join(",", _users.ValidRoles);
+            var roleValidation = ws.Range("D2:D200").CreateDataValidation();
+            roleValidation.List($"\"{roleList}\"");
+            roleValidation.ErrorStyle = XLErrorStyle.Stop;
+            roleValidation.ErrorTitle = "Invalid Role";
+            roleValidation.ErrorMessage = "Please choose a Role from the dropdown list.";
+
             ws.Columns().AdjustToContents();
         }
         else

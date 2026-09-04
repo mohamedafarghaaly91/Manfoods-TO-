@@ -27,14 +27,25 @@ public class StoreAccessService : IStoreAccessService
 
     public IReadOnlyList<string> RestrictedRoles { get; } = RoleEmailColumns.Keys.ToList();
 
-    public bool IsRestrictedRole(string role) => RoleEmailColumns.ContainsKey(role);
+    // Roles with full, unrestricted access — everything else (including a
+    // role string that isn't recognized at all, e.g. a Bulk Upload typo) is
+    // treated as restricted and gets no store access.
+    private static readonly HashSet<string> UnrestrictedRoles = new() { "Admin", "User" };
+
+    public bool IsRestrictedRole(string role) => !UnrestrictedRoles.Contains(role);
 
     public string GetEmailForRole(StoreReference store, string role) =>
         RoleEmailColumns.TryGetValue(role, out var column) ? column.Compile()(store) : "";
 
     public async Task<List<string>?> GetAccessibleStoreNamesAsync(string role, string? email)
     {
-        if (!RoleEmailColumns.TryGetValue(role, out var emailColumn)) return null;
+        if (UnrestrictedRoles.Contains(role)) return null;
+
+        // A role that isn't Admin/User but also isn't one of the known
+        // store-restricted roles (e.g. an invalid/misspelled Bulk Upload
+        // role) has no email column to match against, so it gets zero
+        // accessible stores rather than falling through to full access.
+        if (!RoleEmailColumns.TryGetValue(role, out var emailColumn)) return new List<string>();
 
         var normalized = (email ?? "").Trim().ToLowerInvariant();
         if (string.IsNullOrEmpty(normalized)) return new List<string>();
