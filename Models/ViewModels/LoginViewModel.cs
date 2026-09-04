@@ -42,7 +42,7 @@ public class ForgotPasswordViewModel
     public string OtpCode { get; set; } = "";
 
     [Required(ErrorMessage = "Val_NewPasswordRequired")]
-    [MinLength(6, ErrorMessage = "Val_PasswordMin6")]
+    [MinLength(8, ErrorMessage = "Val_PasswordMin8")]
     [DataType(DataType.Password)]
     public string NewPassword { get; set; } = "";
 
@@ -62,7 +62,7 @@ public class AdminRecoveryViewModel
     public string RecoveryKey { get; set; } = "";
 
     [Required(ErrorMessage = "Val_NewPasswordRequired")]
-    [MinLength(6, ErrorMessage = "Val_PasswordMin6")]
+    [MinLength(8, ErrorMessage = "Val_PasswordMin8")]
     [DataType(DataType.Password)]
     public string NewPassword { get; set; } = "";
 

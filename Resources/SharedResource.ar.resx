@@ -173,6 +173,7 @@
   <data name="Login_SignInAdmin" xml:space="preserve"><value>دخول كمشرف</value></data>
   <data name="Login_ForgotPassword" xml:space="preserve"><value>نسيت كلمة المرور؟</value></data>
   <data name="Login_ForgotPasswordAdmin" xml:space="preserve"><value>نسيت كلمة المرور؟ استخدم مفتاح الاسترداد</value></data>
+  <data name="Login_ForgotPasswordAdminOtp" xml:space="preserve"><value>نسيت كلمة المرور؟ إعادة التعيين برمز التحقق</value></data>
   <data name="Login_AdminPortal" xml:space="preserve"><value>بوابة المشرف</value></data>
   <data name="Login_AdminDashboard" xml:space="preserve"><value>لوحة تحكم المشرف</value></data>
   <data name="Login_WorkforceAnalytics" xml:space="preserve"><value>منصة تحليل القوى العاملة</value></data>
@@ -203,6 +204,7 @@
   <!-- Forgot Password -->
   <data name="FP_Title" xml:space="preserve"><value>إعادة تعيين كلمة المرور</value></data>
   <data name="FP_Subtitle" xml:space="preserve"><value>استخدم رمز التحقق الذي أرسله المشرف لتعيين كلمة مرور جديدة.</value></data>
+  <data name="FP_SubtitleAdmin" xml:space="preserve"><value>استخدم رمز التحقق الذي أرسله المسؤول الأعلى (Super Admin) لتعيين كلمة مرور جديدة.</value></data>
   <data name="FP_PhoneOrEmail" xml:space="preserve"><value>الهاتف أو البريد الإلكتروني</value></data>
   <data name="FP_OtpCode" xml:space="preserve"><value>رمز التحقق</value></data>
   <data name="FP_NewPassword" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
@@ -1227,6 +1229,8 @@
   <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>فشل الرفع. يرجى التحقق من تنسيق الملف والمحاولة مرة أخرى.</value></data>
   <data name="Msg_NoPendingOtps" xml:space="preserve"><value>لا يوجد مستخدمون قيد التفعيل بحاجة إلى رمز مؤقت حاليًا.</value></data>
   <data name="Msg_IncorrectPassword" xml:space="preserve"><value>كلمة المرور غير صحيحة.</value></data>
+  <data name="Msg_SuperAdminOnly" xml:space="preserve"><value>فقط المسؤول الأعلى (Super Admin) يمكنه إدارة مفتاح الاسترداد الرئيسي.</value></data>
+  <data name="Msg_AdminOtpNotPermitted" xml:space="preserve"><value>فقط المسؤول الأعلى (Super Admin) يمكنه إنشاء رمز إعادة تعيين كلمة المرور لمسؤول آخر.</value></data>
   <data name="Msg_UploadThreeFiles" xml:space="preserve"><value>الرجاء رفع الثلاث ملفات (الأكتيف ليست، الاستقالات، ومرجع الفروع) مع تحديد الشهر والسنة — الثلاثة مطلوبين معًا.</value></data>
   <data name="Msg_UploadPeriodFailed" xml:space="preserve"><value>فشل رفع بيانات {0}/{1}: {2}</value></data>
   <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>الرجاء اختيار نوع الملف وتحديد ملف إكسيل صحيح.</value></data>

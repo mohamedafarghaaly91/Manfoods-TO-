@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
@@ -14,8 +15,11 @@ public class AccountController : Controller
 {
     private readonly IAuthService _auth;
     private readonly IUserService _users;
+    private readonly IOtpService _otp;
+    private readonly IMemoryCache _cache;
     private readonly IStringLocalizer<SharedResource> _L;
-    public AccountController(IAuthService auth, IUserService users, IStringLocalizer<SharedResource> localizer) { _auth = auth; _users = users; _L = localizer; }
+    public AccountController(IAuthService auth, IUserService users, IOtpService otp, IMemoryCache cache, IStringLocalizer<SharedResource> localizer)
+    { _auth = auth; _users = users; _otp = otp; _cache = cache; _L = localizer; }
 
     [HttpGet("/adminlogin")]
     public IActionResult Login()
@@ -40,7 +44,15 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        HttpContext.Session.SetUserSession(user.Id, user.Email, user.Role, user.AssignedName);
+        // Session-fixation mitigation — see SessionExtensions.BeginSessionRotation.
+        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName);
+        return RedirectToAction("CompleteLogin", new { token });
+    }
+
+    [HttpGet("/adminlogin/complete")]
+    public IActionResult CompleteLogin(string? token)
+    {
+        if (!HttpContext.CompleteSessionRotation(_cache, token)) return Redirect("/adminlogin");
         return RedirectToAction("Workforce", "Dashboard", new { area = "Admin" });
     }
 
@@ -70,6 +82,27 @@ public class AccountController : Controller
         if (!ok) { ModelState.AddModelError("Email", _L["Msg_NoAdminWithEmail"]); return View(vm); }
 
         TempData["Success"] = _L["Msg_AdminPasswordReset"].Value;
+        return Redirect("/adminlogin");
+    }
+
+    // For ordinary Admins (not the Super Admin): reset via an OTP the Super
+    // Admin issued for them (Users page → key icon), instead of the Master
+    // Recovery Key. Mirrors Areas/Home's ForgotPassword flow exactly, but
+    // routes through VerifyAndResetAdminPasswordAsync, which only matches
+    // Admin accounts other than the Super Admin.
+    [HttpGet]
+    public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+
+    [HttpPost, ValidateAntiForgeryToken]
+    [EnableRateLimiting("login")]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel vm)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var (success, message) = await _otp.VerifyAndResetAdminPasswordAsync(vm.Identifier, vm.OtpCode, vm.NewPassword);
+        if (!success) { ModelState.AddModelError("", message); return View(vm); }
+
+        TempData["Success"] = message;
         return Redirect("/adminlogin");
     }
 

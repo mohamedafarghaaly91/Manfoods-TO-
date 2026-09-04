@@ -14,6 +14,22 @@ public interface IOtpService
 
     /// <summary>Verifies an OTP against the account matched by email or phone
     /// and, on success, sets the new password. On a wrong code, increments the
-    /// attempt counter and invalidates the OTP after 5 failures.</summary>
+    /// attempt counter and invalidates the OTP after 5 failures. Never matches
+    /// an Admin account — Admin password resets go through the
+    /// Generate/VerifyAndResetAdminPasswordAsync pair below instead.</summary>
     Task<(bool success, string message)> VerifyAndResetPasswordAsync(string identifier, string otpCode, string newPassword);
+
+    /// <summary>Super-Admin-only: generates a password-reset OTP for another
+    /// (non-Super-Admin) Admin account, using the same 24-hour-expiry /
+    /// one-active-code rules as the User OTP flow. Returns null if the
+    /// requester isn't the Super Admin, the target isn't an Admin, or the
+    /// target is the Super Admin itself (who must use the Master Recovery Key).</summary>
+    Task<string?> GenerateAdminResetOtpAsync(int targetUserId, string requestingEmail);
+
+    /// <summary>Verifies an Admin-reset OTP and, on success, sets the new
+    /// password — this only ever resets the password, never logs the Admin
+    /// in. Only matches Admin accounts other than the Super Admin (mirrors
+    /// VerifyAndResetPasswordAsync's User-only matching, inverted), so this
+    /// cannot be used to reset a User or the Super Admin's own account.</summary>
+    Task<(bool success, string message)> VerifyAndResetAdminPasswordAsync(string identifier, string otpCode, string newPassword);
 }

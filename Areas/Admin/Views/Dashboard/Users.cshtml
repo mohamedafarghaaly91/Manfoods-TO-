@@ -1,3 +1,5 @@
+@using MvcApp.Extensions
+@using MvcApp.Services
 @model List<MvcApp.Models.ViewModels.UserViewModel>
 @{
     ViewData["Title"] = L["Page_Users"].Value;
@@ -20,6 +22,10 @@
     var pending = total - active;
     var admins = Model.Count(u => u.Role == "Admin");
     var restricted = Model.Count(u => restrictedRoles.Contains(u.Role));
+    // Master Recovery Key management and Admin-targeted OTP generation are
+    // Super-Admin-only — this only decides what's shown; the server side
+    // (UserService/OtpService) is the actual enforcement point.
+    var isSuperAdmin = SuperAdminPolicy.IsSuperAdmin(Context.Session.GetEmail());
 }
 
 <style>
@@ -108,15 +114,18 @@
             <a href="/admin/dashboard/generatebulkotps" class="btn btn-primary btn-sm w-100"><i class="bi bi-file-earmark-arrow-down me-1"></i>@L["Users_GenerateDownloadOtps"]</a>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card-dark h-100">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="card-icon"><i class="bi bi-shield-lock-fill"></i></div>
-                <div><h6 class="mb-0">@L["Users_GenerateRecoveryKeyTitle"]</h6><p class="text-muted-custom mb-0 small">@L["Users_RegenerateRecoveryKeyDesc"]</p></div>
+    @if (isSuperAdmin)
+    {
+        <div class="col-lg-4">
+            <div class="card-dark h-100">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="card-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                    <div><h6 class="mb-0">@L["Users_GenerateRecoveryKeyTitle"]</h6><p class="text-muted-custom mb-0 small">@L["Users_RegenerateRecoveryKeyDesc"]</p></div>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm w-100 js-regenerate-recovery-key"><i class="bi bi-shield-lock me-1"></i>@L["Users_GenerateKey"]</button>
             </div>
-            <button type="button" class="btn btn-primary btn-sm w-100 js-regenerate-recovery-key"><i class="bi bi-shield-lock me-1"></i>@L["Users_GenerateKey"]</button>
         </div>
-    </div>
+    }
 </div>
 
 <div class="card-dark">
@@ -195,6 +204,10 @@
                                 {
                                     <button type="button" class="btn btn-sm btn-outline-secondary me-1 js-generate-otp" data-id="@user.Id" data-email="@user.Email" title="@L["Users_GenerateOtp"]"><i class="bi bi-key"></i></button>
                                 }
+                                else if (isSuperAdmin && !SuperAdminPolicy.IsSuperAdmin(user.Email))
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 js-generate-otp" data-id="@user.Id" data-email="@user.Email" data-admin="true" title="@L["Users_GenerateOtp"]"><i class="bi bi-key"></i></button>
+                                }
                                 <a href="/admin/dashboard/edituser/@user.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></a>
                                 <form asp-area="Admin" asp-controller="Dashboard" asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('@(string.Format(L["Users_DeleteConfirm"].Value, user.Email))')">
                                     @Html.AntiForgeryToken()
@@ -264,7 +277,8 @@
         btn.addEventListener('click', async () => {
             btn.disabled = true;
             try {
-                const res = await fetch(`/admin/dashboard/generateotp/${btn.dataset.id}`, {
+                const endpoint = btn.dataset.admin === 'true' ? 'generateadminotp' : 'generateotp';
+                const res = await fetch(`/admin/dashboard/${endpoint}/${btn.dataset.id}`, {
                     method: 'POST',
                     headers: { 'RequestVerificationToken': token }
                 });

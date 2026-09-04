@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Data;
 using MvcApp.Models;
 
@@ -8,15 +9,42 @@ public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
     private readonly ILogger<AuthService> _logger;
+    private readonly IMemoryCache _cache;
 
-    public AuthService(AppDbContext db, ILogger<AuthService> logger)
+    // Per-account lockout on top of the per-IP "login" rate limiter: the
+    // limiter caps request *volume* from one IP, but a patient attacker
+    // spread across IPs (or just slow) could otherwise keep guessing one
+    // known account indefinitely. Reuses IMemoryCache — already registered
+    // (AddMemoryCache) and used elsewhere in the app — rather than adding a
+    // new store, mirroring the same "N failed attempts locks it out" shape
+    // OtpService already uses for password-reset codes.
+    private const int MaxFailedAttempts = 5;
+    private static readonly TimeSpan LockoutWindow = TimeSpan.FromMinutes(15);
+    private static string FailKey(string email) => $"login-fail:{email.Trim().ToLowerInvariant()}";
+
+    public AuthService(AppDbContext db, ILogger<AuthService> logger, IMemoryCache cache)
     {
         _db = db;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<(User? User, string? FailReason)> ValidateAsync(string email, string password)
     {
+        var failKey = FailKey(email);
+        if (_cache.TryGetValue(failKey, out int failCount) && failCount >= MaxFailedAttempts)
+        {
+            _logger.LogWarning("Login blocked: too many recent failed attempts for '{Email}'.", email.ToLower());
+            // Same generic reason shape as every other failure below — the
+            // caller already discards this and always shows one generic
+            // "invalid credentials" message, so a locked account is not
+            // distinguishable from a wrong password (no extra enumeration
+            // signal from the lockout itself).
+            return (null, "Account temporarily locked after repeated failed attempts.");
+        }
+
+        void RecordFailure() => _cache.Set(failKey, failCount + 1, LockoutWindow);
+
         var user = await _db.Users
             .FirstOrDefaultAsync(u => u.Email == email.ToLower());
 
@@ -24,6 +52,7 @@ public class AuthService : IAuthService
         {
             var reason = $"No user found for email '{email.ToLower()}'.";
             _logger.LogWarning("Login failed: {Reason}", reason);
+            RecordFailure();
             return (null, reason);
         }
         // Bulk-created accounts start with no password set (pending activation
@@ -33,6 +62,7 @@ public class AuthService : IAuthService
         {
             var reason = $"User '{email.ToLower()}' has no password hash set.";
             _logger.LogWarning("Login failed: {Reason}", reason);
+            RecordFailure();
             return (null, reason);
         }
 
@@ -40,9 +70,11 @@ public class AuthService : IAuthService
         {
             var reason = $"Password mismatch for '{email.ToLower()}'.";
             _logger.LogWarning("Login failed: {Reason}", reason);
+            RecordFailure();
             return (null, reason);
         }
 
+        _cache.Remove(failKey);
         return (user, null);
     }
 

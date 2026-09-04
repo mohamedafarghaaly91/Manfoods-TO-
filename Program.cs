@@ -32,20 +32,29 @@ builder.Services.AddAntiforgery(options =>
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("login", o =>
+    // Partitioned per client IP — a single shared/global bucket here would let
+    // any one anonymous caller exhaust the entire app's login budget and lock
+    // every user (including Admin) out of authenticating. Same pattern as the
+    // "api" policy below; ForwardedHeadersOptions above already resolves the
+    // real client IP behind the reverse proxy. Applies to /login, /adminlogin,
+    // Forgot Password, and Admin Recover (all carry [EnableRateLimiting("login")]).
+    options.AddPolicy("login", context =>
     {
-        o.Window = TimeSpan.FromMinutes(1);
-        o.PermitLimit = 10;
-        o.QueueLimit = 0;
+        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(key, _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 10,
+            QueueLimit = 0
+        });
     });
 
-    // Unlike the "login" limiter above (one deliberately shared, app-wide
-    // bucket — fine for a low-volume login form), the dashboard API surface
-    // gets many parallel requests per page load from every logged-in user,
-    // so it must be partitioned per client IP rather than sharing a single
-    // global budget — otherwise a handful of concurrent users would exhaust
-    // it for everyone. ForwardedHeadersOptions above already resolves the
-    // real client IP behind the reverse proxy.
+    // Unlike "login" above (now per-IP too), the dashboard API surface gets
+    // many parallel requests per page load from every logged-in user, so it
+    // must be partitioned per client IP rather than sharing a single global
+    // budget — otherwise a handful of concurrent users would exhaust it for
+    // everyone. ForwardedHeadersOptions above already resolves the real
+    // client IP behind the reverse proxy.
     options.AddPolicy("api", context =>
     {
         var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -82,7 +91,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(1);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.Name = "wicrewsession";
+    options.Cookie.Name = SessionExtensions.SessionCookieName;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });

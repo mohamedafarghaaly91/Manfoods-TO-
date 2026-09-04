@@ -33,7 +33,7 @@ public class CreateUserViewModel
     public string? AssignedName { get; set; }
 
     [Required]
-    [MinLength(6)]
+    [MinLength(8, ErrorMessage = "Val_PasswordMin8")]
     public string Password { get; set; } = "";
 
     [Required]
@@ -57,7 +57,7 @@ public class EditUserViewModel
 
     public string? AssignedName { get; set; }
 
-    [MinLength(6)]
+    [MinLength(8, ErrorMessage = "Val_PasswordMin8")]
     public string? Password { get; set; }
 
     [Compare(nameof(Password))]

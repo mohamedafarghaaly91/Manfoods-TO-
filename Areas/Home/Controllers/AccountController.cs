@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
@@ -14,8 +15,9 @@ public class AccountController : Controller
 {
     private readonly IAuthService _auth;
     private readonly IOtpService _otp;
+    private readonly IMemoryCache _cache;
     private readonly IStringLocalizer<SharedResource> _L;
-    public AccountController(IAuthService auth, IOtpService otp, IStringLocalizer<SharedResource> localizer) { _auth = auth; _otp = otp; _L = localizer; }
+    public AccountController(IAuthService auth, IOtpService otp, IMemoryCache cache, IStringLocalizer<SharedResource> localizer) { _auth = auth; _otp = otp; _cache = cache; _L = localizer; }
 
     [HttpGet("/login")]
     public IActionResult Login()
@@ -40,7 +42,17 @@ public class AccountController : Controller
             return View(vm);
         }
 
-        HttpContext.Session.SetUserSession(user.Id, user.Email, user.Role, user.AssignedName);
+        // Session-fixation mitigation: hand the authenticated identity off
+        // via a one-time token rather than writing it into whatever session
+        // this request arrived with — see SessionExtensions.BeginSessionRotation.
+        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName);
+        return RedirectToAction("CompleteLogin", new { token });
+    }
+
+    [HttpGet("/login/complete")]
+    public IActionResult CompleteLogin(string? token)
+    {
+        if (!HttpContext.CompleteSessionRotation(_cache, token)) return Redirect("/login");
         return RedirectToAction("Index", "Dashboard", new { area = "Home" });
     }
 

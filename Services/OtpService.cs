@@ -11,10 +11,16 @@ public class OtpService : IOtpService
 {
     private readonly AppDbContext _db;
     private readonly IStringLocalizer<SharedResource> _L;
+    private readonly ILogger<OtpService> _logger;
     private static readonly TimeSpan Expiry = TimeSpan.FromHours(24);
     private const int MaxFailedAttempts = 5;
 
-    public OtpService(AppDbContext db, IStringLocalizer<SharedResource> localizer) { _db = db; _L = localizer; }
+    public OtpService(AppDbContext db, IStringLocalizer<SharedResource> localizer, ILogger<OtpService> logger)
+    {
+        _db = db;
+        _L = localizer;
+        _logger = logger;
+    }
 
     private static string GenerateCode() => Random.Shared.Next(0, 1_000_000).ToString("D6");
 
@@ -91,7 +97,12 @@ public class OtpService : IOtpService
         identifier = identifier.Trim();
         var user = await _db.Users.FirstOrDefaultAsync(u =>
             u.Role != "Admin" && (u.Email == identifier.ToLower() || u.Phone == identifier));
-        if (user == null) return (false, _L["Msg_NoAccountFound"].Value);
+        // Same message as "no active OTP" below (not Msg_NoAccountFound) —
+        // an unauthenticated caller must not be able to tell "no such
+        // account" apart from "account exists but nothing to reset right
+        // now", which would otherwise let this form be used to enumerate
+        // registered emails/phones.
+        if (user == null) return (false, _L["Msg_NoActiveOtp"].Value);
 
         var otp = await _db.PasswordResetOtps
             .Where(o => o.UserId == user.Id && !o.IsUsed && o.ExpiresAt > DateTime.UtcNow)
@@ -112,6 +123,72 @@ public class OtpService : IOtpService
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         otp.IsUsed = true;
         await _db.SaveChangesAsync();
+        return (true, _L["Msg_PasswordSetSuccess"].Value);
+    }
+
+    // ── Admin password reset (Super Admin issues the OTP; Master Recovery
+    // Key stays Super-Admin-only and is never used for other Admins) ──────
+
+    public async Task<string?> GenerateAdminResetOtpAsync(int targetUserId, string requestingEmail)
+    {
+        if (!SuperAdminPolicy.IsSuperAdmin(requestingEmail)) return null;
+
+        var user = await _db.Users.FindAsync(targetUserId);
+        // Target must be an Admin, and must not be the Super Admin — the
+        // Super Admin recovers their own account via the Master Key, never
+        // via OTP (this OTP never logs anyone in directly either way).
+        if (user == null || user.Role != "Admin" || SuperAdminPolicy.IsSuperAdmin(user.Email)) return null;
+
+        await _db.PasswordResetOtps.Where(o => o.UserId == user.Id && !o.IsUsed).ExecuteDeleteAsync();
+
+        var code = GenerateCode();
+        _db.PasswordResetOtps.Add(new PasswordResetOtp
+        {
+            UserId = user.Id,
+            OtpCode = code,
+            ExpiresAt = DateTime.UtcNow.Add(Expiry),
+        });
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Super Admin '{RequestingEmail}' generated a password-reset OTP for Admin '{TargetEmail}' (user id {TargetUserId}).",
+            requestingEmail.Trim().ToLowerInvariant(), user.Email, user.Id);
+
+        return code;
+    }
+
+    public async Task<(bool success, string message)> VerifyAndResetAdminPasswordAsync(string identifier, string otpCode, string newPassword)
+    {
+        identifier = identifier.Trim();
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
+            u.Role == "Admin" && (u.Email == identifier.ToLower() || u.Phone == identifier));
+        // Excludes the Super Admin (checked in-memory since EF can't translate
+        // the static helper) so this path can never touch that account, and
+        // reuses the same generic "no active OTP" message as the User flow to
+        // avoid leaking account existence.
+        if (user == null || SuperAdminPolicy.IsSuperAdmin(user.Email)) return (false, _L["Msg_NoActiveOtp"].Value);
+
+        var otp = await _db.PasswordResetOtps
+            .Where(o => o.UserId == user.Id && !o.IsUsed && o.ExpiresAt > DateTime.UtcNow)
+            .OrderByDescending(o => o.CreatedAt)
+            .FirstOrDefaultAsync();
+        if (otp == null) return (false, _L["Msg_NoActiveOtp"].Value);
+
+        if (otp.OtpCode != otpCode.Trim())
+        {
+            otp.FailedAttempts++;
+            if (otp.FailedAttempts >= MaxFailedAttempts) otp.IsUsed = true;
+            await _db.SaveChangesAsync();
+            return otp.IsUsed
+                ? (false, _L["Msg_TooManyOtpAttempts"].Value)
+                : (false, string.Format(_L["Msg_IncorrectOtpCode"].Value, MaxFailedAttempts - otp.FailedAttempts));
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        otp.IsUsed = true;
+        await _db.SaveChangesAsync();
+
+        _logger.LogInformation("Admin '{Email}' (user id {UserId}) reset their password via a Super-Admin-issued OTP.", user.Email, user.Id);
+
         return (true, _L["Msg_PasswordSetSuccess"].Value);
     }
 }

@@ -108,8 +108,15 @@ public class UserService : IUserService
         return BCrypt.Net.BCrypt.Verify(key, setting.Value);
     }
 
+    // The Master Recovery Key is an emergency mechanism for the single Super
+    // Admin (admin@mcd.com) only — it must never be usable to take over any
+    // other Admin account, even by someone who legitimately holds the key.
+    // Other Admins get a password reset via a Super-Admin-issued OTP instead
+    // (see OtpService.GenerateAdminResetOtpAsync/VerifyAndResetAdminPasswordAsync).
     public async Task<bool> ResetAdminPasswordAsync(string email, string newPassword)
     {
+        if (!SuperAdminPolicy.IsSuperAdmin(email)) return false;
+
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower() && u.Role == "Admin");
         if (user == null) return false;
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
@@ -121,8 +128,13 @@ public class UserService : IUserService
         Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
             .Replace('+', '-').Replace('/', '_').TrimEnd('=');
 
+    // Only the Super Admin may generate/regenerate the Master Recovery Key —
+    // enforced here server-side (not just hidden in the UI), independent of
+    // the re-authentication (current password) check below.
     public async Task<string?> RegenerateRecoveryKeyAsync(string requestingEmail, string password)
     {
+        if (!SuperAdminPolicy.IsSuperAdmin(requestingEmail)) return null;
+
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == requestingEmail.ToLower() && u.Role == "Admin");
         if (user == null || string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             return null;

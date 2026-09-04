@@ -575,10 +575,30 @@ public class DashboardController : Controller
         return Json(new { otp });
     }
 
+    // Super-Admin-only: issues a password-reset OTP for another Admin
+    // account. Ordinary Admins never see the Master Recovery Key and use
+    // this OTP (via /adminlogin/forgotpassword) instead when locked out.
+    [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
+    public async Task<IActionResult> GenerateAdminOtp(int id)
+    {
+        var requestingEmail = HttpContext.Session.GetEmail();
+        if (!SuperAdminPolicy.IsSuperAdmin(requestingEmail)) return Json(new { error = _L["Msg_AdminOtpNotPermitted"].Value });
+
+        var otp = await _otp.GenerateAdminResetOtpAsync(id, requestingEmail);
+        if (otp == null) return NotFound();
+        return Json(new { otp });
+    }
+
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> RegenerateRecoveryKey([FromForm] string password)
     {
         var email = HttpContext.Session.GetEmail();
+        // Server-side gate — the Master Recovery Key is Super-Admin-only.
+        // UserService.RegenerateRecoveryKeyAsync enforces this too (defense
+        // in depth); this just gives ordinary Admins a clear message instead
+        // of a misleading "incorrect password".
+        if (!SuperAdminPolicy.IsSuperAdmin(email)) return Json(new { error = _L["Msg_SuperAdminOnly"].Value });
+
         var key = await _users.RegenerateRecoveryKeyAsync(email, password);
         if (key == null) return Json(new { error = _L["Msg_IncorrectPassword"].Value });
         return Json(new { key });

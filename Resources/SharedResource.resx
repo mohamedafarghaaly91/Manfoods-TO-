@@ -173,6 +173,7 @@
   <data name="Login_SignInAdmin" xml:space="preserve"><value>Sign In as Admin</value></data>
   <data name="Login_ForgotPassword" xml:space="preserve"><value>Forgot password?</value></data>
   <data name="Login_ForgotPasswordAdmin" xml:space="preserve"><value>Forgot password? Use recovery key</value></data>
+  <data name="Login_ForgotPasswordAdminOtp" xml:space="preserve"><value>Forgot password? Reset with OTP</value></data>
   <data name="Login_AdminPortal" xml:space="preserve"><value>Admin Portal</value></data>
   <data name="Login_AdminDashboard" xml:space="preserve"><value>Admin Dashboard</value></data>
   <data name="Login_WorkforceAnalytics" xml:space="preserve"><value>Workforce Analytics Platform</value></data>
@@ -203,6 +204,7 @@
   <!-- Forgot Password -->
   <data name="FP_Title" xml:space="preserve"><value>Reset Your Password</value></data>
   <data name="FP_Subtitle" xml:space="preserve"><value>Use the OTP your admin sent you to set a new password.</value></data>
+  <data name="FP_SubtitleAdmin" xml:space="preserve"><value>Use the OTP the Super Admin sent you to set a new password.</value></data>
   <data name="FP_PhoneOrEmail" xml:space="preserve"><value>Phone or Email</value></data>
   <data name="FP_OtpCode" xml:space="preserve"><value>OTP Code</value></data>
   <data name="FP_NewPassword" xml:space="preserve"><value>New Password</value></data>
@@ -1226,6 +1228,8 @@
   <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>Upload failed. Please check the file format and try again.</value></data>
   <data name="Msg_NoPendingOtps" xml:space="preserve"><value>No pending users need an OTP right now.</value></data>
   <data name="Msg_IncorrectPassword" xml:space="preserve"><value>Incorrect password.</value></data>
+  <data name="Msg_SuperAdminOnly" xml:space="preserve"><value>Only the Super Admin can manage the Master Recovery Key.</value></data>
+  <data name="Msg_AdminOtpNotPermitted" xml:space="preserve"><value>Only the Super Admin can generate a password-reset OTP for another Admin.</value></data>
   <data name="Msg_UploadThreeFiles" xml:space="preserve"><value>Please upload all three files (Active Employees, Resignations, and Store Reference) and pick the month and year — all three are required together.</value></data>
   <data name="Msg_UploadPeriodFailed" xml:space="preserve"><value>Upload of {0}/{1} data failed: {2}</value></data>
   <data name="Msg_SelectFileTypeAndExcel" xml:space="preserve"><value>Please choose a file type and select a valid Excel file.</value></data>
