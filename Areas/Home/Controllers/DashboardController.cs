@@ -84,6 +84,7 @@ public class DashboardController : Controller
     // Mirrors Areas/Admin/Controllers/DashboardController.Export exactly (same IReportService
     // calls) so the shared Reports view's download buttons work under the Home area too.
     [HttpGet("home/dashboard/export")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Export(int month, int year, string reportType = "stores-overview",
         string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null,
         int? yearB = null, string? monthsB = null, string? storeB = null, string? omB = null, string? ocB = null, string? socB = null, string? odB = null)

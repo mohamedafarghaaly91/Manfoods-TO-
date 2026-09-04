@@ -106,6 +106,7 @@ public class DashboardController : Controller
     }
 
     [HttpGet("admin/dashboard/export")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Export(int month, int year, string reportType = "stores-overview",
         string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null,
         int? yearB = null, string? monthsB = null, string? storeB = null, string? omB = null, string? ocB = null, string? socB = null, string? odB = null)
@@ -457,6 +458,7 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> DownloadUploadFile(int id)
     {
         var file = await _uploads.GetFileAsync(id);

@@ -142,6 +142,11 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Defense-in-depth on top of whatever HTTPS enforcement the reverse proxy
+// already does — safe to run behind it since UseForwardedHeaders above
+// already resolves the original client scheme via X-Forwarded-Proto.
+app.UseHttpsRedirection();
+
 var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("ar") };
 
 app.UseRequestLocalization(new RequestLocalizationOptions
@@ -174,6 +179,14 @@ app.Use(async (context, next) =>
         "frame-ancestors 'self';";
 
     h.Remove("X-Powered-By");
+
+    // The entire /api/* surface (see the "api" route below) serves
+    // authenticated HR data — turnover, retention, exit interviews, early
+    // warning, workforce/store data — as JSON. None of it should be kept by
+    // the browser's cache or an intermediary proxy. Static assets under
+    // wwwroot never match this prefix, so they're unaffected.
+    if (context.Request.Path.StartsWithSegments("/api"))
+        h["Cache-Control"] = "no-store";
 
     await next();
 });
