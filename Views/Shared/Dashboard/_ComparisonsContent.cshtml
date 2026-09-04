@@ -105,6 +105,23 @@
     </button>
 </div>
 
+@{
+    var comparisonsGuide = new PageGuideViewModel
+    {
+        PageKey = "comparisons",
+        Overview = L["Guide_Comparisons_Overview"],
+        FilterNote = L["Guide_Comparisons_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-clipboard-data", Title = L["Common_SmartInsights"], Body = L["Guide_Comparisons_Chart_Kpis"] },
+            new() { Icon = "bi-bar-chart-steps", Title = L["Chart_TurnoverByStoreCompare"], Body = L["Guide_Comparisons_Chart_TurnoverByStore"] },
+            new() { Icon = "bi-bar-chart-steps", Title = L["Chart_NinetyDayByStoreCompare"], Body = L["Guide_Comparisons_Chart_NinetyByStore"] },
+            new() { Icon = "bi-table", Title = L["Comparisons_StoreBreakdown"], Body = L["Guide_Comparisons_Chart_StoreTable"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", comparisonsGuide)
+
 <div class="row g-3 mb-4">
     <div class="col-lg-6">
         <div class="cmp-panel cmp-panel-a">

@@ -131,6 +131,22 @@
     </div>
 </div>
 
+@{
+    var scorecardGuide = new PageGuideViewModel
+    {
+        PageKey = "scorecard",
+        Overview = L["Guide_Scorecard_Overview"],
+        FilterNote = L["Guide_Scorecard_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_LeaderTurnoverTrend"], Body = L["Guide_Scorecard_Chart_LeaderTrend"] },
+            new() { Icon = "bi-list-ol", Title = L["SC_Ranking"], Body = L["Guide_Scorecard_Chart_Ranking"] },
+            new() { Icon = "bi-diagram-3", Title = L["SC_Rollup"], Body = L["Guide_Scorecard_Chart_Rollup"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", scorecardGuide)
+
 <div id="scEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-shield-check" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
     <h5 class="mb-2">@L["SC_EmptyTitle"]</h5>

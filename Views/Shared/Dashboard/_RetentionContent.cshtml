@@ -122,6 +122,26 @@
     </div>
 </div>
 
+@{
+    var retentionGuide = new PageGuideViewModel
+    {
+        PageKey = "retention",
+        Overview = L["Guide_Retention_Overview"],
+        FilterNote = L["Guide_Retention_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-graph-up", Title = L["Chart_SurvivalCurve"], Body = L["Guide_Retention_Chart_Survival"] },
+            new() { Icon = "bi-trophy", Title = L["Retention_LeaderboardTop"], Body = L["Guide_Retention_Chart_LeaderboardTop"] },
+            new() { Icon = "bi-exclamation-triangle", Title = L["Retention_LeaderboardBottom"], Body = L["Guide_Retention_Chart_LeaderboardBottom"] },
+            new() { Icon = "bi-shop", Title = L["Retention_TenureByStore"], Body = L["Guide_Retention_Chart_TenureByStore"] },
+            new() { Icon = "bi-person-lines-fill", Title = L["Retention_ByJobTitle"], Body = L["Guide_Retention_Chart_JobTitle"] },
+            new() { Icon = "bi-gender-ambiguous", Title = L["Retention_ByGender"], Body = L["Guide_Retention_Chart_Gender"] },
+            new() { Icon = "bi-people", Title = L["Retention_ByOcOm"], Body = L["Guide_Retention_Chart_OcOm"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", retentionGuide)
+
 <div id="rtEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-shield-check" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
     <h5 class="mb-2">@L["RT_NoRetentionData"]</h5>

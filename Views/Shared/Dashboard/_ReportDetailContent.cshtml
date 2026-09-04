@@ -79,6 +79,17 @@
     </div>
 </div>
 
+@{
+    var reportDetailGuide = new PageGuideViewModel
+    {
+        PageKey = "reportdetail",
+        Overview = L["Guide_ReportDetail_Overview"],
+        FilterNote = L["Guide_ReportDetail_FilterNote"],
+        Sections = new List<PageGuideSection>(),
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", reportDetailGuide)
+
 @if (Model == null || Model.Count == 0)
 {
     <div class="card-dark text-center py-5">

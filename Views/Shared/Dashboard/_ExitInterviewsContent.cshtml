@@ -123,6 +123,31 @@
     </div>
 </div>
 
+@{
+    var exitInterviewsGuide = new PageGuideViewModel
+    {
+        PageKey = "exitinterviews",
+        Overview = L["Guide_ExitInterviews_Overview"],
+        FilterNote = L["Guide_ExitInterviews_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-chat-left-text", Title = L["Chart_ReasonsForLeaving"], Body = L["Guide_ExitInterviews_Chart_Reasons"] },
+            new() { Icon = "bi-arrow-repeat", Title = L["Chart_WouldTheyReturn"], Body = L["Guide_ExitInterviews_Chart_Return"] },
+            new() { Icon = "bi-star", Title = L["Chart_OverallExperience"], Body = L["Guide_ExitInterviews_Chart_Experience"] },
+            new() { Icon = "bi-mortarboard", Title = L["Chart_Training"], Body = L["Guide_ExitInterviews_Chart_Training"] },
+            new() { Icon = "bi-balance-scale", Title = L["Chart_FairTreatment"], Body = L["Guide_ExitInterviews_Chart_FairTreatment"] },
+            new() { Icon = "bi-clipboard2-pulse", Title = L["Chart_WorkloadConditions"], Body = L["Guide_ExitInterviews_Chart_Workload"] },
+            new() { Icon = "bi-speedometer2", Title = L["Chart_WorkPressureReason"], Body = L["Guide_ExitInterviews_Chart_WorkPressure"] },
+            new() { Icon = "bi-person-lines-fill", Title = L["Chart_EiByJobTitle"], Body = L["Guide_ExitInterviews_Chart_JobTitle"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_EiReasonsTrend"], Body = L["Guide_ExitInterviews_Chart_ReasonsTrend"] },
+            new() { Icon = "bi-lightning", Title = L["Chart_EngagementDrivers"], Body = L["Guide_ExitInterviews_Chart_Drivers"] },
+            new() { Icon = "bi-diagram-3", Title = L["Chart_EiReasonVsReturn"], Body = L["Guide_ExitInterviews_Chart_ReasonVsReturn"] },
+            new() { Icon = "bi-chat-square-text", Title = L["Chart_Comments"], Body = L["Guide_ExitInterviews_Chart_Comments"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", exitInterviewsGuide)
+
 <div id="eiEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-chat-square-text" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
     <h5 class="mb-2">@L["EI_NoExitData"]</h5>

@@ -107,6 +107,27 @@
     </div>
 </div>
 
+@{
+    var earlyWarningGuide = new PageGuideViewModel
+    {
+        PageKey = "earlywarning",
+        Overview = L["Guide_EarlyWarning_Overview"],
+        FilterNote = L["Guide_EarlyWarning_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-flag", Title = L["Chart_EwReasonBreakdown"], Body = L["Guide_EarlyWarning_Chart_Reason"] },
+            new() { Icon = "bi-shop", Title = L["Chart_EwStoreBreakdown"], Body = L["Guide_EarlyWarning_Chart_Store"] },
+            new() { Icon = "bi-exclamation-diamond", Title = L["Chart_EwHighRiskByStore"], Body = L["Guide_EarlyWarning_Chart_HighRiskByStore"] },
+            new() { Icon = "bi-person-lines-fill", Title = L["Chart_EwJobTitleBreakdown"], Body = L["Guide_EarlyWarning_Chart_JobTitle"] },
+            new() { Icon = "bi-star-half", Title = L["Chart_EwStarDistribution"], Body = L["Guide_EarlyWarning_Chart_StarDist"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_EwTrend"], Body = L["Guide_EarlyWarning_Chart_Trend"] },
+            new() { Icon = "bi-exclamation-triangle", Title = L["EW_HighRiskTable"], Body = L["Guide_EarlyWarning_Chart_HighRiskTable"] },
+            new() { Icon = "bi-binoculars", Title = L["EW_WatchList"], Body = L["Guide_EarlyWarning_Chart_WatchList"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", earlyWarningGuide)
+
 <div id="ewLocalization" style="display:none"
      data-kpi-in-watchlist="@L["EW_InWatchList"]"
      data-kpi-high-risk="@L["EW_HighRisk"]"

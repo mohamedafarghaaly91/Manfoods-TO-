@@ -91,6 +91,21 @@
     </div>
 </div>
 
+@{
+    var storesGuide = new PageGuideViewModel
+    {
+        PageKey = "stores",
+        Overview = L["Guide_Stores_Overview"],
+        FilterNote = L["Guide_Stores_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-clipboard-data", Title = L["Common_SmartInsights"], Body = L["Guide_Stores_Chart_Kpis"] },
+            new() { Icon = "bi-shop", Title = L["Page_Stores"], Body = L["Guide_Stores_Chart_Cards"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", storesGuide)
+
 <div id="stSummaryCards" class="kpi-grid mb-4">
     <div class="kpi-spinner text-center py-3 w-100">
         <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>

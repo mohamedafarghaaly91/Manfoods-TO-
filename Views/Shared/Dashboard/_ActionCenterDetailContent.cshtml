@@ -32,6 +32,24 @@
     </div>
 </div>
 
+@{
+    var actionCenterDetailGuide = new PageGuideViewModel
+    {
+        PageKey = "actioncenterdetail",
+        Overview = L["Guide_ActionCenterDetail_Overview"],
+        FilterNote = L["Guide_ActionCenterDetail_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-speedometer2", Title = L["AC_ProgressTitle"], Body = L["Guide_ActionCenterDetail_Chart_Kpis"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["AC_MetricTrendTitle"], Body = L["Guide_ActionCenterDetail_Chart_Trend"] },
+            new() { Icon = "bi-broadcast", Title = L["AC_Signals"], Body = L["Guide_ActionCenterDetail_Chart_Signals"] },
+            new() { Icon = "bi-exclamation-circle", Title = L["SAP_DetectedIssues"], Body = L["Guide_ActionCenterDetail_Chart_Issues"] },
+            new() { Icon = "bi-list-check", Title = L["SAP_Recommendations"], Body = L["Guide_ActionCenterDetail_Chart_Recommendations"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", actionCenterDetailGuide)
+
 <div id="acdContent"
      data-chart-turnover="@L["Common_TurnoverPctLabel"]"
      data-chart-early-leaver="@L["AC_EarlyLeaverPct"]"

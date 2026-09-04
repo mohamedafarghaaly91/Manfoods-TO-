@@ -34,6 +34,23 @@
     </div>
 </div>
 
+@{
+    var actionCenterGuide = new PageGuideViewModel
+    {
+        PageKey = "actioncenter",
+        Overview = L["Guide_ActionCenter_Overview"],
+        FilterNote = L["Guide_ActionCenter_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-flag", Title = L["AC_ChartTopReasons"], Body = L["Guide_ActionCenter_Chart_Reasons"] },
+            new() { Icon = "bi-geo-alt", Title = L["AC_ChartByRegion"], Body = L["Guide_ActionCenter_Chart_Region"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["AC_ChartTrend"], Body = L["Guide_ActionCenter_Chart_Trend"] },
+            new() { Icon = "bi-table", Title = L["AC_StoresTable"], Body = L["Guide_ActionCenter_Chart_StoresTable"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", actionCenterGuide)
+
 <div id="acSummaryCards" class="kpi-grid mb-4">
     <div class="kpi-spinner text-center py-3 w-100">
         <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>

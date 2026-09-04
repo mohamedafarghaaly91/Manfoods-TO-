@@ -147,6 +147,28 @@
     </div>
 </div>
 
+@{
+    var ninetyDayGuide = new PageGuideViewModel
+    {
+        PageKey = "ninetyday",
+        Overview = L["Guide_NinetyDay_Overview"],
+        FilterNote = L["Guide_NinetyDay_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-calendar3", Title = L["Chart_NinetyDayByCohort"], Body = L["Guide_NinetyDay_Chart_ByCohort"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_NinetyDayTrend"], Body = L["Guide_NinetyDay_Chart_Trend"] },
+            new() { Icon = "bi-shop", Title = L["Chart_ByStore"], Body = L["Guide_NinetyDay_Chart_ByStore"] },
+            new() { Icon = "bi-chat-left-text", Title = L["NTD_ReasonsEarlyLeaving"], Body = L["Guide_NinetyDay_Chart_Reasons"] },
+            new() { Icon = "bi-gender-ambiguous", Title = L["Chart_GenderBreakdown"], Body = L["Guide_NinetyDay_Chart_Gender"] },
+            new() { Icon = "bi-person-lines-fill", Title = L["NTD_ByJobTitle"], Body = L["Guide_NinetyDay_Chart_JobTitle"] },
+            new() { Icon = "bi-cash-coin", Title = L["NTD_ByPayroll"], Body = L["Guide_NinetyDay_Chart_Payroll"] },
+            new() { Icon = "bi-table", Title = L["Common_StoreComparison"], Body = L["Guide_NinetyDay_Chart_StoreTable"] },
+            new() { Icon = "bi-people", Title = L["Common_ByOcOm"], Body = L["Guide_NinetyDay_Chart_OcOm"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", ninetyDayGuide)
+
 <div id="ntdEmptyState" class="card-dark text-center py-5" style="display:none">
     <i class="bi bi-hourglass-split" style="font-size:3rem;color:oklch(0.5 0.18 25);display:block;margin-bottom:1rem"></i>
     <h5 class="mb-2">@L["NTD_NoCohortData"]</h5>

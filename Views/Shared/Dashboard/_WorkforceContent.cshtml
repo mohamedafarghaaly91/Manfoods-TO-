@@ -50,6 +50,26 @@
     </div>
 </div>
 
+@{
+    var workforceGuide = new PageGuideViewModel
+    {
+        PageKey = "workforce",
+        Overview = L["Guide_Workforce_Overview"],
+        FilterNote = L["Guide_Workforce_FilterNote"],
+        Sections = new List<PageGuideSection>
+        {
+            new() { Icon = "bi-person-lines-fill", Title = L["Chart_HeadcountByJobTitle"], Body = L["Guide_Workforce_Chart_JobTitle"] },
+            new() { Icon = "bi-hourglass-split", Title = L["Chart_HeadcountByTenure"], Body = L["Guide_Workforce_Chart_Tenure"] },
+            new() { Icon = "bi-cash-coin", Title = L["Chart_HeadcountByPayroll"], Body = L["Guide_Workforce_Chart_Payroll"] },
+            new() { Icon = "bi-gender-ambiguous", Title = L["Chart_HeadcountGender"], Body = L["Guide_Workforce_Chart_Gender"] },
+            new() { Icon = "bi-graph-up-arrow", Title = L["Chart_HeadcountTrend"], Body = L["Guide_Workforce_Chart_Trend"] },
+            new() { Icon = "bi-shop", Title = L["Workforce_StoreBreakdown"], Body = L["Guide_Workforce_Chart_StoreBreakdown"] },
+            new() { Icon = "bi-people", Title = L["Common_ByOcOm"], Body = L["Guide_Workforce_Chart_OcOm"] },
+        }
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", workforceGuide)
+
 <div id="kpiCards" class="kpi-grid mb-4">
     <div class="kpi-spinner text-center py-3 w-100">
         <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>

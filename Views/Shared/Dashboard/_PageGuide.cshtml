@@ -1,24 +1,28 @@
 @model MvcApp.Models.ViewModels.PageGuideViewModel
 @{
     var offcanvasId = $"pageGuide-{Model.PageKey}";
+    // The guide's own layout (trigger, drawer, icons) always stays LTR regardless of
+    // site language — only the text inside is translated and right-aligned for Arabic.
+    var isArabicText = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
+    var textAlignClass = isArabicText ? "page-guide-text-ar" : "";
 }
 
-<!-- ── Page Guide: creative "compass" trigger + slide-in explainer drawer ── -->
-<button type="button" class="page-guide-orb" data-bs-toggle="offcanvas" data-bs-target="#@offcanvasId"
+<!-- ── Page Guide: creative "compass" trigger + slide-in explainer drawer (always LTR layout) ── -->
+<button type="button" dir="ltr" class="page-guide-orb" data-bs-toggle="offcanvas" data-bs-target="#@offcanvasId"
         aria-controls="@offcanvasId" title="@L["Guide_TriggerLabel"]">
     <span class="page-guide-orb-ring"></span>
     <i class="bi bi-compass"></i>
     <span class="page-guide-orb-label">@L["Guide_TriggerLabel"]</span>
 </button>
 
-<div class="offcanvas offcanvas-end page-guide-panel" tabindex="-1" id="@offcanvasId" aria-labelledby="@(offcanvasId)-label">
+<div class="offcanvas offcanvas-end page-guide-panel" dir="ltr" tabindex="-1" id="@offcanvasId" aria-labelledby="@(offcanvasId)-label">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title d-flex align-items-center gap-2" id="@(offcanvasId)-label">
             <i class="bi bi-compass" style="color:var(--red)"></i> @L["Guide_TriggerLabel"]
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body">
+    <div class="offcanvas-body @textAlignClass">
         <p class="page-guide-overview">@Model.Overview</p>
 
         @if (Model.Sections.Count > 0)

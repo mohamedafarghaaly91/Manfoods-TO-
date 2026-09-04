@@ -386,6 +386,14 @@ html, body {
     background: var(--bg-2); color: var(--text);
     border-inline-start: 1px solid var(--card-border);
 }
+/* Guide layout is always LTR (see _PageGuide.cshtml); Arabic text still
+   reads right-to-left within it, so right-align the copy explicitly. */
+.page-guide-text-ar .page-guide-overview,
+.page-guide-text-ar .page-guide-subheading,
+.page-guide-text-ar .accordion-body,
+.page-guide-text-ar .page-guide-filter-note span { text-align: right; }
+.page-guide-text-ar .accordion-button { flex-direction: row-reverse; text-align: right; }
+.page-guide-text-ar .accordion-button i.bi { margin-inline-end: 0; margin-inline-start: 8px; }
 .page-guide-panel .offcanvas-header { border-bottom: 1px solid var(--card-border); }
 .page-guide-panel .btn-close { filter: var(--bs-btn-close-white-filter, none); }
 [data-theme="light"] .page-guide-panel .btn-close { filter: none; }
@@ -414,7 +422,6 @@ html, body {
     background: var(--warning-bg); border-left: 3px solid var(--warning);
     border-radius: var(--radius-sm); font-size: 13px; color: var(--warning);
 }
-[dir="rtl"] .page-guide-filter-note { border-left: none; border-right: 3px solid var(--warning); }
 
 /* ══ ALERTS ═══════════════════════════════════════════ */
 .alert-banner {

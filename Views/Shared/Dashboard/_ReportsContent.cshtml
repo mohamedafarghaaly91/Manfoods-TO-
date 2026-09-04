@@ -25,6 +25,16 @@
     </div>
 </div>
 
+@{
+    var reportsGuide = new PageGuideViewModel
+    {
+        PageKey = "reports",
+        Overview = L["Guide_Reports_Overview"],
+        Sections = new List<PageGuideSection>(),
+    };
+}
+@await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", reportsGuide)
+
 @if (!hasPeriods)
 {
     <div class="card-dark text-center py-5">
