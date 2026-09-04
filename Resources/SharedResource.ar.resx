@@ -80,12 +80,12 @@
 
   <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_0" xml:space="preserve"><value>طوّر برنامج الاستقبال والتهيئة للموظفين الجدد.</value></data>
   <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_1" xml:space="preserve"><value>خصّص مرافقاً للموظف الجديد وتابعه خلال أول 90 يوماً.</value></data>
-  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2" xml:space="preserve"><value>راجع دور قائد الفرع في دعم الموظفين الجدد.</value></data>
+  <data name="SAP_Rec_EARLY_TURNOVER_90D_Onboarding_2" xml:space="preserve"><value>راجع دور مدير الفرع في دعم الموظفين الجدد.</value></data>
 
   <data name="SAP_Rec_LOW_RETENTION_6M_Retention_0" xml:space="preserve"><value>راجع مستوى الانخراط الوظيفي للموظفين في مرحلة 3-6 أشهر.</value></data>
   <data name="SAP_Rec_LOW_RETENTION_6M_Retention_1" xml:space="preserve"><value>تأكد من ثبات جداول العمل وتوافر فرص النمو قبل إتمام السنة الأولى.</value></data>
 
-  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0" xml:space="preserve"><value>راجع دعم قائد الفرع الحالي وخطط تطويره.</value></data>
+  <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_0" xml:space="preserve"><value>راجع دعم مدير الفرع الحالي وخطط تطويره.</value></data>
   <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_1" xml:space="preserve"><value>احرص على الاستمرارية التشغيلية خلال فترات التغيير القيادي.</value></data>
   <data name="SAP_Rec_LEADERSHIP_INSTABILITY_Leadership_2" xml:space="preserve"><value>قيّم ما إذا كانت الحاجة تستدعي متابعة إضافية من مدير المنطقة.</value></data>
 
@@ -96,16 +96,16 @@
   <data name="SAP_Rec_REASON_CONCENTRATION_Compensation_1" xml:space="preserve"><value>افحص عدالة الرواتب داخل الفرع.</value></data>
   <data name="SAP_Rec_REASON_CONCENTRATION_Workload_0" xml:space="preserve"><value>راجع مستويات التوظيف نسبةً لحجم المبيعات.</value></data>
   <data name="SAP_Rec_REASON_CONCENTRATION_Workload_1" xml:space="preserve"><value>افحص عدالة توزيع الورديات.</value></data>
-  <data name="SAP_Rec_REASON_CONCENTRATION_Management_0" xml:space="preserve"><value>درّب قائد الفرع على إدارة الأفراد.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Management_0" xml:space="preserve"><value>درّب مدير الفرع على إدارة الأفراد.</value></data>
   <data name="SAP_Rec_REASON_CONCENTRATION_Management_1" xml:space="preserve"><value>راجع الشكاوى والحوادث الأخيرة.</value></data>
   <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_0" xml:space="preserve"><value>طوّر برنامج الاستقبال والتهيئة للموظفين الجدد.</value></data>
-  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_1" xml:space="preserve"><value>راجع دور قائد الفرع في دعم الموظفين الجدد.</value></data>
-  <data name="SAP_Rec_REASON_CONCENTRATION_Other_0" xml:space="preserve"><value>راجع سبب الاستقالة الأكثر شيوعاً مع قائد الفرع وضع استجابة مستهدفة.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Onboarding_1" xml:space="preserve"><value>راجع دور مدير الفرع في دعم الموظفين الجدد.</value></data>
+  <data name="SAP_Rec_REASON_CONCENTRATION_Other_0" xml:space="preserve"><value>راجع سبب الاستقالة الأكثر شيوعاً مع مدير الفرع وضع استجابة مستهدفة.</value></data>
 
   <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_0" xml:space="preserve"><value>تواصل باستباقية مع الموظفين المصنّفين كمخاطر عالية.</value></data>
-  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1" xml:space="preserve"><value>راجع قائمة الإنذار المبكر مع قائد الفرع.</value></data>
+  <data name="SAP_Rec_EARLY_WARNING_WATCHLIST_Monitoring_1" xml:space="preserve"><value>راجع قائمة الإنذار المبكر مع مدير الفرع.</value></data>
 
-  <data name="SAP_Rec_NO_DOMINANT_DRIVER_General_0" xml:space="preserve"><value>لا يوجد سبب محدد بارز — يُنصح بمراجعة يدوية لحالات الخروج الأخيرة مع قائد الفرع.</value></data>
+  <data name="SAP_Rec_NO_DOMINANT_DRIVER_General_0" xml:space="preserve"><value>لا يوجد سبب محدد بارز — يُنصح بمراجعة يدوية لحالات الخروج الأخيرة مع مدير الفرع.</value></data>
   <data name="SAP_NoStoreSelected" xml:space="preserve"><value>لم يتم اختيار فرع. الرجاء الرجوع واختيار فرع.</value></data>
   <data name="SAP_NoAccessOrNotFound" xml:space="preserve"><value>لا تملك صلاحية الوصول لهذا الفرع، أو أنه غير موجود.</value></data>
   <data name="Nav_DataManagement" xml:space="preserve"><value>إدارة البيانات</value></data>
@@ -123,7 +123,7 @@
   <data name="UL_Resignations" xml:space="preserve"><value>الاستقالات</value></data>
   <data name="UL_ResignationsSub" xml:space="preserve"><value>كل من ترك العمل خلال الشهر</value></data>
   <data name="UL_StoreReference" xml:space="preserve"><value>مرجع الفروع</value></data>
-  <data name="UL_StoreReferenceSub" xml:space="preserve"><value>قائد الفرع / استشاري العمليات / مدير التشغيل لكل فرع</value></data>
+  <data name="UL_StoreReferenceSub" xml:space="preserve"><value>مدير الفرع / استشاري العمليات / مدير التشغيل لكل فرع</value></data>
   <data name="UL_ExitInterviews" xml:space="preserve"><value>مقابلات الخروج</value></data>
   <data name="UL_ExitInterviewsSub" xml:space="preserve"><value>صدّر الردود من Microsoft Forms وارفعها زي ما هي — من غير أي تعديل</value></data>
   <data name="UL_ExitInterviewsNote" xml:space="preserve"><value>غير مرتبطة بشهر معين — إعادة رفع كل الردود دايمًا أمان، الردود القديمة بتتحدّث لو موجودة بدل ما تتكرر.</value></data>
@@ -221,7 +221,7 @@
   <data name="Common_AllOperationConsultants" xml:space="preserve"><value>جميع استشاريي العمليات</value></data>
   <data name="Common_AllConsultants" xml:space="preserve"><value>جميع المستشارين</value></data>
   <data name="Common_AllManagers" xml:space="preserve"><value>جميع المديرين</value></data>
-  <data name="Common_AllStoreLeaders" xml:space="preserve"><value>جميع قادة الفروع</value></data>
+  <data name="Common_AllStoreLeaders" xml:space="preserve"><value>جميع مديري الفروع</value></data>
   <data name="Common_SelectPeriod" xml:space="preserve"><value>اختر الفترة</value></data>
   <data name="Common_CohortMonth" xml:space="preserve"><value>شهر المجموعة</value></data>
   <data name="Common_From" xml:space="preserve"><value>من</value></data>
@@ -327,8 +327,8 @@
   <data name="Guide_ExitInterviews_Chart_Drivers" xml:space="preserve"><value>عوامل الارتباط الوظيفي (التدريب، العدالة، حجم العمل، إلخ) مرتبة حسب قوة ارتباط كل عامل بتقييم الموظف المستقيل العام لتجربته — أي العوامل الأكثر تأثيرًا في الرضا الوظيفي.</value></data>
   <data name="Guide_ExitInterviews_Chart_ReasonVsReturn" xml:space="preserve"><value>يقارن كل سبب استقالة بما إذا كان الموظف قد أشار إلى احتمال عودته أم لا، لمعرفة أي الأسباب "نهائية" وأيها ظرفية أكثر.</value></data>
   <data name="Guide_ExitInterviews_Chart_Comments" xml:space="preserve"><value>التعليقات الحرة التي كتبها الموظفون المستقيلون في مقابلة الخروج، قابلة للبحث والتصفية حسب السؤال.</value></data>
-  <data name="Guide_ExitInterviews_FilterNote" xml:space="preserve"><value>اختيار فرع أو قائد فرع أو استشاري عمليات أو مدير تشغيل يقوم بتصفية جميع الرسوم البيانية والجداول والتعليقات في الصفحة على هذا الاختيار فقط. يقتصر فلتر السنة/الأشهر كل عناصر الصفحة على الاستقالات التي حدثت في هذه الفترة.</value></data>
-  <data name="Guide_EarlyWarning_Overview" xml:space="preserve"><value>ترصد هذه الصفحة الموظفين العاملين حاليًا الذين يشبهون إحصائيًا من استقالوا سابقًا — قبل أن يغادروا فعليًا. يحصل كل موظف على تقييم مخاطرة من 1 إلى 5 نجوم، مبني على مجموعة من الإشارات المرجَّحة (مدى حداثة تعيينه، وتاريخ الاستقالات في فرعه ووظيفته ولدى قائد فرعه، ومواسم التعيين "الذروة"، والتاريخ حسب الجنس، وانطباع مقابلة الخروج إن وُجد). كلما زاد عدد النجوم ارتفعت المخاطرة المتوقعة؛ ويظهر الموظفون الذين يتجاوزون حدًا معينًا في جدول "الأعلى خطورة" وفي قائمة المراقبة الأشمل.</value></data>
+  <data name="Guide_ExitInterviews_FilterNote" xml:space="preserve"><value>اختيار فرع أو مدير فرع أو استشاري عمليات أو مدير تشغيل يقوم بتصفية جميع الرسوم البيانية والجداول والتعليقات في الصفحة على هذا الاختيار فقط. يقتصر فلتر السنة/الأشهر كل عناصر الصفحة على الاستقالات التي حدثت في هذه الفترة.</value></data>
+  <data name="Guide_EarlyWarning_Overview" xml:space="preserve"><value>ترصد هذه الصفحة الموظفين العاملين حاليًا الذين يشبهون إحصائيًا من استقالوا سابقًا — قبل أن يغادروا فعليًا. يحصل كل موظف على تقييم مخاطرة من 1 إلى 5 نجوم، مبني على مجموعة من الإشارات المرجَّحة (مدى حداثة تعيينه، وتاريخ الاستقالات في فرعه ووظيفته ولدى مدير فرعه، ومواسم التعيين "الذروة"، والتاريخ حسب الجنس، وانطباع مقابلة الخروج إن وُجد). كلما زاد عدد النجوم ارتفعت المخاطرة المتوقعة؛ ويظهر الموظفون الذين يتجاوزون حدًا معينًا في جدول "الأعلى خطورة" وفي قائمة المراقبة الأشمل.</value></data>
   <data name="Guide_EarlyWarning_Chart_Reason" xml:space="preserve"><value>أي إشارة خطر (سبب) هي المسؤولة عن أكبر عدد من التنبيهات في قائمة المراقبة حاليًا.</value></data>
   <data name="Guide_EarlyWarning_Chart_Store" xml:space="preserve"><value>الموظفون المدرجون في قائمة المراقبة مقسّمون حسب الفرع، لمعرفة الفروع التي بها أكبر عدد من الموظفين المعرّضين لخطر الاستقالة حاليًا.</value></data>
   <data name="Guide_EarlyWarning_Chart_HighRiskByStore" xml:space="preserve"><value>الموظفون الأعلى خطورة فقط (4-5 نجوم)، مقسّمون حسب الفرع.</value></data>
@@ -338,10 +338,10 @@
   <data name="Guide_EarlyWarning_Chart_HighRiskTable" xml:space="preserve"><value>الموظفون بتقييم 4-5 نجوم — الأكثر إلحاحًا — مع فرعهم ووظيفتهم وتاريخ تعيينهم ومدة خدمتهم حتى الآن وتقييم النجوم والأسباب المحددة التي أدت إلى التنبيه.</value></data>
   <data name="Guide_EarlyWarning_Chart_WatchList" xml:space="preserve"><value>قائمة المراقبة الكاملة (جميع من هم فوق حد الخطورة، وليس فقط 4-5 نجوم)، قابلة للترتيب والبحث، بنفس أعمدة التفاصيل الموجودة في جدول الأعلى خطورة.</value></data>
   <data name="Guide_EarlyWarning_FilterNote" xml:space="preserve"><value>اختيار فرع يقوم بتصفية جميع الرسوم البيانية والجدولين على هذا الفرع فقط. يغيّر فلتر السنة/الأشهر اللحظة الزمنية التي يُحسب عندها تقييم المخاطرة — وبما أن المخاطرة تخص الموظفين العاملين حاليًا، فإنها تُترك عادة على أحدث فترة.</value></data>
-  <data name="Guide_Scorecard_Overview" xml:space="preserve"><value>تقيّم هذه الصفحة كل قائد فرع (وتجمّع النتيجة على مستوى استشاري العمليات/مدير التشغيل) وفق 4 مقاييس: معدل الدوران، ومعدل المغادرين مبكرًا (90 يومًا)، ومعدل الاستبقاء لمدة 180 يومًا، وانطباع مقابلات الخروج — لترتيب أداء القيادات ومتابعته وليس أداء الفروع فقط.</value></data>
-  <data name="Guide_Scorecard_Chart_LeaderTrend" xml:space="preserve"><value>اختر قائد فرع واحدًا لعرض اتجاه معدل الدوران الخاص به مع الوقت عبر جميع الفروع التي أدارها — بما في ذلك علامة عند انتقاله بين الفروع، للتمييز بين تغيّر المعدل وتغيّر الفرع.</value></data>
-  <data name="Guide_Scorecard_Chart_Ranking" xml:space="preserve"><value>جميع قادة الفروع (أو، عند تبديل التبويب أعلاه، جميع استشاريي العمليات/مديري التشغيل) مرتبون حسب معدل الدوران ومعدل المغادرين مبكرًا ومعدل الاستبقاء لـ 180 يومًا وانطباع مقابلات الخروج جنبًا إلى جنب. الترتيب الافتراضي يبدأ بأسوأ معدل دوران — اضغط أي عمود لإعادة الترتيب.</value></data>
-  <data name="Guide_Scorecard_Chart_Rollup" xml:space="preserve"><value>لكل استشاري عمليات ولكل مدير تشغيل: عدد قادة الفروع تحت إدارته، وعدد من يُعتبر منهم "دون المستوى المطلوب" (ضعيف الأداء في الترتيب أعلاه)، والنسبة التي يمثّلها ذلك.</value></data>
+  <data name="Guide_Scorecard_Overview" xml:space="preserve"><value>تقيّم هذه الصفحة كل مدير فرع (وتجمّع النتيجة على مستوى استشاري العمليات/مدير التشغيل) وفق 4 مقاييس: معدل الدوران، ومعدل المغادرين مبكرًا (90 يومًا)، ومعدل الاستبقاء لمدة 180 يومًا، وانطباع مقابلات الخروج — لترتيب أداء القيادات ومتابعته وليس أداء الفروع فقط.</value></data>
+  <data name="Guide_Scorecard_Chart_LeaderTrend" xml:space="preserve"><value>اختر مدير فرع واحدًا لعرض اتجاه معدل الدوران الخاص به مع الوقت عبر جميع الفروع التي أدارها — بما في ذلك علامة عند انتقاله بين الفروع، للتمييز بين تغيّر المعدل وتغيّر الفرع.</value></data>
+  <data name="Guide_Scorecard_Chart_Ranking" xml:space="preserve"><value>جميع مديري الفروع (أو، عند تبديل التبويب أعلاه، جميع استشاريي العمليات/مديري التشغيل) مرتبون حسب معدل الدوران ومعدل المغادرين مبكرًا ومعدل الاستبقاء لـ 180 يومًا وانطباع مقابلات الخروج جنبًا إلى جنب. الترتيب الافتراضي يبدأ بأسوأ معدل دوران — اضغط أي عمود لإعادة الترتيب.</value></data>
+  <data name="Guide_Scorecard_Chart_Rollup" xml:space="preserve"><value>لكل استشاري عمليات ولكل مدير تشغيل: عدد مديري الفروع تحت إدارته، وعدد من يُعتبر منهم "دون المستوى المطلوب" (ضعيف الأداء في الترتيب أعلاه)، والنسبة التي يمثّلها ذلك.</value></data>
   <data name="Guide_Scorecard_FilterNote" xml:space="preserve"><value>اختيار مدير تشغيل أو استشاري عمليات أو استشاري أول عمليات أو مدير أول تشغيل يقتصر الترتيب والتجميع على خط تقاريره فقط. يحدد فلتر السنة/الأشهر بيانات الفترة التي تُغذّي كل مقياس في الصفحة.</value></data>
   <data name="Guide_ActionCenter_Overview" xml:space="preserve"><value>هذه الصفحة عبارة عن قائمة أعمال على مستوى الشركة بأكملها للفروع التي فعّلت إشارة اكتشاف (مثل معدل دوران يتجاوز الحد، أو ارتفاع مفاجئ في نسبة المغادرين مبكرًا) وفُتحت لها خطة عمل نتيجة لذلك. تعرض الصفحة دائمًا الحالة الراهنة للخطط المفتوحة/المحلولة — ولا يوجد فلتر فترة هنا، لأن عمر الخطة وحالتها أهم من الشهر الذي بدأت فيه.</value></data>
   <data name="Guide_ActionCenter_Chart_Reasons" xml:space="preserve"><value>إشارات الاكتشاف التي تفتح خطة عمل أكثر من غيرها، مرتبة حسب عدد مرات ظهور كل واحدة.</value></data>
@@ -411,7 +411,7 @@
   <data name="Page_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
   <data name="Page_EarlyWarningSub" xml:space="preserve"><value>الموظفون في خطر — رُصدوا قبل أن يستقيلوا</value></data>
   <data name="Page_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
-  <data name="Page_ScorecardSub" xml:space="preserve"><value>تصنيف الأداء لقادة الفروع والمستشارين والمديرين</value></data>
+  <data name="Page_ScorecardSub" xml:space="preserve"><value>تصنيف الأداء لمديري الفروع والمستشارين والمديرين</value></data>
   <data name="Page_ActionCenter" xml:space="preserve"><value>مركز العمليات</value></data>
   <data name="Page_ActionCenterSub" xml:space="preserve"><value>نظرة شاملة على خطط عمل كل الفروع — الشدة، المسؤولية، التقدّم، والنتائج في مكان واحد</value></data>
   <data name="Page_Stores" xml:space="preserve"><value>الفروع</value></data>
@@ -625,7 +625,7 @@
   <data name="Rep_Retention" xml:space="preserve"><value>الاحتفاظ</value></data>
   <data name="Rep_RetentionDesc" xml:space="preserve"><value>المعالم، منحنى البقاء، الاتجاه، تصنيف الفروع، وتوزيع مدة الخدمة</value></data>
   <data name="Rep_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
-  <data name="Rep_ScorecardDesc" xml:space="preserve"><value>قادة الفروع والمستشارون والمديرون مرتبون جنبًا إلى جنب</value></data>
+  <data name="Rep_ScorecardDesc" xml:space="preserve"><value>مديرو الفروع والمستشارون والمديرون مرتبون جنبًا إلى جنب</value></data>
   <data name="Rep_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
   <data name="Rep_EarlyWarningDesc" xml:space="preserve"><value>قائمة المتابعة الكاملة مع درجات الخطر والأسباب</value></data>
   <data name="Rep_ExitInterview" xml:space="preserve"><value>تقرير مقابلات الخروج</value></data>
@@ -634,8 +634,8 @@
   <data name="Rep_AllOperationConsultants" xml:space="preserve"><value>جميع استشاريي العمليات</value></data>
 
   <!-- Scorecard -->
-  <data name="SC_StoreLeaders" xml:space="preserve"><value>قادة الفروع</value></data>
-  <data name="SC_StoreLeader" xml:space="preserve"><value>قائد الفرع</value></data>
+  <data name="SC_StoreLeaders" xml:space="preserve"><value>مديرو الفروع</value></data>
+  <data name="SC_StoreLeader" xml:space="preserve"><value>مدير الفرع</value></data>
   <data name="SC_OC" xml:space="preserve"><value>استشاريو العمليات</value></data>
   <data name="SC_OM" xml:space="preserve"><value>مديرو التشغيل</value></data>
   <data name="SC_TurnoverRate" xml:space="preserve"><value>معدل الدوران</value></data>
@@ -644,41 +644,41 @@
   <data name="SC_ExitSentiment" xml:space="preserve"><value>شعور مقابلات الخروج</value></data>
   <data name="SC_Ranking" xml:space="preserve"><value>الترتيب</value></data>
   <data name="SC_RankingSub" xml:space="preserve"><value>مجمّع على الفترة المختارة — بيتتبع كل شخص حتى لو اتنقل بين الفروع</value></data>
-  <data name="SC_TrackLeader" xml:space="preserve"><value>تتبع قائد فرع</value></data>
-  <data name="SC_TrackLeaderSub" xml:space="preserve"><value>شوف تاريخ تنقلات القائد بين الفروع ومعدل الدوران بتاعه مع الوقت</value></data>
-  <data name="SC_SelectLeaderPlaceholder" xml:space="preserve"><value>ابحث عن قائد فرع...</value></data>
-  <data name="SC_NoLeaderSelected" xml:space="preserve"><value>اختار قائد فرع من فوق عشان تشوف تاريخه.</value></data>
-  <data name="SC_LeaderHistoryEmpty" xml:space="preserve"><value>مفيش سجلات لهذا القائد في الفترة المختارة.</value></data>
+  <data name="SC_TrackLeader" xml:space="preserve"><value>تتبع مدير فرع</value></data>
+  <data name="SC_TrackLeaderSub" xml:space="preserve"><value>شوف تاريخ تنقلات المدير بين الفروع ومعدل الدوران بتاعه مع الوقت</value></data>
+  <data name="SC_SelectLeaderPlaceholder" xml:space="preserve"><value>ابحث عن مدير فرع...</value></data>
+  <data name="SC_NoLeaderSelected" xml:space="preserve"><value>اختار مدير فرع من فوق عشان تشوف تاريخه.</value></data>
+  <data name="SC_LeaderHistoryEmpty" xml:space="preserve"><value>مفيش سجلات لهذا المدير في الفترة المختارة.</value></data>
   <data name="SC_Period" xml:space="preserve"><value>الفترة</value></data>
   <data name="SC_Resignations" xml:space="preserve"><value>الاستقالات</value></data>
   <data name="SC_TransferBadge" xml:space="preserve"><value>انتقل هنا</value></data>
   <data name="Chart_LeaderTurnoverTrend" xml:space="preserve"><value>معدل الدوران عبر الوقت</value></data>
-  <data name="Chart_LeaderTurnoverTrendSub" xml:space="preserve"><value>العلامات المنقطة توضح نقاط انتقال القائد لفرع جديد</value></data>
+  <data name="Chart_LeaderTurnoverTrendSub" xml:space="preserve"><value>العلامات المنقطة توضح نقاط انتقال المدير لفرع جديد</value></data>
   <data name="SC_Rollup" xml:space="preserve"><value>تجميع حسب استشاري العمليات / مدير التشغيل</value></data>
-  <data name="SC_RollupSub" xml:space="preserve"><value>كام قائد فرع تحت كل مسؤول عنده معدل دوران أعلى من المتوسط في الفترة المختارة</value></data>
+  <data name="SC_RollupSub" xml:space="preserve"><value>كام مدير فرع تحت كل مسؤول عنده معدل دوران أعلى من المتوسط في الفترة المختارة</value></data>
   <data name="SC_RollupByOc" xml:space="preserve"><value>حسب استشاري العمليات</value></data>
   <data name="SC_RollupByOm" xml:space="preserve"><value>حسب مدير التشغيل</value></data>
   <data name="SC_RollupBySoc" xml:space="preserve"><value>حسب استشاري أول العمليات</value></data>
   <data name="SC_RollupByOd" xml:space="preserve"><value>حسب مدير أول التشغيل</value></data>
-  <data name="SC_TotalLeaders" xml:space="preserve"><value>عدد القادة</value></data>
+  <data name="SC_TotalLeaders" xml:space="preserve"><value>عدد المديرين</value></data>
   <data name="SC_FlaggedLeaders" xml:space="preserve"><value>الأعلى من المتوسط</value></data>
   <data name="SC_FlaggedPercent" xml:space="preserve"><value>نسبة الأعلى من المتوسط</value></data>
-  <data name="SC_AverageTurnover" xml:space="preserve"><value>متوسط معدل الدوران للقادة في هذه الفترة</value></data>
-  <data name="SC_KpiTotalLeaders" xml:space="preserve"><value>قادة الفروع</value></data>
-  <data name="SC_KpiTotalLeadersDesc" xml:space="preserve"><value>عدد قادة الفروع النشطين في الفترة المختارة</value></data>
+  <data name="SC_AverageTurnover" xml:space="preserve"><value>متوسط معدل الدوران للمديرو في هذه الفترة</value></data>
+  <data name="SC_KpiTotalLeaders" xml:space="preserve"><value>مديرو الفروع</value></data>
+  <data name="SC_KpiTotalLeadersDesc" xml:space="preserve"><value>عدد مديري الفروع النشطين في الفترة المختارة</value></data>
   <data name="SC_KpiTotalHeadcount" xml:space="preserve"><value>إجمالي الموظفين</value></data>
-  <data name="SC_KpiTotalHeadcountDesc" xml:space="preserve"><value>عدد الموظفين تحت فروع هؤلاء القادة</value></data>
+  <data name="SC_KpiTotalHeadcountDesc" xml:space="preserve"><value>عدد الموظفين تحت فروع هؤلاء المديرين</value></data>
   <data name="SC_KpiAvgTurnover" xml:space="preserve"><value>متوسط الدوران</value></data>
   <data name="SC_KpiFlaggedLeaders" xml:space="preserve"><value>أعلى من المتوسط</value></data>
-  <data name="SC_KpiFlaggedLeadersDesc" xml:space="preserve"><value>قادة معدل الدوران عندهم أعلى من متوسط الشركة</value></data>
-  <data name="SC_InsightBestLeaderTitle" xml:space="preserve"><value>أفضل قائد فرع</value></data>
-  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>معدل دوران — أفضل قائد فرع في هذه الفترة.</value></data>
-  <data name="SC_InsightWorstLeaderTitle" xml:space="preserve"><value>قائد فرع محتاج متابعة</value></data>
-  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>معدل دوران — القائد الأكثر احتياجًا للمتابعة في هذه الفترة.</value></data>
+  <data name="SC_KpiFlaggedLeadersDesc" xml:space="preserve"><value>مديرو معدل الدوران عندهم أعلى من متوسط الشركة</value></data>
+  <data name="SC_InsightBestLeaderTitle" xml:space="preserve"><value>أفضل مدير فرع</value></data>
+  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>معدل دوران — أفضل مدير فرع في هذه الفترة.</value></data>
+  <data name="SC_InsightWorstLeaderTitle" xml:space="preserve"><value>مدير فرع محتاج متابعة</value></data>
+  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>معدل دوران — المدير الأكثر احتياجًا للمتابعة في هذه الفترة.</value></data>
   <data name="SC_InsightTopOcTitle" xml:space="preserve"><value>استشاري العمليات يحتاج إلى متابعة</value></data>
-  <data name="SC_InsightTopOcDesc" xml:space="preserve"><value>من قادة الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
+  <data name="SC_InsightTopOcDesc" xml:space="preserve"><value>من مديري الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
   <data name="SC_InsightTopOmTitle" xml:space="preserve"><value>مدير التشغيل يحتاج إلى متابعة</value></data>
-  <data name="SC_InsightTopOmDesc" xml:space="preserve"><value>من قادة الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
+  <data name="SC_InsightTopOmDesc" xml:space="preserve"><value>من مديري الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
   <data name="SC_NoInsights" xml:space="preserve"><value>مفيش رؤى كافية للاختيار الحالي لسه.</value></data>
   <data name="SC_EmptyTitle" xml:space="preserve"><value>لا توجد بيانات سكور كارد بعد</value></data>
   <data name="SC_EmptyDesc" xml:space="preserve"><value>ارفع بيانات المطاعم والقوى العاملة والاستقالات عشان تشوف ترتيب السكور كارد هنا.</value></data>
@@ -1055,7 +1055,7 @@
   <data name="Rep_Title_Retention" xml:space="preserve"><value>الاحتفاظ</value></data>
   <data name="Rep_Desc_Retention" xml:space="preserve"><value>معدلات المراحل (من 90 يومًا إلى 5 سنوات)، ومنحنى البقاء، والاتجاه متعدد السنوات، وترتيب الفروع، وتوزيع مدد خدمة القوى العاملة.</value></data>
   <data name="Rep_Title_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
-  <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>ترتيب مؤشرات الأداء لقادة الفروع واستشاريي العمليات ومديري التشغيل — الدوران و90 يومًا والاحتفاظ وانطباع إنهاء الخدمة.</value></data>
+  <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>ترتيب مؤشرات الأداء لمديري الفروع واستشاريي العمليات ومديري التشغيل — الدوران و90 يومًا والاحتفاظ وانطباع إنهاء الخدمة.</value></data>
   <data name="Rep_Title_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
   <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>قائمة متابعة الموظفين المعرضين للخطر مع نجوم الخطورة ★ (7 معايير تقييم)، والأسباب المرصودة، وتاريخ التعيين، ومدة الخدمة — للفروع المحددة.</value></data>
   <data name="Rep_Title_ExitInterviews" xml:space="preserve"><value>تقرير مقابلات إنهاء الخدمة</value></data>
@@ -1199,7 +1199,7 @@
   <data name="Msg_UnmatchedRoleEmails" xml:space="preserve"><value>⚠ {0} مفقود: {1} إيميل غير مطابق لأي حساب: {2}.</value></data>
   <data name="Msg_ExitProcessedWithMissingStore" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج ({1} بدون فرع محدد — تحقق من عمود "المطعم" لهذه الصفوف)</value></data>
   <data name="Msg_ExitProcessed" xml:space="preserve"><value>تم معالجة {0} من ردود مقابلات الخروج</value></data>
-  <data name="Msg_ExitUnmatchedStores" xml:space="preserve"><value>{0} اسم فرع غير مطابق لأي سجل في مرجع الفروع، فهذه الصفوف بدون قائد فرع/OC/OM: {1}.</value></data>
+  <data name="Msg_ExitUnmatchedStores" xml:space="preserve"><value>{0} اسم فرع غير مطابق لأي سجل في مرجع الفروع، فهذه الصفوف بدون مدير فرع/OC/OM: {1}.</value></data>
   <data name="Msg_JobActiveEmployees" xml:space="preserve"><value>الموظفون النشطون — {0}</value></data>
   <data name="Msg_UpdatedActiveEmployees" xml:space="preserve"><value>تم تحديث الموظفين النشطين لشهر {0} — {1} سجل.</value></data>
   <data name="Msg_JobResignations" xml:space="preserve"><value>الاستقالات — {0}</value></data>
