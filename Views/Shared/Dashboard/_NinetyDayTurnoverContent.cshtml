@@ -566,7 +566,7 @@ function ntdCreateCombobox({ inputId, panelId, onSelect }) {
         const ft = (filterText || '').toLowerCase();
         const filtered = options.filter(o => o.toLowerCase().includes(ft));
         let html = `<div class="ntd-combo-option${value === '' ? ' active' : ''}" data-value="">${allLabel}</div>`;
-        html += filtered.map(o => `<div class="ntd-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('');
+        html += filtered.map(o => `<div class="ntd-combo-option${o === value ? ' active' : ''}" data-value="${sapEscape(o)}">${sapEscape(o)}</div>`).join('');
         panel.innerHTML = html;
     }
     function open() { panel.classList.add('open'); render(''); input.select(); }
@@ -870,11 +870,11 @@ function ntdRenderLeaversTable() {
     });
     tbody.innerHTML = rows.map(r => `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${r.name}</td>
-            <td class="px-3 py-2">${r.store}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.jobTitle}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.hireDate}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.resignationDate}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
+            <td class="px-3 py-2">${sapEscape(r.store)}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${sapEscape(r.jobTitle)}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${sapEscape(r.hireDate)}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${sapEscape(r.resignationDate)}</td>
             <td class="px-3 py-2">${r.tenureDays}</td>
         </tr>`).join('');
 }
@@ -953,7 +953,7 @@ async function ntdLoadGenderChart() {
             const pct = total > 0 ? Math.round(d.value / total * 100) : 0;
             return `<div class="tv-gender-row">
                 <span class="tv-gender-dot" style="background:${ntdGenderColors[i]}"></span>
-                <span class="tv-gender-label">${d.label}</span>
+                <span class="tv-gender-label">${sapEscape(d.label)}</span>
                 <span class="tv-gender-value">${d.value} <span class="tv-gender-pct">(${pct}%)</span></span>
             </div>`;
         }).join('');
@@ -995,9 +995,9 @@ function ntdRenderStoreTable() {
         const c = ntdRateColor(r.rate);
         const rateBadge = `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.rate.toFixed(1)}%</span>`;
         return `<tr>
-            <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationManager    || '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.storeName)}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationConsultant ? sapEscape(r.operationConsultant) : '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${r.operationManager ? sapEscape(r.operationManager) : '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 text-center">${r.totalHires}</td>
             <td class="px-3 py-2 text-center" style="color:${ChartColors.SEMANTIC.BAD};font-weight:600">${r.earlyLeavers}</td>
             <td class="px-3 py-2 text-center">${rateBadge}</td>
@@ -1024,7 +1024,7 @@ function ntdRenderOcOmTable(tbodyId, rows) {
         const badge = `<span style="background:${c.bg};color:${c.fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:700">${r.avgRate.toFixed(1)}%</span>`;
         const rank  = i === 0 ? `<span style="color:${ChartColors.SEMANTIC.GOOD}">▼</span>` : i === 1 ? `<span style="color:${ChartColors.SEMANTIC.WARNING}">▼</span>` : '<span style="color:#aaa">•</span>';
         return `<tr>
-            <td class="px-3 py-2">${rank} <span class="fw-semibold">${r.name}</span></td>
+            <td class="px-3 py-2">${rank} <span class="fw-semibold">${sapEscape(r.name)}</span></td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.totalHires}</td>
             <td class="px-3 py-2 text-center" style="color:${ChartColors.SEMANTIC.BAD};font-weight:600">${r.earlyLeavers}</td>
@@ -1074,8 +1074,8 @@ async function ntdLoadSmartInsights() {
                 <div class="d-flex align-items-start gap-2">
                     <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:17px"></i>
                     <div>
-                        <div style="font-size:13px;font-weight:700;color:${c.text};margin-bottom:3px">${item.title}</div>
-                        <div style="font-size:12.5px;color:oklch(0.5 0.03 258);line-height:1.55">${item.description}</div>
+                        <div style="font-size:13px;font-weight:700;color:${c.text};margin-bottom:3px">${sapEscape(item.title)}</div>
+                        <div style="font-size:12.5px;color:oklch(0.5 0.03 258);line-height:1.55">${sapEscape(item.description)}</div>
                     </div>
                 </div>
             </div>
@@ -1176,8 +1176,8 @@ function ndMxRender() {
         const periodCells = ndMxData.periods.map(pk => ndMxRateCell(r.periodRates[pk])).join('');
         const totalCell = ndMxRateCell(ndMxTotalRate(r)).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"');
         return `<tr>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258);white-space:nowrap">${r.operationConsultant || '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2 fw-semibold" style="white-space:nowrap">${r.storeName}</td>
+            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258);white-space:nowrap">${r.operationConsultant ? sapEscape(r.operationConsultant) : '<span class="text-muted">—</span>'}</td>
+            <td class="px-3 py-2 fw-semibold" style="white-space:nowrap">${sapEscape(r.storeName)}</td>
             ${periodCells}
             ${totalCell}
         </tr>`;

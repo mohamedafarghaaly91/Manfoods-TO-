@@ -489,7 +489,7 @@ function scCreateCombobox({ inputId, panelId, onSelect }) {
     function render(filterText) {
         const ft = (filterText || '').toLowerCase();
         const filtered = options.filter(o => o.toLowerCase().startsWith(ft));
-        panel.innerHTML = filtered.map(o => `<div class="sc-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('')
+        panel.innerHTML = filtered.map(o => `<div class="sc-combo-option${o === value ? ' active' : ''}" data-value="${sapEscape(o)}">${sapEscape(o)}</div>`).join('')
             || `<div class="sc-combo-option text-muted">${noMatchesLabel}</div>`;
     }
     function open() { panel.classList.add('open'); render(input.value); }
@@ -565,7 +565,7 @@ function scRenderRankingTable() {
     const rows = scApplySort(scRankingRows);
     tbody.innerHTML = rows.map(r => `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${r.name}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2 text-center">${scMetricBadge(r.turnoverRate, 'turnover')}</td>
@@ -628,7 +628,7 @@ async function scLoadLeaderDetail() {
 
     document.getElementById('scLeaderHistoryBody').innerHTML = rows.map(r => `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${r.store}${r.isStoreTransition ? `<span class="sc-transfer-badge">${transferBadgeLabel}</span>` : ''}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.store)}${r.isStoreTransition ? `<span class="sc-transfer-badge">${transferBadgeLabel}</span>` : ''}</td>
             <td class="px-3 py-2 text-center">${r.periodLabel}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2 text-center">${r.resignations}</td>
@@ -680,7 +680,7 @@ function scRenderRollupTable(elId, rows) {
     if (!rows || !rows.length) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">${noDataText}</td></tr>`; return; }
     tbody.innerHTML = rows.map(r => `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${r.name}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
             <td class="px-3 py-2 text-center">${r.totalLeaders}</td>
             <td class="px-3 py-2 text-center">${r.flaggedLeaders}</td>
             <td class="px-3 py-2 text-center">${scRateBadge(r.flaggedPercent, false)}</td>
@@ -802,8 +802,8 @@ function scRenderInsights(leaderRows, rollup) {
                 <div class="d-flex align-items-start gap-2">
                     <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:15px"></i>
                     <div>
-                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${item.title}</div>
-                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${item.description}</div>
+                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${sapEscape(item.title)}</div>
+                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${sapEscape(item.description)}</div>
                     </div>
                 </div>
             </div>

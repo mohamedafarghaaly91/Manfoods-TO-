@@ -351,7 +351,7 @@ async function wfLoadGenderChart() {
         const pct = total > 0 ? Math.round(d.value / total * 100) : 0;
         return `<div class="wf-gender-row">
             <span class="wf-gender-dot" style="background:${genderColors[i]}"></span>
-            <span class="wf-gender-label">${d.label}</span>
+            <span class="wf-gender-label">${sapEscape(d.label)}</span>
             <span class="wf-gender-value">${d.value} <span class="wf-gender-pct">(${pct}%)</span></span>
         </div>`;
     }).join('');
@@ -394,7 +394,7 @@ function wfRenderMixChips(breakdown, colorFor) {
     const total = Object.values(breakdown).reduce((s, v) => s + v, 0) || 1;
     return Object.entries(breakdown).map(([label, value]) => {
         const pct = Math.round(value / total * 100);
-        return `<span><span class="wf-store-gender-dot" style="background:${colorFor(label)}"></span>${label} ${pct}%</span>`;
+        return `<span><span class="wf-store-gender-dot" style="background:${colorFor(label)}"></span>${sapEscape(label)} ${pct}%</span>`;
     }).join(' ');
 }
 
@@ -405,7 +405,7 @@ function wfRenderStoreTable(rows) {
         const genderHtml  = wfRenderMixChips(r.genderBreakdown, l => ChartColors.GENDER_COLORS[l] || ChartColors.hashColor(l));
         const payrollHtml = wfRenderMixChips(r.payrollGroupBreakdown || {}, l => ChartColors.hashColor(l));
         return `<tr>
-            <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.storeName)}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2"><div class="wf-store-gender-mini">${genderHtml}</div></td>
             <td class="px-3 py-2"><div class="wf-store-gender-mini">${payrollHtml || '—'}</div></td>
@@ -431,7 +431,7 @@ function wfRenderOcOmTable(tbodyId, rows) {
     tbody.innerHTML = rows.map(r => {
         const badge = ChartColors.rateBadgeHtml(wfTurnoverColorRules, r.avgTurnoverRate);
         return `<tr>
-            <td class="px-3 py-2 fw-semibold">${r.name}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.totalHeadcount}</td>
             <td class="px-3 py-2 text-center">${badge}</td>

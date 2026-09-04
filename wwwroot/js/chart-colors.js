@@ -3,6 +3,18 @@
    Categorical colors = no good/bad meaning; always looked up by LABEL,
    never by array position, so the same category is always the same color. */
 
+// Single canonical HTML-escaping helper for every page that builds HTML via
+// innerHTML/template literals from database- or import-sourced text (employee
+// names, store/leader names, comments, notes, etc.). chart-colors.js is the
+// one script every dashboard content page already loads first, so this is
+// the shared place for it — do not redefine this elsewhere.
+function sapEscape(s) {
+    if (s === null || s === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(s);
+    return div.innerHTML;
+}
+
 const ChartColors = (function () {
     const SEMANTIC = {
         GOOD:           'oklch(0.62 0.15 155)', // green

@@ -4,7 +4,7 @@ namespace MvcApp.Controllers
 {
     public class LanguageController : Controller
     {
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         public IActionResult Set(string lang, string returnUrl = "/")
         {
             var supported = new[] { "en", "ar" };

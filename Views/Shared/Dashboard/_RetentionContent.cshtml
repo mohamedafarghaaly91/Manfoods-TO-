@@ -447,7 +447,7 @@ function rtCreateCombobox({ inputId, panelId, onSelect }) {
         const ft = (filterText || '').toLowerCase();
         const filtered = options.filter(o => o.toLowerCase().includes(ft));
         let html = `<div class="rt-combo-option${value === '' ? ' active' : ''}" data-value="">${allLabel}</div>`;
-        html += filtered.map(o => `<div class="rt-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('');
+        html += filtered.map(o => `<div class="rt-combo-option${o === value ? ' active' : ''}" data-value="${sapEscape(o)}">${sapEscape(o)}</div>`).join('');
         panel.innerHTML = html;
     }
     function open() { panel.classList.add('open'); render(''); input.select(); }
@@ -722,7 +722,7 @@ function rtRenderTenureTable(rows) {
             `<span style="color:var(--text-3);font-size:10.5px;margin-inline-end:8px"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${bucketColor(b)};margin-inline-end:3px"></span>${b.label} (${b.value})</span>`
         ).join('');
         return `<tr>
-            <td class="px-3 py-2 fw-semibold">${r.storeName}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.storeName)}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2">
                 <div class="rt-tenure-bar-row"><div class="rt-tenure-bar-track">${segs}</div></div>
@@ -798,7 +798,7 @@ function rtRenderManagerTenureRows(tbodyId, rows) {
     const tbody = document.getElementById(tbodyId);
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-3 text-muted">' + rtL.noDataShort + '</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `<tr>
-        <td class="px-3 py-2 fw-semibold">${r.name}</td>
+        <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
         <td class="px-3 py-2 text-center">${r.stores}</td>
         <td class="px-3 py-2 text-center">${r.headcount}</td>
         <td class="px-3 py-2 text-center fw-semibold">${r.avgTenureMonths.toFixed(1)} mo</td>
@@ -924,8 +924,8 @@ function rtRenderInsights(items) {
                 <div class="d-flex align-items-start gap-2">
                     <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:15px"></i>
                     <div>
-                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${item.title}</div>
-                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${item.description}</div>
+                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${sapEscape(item.title)}</div>
+                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${sapEscape(item.description)}</div>
                     </div>
                 </div>
             </div>

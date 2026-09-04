@@ -3,12 +3,8 @@
    Kept separate from dashboard.js since neither page needs its
    period-selector/Chart.js machinery. */
 
-function sapEscape(s) {
-    if (s === null || s === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(s);
-    return div.innerHTML;
-}
+// sapEscape moved to chart-colors.js (loaded on every page that includes
+// this script, before it) — kept as the single canonical definition.
 
 async function sapFetchJson(url) {
     const r = await fetch(url);

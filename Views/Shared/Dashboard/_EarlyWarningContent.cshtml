@@ -341,7 +341,7 @@ function ewCreateCombobox({ inputId, panelId, onSelect }) {
         const ft = (filterText || '').toLowerCase();
         const filtered = options.filter(o => o.toLowerCase().includes(ft));
         let html = `<div class="ew-combo-option${value === '' ? ' active' : ''}" data-value="">${allLabel}</div>`;
-        html += filtered.map(o => `<div class="ew-combo-option${o === value ? ' active' : ''}" data-value="${o.replace(/"/g, '&quot;')}">${o}</div>`).join('');
+        html += filtered.map(o => `<div class="ew-combo-option${o === value ? ' active' : ''}" data-value="${sapEscape(o)}">${sapEscape(o)}</div>`).join('');
         panel.innerHTML = html;
     }
     function open() { panel.classList.add('open'); render(''); input.select(); }
@@ -502,7 +502,7 @@ function ewReasonText(reason) {
         store_leader_history: EW_L.reasonStoreLeaderHistory,
     };
     const t = templates[reason.type] || '';
-    return t.replace(/\{(\w+)\}/g, (_, k) => reason.params?.[k] ?? '');
+    return t.replace(/\{(\w+)\}/g, (_, k) => sapEscape(reason.params?.[k] ?? ''));
 }
 
 function ewRiskBadge(stars) {
@@ -516,11 +516,11 @@ function ewRiskBadge(stars) {
 function ewRowHtml(r) {
     return `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${r.name}</td>
-            <td class="px-3 py-2">${r.store}</td>
-            <td class="px-3 py-2" style="color:var(--text-2)">${r.operationConsultant || ''}</td>
-            <td class="px-3 py-2" style="color:var(--text-2)">${r.jobTitle}</td>
-            <td class="px-3 py-2" style="color:var(--text-2)">${r.hireDate}</td>
+            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
+            <td class="px-3 py-2">${sapEscape(r.store)}</td>
+            <td class="px-3 py-2" style="color:var(--text-2)">${r.operationConsultant ? sapEscape(r.operationConsultant) : ''}</td>
+            <td class="px-3 py-2" style="color:var(--text-2)">${sapEscape(r.jobTitle)}</td>
+            <td class="px-3 py-2" style="color:var(--text-2)">${sapEscape(r.hireDate)}</td>
             <td class="px-3 py-2">${r.tenureDays}</td>
             <td class="px-3 py-2 text-center">${ewRiskBadge(r.stars)}</td>
             <td class="px-3 py-2" style="font-size:12px;color:var(--text-2)">${r.reasons.map(x => `• ${ewReasonText(x)}`).join('<br>')}</td>
@@ -855,6 +855,9 @@ function ewRenderInsights(rows) {
         });
     }
 
+    // item.title/description are escaped once below, at render — any
+    // dynamic value folded into them above (e.g. topStore[0]/topRole[0])
+    // must stay unescaped at construction time, or it double-encodes here.
     el.innerHTML = '<div class="row g-3">' + items.map(item => {
         const c = colorMap[item.color] || colorMap.secondary;
         return `<div class="col-md-6">
@@ -862,8 +865,8 @@ function ewRenderInsights(rows) {
                 <div class="d-flex align-items-start gap-2">
                     <i class="bi ${item.icon} mt-1 flex-shrink-0" style="color:${c.text};font-size:15px"></i>
                     <div>
-                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${item.title}</div>
-                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${item.description}</div>
+                        <div style="font-size:12.5px;font-weight:700;color:${c.text};margin-bottom:2px">${sapEscape(item.title)}</div>
+                        <div style="font-size:12px;color:var(--text-2);line-height:1.5">${sapEscape(item.description)}</div>
                     </div>
                 </div>
             </div>

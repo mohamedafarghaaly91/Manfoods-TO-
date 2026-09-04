@@ -133,7 +133,20 @@ public class UploadService : IUploadService
         return null;
     }
 
-    private void ValidateFile(IFormFile file)
+    // .xlsx is a ZIP archive ("PK\x03\x04" etc.); legacy .xls is an OLE2
+    // Compound File ("\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"). Checking these
+    // magic bytes catches a file that's merely been renamed to look like
+    // Excel before it ever reaches ClosedXML — defense in depth on top of
+    // the extension check, not a replacement for it.
+    private static readonly byte[][] ZipSignatures =
+    {
+        new byte[] { 0x50, 0x4B, 0x03, 0x04 },
+        new byte[] { 0x50, 0x4B, 0x05, 0x06 },
+        new byte[] { 0x50, 0x4B, 0x07, 0x08 },
+    };
+    private static readonly byte[] Ole2Signature = { 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1 };
+
+    private async Task ValidateFileAsync(IFormFile file)
     {
         const long maxBytes = 10 * 1024 * 1024; // 10 MB
         if (file.Length > maxBytes)
@@ -141,6 +154,18 @@ public class UploadService : IUploadService
         var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (ext != ".xlsx" && ext != ".xls")
             throw new InvalidOperationException(_L["Msg_OnlyExcelFiles"].Value);
+
+        var header = new byte[8];
+        await using (var stream = file.OpenReadStream())
+        {
+            var read = await stream.ReadAsync(header.AsMemory(0, 8));
+            if (read < 4 ||
+                !(ZipSignatures.Any(sig => header.AsSpan(0, 4).SequenceEqual(sig)) ||
+                  (read == 8 && header.AsSpan(0, 8).SequenceEqual(Ole2Signature))))
+            {
+                throw new InvalidOperationException(_L["Msg_OnlyExcelFiles"].Value);
+            }
+        }
     }
 
     private static string GetContentType(string fileName) =>
@@ -282,9 +307,9 @@ public class UploadService : IUploadService
         IFormFile activeEmployeesFile, IFormFile resignationsFile, IFormFile storeReferenceFile,
         int month, int year, string uploadedBy)
     {
-        ValidateFile(activeEmployeesFile);
-        ValidateFile(resignationsFile);
-        ValidateFile(storeReferenceFile);
+        await ValidateFileAsync(activeEmployeesFile);
+        await ValidateFileAsync(resignationsFile);
+        await ValidateFileAsync(storeReferenceFile);
 
         var activeBytes = await ReadBytesAsync(activeEmployeesFile);
         var resignBytes = await ReadBytesAsync(resignationsFile);
@@ -380,7 +405,7 @@ public class UploadService : IUploadService
 
     public async Task<(bool, string, int)> UploadExitInterviewsAsync(IFormFile file, string uploadedBy)
     {
-        ValidateFile(file);
+        await ValidateFileAsync(file);
         using var ms = new MemoryStream();
         await file.CopyToAsync(ms);
         var fileBytes = ms.ToArray();
@@ -663,7 +688,7 @@ public class UploadService : IUploadService
     public async Task<(bool, string, string?)> UpdateSingleFileAsync(
         string fileType, int month, int year, IFormFile file, string uploadedBy)
     {
-        ValidateFile(file);
+        await ValidateFileAsync(file);
         var fileBytes = await ReadBytesAsync(file);
 
         await using var tx = await _db.Database.BeginTransactionAsync();

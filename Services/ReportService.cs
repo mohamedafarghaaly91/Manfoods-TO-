@@ -12,6 +12,22 @@ public class ReportService : IReportService
     private const string PercentFormat = "0.0%";
     private const string DateFormat = "yyyy-mm-dd";
 
+    // Formula-injection guard (CWE-1236): any free-text value written into a
+    // workbook cell — employee/leader/OC/OM names, store names, comments,
+    // job titles — must not be allowed to open as a formula in Excel. A
+    // leading '=', '+', '-', '@', tab, or CR is how that's triggered, so
+    // prefixing those with an apostrophe forces the cell to stay plain text.
+    // The single place this logic lives; every text cell below with
+    // database/imported content goes through it. Never applied to numeric,
+    // date, or the app's own fixed status/enum strings.
+    private static readonly char[] FormulaTriggerChars = { '=', '+', '-', '@', '\t', '\r' };
+
+    private static string SafeText(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return value ?? "";
+        return FormulaTriggerChars.Contains(value[0]) ? "'" + value : value;
+    }
+
     /// <summary>Column order requested for every store-scoped report row:
     /// Head Manager, Operation Consultant, Senior Operation Consultant,
     /// Operation Manager, Operation Director.</summary>
@@ -66,11 +82,11 @@ public class ReportService : IReportService
     private static int WriteLeadershipCells(IXLWorksheet ws, int row, int col, Dictionary<string, StoreReference> map, string? storeName)
     {
         map.TryGetValue(storeName ?? "", out var s);
-        ws.Cell(row, col).Value = s?.HeadManager ?? "—";
-        ws.Cell(row, col + 1).Value = s?.OperationConsultant ?? "—";
-        ws.Cell(row, col + 2).Value = s?.SeniorOperationConsultant ?? "—";
-        ws.Cell(row, col + 3).Value = s?.OperationManager ?? "—";
-        ws.Cell(row, col + 4).Value = s?.OperationDirector ?? "—";
+        ws.Cell(row, col).Value = SafeText(s?.HeadManager ?? "—");
+        ws.Cell(row, col + 1).Value = SafeText(s?.OperationConsultant ?? "—");
+        ws.Cell(row, col + 2).Value = SafeText(s?.SeniorOperationConsultant ?? "—");
+        ws.Cell(row, col + 3).Value = SafeText(s?.OperationManager ?? "—");
+        ws.Cell(row, col + 4).Value = SafeText(s?.OperationDirector ?? "—");
         return col + 5;
     }
 
@@ -159,7 +175,7 @@ public class ReportService : IReportService
         int r = 2;
         foreach (var item in items)
         {
-            ws.Cell(r, 1).Value = item.Label;
+            ws.Cell(r, 1).Value = SafeText(item.Label);
             if (asPercent) SetPercentCell(ws.Cell(r, 2), item.Value);
             else SetIntCell(ws.Cell(r, 2), item.Value);
             r++;
@@ -179,7 +195,7 @@ public class ReportService : IReportService
         for (int r = 0; r < rows.Count; r++)
         {
             var row = rows[r];
-            ws.Cell(r + 2, 1).Value = row.StoreName;
+            ws.Cell(r + 2, 1).Value = SafeText(row.StoreName);
             ws.Cell(r + 2, 2).Value = period;
             int col = WriteLeadershipCells(ws, r + 2, 3, leadership, row.StoreName);
             SetIntCell(ws.Cell(r + 2, col), row.Headcount);
@@ -230,7 +246,7 @@ public class ReportService : IReportService
             for (int i = 0; i < byStore.Count; i++)
             {
                 var row = byStore[i];
-                wsByStore.Cell(i + 2, 1).Value = row.StoreName;
+                wsByStore.Cell(i + 2, 1).Value = SafeText(row.StoreName);
                 wsByStore.Cell(i + 2, 2).Value = $"{latest.Month:D2}-{latest.Year}";
                 int col = WriteLeadershipCells(wsByStore, i + 2, 3, leadership, row.StoreName);
                 SetIntCell(wsByStore.Cell(i + 2, col), row.Headcount);
@@ -249,11 +265,11 @@ public class ReportService : IReportService
         {
             var r = resignations[i];
             wsResignations.Cell(i + 2, 1).Value = $"{r.Month:D2}-{r.Year}";
-            wsResignations.Cell(i + 2, 2).Value = r.Name;
-            wsResignations.Cell(i + 2, 3).Value = r.Store;
+            wsResignations.Cell(i + 2, 2).Value = SafeText(r.Name);
+            wsResignations.Cell(i + 2, 3).Value = SafeText(r.Store);
             int col = WriteLeadershipCells(wsResignations, i + 2, 4, leadership, r.Store);
-            wsResignations.Cell(i + 2, col).Value = r.JobTitle;
-            wsResignations.Cell(i + 2, col + 1).Value = r.Gender;
+            wsResignations.Cell(i + 2, col).Value = SafeText(r.JobTitle);
+            wsResignations.Cell(i + 2, col + 1).Value = SafeText(r.Gender);
             if (r.HireDate.HasValue) SetDateCell(wsResignations.Cell(i + 2, col + 2), r.HireDate.Value);
             else wsResignations.Cell(i + 2, col + 2).Value = "—";
             if (r.ResignationDate.HasValue) SetDateCell(wsResignations.Cell(i + 2, col + 3), r.ResignationDate.Value);
@@ -289,7 +305,7 @@ public class ReportService : IReportService
         for (int i = 0; i < trend.Count; i++)
         {
             var t = trend[i];
-            wsTrend.Cell(i + 2, 1).Value = t.Label;
+            wsTrend.Cell(i + 2, 1).Value = SafeText(t.Label);
             SetIntCell(wsTrend.Cell(i + 2, 2), t.TotalHires);
             SetIntCell(wsTrend.Cell(i + 2, 3), t.EarlyLeavers);
             SetPercentCell(wsTrend.Cell(i + 2, 4), t.Rate);
@@ -308,7 +324,7 @@ public class ReportService : IReportService
             int bi = 2;
             foreach (var item in byStore)
             {
-                wsByStore.Cell(bi, 1).Value = item.Label;
+                wsByStore.Cell(bi, 1).Value = SafeText(item.Label);
                 wsByStore.Cell(bi, 2).Value = $"{latest.Month:D2}-{latest.Year}";
                 int c = WriteLeadershipCells(wsByStore, bi, 3, leadership, item.Label);
                 SetPercentCell(wsByStore.Cell(bi, c), item.Value);
@@ -329,10 +345,10 @@ public class ReportService : IReportService
             foreach (var lv in leavers)
             {
                 wsLeavers.Cell(row, 1).Value = cohortLabel;
-                wsLeavers.Cell(row, 2).Value = lv.Name;
-                wsLeavers.Cell(row, 3).Value = lv.Store;
+                wsLeavers.Cell(row, 2).Value = SafeText(lv.Name);
+                wsLeavers.Cell(row, 3).Value = SafeText(lv.Store);
                 int c = WriteLeadershipCells(wsLeavers, row, 4, leadership, lv.Store);
-                wsLeavers.Cell(row, c).Value = lv.JobTitle;
+                wsLeavers.Cell(row, c).Value = SafeText(lv.JobTitle);
                 SetDateCell(wsLeavers.Cell(row, c + 1), lv.HireDate);
                 SetDateCell(wsLeavers.Cell(row, c + 2), lv.ResignationDate);
                 SetIntCell(wsLeavers.Cell(row, c + 3), lv.TenureDays);
@@ -430,7 +446,7 @@ public class ReportService : IReportService
         for (int i = 0; i < trend.Count; i++)
         {
             var t = trend[i];
-            wsTrend.Cell(i + 2, 1).Value = t.Label;
+            wsTrend.Cell(i + 2, 1).Value = SafeText(t.Label);
             for (int m = 0; m < milestoneLabels.Length; m++)
             {
                 var label = milestoneLabels[m];
@@ -445,7 +461,7 @@ public class ReportService : IReportService
         StyleHeader(wsLeaderboard, new[] { "Store", "Period" }.Concat(LeadershipHeaders).Concat(new[] { "Retention Rate" }).ToArray());
         for (int i = 0; i < leaderboard.Count; i++)
         {
-            wsLeaderboard.Cell(i + 2, 1).Value = leaderboard[i].Label;
+            wsLeaderboard.Cell(i + 2, 1).Value = SafeText(leaderboard[i].Label);
             wsLeaderboard.Cell(i + 2, 2).Value = "Trailing 1 Year";
             int c = WriteLeadershipCells(wsLeaderboard, i + 2, 3, leadership, leaderboard[i].Label);
             SetPercentCell(wsLeaderboard.Cell(i + 2, c), leaderboard[i].Value);
@@ -458,8 +474,8 @@ public class ReportService : IReportService
         StyleHeader(wsInsights, new[] { "Insight", "Description" });
         for (int i = 0; i < insights.Count; i++)
         {
-            wsInsights.Cell(i + 2, 1).Value = insights[i].Title;
-            wsInsights.Cell(i + 2, 2).Value = insights[i].Description;
+            wsInsights.Cell(i + 2, 1).Value = SafeText(insights[i].Title);
+            wsInsights.Cell(i + 2, 2).Value = SafeText(insights[i].Description);
         }
         Finalize(wsInsights);
     }
@@ -492,7 +508,7 @@ public class ReportService : IReportService
         StyleHeader(wsDrivers, new[] { "Driver", "Positive", "Total Responses" });
         for (int i = 0; i < drivers.Count; i++)
         {
-            wsDrivers.Cell(i + 2, 1).Value = drivers[i].Label;
+            wsDrivers.Cell(i + 2, 1).Value = SafeText(drivers[i].Label);
             SetPercentCell(wsDrivers.Cell(i + 2, 2), drivers[i].PositivePercent);
             SetIntCell(wsDrivers.Cell(i + 2, 3), drivers[i].TotalResponses);
         }
@@ -505,11 +521,11 @@ public class ReportService : IReportService
         for (int i = 0; i < comments.Count; i++)
         {
             var c = comments[i];
-            wsComments.Cell(i + 2, 1).Value = c.Store;
-            wsComments.Cell(i + 2, 2).Value = c.StoreLeader;
+            wsComments.Cell(i + 2, 1).Value = SafeText(c.Store);
+            wsComments.Cell(i + 2, 2).Value = SafeText(c.StoreLeader);
             int col = WriteLeadershipCells(wsComments, i + 2, 3, leadership, c.Store);
-            wsComments.Cell(i + 2, col).Value = c.QuestionLabel;
-            wsComments.Cell(i + 2, col + 1).Value = c.Text;
+            wsComments.Cell(i + 2, col).Value = SafeText(c.QuestionLabel);
+            wsComments.Cell(i + 2, col + 1).Value = SafeText(c.Text);
             SetDateCell(wsComments.Cell(i + 2, col + 2), c.SubmittedAt);
         }
         Finalize(wsComments);
@@ -545,7 +561,7 @@ public class ReportService : IReportService
         for (int i = 0; i < rows.Count; i++)
         {
             var r = rows[i];
-            ws.Cell(i + 2, 1).Value = r.Name;
+            ws.Cell(i + 2, 1).Value = SafeText(r.Name);
             ws.Cell(i + 2, 2).Value = period;
             SetIntCell(ws.Cell(i + 2, 3), r.StoreCount);
             SetIntCell(ws.Cell(i + 2, 4), r.Headcount);
@@ -595,11 +611,11 @@ public class ReportService : IReportService
         for (int i = 0; i < watchlist.Count; i++)
         {
             var w = watchlist[i];
-            wsWatchlist.Cell(i + 2, 1).Value = w.Name;
-            wsWatchlist.Cell(i + 2, 2).Value = w.Store;
+            wsWatchlist.Cell(i + 2, 1).Value = SafeText(w.Name);
+            wsWatchlist.Cell(i + 2, 2).Value = SafeText(w.Store);
             wsWatchlist.Cell(i + 2, 3).Value = $"As Of {asOf}";
             int col = WriteLeadershipCells(wsWatchlist, i + 2, 4, leadership, w.Store);
-            wsWatchlist.Cell(i + 2, col).Value = w.JobTitle;
+            wsWatchlist.Cell(i + 2, col).Value = SafeText(w.JobTitle);
             SetDateCell(wsWatchlist.Cell(i + 2, col + 1), w.HireDate);
             SetIntCell(wsWatchlist.Cell(i + 2, col + 2), w.TenureDays);
             wsWatchlist.Cell(i + 2, col + 3).Value = new string('★', w.Stars) + new string('☆', 5 - w.Stars);
@@ -630,7 +646,7 @@ public class ReportService : IReportService
         for (int i = 0; i < result.Rows.Count; i++)
         {
             var row = result.Rows[i];
-            ws.Cell(i + 2, 1).Value = row.StoreName;
+            ws.Cell(i + 2, 1).Value = SafeText(row.StoreName);
             int col = WriteLeadershipCells(ws, i + 2, 2, leadership, row.StoreName);
             // Sum of this row's own displayed period rates (not an average/pooled
             // rate) — matches the "Total" column on the Turnover/90-Day Turnover
@@ -711,7 +727,7 @@ public class ReportService : IReportService
         for (int i = 0; i < stores.Count; i++)
         {
             var s = stores[i];
-            wsStores.Cell(i + 2, 1).Value = s.StoreName;
+            wsStores.Cell(i + 2, 1).Value = SafeText(s.StoreName);
             wsStores.Cell(i + 2, 2).Value = $"As Of {asOf}";
             int col = WriteLeadershipCells(wsStores, i + 2, 3, leadership, s.StoreName);
             wsStores.Cell(i + 2, col).Value = s.PlanStatus;
@@ -721,8 +737,8 @@ public class ReportService : IReportService
             wsStores.Cell(i + 2, col + 4).Value = s.IsChronic ? "Yes" : "No";
             wsStores.Cell(i + 2, col + 5).Value = s.IsStalled ? "Yes" : "No";
             wsStores.Cell(i + 2, col + 6).Value = s.Trend;
-            wsStores.Cell(i + 2, col + 7).Value = s.ResponsibleName ?? "—";
-            wsStores.Cell(i + 2, col + 8).Value = s.AssignedToName ?? "—";
+            wsStores.Cell(i + 2, col + 7).Value = SafeText(s.ResponsibleName ?? "—");
+            wsStores.Cell(i + 2, col + 8).Value = SafeText(s.AssignedToName ?? "—");
             SetDateCell(wsStores.Cell(i + 2, col + 9), s.TargetResolutionDate?.ToDateTime(TimeOnly.MinValue));
             wsStores.Cell(i + 2, col + 10).Value = s.TasksTotal > 0 ? $"{s.TasksCompleted}/{s.TasksTotal}" : "—";
         }
@@ -755,7 +771,7 @@ public class ReportService : IReportService
         for (int i = 0; i < comparison.Count; i++)
         {
             var row = comparison[i];
-            ws.Cell(i + 2, 1).Value = row.StoreName;
+            ws.Cell(i + 2, 1).Value = SafeText(row.StoreName);
             ws.Cell(i + 2, 2).Value = period;
             int col = WriteLeadershipCells(ws, i + 2, 3, leadership, row.StoreName);
             SetIntCell(ws.Cell(i + 2, col), row.Headcount);
@@ -798,15 +814,15 @@ public class ReportService : IReportService
         for (int i = 0; i < details.Count; i++)
         {
             var e = details[i];
-            wsDetail.Cell(i + 2, 1).Value = e.EmployeeId;
-            wsDetail.Cell(i + 2, 2).Value = e.Name;
-            wsDetail.Cell(i + 2, 3).Value = e.Store;
+            wsDetail.Cell(i + 2, 1).Value = SafeText(e.EmployeeId);
+            wsDetail.Cell(i + 2, 2).Value = SafeText(e.Name);
+            wsDetail.Cell(i + 2, 3).Value = SafeText(e.Store);
             wsDetail.Cell(i + 2, 4).Value = period;
             int col = WriteLeadershipCells(wsDetail, i + 2, 5, leadership, e.Store);
-            wsDetail.Cell(i + 2, col).Value = e.JobTitle;
-            wsDetail.Cell(i + 2, col + 1).Value = e.Grade;
-            wsDetail.Cell(i + 2, col + 2).Value = e.PayrollGroup;
-            wsDetail.Cell(i + 2, col + 3).Value = e.Gender;
+            wsDetail.Cell(i + 2, col).Value = SafeText(e.JobTitle);
+            wsDetail.Cell(i + 2, col + 1).Value = SafeText(e.Grade);
+            wsDetail.Cell(i + 2, col + 2).Value = SafeText(e.PayrollGroup);
+            wsDetail.Cell(i + 2, col + 3).Value = SafeText(e.Gender);
             if (e.HireDate.HasValue) SetDateCell(wsDetail.Cell(i + 2, col + 4), e.HireDate.Value);
             else wsDetail.Cell(i + 2, col + 4).Value = "—";
         }
@@ -829,7 +845,7 @@ public class ReportService : IReportService
         StyleHeader(wsTrend, new[] { "Period", "Headcount" });
         for (int i = 0; i < trend.Count; i++)
         {
-            wsTrend.Cell(i + 2, 1).Value = trend[i].Label;
+            wsTrend.Cell(i + 2, 1).Value = SafeText(trend[i].Label);
             SetIntCell(wsTrend.Cell(i + 2, 2), trend[i].Value);
         }
         Finalize(wsTrend);
@@ -850,7 +866,7 @@ public class ReportService : IReportService
         for (int i = 0; i < rows.Count; i++)
         {
             var r = rows[i];
-            ws.Cell(i + 2, 1).Value = r.Name;
+            ws.Cell(i + 2, 1).Value = SafeText(r.Name);
             ws.Cell(i + 2, 2).Value = period;
             SetIntCell(ws.Cell(i + 2, 3), r.StoreCount);
             SetIntCell(ws.Cell(i + 2, 4), r.TotalHeadcount);
@@ -993,7 +1009,7 @@ public class ReportService : IReportService
         for (int i = 0; i < allTurnoverStores.Count; i++)
         {
             var store = allTurnoverStores[i];
-            wsTurnover.Cell(i + 2, 1).Value = store;
+            wsTurnover.Cell(i + 2, 1).Value = SafeText(store);
             int col = WriteLeadershipCells(wsTurnover, i + 2, 2, leadership, store);
             var rateA = turnoverAByStore.GetValueOrDefault(store);
             var rateB = turnoverBByStore.GetValueOrDefault(store);
@@ -1015,7 +1031,7 @@ public class ReportService : IReportService
         for (int i = 0; i < allNinetyStores.Count; i++)
         {
             var store = allNinetyStores[i];
-            wsNinety.Cell(i + 2, 1).Value = store;
+            wsNinety.Cell(i + 2, 1).Value = SafeText(store);
             int col = WriteLeadershipCells(wsNinety, i + 2, 2, leadership, store);
             var rateA = ninetyAByStore.GetValueOrDefault(store);
             var rateB = ninetyBByStore.GetValueOrDefault(store);
