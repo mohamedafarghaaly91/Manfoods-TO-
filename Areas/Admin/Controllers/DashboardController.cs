@@ -496,7 +496,7 @@ public class DashboardController : Controller
     [RequireAdminAuth]
     public async Task<IActionResult> Users()
     {
-        var users = await _users.GetAllAsync();
+        var users = await _users.GetAllAsync(HttpContext.Session.GetEmail());
         return View(users);
     }
 
@@ -507,10 +507,20 @@ public class DashboardController : Controller
     public async Task<IActionResult> CreateUser(MvcApp.Models.ViewModels.CreateUserViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);
-        var (created, error) = await _users.CreateAsync(vm);
+        var (created, error) = await _users.CreateAsync(vm, HttpContext.Session.GetEmail());
         if (error == "duplicate-email")
         {
             ModelState.AddModelError(nameof(vm.Email), _L["Msg_EmailAlreadyExists"].Value);
+            return View(vm);
+        }
+        if (error == "invalid-role")
+        {
+            ModelState.AddModelError(nameof(vm.Role), _L["Msg_InvalidRole"].Value);
+            return View(vm);
+        }
+        if (error == "role-forbidden")
+        {
+            ModelState.AddModelError(nameof(vm.Role), _L["Msg_RoleForbidden"].Value);
             return View(vm);
         }
         TempData["Success"] = _L["Msg_UserCreated"].Value;
@@ -520,7 +530,7 @@ public class DashboardController : Controller
     [RequireAdminAuth]
     public async Task<IActionResult> EditUser(int id)
     {
-        var user = await _users.GetByIdAsync(id);
+        var user = await _users.GetByIdAsync(id, HttpContext.Session.GetEmail());
         if (user == null) return NotFound();
         return View(new MvcApp.Models.ViewModels.EditUserViewModel { Id = user.Id, Email = user.Email, Phone = user.Phone, Role = user.Role, AssignedName = user.AssignedName });
     }
@@ -530,7 +540,7 @@ public class DashboardController : Controller
     {
         vm.Id = id;
         if (!ModelState.IsValid) return View(vm);
-        var (updated, error) = await _users.UpdateAsync(id, vm);
+        var (updated, error) = await _users.UpdateAsync(id, vm, HttpContext.Session.GetEmail());
         if (error == "last-admin")
         {
             TempData["Error"] = _L["Msg_LastAdminRole"].Value;
@@ -541,6 +551,21 @@ public class DashboardController : Controller
             ModelState.AddModelError(nameof(vm.Email), _L["Msg_EmailAlreadyExists"].Value);
             return View(vm);
         }
+        if (error == "invalid-role")
+        {
+            ModelState.AddModelError(nameof(vm.Role), _L["Msg_InvalidRole"].Value);
+            return View(vm);
+        }
+        if (error == "role-forbidden")
+        {
+            ModelState.AddModelError(nameof(vm.Role), _L["Msg_RoleForbidden"].Value);
+            return View(vm);
+        }
+        if (error == "super-admin-protected")
+        {
+            ModelState.AddModelError(nameof(vm.Email), _L["Msg_SuperAdminProtected"].Value);
+            return View(vm);
+        }
         if (updated == null) return NotFound();
         TempData["Success"] = _L["Msg_UserUpdated"].Value;
         return RedirectToAction("Users");
@@ -549,10 +574,13 @@ public class DashboardController : Controller
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]
     public async Task<IActionResult> DeleteUser(int id)
     {
-        var (success, error) = await _users.DeleteAsync(id);
-        TempData[success ? "Success" : "Error"] = error == "last-admin"
-            ? _L["Msg_LastAdminDelete"].Value
-            : (success ? _L["Msg_UserDeleted"].Value : _L["Msg_UserNotFound"].Value);
+        var (success, error) = await _users.DeleteAsync(id, HttpContext.Session.GetEmail());
+        TempData[success ? "Success" : "Error"] = error switch
+        {
+            "last-admin" => _L["Msg_LastAdminDelete"].Value,
+            "super-admin-protected" => _L["Msg_SuperAdminProtected"].Value,
+            _ => success ? _L["Msg_UserDeleted"].Value : _L["Msg_UserNotFound"].Value,
+        };
         return RedirectToAction("Users");
     }
 
@@ -562,7 +590,7 @@ public class DashboardController : Controller
         if (!ModelState.IsValid || vm.File == null) { TempData["Error"] = _L["Msg_SelectFile"].Value; return RedirectToAction("Users"); }
         try
         {
-            var (created, skipped) = await _users.UploadBulkUsersAsync(vm.File);
+            var (created, skipped) = await _users.UploadBulkUsersAsync(vm.File, HttpContext.Session.GetEmail());
             TempData["Success"] = string.Format(_L["Msg_BulkUsersCreated"].Value, created) + (skipped > 0 ? string.Format(_L["Msg_BulkUsersSkipped"].Value, skipped) : "");
         }
         catch { TempData["Error"] = _L["Msg_BulkUploadFailed"].Value; }

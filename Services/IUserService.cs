@@ -10,21 +10,41 @@ public interface IUserService
     /// downloadable template's Role-column dropdown offers.</summary>
     IReadOnlyList<string> ValidRoles { get; }
 
-    Task<List<UserViewModel>> GetAllAsync();
-    Task<UserViewModel?> GetByIdAsync(int id);
+    /// <summary>Users visible to `actorEmail` per UserManagementPolicy.CanView —
+    /// a normal Admin never sees another Admin or the Super Admin row.</summary>
+    Task<List<UserViewModel>> GetAllAsync(string actorEmail);
+    /// <summary>Returns null if the user doesn't exist, or if `actorEmail` is
+    /// not allowed to view it (UserManagementPolicy.CanView) — both cases look
+    /// identical to the caller so a hidden Admin/Super-Admin id can't be
+    /// distinguished from a nonexistent one.</summary>
+    Task<UserViewModel?> GetByIdAsync(int id, string actorEmail);
     /// <summary>Returns (null, "duplicate-email") when a user with this email
-    /// already exists.</summary>
-    Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm);
+    /// already exists, (null, "invalid-role") when Role isn't one of
+    /// ValidRoles, or (null, "role-forbidden") when `actorEmail` isn't allowed
+    /// to assign that role (UserManagementPolicy.CanAssignRole — only the
+    /// Super Admin may create an Admin account).</summary>
+    Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm, string actorEmail);
     /// <summary>Returns (null, error) when the update is rejected — the user
-    /// wasn't found, this is the last remaining Admin and the edit would take
-    /// away their Admin role (would lock everyone out of user management), or
-    /// another user already has the email being changed to
-    /// ("duplicate-email").</summary>
-    Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm);
-    /// <summary>Returns (false, error) when deletion is rejected — this is the
-    /// last remaining Admin account.</summary>
-    Task<(bool success, string? error)> DeleteAsync(int id);
-    Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file);
+    /// wasn't found or isn't visible to `actorEmail` (null error, same as
+    /// not-found), "invalid-role" (Role isn't one of ValidRoles),
+    /// "role-forbidden" (actor isn't allowed to change to that role — includes
+    /// self-promotion and changing the Super Admin's own Role), "last-admin"
+    /// (this is the last remaining Admin and the edit would take away their
+    /// Admin role), "super-admin-protected" (attempting to change the Super
+    /// Admin's email), or "duplicate-email".</summary>
+    Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm, string actorEmail);
+    /// <summary>Returns (false, null) when the user doesn't exist or isn't
+    /// deletable by `actorEmail` (UserManagementPolicy.CanDelete — includes a
+    /// normal Admin targeting any Admin/Super-Admin account, indistinguishable
+    /// from not-found), (false, "super-admin-protected") only when the Super
+    /// Admin itself attempts to delete its own account, or (false,
+    /// "last-admin") for the last remaining Admin account.</summary>
+    Task<(bool success, string? error)> DeleteAsync(int id, string actorEmail);
+    /// <summary>Rows whose Role would resolve to Admin are silently skipped
+    /// (counted in `skipped`, never created) unless `actorEmail` is the Super
+    /// Admin — same rule as manual creation, applied per-row so a manipulated
+    /// upload file can't create Admin accounts either.</summary>
+    Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file, string actorEmail);
     Task<bool> VerifyRecoveryKeyAsync(string key);
     Task<bool> ResetAdminPasswordAsync(string email, string newPassword);
     /// <summary>Regenerates the shared admin recovery key after verifying the

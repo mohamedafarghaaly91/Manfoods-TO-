@@ -26,9 +26,11 @@ public class UserService : IUserService
         HasPassword = !string.IsNullOrEmpty(u.PasswordHash), CreatedAt = u.CreatedAt
     };
 
-    public async Task<List<UserViewModel>> GetAllAsync()
+    public async Task<List<UserViewModel>> GetAllAsync(string actorEmail)
     {
-        var users = (await _db.Users.OrderBy(u => u.CreatedAt).ToListAsync()).Select(ToVm).ToList();
+        var users = (await _db.Users.OrderBy(u => u.CreatedAt).ToListAsync())
+            .Where(u => UserManagementPolicy.CanView(actorEmail, u))
+            .Select(ToVm).ToList();
 
         // Store-restricted roles only — Admin/User aren't matched against
         // StoreReference, so leave MatchedStoreCount null for them (there's
@@ -42,14 +44,19 @@ public class UserService : IUserService
         return users;
     }
 
-    public async Task<UserViewModel?> GetByIdAsync(int id)
+    public async Task<UserViewModel?> GetByIdAsync(int id, string actorEmail)
     {
         var u = await _db.Users.FindAsync(id);
-        return u == null ? null : ToVm(u);
+        if (u == null || !UserManagementPolicy.CanView(actorEmail, u)) return null;
+        return ToVm(u);
     }
 
-    public async Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm)
+    public async Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm, string actorEmail)
     {
+        if (!UserManagementPolicy.IsValidRole(vm.Role)) return (null, "invalid-role");
+        var role = UserManagementPolicy.NormalizeRole(vm.Role)!;
+        if (!UserManagementPolicy.CanAssignRole(actorEmail, role)) return (null, "role-forbidden");
+
         var email = vm.Email.ToLower();
         if (await _db.Users.AnyAsync(u => u.Email == email))
             return (null, "duplicate-email");
@@ -60,7 +67,7 @@ public class UserService : IUserService
             Phone = vm.Phone,
             AssignedName = vm.AssignedName?.Trim() ?? "",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
-            Role = vm.Role,
+            Role = role,
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -69,22 +76,27 @@ public class UserService : IUserService
 
     private async Task<bool> IsLastAdminAsync() => await _db.Users.CountAsync(u => u.Role == "Admin") <= 1;
 
-    public async Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm)
+    public async Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm, string actorEmail)
     {
         var user = await _db.Users.FindAsync(id);
-        if (user == null) return (null, null);
+        if (user == null || !UserManagementPolicy.CanEdit(actorEmail, user)) return (null, null);
 
-        if (user.Role == "Admin" && vm.Role != "Admin" && await IsLastAdminAsync())
+        if (!UserManagementPolicy.IsValidRole(vm.Role)) return (null, "invalid-role");
+        var role = UserManagementPolicy.NormalizeRole(vm.Role)!;
+        if (!UserManagementPolicy.CanChangeRole(actorEmail, user, role)) return (null, "role-forbidden");
+
+        if (user.Role == "Admin" && role != "Admin" && await IsLastAdminAsync())
             return (null, "last-admin");
 
         var email = vm.Email.ToLower();
+        if (!UserManagementPolicy.CanChangeEmail(user, email)) return (null, "super-admin-protected");
         if (email != user.Email && await _db.Users.AnyAsync(u => u.Id != id && u.Email == email))
             return (null, "duplicate-email");
 
         user.Email = email;
         user.Phone = vm.Phone;
         user.AssignedName = vm.AssignedName?.Trim() ?? "";
-        user.Role = vm.Role;
+        user.Role = role;
         if (!string.IsNullOrEmpty(vm.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
         await _db.SaveChangesAsync();
@@ -95,10 +107,20 @@ public class UserService : IUserService
         return (ToVm(user), null);
     }
 
-    public async Task<(bool success, string? error)> DeleteAsync(int id)
+    public async Task<(bool success, string? error)> DeleteAsync(int id, string actorEmail)
     {
         var user = await _db.Users.FindAsync(id);
         if (user == null) return (false, null);
+
+        // The Super Admin account can never be deleted, by anyone — including
+        // itself. A normal Admin targeting it gets the same generic
+        // not-found as any other hidden Admin row (no existence leak); the
+        // Super Admin targeting itself gets a specific, informative error
+        // (it already knows its own id/email, so nothing is disclosed).
+        if (SuperAdminPolicy.IsSuperAdmin(user.Email))
+            return (false, SuperAdminPolicy.IsSuperAdmin(actorEmail) ? "super-admin-protected" : null);
+
+        if (!UserManagementPolicy.CanDelete(actorEmail, user)) return (false, null);
         if (user.Role == "Admin" && await IsLastAdminAsync())
             return (false, "last-admin");
 
@@ -167,15 +189,9 @@ public class UserService : IUserService
         return "";
     }
 
-    private static readonly string[] ValidRolesArray =
-    {
-        "Admin", "User", "Operation_Manager", "Operation_Consultant",
-        "Head_Manager", "Senior_Operation_Consultant", "Operation_Director",
-    };
+    public IReadOnlyList<string> ValidRoles => UserManagementPolicy.ValidRoles;
 
-    public IReadOnlyList<string> ValidRoles => ValidRolesArray;
-
-    public async Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file)
+    public async Task<(int created, int skipped)> UploadBulkUsersAsync(IFormFile file, string actorEmail)
     {
         const long maxBytes = 10 * 1024 * 1024;
         if (file.Length > maxBytes) throw new InvalidOperationException("File size exceeds the 10 MB limit.");
@@ -212,8 +228,18 @@ public class UserService : IUserService
             // Role that doesn't match a known value is kept as-is (not
             // silently coerced to "User") so the account gets no data access
             // (see StoreAccessService) and the typo stays visible to Admin.
-            var matched = ValidRolesArray.FirstOrDefault(r => string.Equals(r, roleRaw, StringComparison.OrdinalIgnoreCase));
+            var matched = UserManagementPolicy.NormalizeRole(roleRaw);
             var role = matched ?? (string.IsNullOrWhiteSpace(roleRaw) ? "User" : roleRaw);
+
+            // A non-Super-Admin uploader can't create Admin accounts this
+            // way either — same rule as manual creation, applied per row so
+            // a manipulated Excel file can't be used to smuggle one in.
+            if (UserManagementPolicy.IsAdminRole(role) && !UserManagementPolicy.CanAssignRole(actorEmail, role))
+            {
+                skipped++;
+                continue;
+            }
+
             toAdd.Add(new User { Email = email, Phone = phone, AssignedName = assignedName, Role = role, PasswordHash = null });
         }
 

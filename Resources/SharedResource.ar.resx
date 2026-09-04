@@ -1223,6 +1223,9 @@
   <data name="Msg_LastAdminDelete" xml:space="preserve"><value>لا يمكن حذف آخر حساب مسؤول متبقٍ.</value></data>
   <data name="Msg_UserDeleted" xml:space="preserve"><value>تم حذف المستخدم.</value></data>
   <data name="Msg_UserNotFound" xml:space="preserve"><value>لم يتم العثور على المستخدم.</value></data>
+  <data name="Msg_InvalidRole" xml:space="preserve"><value>هذا ليس دورًا معروفًا.</value></data>
+  <data name="Msg_RoleForbidden" xml:space="preserve"><value>فقط المسؤول الأعلى (Super Admin) يمكنه إنشاء حساب مسؤول أو ترقية مستخدم إليه.</value></data>
+  <data name="Msg_SuperAdminProtected" xml:space="preserve"><value>لا يمكن تغيير دور أو بريد حساب المسؤول الأعلى (Super Admin)، ولا يمكن حذفه.</value></data>
   <data name="Msg_SelectFile" xml:space="preserve"><value>يرجى اختيار ملف.</value></data>
   <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>تم إنشاء {0} مستخدم قيد التفعيل.</value></data>
   <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> تم تخطي {0} (موجود مسبقًا).</value></data>

@@ -1222,6 +1222,9 @@
   <data name="Msg_LastAdminDelete" xml:space="preserve"><value>Can't delete the last remaining Admin account.</value></data>
   <data name="Msg_UserDeleted" xml:space="preserve"><value>User deleted.</value></data>
   <data name="Msg_UserNotFound" xml:space="preserve"><value>User not found.</value></data>
+  <data name="Msg_InvalidRole" xml:space="preserve"><value>Not a recognized role.</value></data>
+  <data name="Msg_RoleForbidden" xml:space="preserve"><value>Only the Super Admin can create or promote to an Admin account.</value></data>
+  <data name="Msg_SuperAdminProtected" xml:space="preserve"><value>The Super Admin account's role and email cannot be changed, and it cannot be deleted.</value></data>
   <data name="Msg_SelectFile" xml:space="preserve"><value>Please select a file.</value></data>
   <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>Created {0} pending user(s).</value></data>
   <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> Skipped {0} (already existed).</value></data>
