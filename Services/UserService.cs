@@ -7,6 +7,21 @@ using MvcApp.Models.ViewModels;
 
 namespace MvcApp.Services;
 
+/// <summary>
+/// Thrown by UploadBulkUsersAsync when a non-Super-Admin's file contains one
+/// or more rows that would create an Admin account. The whole upload is
+/// rejected — nothing in the file is persisted, not even the valid rows —
+/// rather than silently skipping just the offending rows.
+/// </summary>
+public sealed class BulkUploadRoleForbiddenException : Exception
+{
+    public IReadOnlyList<int> Rows { get; }
+
+    public BulkUploadRoleForbiddenException(IReadOnlyList<int> rows)
+        : base("Bulk upload rejected: one or more rows attempt to create an Admin account.") =>
+        Rows = rows;
+}
+
 public class UserService : IUserService
 {
     private readonly AppDbContext _db;
@@ -209,6 +224,7 @@ public class UserService : IUserService
 
         var toAdd = new List<User>();
         var seenInFile = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var forbiddenAdminRows = new List<int>();
         int skipped = 0;
 
         foreach (var row in ws.RowsUsed().Skip(1))
@@ -231,17 +247,23 @@ public class UserService : IUserService
             var matched = UserManagementPolicy.NormalizeRole(roleRaw);
             var role = matched ?? (string.IsNullOrWhiteSpace(roleRaw) ? "User" : roleRaw);
 
-            // A non-Super-Admin uploader can't create Admin accounts this
-            // way either — same rule as manual creation, applied per row so
-            // a manipulated Excel file can't be used to smuggle one in.
+            // A non-Super-Admin uploader can't create Admin accounts this way
+            // either — same rule as manual creation. Nothing is added to
+            // toAdd yet and nothing has been persisted, so recording the row
+            // here and rejecting the whole file below (before any
+            // AddRangeAsync/SaveChangesAsync) keeps this atomic: either every
+            // valid row is created, or none are.
             if (UserManagementPolicy.IsAdminRole(role) && !UserManagementPolicy.CanAssignRole(actorEmail, role))
             {
-                skipped++;
+                forbiddenAdminRows.Add(row.RowNumber());
                 continue;
             }
 
             toAdd.Add(new User { Email = email, Phone = phone, AssignedName = assignedName, Role = role, PasswordHash = null });
         }
+
+        if (forbiddenAdminRows.Count > 0)
+            throw new BulkUploadRoleForbiddenException(forbiddenAdminRows);
 
         if (toAdd.Count > 0)
         {

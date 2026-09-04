@@ -593,6 +593,10 @@ public class DashboardController : Controller
             var (created, skipped) = await _users.UploadBulkUsersAsync(vm.File, HttpContext.Session.GetEmail());
             TempData["Success"] = string.Format(_L["Msg_BulkUsersCreated"].Value, created) + (skipped > 0 ? string.Format(_L["Msg_BulkUsersSkipped"].Value, skipped) : "");
         }
+        catch (BulkUploadRoleForbiddenException ex)
+        {
+            TempData["Error"] = string.Format(_L["Msg_BulkUploadAdminRoleForbidden"].Value, string.Join(", ", ex.Rows));
+        }
         catch { TempData["Error"] = _L["Msg_BulkUploadFailed"].Value; }
         return RedirectToAction("Users");
     }
