@@ -46,11 +46,15 @@ public class UserService : IUserService
         return u == null ? null : ToVm(u);
     }
 
-    public async Task<UserViewModel> CreateAsync(CreateUserViewModel vm)
+    public async Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm)
     {
+        var email = vm.Email.ToLower();
+        if (await _db.Users.AnyAsync(u => u.Email == email))
+            return (null, "duplicate-email");
+
         var user = new User
         {
-            Email = vm.Email.ToLower(),
+            Email = email,
             Phone = vm.Phone,
             AssignedName = vm.AssignedName?.Trim() ?? "",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
@@ -58,7 +62,7 @@ public class UserService : IUserService
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-        return ToVm(user);
+        return (ToVm(user), null);
     }
 
     private async Task<bool> IsLastAdminAsync() => await _db.Users.CountAsync(u => u.Role == "Admin") <= 1;
@@ -71,7 +75,11 @@ public class UserService : IUserService
         if (user.Role == "Admin" && vm.Role != "Admin" && await IsLastAdminAsync())
             return (null, "last-admin");
 
-        user.Email = vm.Email.ToLower();
+        var email = vm.Email.ToLower();
+        if (email != user.Email && await _db.Users.AnyAsync(u => u.Id != id && u.Email == email))
+            return (null, "duplicate-email");
+
+        user.Email = email;
         user.Phone = vm.Phone;
         user.AssignedName = vm.AssignedName?.Trim() ?? "";
         user.Role = vm.Role;

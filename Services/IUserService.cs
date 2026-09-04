@@ -7,10 +7,14 @@ public interface IUserService
 {
     Task<List<UserViewModel>> GetAllAsync();
     Task<UserViewModel?> GetByIdAsync(int id);
-    Task<UserViewModel> CreateAsync(CreateUserViewModel vm);
-    /// <summary>Returns (null, error) when the update is rejected — either the user
-    /// wasn't found, or this is the last remaining Admin and the edit would take
-    /// away their Admin role (would lock everyone out of user management).</summary>
+    /// <summary>Returns (null, "duplicate-email") when a user with this email
+    /// already exists.</summary>
+    Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm);
+    /// <summary>Returns (null, error) when the update is rejected — the user
+    /// wasn't found, this is the last remaining Admin and the edit would take
+    /// away their Admin role (would lock everyone out of user management), or
+    /// another user already has the email being changed to
+    /// ("duplicate-email").</summary>
     Task<(UserViewModel? user, string? error)> UpdateAsync(int id, EditUserViewModel vm);
     /// <summary>Returns (false, error) when deletion is rejected — this is the
     /// last remaining Admin account.</summary>

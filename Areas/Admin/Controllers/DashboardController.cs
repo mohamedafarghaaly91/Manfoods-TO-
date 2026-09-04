@@ -495,7 +495,12 @@ public class DashboardController : Controller
     public async Task<IActionResult> CreateUser(MvcApp.Models.ViewModels.CreateUserViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);
-        await _users.CreateAsync(vm);
+        var (created, error) = await _users.CreateAsync(vm);
+        if (error == "duplicate-email")
+        {
+            ModelState.AddModelError(nameof(vm.Email), _L["Msg_EmailAlreadyExists"].Value);
+            return View(vm);
+        }
         TempData["Success"] = _L["Msg_UserCreated"].Value;
         return RedirectToAction("Users");
     }
@@ -518,6 +523,11 @@ public class DashboardController : Controller
         {
             TempData["Error"] = _L["Msg_LastAdminRole"].Value;
             return RedirectToAction("EditUser", new { id });
+        }
+        if (error == "duplicate-email")
+        {
+            ModelState.AddModelError(nameof(vm.Email), _L["Msg_EmailAlreadyExists"].Value);
+            return View(vm);
         }
         if (updated == null) return NotFound();
         TempData["Success"] = _L["Msg_UserUpdated"].Value;

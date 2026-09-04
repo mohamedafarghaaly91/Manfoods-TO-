@@ -1123,6 +1123,7 @@
   <!-- Users page -->
   <data name="Users_GenerateOtp" xml:space="preserve"><value>إنشاء رمز مؤقت</value></data>
   <data name="Users_GenerateRecoveryKeyTitle" xml:space="preserve"><value>إنشاء مفتاح استرداد جديد للمسؤول</value></data>
+  <data name="Users_RegenerateRecoveryKeyDesc" xml:space="preserve"><value>هذا مفتاح واحد مشترك لكل المسؤولين — إنشاء مفتاح جديد يُلغي القديم فورًا للجميع.</value></data>
   <data name="Users_DeleteConfirm" xml:space="preserve"><value>حذف المستخدم {0}؟</value></data>
   <data name="Users_RecoveryPasswordPrompt" xml:space="preserve"><value>أدخل &lt;strong&gt;كلمة مرورك أنت&lt;/strong&gt; كمسؤول لإنشاء مفتاح استرداد جديد. سيحل هذا محل المفتاح الحالي في كل مكان — ويتوقف المفتاح القديم عن العمل فورًا.</value></data>
   <data name="Users_YourPassword" xml:space="preserve"><value>كلمة مرورك</value></data>
@@ -1215,6 +1216,7 @@
   <data name="Msg_UploadLogDeleted" xml:space="preserve"><value>تم حذف سجل الرفع والبيانات المرتبطة به.</value></data>
   <data name="Msg_UserCreated" xml:space="preserve"><value>تم إنشاء المستخدم بنجاح.</value></data>
   <data name="Msg_LastAdminRole" xml:space="preserve"><value>لا يمكن تغيير دور آخر حساب مسؤول متبقٍ.</value></data>
+  <data name="Msg_EmailAlreadyExists" xml:space="preserve"><value>يوجد مستخدم آخر بهذا البريد الإلكتروني بالفعل.</value></data>
   <data name="Msg_UserUpdated" xml:space="preserve"><value>تم تحديث المستخدم.</value></data>
   <data name="Msg_LastAdminDelete" xml:space="preserve"><value>لا يمكن حذف آخر حساب مسؤول متبقٍ.</value></data>
   <data name="Msg_UserDeleted" xml:space="preserve"><value>تم حذف المستخدم.</value></data>

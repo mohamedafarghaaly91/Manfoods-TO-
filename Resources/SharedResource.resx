@@ -1122,6 +1122,7 @@
   <!-- Users page -->
   <data name="Users_GenerateOtp" xml:space="preserve"><value>Generate OTP</value></data>
   <data name="Users_GenerateRecoveryKeyTitle" xml:space="preserve"><value>Generate a new admin recovery key</value></data>
+  <data name="Users_RegenerateRecoveryKeyDesc" xml:space="preserve"><value>This is a single shared key for all admins — regenerating it invalidates the old one immediately for everyone.</value></data>
   <data name="Users_DeleteConfirm" xml:space="preserve"><value>Delete user {0}?</value></data>
   <data name="Users_RecoveryPasswordPrompt" xml:space="preserve"><value>Enter &lt;strong&gt;your own&lt;/strong&gt; admin password to generate a new recovery key. This replaces the current key everywhere — the old one stops working immediately.</value></data>
   <data name="Users_YourPassword" xml:space="preserve"><value>Your password</value></data>
@@ -1214,6 +1215,7 @@
   <data name="Msg_UploadLogDeleted" xml:space="preserve"><value>Upload log and associated data deleted.</value></data>
   <data name="Msg_UserCreated" xml:space="preserve"><value>User created successfully.</value></data>
   <data name="Msg_LastAdminRole" xml:space="preserve"><value>Can't change the role of the last remaining Admin account.</value></data>
+  <data name="Msg_EmailAlreadyExists" xml:space="preserve"><value>A user with this email already exists.</value></data>
   <data name="Msg_UserUpdated" xml:space="preserve"><value>User updated.</value></data>
   <data name="Msg_LastAdminDelete" xml:space="preserve"><value>Can't delete the last remaining Admin account.</value></data>
   <data name="Msg_UserDeleted" xml:space="preserve"><value>User deleted.</value></data>
