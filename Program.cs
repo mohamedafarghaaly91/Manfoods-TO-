@@ -91,7 +91,7 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromHours(1);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.Name = SessionExtensions.SessionCookieName;
+    options.Cookie.Name = MvcApp.Extensions.SessionExtensions.SessionCookieName;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
