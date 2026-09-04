@@ -39,11 +39,22 @@ builder.Services.AddRateLimiter(options =>
         o.QueueLimit = 0;
     });
 
-    options.AddFixedWindowLimiter("api", o =>
+    // Unlike the "login" limiter above (one deliberately shared, app-wide
+    // bucket — fine for a low-volume login form), the dashboard API surface
+    // gets many parallel requests per page load from every logged-in user,
+    // so it must be partitioned per client IP rather than sharing a single
+    // global budget — otherwise a handful of concurrent users would exhaust
+    // it for everyone. ForwardedHeadersOptions above already resolves the
+    // real client IP behind the reverse proxy.
+    options.AddPolicy("api", context =>
     {
-        o.Window = TimeSpan.FromMinutes(1);
-        o.PermitLimit = 60;
-        o.QueueLimit = 0;
+        var key = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(key, _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+        {
+            Window = TimeSpan.FromMinutes(1),
+            PermitLimit = 300,
+            QueueLimit = 0
+        });
     });
 
     options.RejectionStatusCode = 429;

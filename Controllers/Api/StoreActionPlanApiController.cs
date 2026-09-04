@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
@@ -9,6 +10,7 @@ namespace MvcApp.Controllers.Api;
 
 [ApiController]
 [Route("api/store-action-plan")]
+[EnableRateLimiting("api")]
 [RequireAuth]
 public class StoreActionPlanApiController : ControllerBase
 {
@@ -23,7 +25,7 @@ public class StoreActionPlanApiController : ControllerBase
         _L = localizer;
     }
 
-    [HttpPost("{store}/notes")]
+    [HttpPost("{store}/notes"), ValidateAntiForgeryToken]
     [RequireRole("Head_Manager", "Operation_Consultant")]
     public async Task<IActionResult> AddNote(string store, [FromBody] AddNoteRequest request)
     {
@@ -47,11 +49,11 @@ public class StoreActionPlanApiController : ControllerBase
     /// Returns immediately (202 Accepted) and processes in the background so
     /// the request never times out regardless of how many periods/stores exist.
     /// </summary>
-    [HttpPost("run-detection")]
+    [HttpPost("run-detection"), ValidateAntiForgeryToken]
     public async Task<IActionResult> RunDetectionAllPeriods()
     {
         var role = HttpContext.Session.GetRole();
-        if (role != "Admin") return Forbid();
+        if (role != "Admin") return StatusCode(StatusCodes.Status403Forbidden);
 
         var periods = await _dashboard.GetAvailablePeriodsAsync();
         if (periods.Count == 0) return Accepted(new { status = "no_periods", message = "No periods found." });
@@ -108,7 +110,7 @@ public class StoreActionPlanApiController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("recommendations/{id:int}/toggle")]
+    [HttpPost("recommendations/{id:int}/toggle"), ValidateAntiForgeryToken]
     [RequireRole("Admin", "Head_Manager", "Operation_Consultant")]
     public async Task<IActionResult> ToggleRecommendation(int id, [FromBody] ToggleRecommendationRequest request)
     {
@@ -122,7 +124,7 @@ public class StoreActionPlanApiController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{store}/assign")]
+    [HttpPost("{store}/assign"), ValidateAntiForgeryToken]
     [RequireRole("Admin")]
     public async Task<IActionResult> SetAssignment(string store, [FromBody] SetAssignmentRequest request)
     {
@@ -133,7 +135,7 @@ public class StoreActionPlanApiController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("{store}/close")]
+    [HttpPost("{store}/close"), ValidateAntiForgeryToken]
     [RequireRole("Admin")]
     public async Task<IActionResult> ManualClose(string store, [FromBody] ManualCloseRequest request)
     {

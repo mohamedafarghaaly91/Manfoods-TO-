@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
@@ -8,6 +9,7 @@ namespace MvcApp.Controllers.Api;
 
 [ApiController]
 [Route("api/exit-interviews")]
+[EnableRateLimiting("api")]
 [RequireAuth]
 public class ExitInterviewApiController : ControllerBase
 {

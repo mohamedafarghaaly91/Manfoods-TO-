@@ -116,6 +116,11 @@
 <script>
 const acdContentEl = document.getElementById('acdContent');
 const ACD_D = acdContentEl.dataset;
+
+function sapAntiForgeryToken() {
+    const el = document.querySelector('input[name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+}
 const ACD_SEVERITY_META = {
     Critical: { label: ACD_D.severityCritical, bg: 'oklch(0.6 0.22 22 / .12)', color: ChartColors.SEMANTIC.BAD },
     High:     { label: ACD_D.severityHigh,     bg: 'oklch(0.7 0.19 45 / .14)', color: 'oklch(0.6 0.19 45)' },
@@ -359,7 +364,7 @@ async function acdToggleRec(id, isCompleted) {
     try {
         const res = await fetch(`/api/store-action-plan/recommendations/${id}/toggle`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': sapAntiForgeryToken() },
             body: JSON.stringify({ isCompleted })
         });
         if (!res.ok) { await acdLoad(); return; }
@@ -379,7 +384,7 @@ async function acdSaveAssignment() {
     try {
         const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/assign`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': sapAntiForgeryToken() },
             body: JSON.stringify({ assignedToName: name || null, targetResolutionDate: dateVal })
         });
         msgEl.style.display = 'block';
@@ -420,7 +425,7 @@ async function acdManualClose() {
     try {
         const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/close`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': sapAntiForgeryToken() },
             body: JSON.stringify({ reason })
         });
         if (!res.ok) {
@@ -458,7 +463,7 @@ async function acdSubmitNote() {
     try {
         const res = await fetch(`/api/store-action-plan/${encodeURIComponent(store)}/notes`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': sapAntiForgeryToken() },
             body: JSON.stringify({ noteText: text })
         });
 

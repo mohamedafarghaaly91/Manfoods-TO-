@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MvcApp.Extensions;
 using MvcApp.Filters;
 using MvcApp.Services;
@@ -7,6 +8,7 @@ namespace MvcApp.Controllers.Api;
 
 [ApiController]
 [Route("api/retention")]
+[EnableRateLimiting("api")]
 [RequireAuth]
 public class RetentionApiController : ControllerBase
 {

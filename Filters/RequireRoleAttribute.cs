@@ -23,7 +23,11 @@ public class RequireRoleAttribute : ActionFilterAttribute
         var role = context.HttpContext.Session.GetString("Role") ?? "";
         if (!_roles.Contains(role))
         {
-            context.Result = new ForbidResult();
+            // No authentication scheme is registered (auth here is custom,
+            // session-based), so ForbidResult would try to resolve a default
+            // forbid scheme and throw instead of denying access. Return a
+            // plain 403 so an unauthorized role is reliably rejected.
+            context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
         }
     }
 }

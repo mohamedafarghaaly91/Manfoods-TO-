@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MvcApp.Filters;
 using MvcApp.Models.ViewModels;
 using MvcApp.Services;
@@ -9,6 +10,7 @@ namespace MvcApp.Controllers.Api;
 
 [ApiController]
 [Route("api/settings")]
+[EnableRateLimiting("api")]
 [RequireAuth]
 public class SettingsApiController : ControllerBase
 {
