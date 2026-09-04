@@ -41,7 +41,7 @@ public class OtpService : IOtpService
             _db.PasswordResetOtps.Add(new PasswordResetOtp
             {
                 UserId = user.Id,
-                OtpCode = code,
+                OtpCode = BCrypt.Net.BCrypt.HashPassword(code),
                 ExpiresAt = DateTime.UtcNow.Add(Expiry),
             });
             results.Add((user.Email, user.Phone, code));
@@ -85,7 +85,7 @@ public class OtpService : IOtpService
         _db.PasswordResetOtps.Add(new PasswordResetOtp
         {
             UserId = user.Id,
-            OtpCode = code,
+            OtpCode = BCrypt.Net.BCrypt.HashPassword(code),
             ExpiresAt = DateTime.UtcNow.Add(Expiry),
         });
         await _db.SaveChangesAsync();
@@ -110,7 +110,7 @@ public class OtpService : IOtpService
             .FirstOrDefaultAsync();
         if (otp == null) return (false, _L["Msg_NoActiveOtp"].Value);
 
-        if (otp.OtpCode != otpCode.Trim())
+        if (!BCrypt.Net.BCrypt.Verify(otpCode.Trim(), otp.OtpCode))
         {
             otp.FailedAttempts++;
             if (otp.FailedAttempts >= MaxFailedAttempts) otp.IsUsed = true;
@@ -145,7 +145,7 @@ public class OtpService : IOtpService
         _db.PasswordResetOtps.Add(new PasswordResetOtp
         {
             UserId = user.Id,
-            OtpCode = code,
+            OtpCode = BCrypt.Net.BCrypt.HashPassword(code),
             ExpiresAt = DateTime.UtcNow.Add(Expiry),
         });
         await _db.SaveChangesAsync();
@@ -173,7 +173,7 @@ public class OtpService : IOtpService
             .FirstOrDefaultAsync();
         if (otp == null) return (false, _L["Msg_NoActiveOtp"].Value);
 
-        if (otp.OtpCode != otpCode.Trim())
+        if (!BCrypt.Net.BCrypt.Verify(otpCode.Trim(), otp.OtpCode))
         {
             otp.FailedAttempts++;
             if (otp.FailedAttempts >= MaxFailedAttempts) otp.IsUsed = true;
