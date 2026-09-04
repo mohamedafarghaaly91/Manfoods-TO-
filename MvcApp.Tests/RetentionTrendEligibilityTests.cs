@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
+using MvcApp.Resources;
 using MvcApp.Services;
 using Xunit;
 
@@ -21,8 +24,12 @@ public class RetentionTrendEligibilityTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
+    private static readonly IStringLocalizer<SharedResource> Localizer =
+        new ServiceCollection().AddLocalization().BuildServiceProvider()
+            .GetRequiredService<IStringLocalizer<SharedResource>>();
+
     private static RetentionService NewService(AppDbContext db) =>
-        new(db, new StoreAccessService(db), new MemoryCache(new MemoryCacheOptions()));
+        new(db, new StoreAccessService(db), new MemoryCache(new MemoryCacheOptions()), Localizer);
 
     private static void AddActive(AppDbContext db, string employeeId, string store, DateOnly hireDate, int month, int year) =>
         db.ActiveEmployees.Add(new ActiveEmployee
