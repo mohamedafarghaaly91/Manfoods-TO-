@@ -303,6 +303,29 @@ public class UploadService : IUploadService
         return records;
     }
 
+    // Guards the one authorization-critical invariant of this table: a store
+    // can only have ONE set of role emails (OM/OC/Head Manager/Senior OC/
+    // Operation Director) per (Month, Year), because StoreAccessService grants
+    // access to any user whose email matches ANY row for that store — an
+    // in-file duplicate (e.g. a copy-paste mistake) could otherwise hand the
+    // same store to two different people for the same period. Rejects the
+    // whole upload rather than silently keeping one row, since choosing which
+    // duplicate is "correct" is not something this code can safely guess.
+    private static void ValidateNoDuplicateStoreReferences(List<StoreReference> storeRecords, int month, int year)
+    {
+        var duplicates = storeRecords
+            .GroupBy(s => s.StoreName)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .OrderBy(s => s)
+            .ToList();
+
+        if (duplicates.Count > 0)
+            throw new DuplicateStoreReferenceException(
+                $"Duplicate store reference found for Store + Month + Year: {string.Join(", ", duplicates)} " +
+                $"appear more than once for {month:D2}/{year}. Remove the duplicate row(s) from the file and re-upload.");
+    }
+
     public async Task<(bool, string, Dictionary<string, int>, string?)> UploadPeriodDataAsync(
         IFormFile activeEmployeesFile, IFormFile resignationsFile, IFormFile storeReferenceFile,
         int month, int year, string uploadedBy)
@@ -320,6 +343,7 @@ public class UploadService : IUploadService
         var (activeRecords, activeIssues) = ParseActiveEmployees(activeBytes, month, year);
         var (resignRecords, resignIssues) = ParseResignations(resignBytes, month, year);
         var storeRecords = ParseStoreReference(storeBytes, month, year);
+        ValidateNoDuplicateStoreReferences(storeRecords, month, year);
 
         await using var tx = await _db.Database.BeginTransactionAsync();
 
@@ -723,6 +747,7 @@ public class UploadService : IUploadService
             case "store_reference":
                 await _db.StoreReferences.Where(s => s.Month == month && s.Year == year).ExecuteDeleteAsync();
                 var storeRecords = ParseStoreReference(fileBytes, month, year);
+                ValidateNoDuplicateStoreReferences(storeRecords, month, year);
                 if (storeRecords.Count > 0) await _db.StoreReferences.AddRangeAsync(storeRecords);
                 await _db.UploadLogs.Where(l => l.FileType == "store_reference" && l.Month == month && l.Year == year).ExecuteDeleteAsync();
                 _db.UploadLogs.Add(new UploadLog { FileType = "store_reference", FileName = file.FileName, Month = month, Year = year, UploadedBy = uploadedBy, FileContent = fileBytes, ContentType = GetContentType(file.FileName) });

@@ -11,11 +11,13 @@ public class UserService : IUserService
 {
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly ISessionValidationService _sessionValidation;
 
-    public UserService(AppDbContext db, IStoreAccessService storeAccess)
+    public UserService(AppDbContext db, IStoreAccessService storeAccess, ISessionValidationService sessionValidation)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _sessionValidation = sessionValidation;
     }
 
     private static UserViewModel ToVm(User u) => new()
@@ -86,6 +88,10 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(vm.Password))
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password);
         await _db.SaveChangesAsync();
+        // A role change (or the account being edited at all) must not keep
+        // working off a stale cached session-validation result — see
+        // SessionValidationService.
+        _sessionValidation.Invalidate(id);
         return (ToVm(user), null);
     }
 
@@ -98,6 +104,7 @@ public class UserService : IUserService
 
         _db.Users.Remove(user);
         await _db.SaveChangesAsync();
+        _sessionValidation.Invalidate(id);
         return (true, null);
     }
 

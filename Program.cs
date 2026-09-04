@@ -113,6 +113,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
 builder.Services.AddSingleton<IBackgroundJobTracker, BackgroundJobTracker>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISessionValidationService, SessionValidationService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IStoreAccessService, StoreAccessService>();
 builder.Services.AddScoped<IExitInterviewService, ExitInterviewService>();
