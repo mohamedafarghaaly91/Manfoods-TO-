@@ -77,16 +77,6 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"App_Data/keys"))
     .SetApplicationName("ManFoodsTO");
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.IsEssential = true;
-    options.Cookie.HttpOnly = true;
-    options.Cookie.Name = "wicrewidentity";
-    options.LoginPath = "/login";
-});
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromHours(1);
