@@ -350,7 +350,11 @@ body.admin-theme .admin-nav-link {
     display: none;
     height: var(--header-h);
     border-bottom: 1px solid var(--nav-border);
-    align-items: center; justify-content: flex-end;
+    align-items: center; justify-content: flex-start;
+    /* Pinned to the physical left always (not the logical "start", which
+       flips to the right under RTL) so the hamburger never sits under the
+       page-guide trigger, which is itself always pinned top-right. */
+    direction: ltr;
     padding: 0 28px; position: sticky; top: var(--global-header-h); z-index: 90;
     background: var(--bg);
 }
