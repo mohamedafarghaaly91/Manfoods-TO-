@@ -612,7 +612,7 @@
   <data name="Users_TemplateBulk" xml:space="preserve"><value>نموذج: مستخدمون بالجملة</value></data>
   <data name="Users_Created" xml:space="preserve"><value>تاريخ الإنشاء</value></data>
   <data name="Users_OtpGenerated" xml:space="preserve"><value>تم توليد رمز OTP</value></data>
-  <data name="Users_ValidFor" xml:space="preserve"><value>صالح لمدة 4 ساعات، استخدام واحد. أرسله للمستخدم بنفسك.</value></data>
+  <data name="Users_ValidFor" xml:space="preserve"><value>صالح لمدة 24 ساعة، استخدام واحد. أرسله للمستخدم بنفسك.</value></data>
   <data name="Users_Close" xml:space="preserve"><value>إغلاق</value></data>
   <data name="Users_ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور</value></data>
   <data name="Users_GenerateKey" xml:space="preserve"><value>توليد مفتاح جديد</value></data>

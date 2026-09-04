@@ -11,7 +11,7 @@ public class OtpService : IOtpService
 {
     private readonly AppDbContext _db;
     private readonly IStringLocalizer<SharedResource> _L;
-    private static readonly TimeSpan Expiry = TimeSpan.FromHours(4);
+    private static readonly TimeSpan Expiry = TimeSpan.FromHours(24);
     private const int MaxFailedAttempts = 5;
 
     public OtpService(AppDbContext db, IStringLocalizer<SharedResource> localizer) { _db = db; _L = localizer; }

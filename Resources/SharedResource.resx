@@ -612,7 +612,7 @@
   <data name="Users_TemplateBulk" xml:space="preserve"><value>Template: Bulk Users</value></data>
   <data name="Users_Created" xml:space="preserve"><value>Created</value></data>
   <data name="Users_OtpGenerated" xml:space="preserve"><value>OTP Generated</value></data>
-  <data name="Users_ValidFor" xml:space="preserve"><value>Valid for 4 hours, single use. Send this to the user yourself.</value></data>
+  <data name="Users_ValidFor" xml:space="preserve"><value>Valid for 24 hours, single use. Send this to the user yourself.</value></data>
   <data name="Users_Close" xml:space="preserve"><value>Close</value></data>
   <data name="Users_ConfirmPassword" xml:space="preserve"><value>Confirm Your Password</value></data>
   <data name="Users_GenerateKey" xml:space="preserve"><value>Generate New Key</value></data>
