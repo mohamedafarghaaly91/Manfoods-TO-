@@ -67,10 +67,10 @@
    the page's dir="rtl" and reorders numeric-leading labels. */
 .chart-body canvas { direction:ltr; }
 
-/* KPI/insight text is always English by design (unlocalized metric names) —
-   isolate it from RTL bidi reordering when the page is in Arabic. */
+/* KPI milestone card text is always English by design (unlocalized metric
+   names) — isolate it from RTL bidi reordering when the page is in Arabic.
+   (The Smart Insights themselves are now localized — see RetentionService.) */
 #rtMilestoneCards .kpi-label, #rtMilestoneCards .kpi-value { direction:ltr; unicode-bidi:isolate; text-align:left; }
-#rtInsights { direction:ltr; unicode-bidi:isolate; text-align:left; }
 </style>
 
 <div class="page-header">

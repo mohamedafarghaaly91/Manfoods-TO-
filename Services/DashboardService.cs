@@ -1,9 +1,11 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
@@ -12,13 +14,15 @@ public class DashboardService : IDashboardService
     private readonly AppDbContext _db;
     private readonly IMemoryCache _cache;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IStringLocalizer<SharedResource> _L;
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
-    public DashboardService(AppDbContext db, IMemoryCache cache, IStoreAccessService storeAccess)
+    public DashboardService(AppDbContext db, IMemoryCache cache, IStoreAccessService storeAccess, IStringLocalizer<SharedResource> localizer)
     {
         _db = db;
         _cache = cache;
         _storeAccess = storeAccess;
+        _L = localizer;
     }
 
     // Returns the store names a restricted role (Operation Manager/Consultant,
@@ -637,7 +641,9 @@ public class DashboardService : IDashboardService
         var prevByStore = previous.ToDictionary(s => s.StoreName);
 
         // Human-readable label for comparison window used in descriptions
-        var periodLabel = periodCount == 1 ? "last month" : $"prior {periodCount}-month period";
+        var periodLabel = periodCount == 1
+            ? _L["Insight_PeriodLabelLastMonth"].Value
+            : string.Format(_L["Insight_PeriodLabelPriorMonths"].Value, periodCount);
 
         // 1. Highest turnover store
         var highest = current.First();
@@ -646,8 +652,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-exclamation-triangle-fill",
                 Color       = "danger",
-                Title       = $"Highest Turnover: {highest.StoreName}",
-                Description = $"{highest.TurnoverRate:F1}% turnover — {highest.Resignations} resignation(s) from {Math.Round(highest.AvgHeadcount)} average employees.",
+                Title       = string.Format(_L["Insight_HighestTurnoverTitle"].Value, highest.StoreName),
+                Description = string.Format(_L["Insight_HighestTurnoverDesc"].Value, highest.TurnoverRate.ToString("F1"), highest.Resignations, Math.Round(highest.AvgHeadcount)),
                 Group       = "primary"
             });
 
@@ -658,8 +664,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-check-circle-fill",
                 Color       = "success",
-                Title       = $"Best Performing: {best.StoreName}",
-                Description = $"Lowest turnover at {best.TurnoverRate:F1}% with only {best.Resignations} resignation(s).",
+                Title       = string.Format(_L["Insight_BestPerformingTitle"].Value, best.StoreName),
+                Description = string.Format(_L["Insight_BestPerformingDesc"].Value, best.TurnoverRate.ToString("F1"), best.Resignations),
                 Group       = "primary"
             });
 
@@ -681,10 +687,10 @@ public class DashboardService : IDashboardService
             {
                 Icon        = rateDiff > 0 ? "bi-arrow-up-circle-fill" : rateDiff < 0 ? "bi-arrow-down-circle-fill" : "bi-dash-circle-fill",
                 Color       = rateDiff > 0 ? "danger" : rateDiff < 0 ? "success" : "secondary",
-                Title       = rateDiff > 0 ? "Trend: Worsening" : rateDiff < 0 ? "Trend: Improving" : "Trend: Stable",
+                Title       = _L[rateDiff > 0 ? "Insight_TrendWorseningTitle" : rateDiff < 0 ? "Insight_TrendImprovingTitle" : "Insight_TrendStableTitle"].Value,
                 Description = rateDiff != 0
-                    ? $"Turnover rate {(rateDiff > 0 ? "increased" : "decreased")} by {Math.Abs(rateDiff):F1}% vs {periodLabel} ({prevRate:F1}% → {currRate:F1}%)."
-                    : $"Turnover rate unchanged at {currRate:F1}% vs {periodLabel}.",
+                    ? string.Format(_L[rateDiff > 0 ? "Insight_TrendIncreasedDesc" : "Insight_TrendDecreasedDesc"].Value, Math.Abs(rateDiff).ToString("F1"), periodLabel, prevRate.ToString("F1"), currRate.ToString("F1"))
+                    : string.Format(_L["Insight_TrendUnchangedDesc"].Value, currRate.ToString("F1"), periodLabel),
                 Group       = "primary"
             });
         }
@@ -708,8 +714,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-person-fill-exclamation",
                 Color       = "warning",
-                Title       = $"Highest OC Turnover: {worstOc.Name}",
-                Description = $"{worstOc.AvgTurnoverRate:F1}% weighted avg across {worstOc.StoreCount} store(s) — {worstOc.TotalRes} total resignation(s).",
+                Title       = string.Format(_L["Insight_HighestOcTurnoverTitle"].Value, worstOc.Name),
+                Description = string.Format(_L["Insight_WeightedAvgDesc"].Value, worstOc.AvgTurnoverRate.ToString("F1"), worstOc.StoreCount, worstOc.TotalRes),
                 Group       = "leadership"
             });
 
@@ -719,8 +725,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-person-badge-fill",
                 Color       = "warning",
-                Title       = $"Highest OM Turnover: {worstOm.Name}",
-                Description = $"{worstOm.AvgTurnoverRate:F1}% weighted avg across {worstOm.StoreCount} store(s) — {worstOm.TotalRes} total resignation(s).",
+                Title       = string.Format(_L["Insight_HighestOmTurnoverTitle"].Value, worstOm.Name),
+                Description = string.Format(_L["Insight_WeightedAvgDesc"].Value, worstOm.AvgTurnoverRate.ToString("F1"), worstOm.StoreCount, worstOm.TotalRes),
                 Group       = "leadership"
             });
 
@@ -730,8 +736,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-person-vcard-fill",
                 Color       = "warning",
-                Title       = $"Highest OD Turnover: {worstOd.Name}",
-                Description = $"{worstOd.AvgTurnoverRate:F1}% weighted avg across {worstOd.StoreCount} store(s) — {worstOd.TotalRes} total resignation(s).",
+                Title       = string.Format(_L["Insight_HighestOdTurnoverTitle"].Value, worstOd.Name),
+                Description = string.Format(_L["Insight_WeightedAvgDesc"].Value, worstOd.AvgTurnoverRate.ToString("F1"), worstOd.StoreCount, worstOd.TotalRes),
                 Group       = "leadership"
             });
 
@@ -750,8 +756,8 @@ public class DashboardService : IDashboardService
             {
                 Icon        = "bi-graph-up-arrow",
                 Color       = "warning",
-                Title       = $"Turnover Spike: {spike.StoreName}",
-                Description = $"↑ +{delta:F1}% vs {periodLabel} ({prev.TurnoverRate:F1}% → {spike.TurnoverRate:F1}%).",
+                Title       = string.Format(_L["Insight_TurnoverSpikeTitle"].Value, spike.StoreName),
+                Description = string.Format(_L["Insight_TurnoverSpikeDesc"].Value, delta.ToString("F1"), periodLabel, prev.TurnoverRate.ToString("F1"), spike.TurnoverRate.ToString("F1")),
                 Group       = "spike"
             });
         }

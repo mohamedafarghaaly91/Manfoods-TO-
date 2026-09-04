@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
@@ -17,12 +19,14 @@ public class RetentionService : IRetentionService
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
+    private readonly IStringLocalizer<SharedResource> _L;
 
-    public RetentionService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
+    public RetentionService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer)
     {
         _db = db;
         _storeAccess = storeAccess;
         _cache = cache;
+        _L = localizer;
     }
 
     // Real "retention" is a long-term measure — 30/90-day attrition is covered by the
@@ -487,8 +491,8 @@ public class RetentionService : IRetentionService
                     {
                         Icon = diff > 0 ? "bi-arrow-up-circle-fill" : "bi-arrow-down-circle-fill",
                         Color = diff > 0 ? "success" : "danger",
-                        Title = diff > 0 ? "1-Year Retention Improving" : "1-Year Retention Slipping",
-                        Description = $"{recentAvg:F1}% avg over the last {recent.Count} cohort(s) vs {priorAvg:F1}% before — {(diff > 0 ? "+" : "")}{diff}pt.",
+                        Title = _L[diff > 0 ? "Insight_RetentionImprovingTitle" : "Insight_RetentionSlippingTitle"].Value,
+                        Description = string.Format(_L["Insight_RetentionTrendDesc"].Value, recentAvg.ToString("F1"), recent.Count, priorAvg.ToString("F1"), (diff > 0 ? "+" : "") + diff),
                     });
             }
         }
@@ -504,8 +508,8 @@ public class RetentionService : IRetentionService
                 {
                     Icon = "bi-trophy-fill",
                     Color = "success",
-                    Title = $"Best 1-Year Retention: {best.Label}",
-                    Description = $"{best.Value}% of hires are still there after 1 year.",
+                    Title = string.Format(_L["Insight_BestRetentionTitle"].Value, best.Label),
+                    Description = string.Format(_L["Insight_BestRetentionDesc"].Value, best.Value),
                 });
                 var worst = leaderboard.Last();
                 if (worst.Label != best.Label && worst.Value < 50)
@@ -513,8 +517,8 @@ public class RetentionService : IRetentionService
                     {
                         Icon = "bi-exclamation-triangle-fill",
                         Color = "danger",
-                        Title = $"Weakest 1-Year Retention: {worst.Label}",
-                        Description = $"Only {worst.Value}% of hires are still there after 1 year.",
+                        Title = string.Format(_L["Insight_WeakestRetentionTitle"].Value, worst.Label),
+                        Description = string.Format(_L["Insight_WeakestRetentionDesc"].Value, worst.Value),
                     });
             }
         }
@@ -530,8 +534,8 @@ public class RetentionService : IRetentionService
             {
                 Icon = "bi-shield-check",
                 Color = pct >= 40 ? "success" : "secondary",
-                Title = "Workforce Maturity",
-                Description = $"{pct}% of the current active workforce has been here a year or more.",
+                Title = _L["Insight_WorkforceMaturityTitle"].Value,
+                Description = string.Format(_L["Insight_WorkforceMaturityDesc"].Value, pct),
             });
         }
 

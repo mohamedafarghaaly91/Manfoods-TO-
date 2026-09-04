@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 using MvcApp.Services;
 using MvcApp.Tests.TestHelpers;
 using Xunit;
@@ -25,10 +28,14 @@ public class StoreActionPlanBulkDetectionOrderTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
+    private static readonly IStringLocalizer<SharedResource> Localizer =
+        new ServiceCollection().AddLocalization().BuildServiceProvider()
+            .GetRequiredService<IStringLocalizer<SharedResource>>();
+
     private static StoreActionPlanService NewService(AppDbContext db)
     {
         var storeAccess = new StoreAccessService(db);
-        var dashboard = new DashboardService(db, new MemoryCache(new MemoryCacheOptions()), storeAccess);
+        var dashboard = new DashboardService(db, new MemoryCache(new MemoryCacheOptions()), storeAccess, Localizer);
         return new StoreActionPlanService(
             db, storeAccess,
             new NoOpStoreService(),

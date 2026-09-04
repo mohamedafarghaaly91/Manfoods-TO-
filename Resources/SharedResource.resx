@@ -385,6 +385,48 @@
   <data name="Guide_Workforce_Chart_StoreBreakdown" xml:space="preserve"><value>Every store's headcount for the selected period, with a mini gender mix and payroll group mix per store.</value></data>
   <data name="Guide_Workforce_Chart_OcOm" xml:space="preserve"><value>Operation Consultants, Directors, Managers and Senior Consultants with their total headcount and turnover rate (weighted across all their stores) for the selected period.</value></data>
   <data name="Guide_Workforce_FilterNote" xml:space="preserve"><value>Choosing a Store, Operation Manager, Operation Consultant, Senior Operation Consultant or Operation Director filters every chart and table on this page to just that selection. The From/To period filter narrows the KPI cards and the composition/store/OC-OM breakdowns — but the "Headcount Trend" chart always shows the complete history from the selected year onward, since it's built to show change over time.</value></data>
+
+  <!-- Turnover Smart Insights (DashboardService.GetSmartInsightsAsync) -->
+  <data name="Insight_PeriodLabelLastMonth" xml:space="preserve"><value>last month</value></data>
+  <data name="Insight_PeriodLabelPriorMonths" xml:space="preserve"><value>prior {0}-month period</value></data>
+  <data name="Insight_HighestTurnoverTitle" xml:space="preserve"><value>Highest Turnover: {0}</value></data>
+  <data name="Insight_HighestTurnoverDesc" xml:space="preserve"><value>{0}% turnover — {1} resignation(s) from {2} average employees.</value></data>
+  <data name="Insight_BestPerformingTitle" xml:space="preserve"><value>Best Performing: {0}</value></data>
+  <data name="Insight_BestPerformingDesc" xml:space="preserve"><value>Lowest turnover at {0}% with only {1} resignation(s).</value></data>
+  <data name="Insight_TrendWorseningTitle" xml:space="preserve"><value>Trend: Worsening</value></data>
+  <data name="Insight_TrendImprovingTitle" xml:space="preserve"><value>Trend: Improving</value></data>
+  <data name="Insight_TrendStableTitle" xml:space="preserve"><value>Trend: Stable</value></data>
+  <data name="Insight_TrendIncreasedDesc" xml:space="preserve"><value>Turnover rate increased by {0}% vs {1} ({2}% → {3}%).</value></data>
+  <data name="Insight_TrendDecreasedDesc" xml:space="preserve"><value>Turnover rate decreased by {0}% vs {1} ({2}% → {3}%).</value></data>
+  <data name="Insight_TrendUnchangedDesc" xml:space="preserve"><value>Turnover rate unchanged at {0}% vs {1}.</value></data>
+  <data name="Insight_HighestOcTurnoverTitle" xml:space="preserve"><value>Highest Turnover — Operation Consultant: {0}</value></data>
+  <data name="Insight_HighestOmTurnoverTitle" xml:space="preserve"><value>Highest Turnover — Operation Manager: {0}</value></data>
+  <data name="Insight_HighestOdTurnoverTitle" xml:space="preserve"><value>Highest Turnover — Operation Director: {0}</value></data>
+  <data name="Insight_WeightedAvgDesc" xml:space="preserve"><value>{0}% weighted avg across {1} store(s) — {2} total resignation(s).</value></data>
+  <data name="Insight_TurnoverSpikeTitle" xml:space="preserve"><value>Turnover Spike: {0}</value></data>
+  <data name="Insight_TurnoverSpikeDesc" xml:space="preserve"><value>↑ +{0}% vs {1} ({2}% → {3}%).</value></data>
+
+  <!-- 90-Day Turnover Smart Insights (NinetyDayTurnoverService.GetSmartInsightsAsync) -->
+  <data name="Insight_NinetyDayImprovingTitle" xml:space="preserve"><value>90-Day Rate Improving</value></data>
+  <data name="Insight_NinetyDaySlippingTitle" xml:space="preserve"><value>90-Day Rate Slipping</value></data>
+  <data name="Insight_NinetyDayTrendDesc" xml:space="preserve"><value>Employees hired in the last {0} cohort month(s) left within 90 days at {1}%, vs {2}% for the {3} month(s) before that — a {4}pt {5}.</value></data>
+  <data name="Insight_ImprovementWord" xml:space="preserve"><value>improvement</value></data>
+  <data name="Insight_IncreaseWord" xml:space="preserve"><value>increase</value></data>
+  <data name="Insight_BestNinetyDayTitle" xml:space="preserve"><value>Best 90-Day Rate: {0}</value></data>
+  <data name="Insight_BestNinetyDayDesc" xml:space="preserve"><value>Only {0}% of this store's hires left within 90 days.</value></data>
+  <data name="Insight_WeakestNinetyDayTitle" xml:space="preserve"><value>Weakest 90-Day Rate: {0}</value></data>
+  <data name="Insight_WeakestNinetyDayDesc" xml:space="preserve"><value>{0}% of this store's hires left within 90 days.</value></data>
+
+  <!-- Retention Insights (RetentionService.GetInsightsAsync) -->
+  <data name="Insight_RetentionImprovingTitle" xml:space="preserve"><value>1-Year Retention Improving</value></data>
+  <data name="Insight_RetentionSlippingTitle" xml:space="preserve"><value>1-Year Retention Slipping</value></data>
+  <data name="Insight_RetentionTrendDesc" xml:space="preserve"><value>{0}% avg over the last {1} cohort(s) vs {2}% before — {3}pt.</value></data>
+  <data name="Insight_BestRetentionTitle" xml:space="preserve"><value>Best 1-Year Retention: {0}</value></data>
+  <data name="Insight_BestRetentionDesc" xml:space="preserve"><value>{0}% of hires are still there after 1 year.</value></data>
+  <data name="Insight_WeakestRetentionTitle" xml:space="preserve"><value>Weakest 1-Year Retention: {0}</value></data>
+  <data name="Insight_WeakestRetentionDesc" xml:space="preserve"><value>Only {0}% of hires are still there after 1 year.</value></data>
+  <data name="Insight_WorkforceMaturityTitle" xml:space="preserve"><value>Workforce Maturity</value></data>
+  <data name="Insight_WorkforceMaturityDesc" xml:space="preserve"><value>{0}% of the current active workforce has been here a year or more.</value></data>
   <data name="Page_Retention" xml:space="preserve"><value>Retention</value></data>
   <data name="Page_RetentionSub" xml:space="preserve"><value>How long new hires actually stay — milestones, survival curve, and long-term trends</value></data>
   <data name="Page_ExitInterviews" xml:space="preserve"><value>Exit Interviews</value></data>

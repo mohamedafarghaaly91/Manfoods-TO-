@@ -385,6 +385,48 @@
   <data name="Guide_Workforce_Chart_StoreBreakdown" xml:space="preserve"><value>عدد الموظفين في كل فرع للفترة المختارة، مع توزيع الجنس وفئة الرواتب لكل فرع.</value></data>
   <data name="Guide_Workforce_Chart_OcOm" xml:space="preserve"><value>استشاريو العمليات ومديرو أول التشغيل ومديرو التشغيل واستشاريو أول العمليات بإجمالي عدد الموظفين ومعدل الدوران (مرجَّح عبر جميع فروعهم) للفترة المختارة.</value></data>
   <data name="Guide_Workforce_FilterNote" xml:space="preserve"><value>اختيار فرع أو مدير تشغيل أو استشاري عمليات أو استشاري أول عمليات أو مدير أول تشغيل يقوم بتصفية جميع الرسوم البيانية والجداول في الصفحة على هذا الاختيار فقط. فلتر الفترة "من/إلى" يُضيّق نطاق بطاقات مؤشرات الأداء الرئيسية ورسومات التكوين وجدول الفروع وجدول استشاري العمليات/مدير التشغيل — لكن رسم "اتجاه عدد الموظفين" يعرض دائمًا كامل التاريخ من السنة المختارة، لأنه مصمم أساسًا لتوضيح التغيّر مع الوقت.</value></data>
+
+  <!-- Turnover Smart Insights (DashboardService.GetSmartInsightsAsync) -->
+  <data name="Insight_PeriodLabelLastMonth" xml:space="preserve"><value>الشهر الماضي</value></data>
+  <data name="Insight_PeriodLabelPriorMonths" xml:space="preserve"><value>فترة الـ {0} أشهر السابقة</value></data>
+  <data name="Insight_HighestTurnoverTitle" xml:space="preserve"><value>أعلى معدل دوران: {0}</value></data>
+  <data name="Insight_HighestTurnoverDesc" xml:space="preserve"><value>معدل دوران {0}% — {1} استقالة من متوسط {2} موظف.</value></data>
+  <data name="Insight_BestPerformingTitle" xml:space="preserve"><value>الأفضل أداءً: {0}</value></data>
+  <data name="Insight_BestPerformingDesc" xml:space="preserve"><value>أقل معدل دوران بنسبة {0}% وباستقالات لا تتجاوز {1}.</value></data>
+  <data name="Insight_TrendWorseningTitle" xml:space="preserve"><value>الاتجاه: تراجع</value></data>
+  <data name="Insight_TrendImprovingTitle" xml:space="preserve"><value>الاتجاه: تحسّن</value></data>
+  <data name="Insight_TrendStableTitle" xml:space="preserve"><value>الاتجاه: مستقر</value></data>
+  <data name="Insight_TrendIncreasedDesc" xml:space="preserve"><value>ارتفع معدل الدوران بنسبة {0}% مقارنة بـ{1} ({2}% ← {3}%).</value></data>
+  <data name="Insight_TrendDecreasedDesc" xml:space="preserve"><value>انخفض معدل الدوران بنسبة {0}% مقارنة بـ{1} ({2}% ← {3}%).</value></data>
+  <data name="Insight_TrendUnchangedDesc" xml:space="preserve"><value>معدل الدوران ثابت عند {0}% مقارنة بـ{1}.</value></data>
+  <data name="Insight_HighestOcTurnoverTitle" xml:space="preserve"><value>أعلى معدل دوران — استشاري العمليات: {0}</value></data>
+  <data name="Insight_HighestOmTurnoverTitle" xml:space="preserve"><value>أعلى معدل دوران — مدير التشغيل: {0}</value></data>
+  <data name="Insight_HighestOdTurnoverTitle" xml:space="preserve"><value>أعلى معدل دوران — مدير أول التشغيل: {0}</value></data>
+  <data name="Insight_WeightedAvgDesc" xml:space="preserve"><value>متوسط مرجَّح {0}% عبر {1} فرع — بإجمالي {2} استقالة.</value></data>
+  <data name="Insight_TurnoverSpikeTitle" xml:space="preserve"><value>ارتفاع مفاجئ في معدل الدوران: {0}</value></data>
+  <data name="Insight_TurnoverSpikeDesc" xml:space="preserve"><value>↑ +{0}% مقارنة بـ{1} ({2}% ← {3}%).</value></data>
+
+  <!-- 90-Day Turnover Smart Insights (NinetyDayTurnoverService.GetSmartInsightsAsync) -->
+  <data name="Insight_NinetyDayImprovingTitle" xml:space="preserve"><value>معدل الـ 90 يومًا في تحسّن</value></data>
+  <data name="Insight_NinetyDaySlippingTitle" xml:space="preserve"><value>معدل الـ 90 يومًا في تراجع</value></data>
+  <data name="Insight_NinetyDayTrendDesc" xml:space="preserve"><value>الموظفون المعيَّنون خلال آخر {0} شهر (أشهر) من أفواج التعيين غادروا خلال 90 يومًا بنسبة {1}%، مقابل {2}% في الـ {3} شهر (أشهر) قبل ذلك — أي {4} نقطة مئوية {5}.</value></data>
+  <data name="Insight_ImprovementWord" xml:space="preserve"><value>تحسّن</value></data>
+  <data name="Insight_IncreaseWord" xml:space="preserve"><value>ارتفاع</value></data>
+  <data name="Insight_BestNinetyDayTitle" xml:space="preserve"><value>أفضل معدل 90 يومًا: {0}</value></data>
+  <data name="Insight_BestNinetyDayDesc" xml:space="preserve"><value>{0}% فقط من تعيينات هذا الفرع غادروا خلال 90 يومًا.</value></data>
+  <data name="Insight_WeakestNinetyDayTitle" xml:space="preserve"><value>أضعف معدل 90 يومًا: {0}</value></data>
+  <data name="Insight_WeakestNinetyDayDesc" xml:space="preserve"><value>{0}% من تعيينات هذا الفرع غادروا خلال 90 يومًا.</value></data>
+
+  <!-- Retention Insights (RetentionService.GetInsightsAsync) -->
+  <data name="Insight_RetentionImprovingTitle" xml:space="preserve"><value>الاستبقاء لمدة سنة في تحسّن</value></data>
+  <data name="Insight_RetentionSlippingTitle" xml:space="preserve"><value>الاستبقاء لمدة سنة في تراجع</value></data>
+  <data name="Insight_RetentionTrendDesc" xml:space="preserve"><value>متوسط {0}% خلال آخر {1} فوج (أفواج) مقابل {2}% قبل ذلك — {3} نقطة مئوية.</value></data>
+  <data name="Insight_BestRetentionTitle" xml:space="preserve"><value>أفضل معدل استبقاء لمدة سنة: {0}</value></data>
+  <data name="Insight_BestRetentionDesc" xml:space="preserve"><value>{0}% من التعيينات ما زالوا على رأس عملهم بعد مرور سنة.</value></data>
+  <data name="Insight_WeakestRetentionTitle" xml:space="preserve"><value>أضعف معدل استبقاء لمدة سنة: {0}</value></data>
+  <data name="Insight_WeakestRetentionDesc" xml:space="preserve"><value>{0}% فقط من التعيينات ما زالوا على رأس عملهم بعد مرور سنة.</value></data>
+  <data name="Insight_WorkforceMaturityTitle" xml:space="preserve"><value>نضج القوى العاملة</value></data>
+  <data name="Insight_WorkforceMaturityDesc" xml:space="preserve"><value>{0}% من القوى العاملة الحالية النشطة يعملون هنا منذ سنة أو أكثر.</value></data>
   <data name="Page_Retention" xml:space="preserve"><value>الاحتفاظ بالموظفين</value></data>
   <data name="Page_RetentionSub" xml:space="preserve"><value>كم يبقى الموظفون الجدد — المعالم، منحنى البقاء، والاتجاهات</value></data>
   <data name="Page_ExitInterviews" xml:space="preserve"><value>مقابلات الخروج</value></data>

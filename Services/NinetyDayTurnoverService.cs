@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
@@ -18,12 +20,14 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
+    private readonly IStringLocalizer<SharedResource> _L;
 
-    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
+    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer)
     {
         _db = db;
         _storeAccess = storeAccess;
         _cache = cache;
+        _L = localizer;
     }
 
     private class ResignationTenure
@@ -539,8 +543,9 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
                     {
                         Icon = diff < 0 ? "bi-arrow-down-circle-fill" : "bi-arrow-up-circle-fill",
                         Color = diff < 0 ? "success" : "danger",
-                        Title = diff < 0 ? "90-Day Rate Improving" : "90-Day Rate Slipping",
-                        Description = $"Employees hired in the last {recent.Count} cohort month(s) left within 90 days at {recentAvg:F1}%, vs {priorAvg:F1}% for the {prior.Count} month(s) before that — a {Math.Abs(diff)}pt {(diff < 0 ? "improvement" : "increase")}.",
+                        Title = _L[diff < 0 ? "Insight_NinetyDayImprovingTitle" : "Insight_NinetyDaySlippingTitle"].Value,
+                        Description = string.Format(_L["Insight_NinetyDayTrendDesc"].Value, recent.Count, recentAvg.ToString("F1"), priorAvg.ToString("F1"), prior.Count, Math.Abs(diff),
+                            _L[diff < 0 ? "Insight_ImprovementWord" : "Insight_IncreaseWord"].Value),
                     });
             }
         }
@@ -556,8 +561,8 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
                 {
                     Icon = "bi-trophy-fill",
                     Color = "success",
-                    Title = $"Best 90-Day Rate: {best.StoreName}",
-                    Description = $"Only {best.Rate:F1}% of this store's hires left within 90 days.",
+                    Title = string.Format(_L["Insight_BestNinetyDayTitle"].Value, best.StoreName),
+                    Description = string.Format(_L["Insight_BestNinetyDayDesc"].Value, best.Rate.ToString("F1")),
                 });
                 var worst = byStore.OrderByDescending(s => s.Rate).First();
                 if (worst.StoreName != best.StoreName && worst.Rate >= 50)
@@ -565,8 +570,8 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
                     {
                         Icon = "bi-exclamation-triangle-fill",
                         Color = "danger",
-                        Title = $"Weakest 90-Day Rate: {worst.StoreName}",
-                        Description = $"{worst.Rate:F1}% of this store's hires left within 90 days.",
+                        Title = string.Format(_L["Insight_WeakestNinetyDayTitle"].Value, worst.StoreName),
+                        Description = string.Format(_L["Insight_WeakestNinetyDayDesc"].Value, worst.Rate.ToString("F1")),
                     });
             }
         }
