@@ -349,7 +349,7 @@
         resultKeyEl.select();
         navigator.clipboard.writeText(resultKeyEl.value);
     });
-    document.getElementById('recoveryResultCloseBtn').addEventListener('click', () => { resultModal.style.display = 'none'; });
+    document.getElementById('recoveryResultCloseBtn').addEventListener('click', () => { resultModal.style.display = 'none'; resultKeyEl.value = ''; });
 
     // ── Search + role filter (client-side, small dataset) ──────────────────
     const searchInput = document.getElementById('usSearchInput');
