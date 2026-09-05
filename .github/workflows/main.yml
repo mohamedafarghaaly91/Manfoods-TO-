@@ -9,6 +9,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x' # أو إصدار الـ .NET اللي شغال بيه مشروعك (مثلاً 8.0.x)
+    - name: Restore
+      run: dotnet restore
+    - name: Test
+      run: dotnet test --no-restore
     - name: Publish
       run: dotnet publish -c Release -o ./publish
     - name: Upload Artifact
