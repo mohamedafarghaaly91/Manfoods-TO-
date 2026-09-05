@@ -17,6 +17,7 @@ public class StoreActionPlanService : IStoreActionPlanService
 {
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IActionPlanRoleService _actionPlanRoles;
     private readonly IStoreService _stores;
     private readonly IDashboardService _dashboard;
     private readonly INinetyDayTurnoverService _ninetyDay;
@@ -48,6 +49,7 @@ public class StoreActionPlanService : IStoreActionPlanService
     public StoreActionPlanService(
         AppDbContext db,
         IStoreAccessService storeAccess,
+        IActionPlanRoleService actionPlanRoles,
         IStoreService stores,
         IDashboardService dashboard,
         INinetyDayTurnoverService ninetyDay,
@@ -58,6 +60,7 @@ public class StoreActionPlanService : IStoreActionPlanService
     {
         _db = db;
         _storeAccess = storeAccess;
+        _actionPlanRoles = actionPlanRoles;
         _stores = stores;
         _dashboard = dashboard;
         _ninetyDay = ninetyDay;
@@ -78,8 +81,11 @@ public class StoreActionPlanService : IStoreActionPlanService
             .OrderByDescending(p => p.CreatedAt)
             .FirstOrDefaultAsync();
 
-        var responsible = await _storeAccess.GetResponsiblePartyAsync(storeName);
-        var canAddNotes = role is "Head_Manager" or "Operation_Consultant";
+        var responsible = await _actionPlanRoles.GetEffectiveResponsiblePartyAsync(storeName);
+        // CanAccessStoreAsync above already confirmed this role/email pair
+        // matches the store's own email column for that role, so it's safe
+        // to grant notes access purely on "is this the delegated role."
+        var canAddNotes = responsible != null && role == responsible.Role;
 
         if (plan == null)
         {
@@ -147,7 +153,9 @@ public class StoreActionPlanService : IStoreActionPlanService
         string storeName, string role, string? email, int authorUserId, string authorName, string noteText)
     {
         if (string.IsNullOrWhiteSpace(noteText)) return (false, "Note text is required.", null);
-        if (role is not ("Head_Manager" or "Operation_Consultant")) return (false, "Not permitted to add notes.", null);
+
+        var effectiveRole = await _actionPlanRoles.GetEffectiveRoleAsync(storeName);
+        if (effectiveRole == null || role != effectiveRole) return (false, "Not permitted to add notes.", null);
         if (!await _storeAccess.CanAccessStoreAsync(role, email, storeName)) return (false, "Not permitted to add notes.", null);
 
         var plan = await _db.StoreActionPlans
@@ -671,17 +679,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         var storeNames = storeRefs.Select(s => s.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         if (storeNames.Count == 0) return new List<ActionCenterStoreRowDto>();
 
-        var latestPeriod = await _db.StoreReferences
-            .OrderByDescending(s => s.Year).ThenByDescending(s => s.Month)
-            .Select(s => new { s.Month, s.Year })
-            .FirstOrDefaultAsync();
-        var latestRefsByStore = latestPeriod == null
-            ? new Dictionary<string, StoreReference>(StringComparer.OrdinalIgnoreCase)
-            : (await _db.StoreReferences
-                .Where(s => s.Month == latestPeriod.Month && s.Year == latestPeriod.Year && storeNames.Contains(s.StoreName))
-                .ToListAsync())
-                .GroupBy(s => s.StoreName, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+        var responsibleByStore = await _actionPlanRoles.GetEffectiveResponsiblePartiesAsync(storeNames);
 
         var allPlans = await _db.StoreActionPlans.Where(p => storeNames.Contains(p.StoreName)).ToListAsync();
         var plansByStore = allPlans.GroupBy(p => p.StoreName, StringComparer.OrdinalIgnoreCase)
@@ -699,8 +697,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         {
             plansByStore.TryGetValue(storeName, out var storePlans);
             var latest = storePlans?.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
-            latestRefsByStore.TryGetValue(storeName, out var reference);
-            var responsible = reference != null ? _storeAccess.ResolveResponsible(reference) : null;
+            responsibleByStore.TryGetValue(storeName, out var responsible);
 
             if (latest == null)
             {
@@ -868,7 +865,8 @@ public class StoreActionPlanService : IStoreActionPlanService
 
         if (role != "Admin")
         {
-            if (role is not ("Head_Manager" or "Operation_Consultant")) return false;
+            var effectiveRole = await _actionPlanRoles.GetEffectiveRoleAsync(plan.StoreName);
+            if (effectiveRole == null || role != effectiveRole) return false;
             if (!await _storeAccess.CanAccessStoreAsync(role, email, plan.StoreName)) return false;
         }
 

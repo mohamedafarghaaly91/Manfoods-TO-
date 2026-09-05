@@ -427,6 +427,28 @@ END
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_action_plan_metric_snapshots_plan_id' AND object_id = OBJECT_ID('dbo.action_plan_metric_snapshots'))
     CREATE INDEX ix_action_plan_metric_snapshots_plan_id ON dbo.action_plan_metric_snapshots (store_action_plan_id);
 
+-- ── store_action_plan_role_assignments ─────────────────────────────────────
+-- Optional Admin override of which role is authorized to manage a store's
+-- Action Plan (add notes / toggle recommendation checkboxes / shown as its
+-- Responsible Party there) — lets an Admin delegate away from the computed
+-- default (Operation_Consultant if assigned, else Head_Manager), e.g. while
+-- the Operation Consultant is on leave. One row per store; no row means "use
+-- the computed default." This table only affects Action Plan permissions —
+-- StoreAccessService's general store-visibility rules are untouched by it.
+IF OBJECT_ID('dbo.store_action_plan_role_assignments', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.store_action_plan_role_assignments (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_name NVARCHAR(450) NOT NULL DEFAULT '',
+        role NVARCHAR(MAX) NOT NULL DEFAULT '',
+        set_by_name NVARCHAR(MAX) NULL,
+        updated_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_store_action_plan_role_assignments_store' AND object_id = OBJECT_ID('dbo.store_action_plan_role_assignments'))
+    CREATE UNIQUE INDEX ux_store_action_plan_role_assignments_store
+        ON dbo.store_action_plan_role_assignments (store_name);
+
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal

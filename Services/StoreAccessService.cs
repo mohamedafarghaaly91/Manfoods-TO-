@@ -27,6 +27,18 @@ public class StoreAccessService : IStoreAccessService
 
     public IReadOnlyList<string> RestrictedRoles { get; } = RoleEmailColumns.Keys.ToList();
 
+    // Mirrors RoleEmailColumns but for each role's display-name column — used
+    // only for display purposes (e.g. the Action Plan Role settings page),
+    // never for access decisions.
+    private static readonly Dictionary<string, Expression<Func<StoreReference, string>>> RoleNameColumns = new()
+    {
+        ["Operation_Manager"] = s => s.OperationManager,
+        ["Operation_Consultant"] = s => s.OperationConsultant,
+        ["Head_Manager"] = s => s.HeadManager,
+        ["Senior_Operation_Consultant"] = s => s.SeniorOperationConsultant,
+        ["Operation_Director"] = s => s.OperationDirector,
+    };
+
     // Roles with full, unrestricted access — everything else (including a
     // role string that isn't recognized at all, e.g. a Bulk Upload typo) is
     // treated as restricted and gets no store access.
@@ -36,6 +48,9 @@ public class StoreAccessService : IStoreAccessService
 
     public string GetEmailForRole(StoreReference store, string role) =>
         RoleEmailColumns.TryGetValue(role, out var column) ? column.Compile()(store) : "";
+
+    public string GetNameForRole(StoreReference store, string role) =>
+        RoleNameColumns.TryGetValue(role, out var column) ? column.Compile()(store) : "";
 
     public async Task<List<string>?> GetAccessibleStoreNamesAsync(string role, string? email)
     {

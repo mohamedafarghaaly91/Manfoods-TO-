@@ -1172,6 +1172,15 @@
   <data name="Set_RecGroup_ReasonOther" xml:space="preserve"><value>سبب الاستقالة الأكثر شيوعًا: أخرى</value></data>
   <data name="Set_RecGroup_EarlyWarningWatchlist" xml:space="preserve"><value>قائمة الإنذار المبكر</value></data>
   <data name="Set_RecGroup_NoDominantDriver" xml:space="preserve"><value>لا يوجد سبب بارز (احتياطي)</value></data>
+  <data name="Set_Tab_ActionPlanRole" xml:space="preserve"><value>صلاحية خطة العمل</value></data>
+  <data name="Set_AproleSub" xml:space="preserve"><value>حدد الرول اللي عنده صلاحية إدارة خطة العمل (Action Plan) لكل فرع — إضافة الملاحظات والتعليم على التوصيات. الافتراضي هو الأوبريشن كونسلتنت، أو الهيد مانجر لو مفيش أوبريشن كونسلتنت متسجل — غيّره لتفويض حد تاني، مثلاً وقت إجازة صاحب الصلاحية الأصلي.</value></data>
+  <data name="Set_AproleStore" xml:space="preserve"><value>الفرع</value></data>
+  <data name="Set_AproleCurrentRole" xml:space="preserve"><value>صاحب خطة العمل</value></data>
+  <data name="Set_AproleDefault" xml:space="preserve"><value>افتراضي</value></data>
+  <data name="Set_AproleOverridden" xml:space="preserve"><value>معيّن يدويًا</value></data>
+  <data name="Set_AproleReset" xml:space="preserve"><value>رجوع للافتراضي</value></data>
+  <data name="Set_AproleNoRoles" xml:space="preserve"><value>لا يوجد مدير متسجل على هذا الفرع بعد</value></data>
+  <data name="Set_AproleSearchPlaceholder" xml:space="preserve"><value>ابحث عن فرع...</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>خطأ.</value></data>

@@ -38,6 +38,7 @@ public class StoreActionPlanBulkDetectionOrderTests
         var dashboard = new DashboardService(db, new MemoryCache(new MemoryCacheOptions()), storeAccess, Localizer);
         return new StoreActionPlanService(
             db, storeAccess,
+            new ActionPlanRoleService(db, storeAccess),
             new NoOpStoreService(),
             dashboard,
             new NoOpNinetyDayTurnoverService(),

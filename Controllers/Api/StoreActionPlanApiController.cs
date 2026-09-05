@@ -25,8 +25,13 @@ public class StoreActionPlanApiController : ControllerBase
         _L = localizer;
     }
 
+    // The actual owner of a store's Action Plan (Head_Manager or
+    // Operation_Consultant by default, or whichever role an Admin delegated
+    // it to on the Action Plan Role settings page) is resolved and checked
+    // per-store inside StoreActionPlanService — this attribute is just the
+    // outer gate covering every role that could possibly be delegated.
     [HttpPost("{store}/notes"), ValidateAntiForgeryToken]
-    [RequireRole("Head_Manager", "Operation_Consultant")]
+    [RequireRole("Operation_Manager", "Operation_Consultant", "Head_Manager", "Senior_Operation_Consultant", "Operation_Director")]
     public async Task<IActionResult> AddNote(string store, [FromBody] AddNoteRequest request)
     {
         if (string.IsNullOrWhiteSpace(request?.NoteText)) return BadRequest(_L["Api_NoteTextRequired"].Value);
@@ -111,7 +116,7 @@ public class StoreActionPlanApiController : ControllerBase
     }
 
     [HttpPost("recommendations/{id:int}/toggle"), ValidateAntiForgeryToken]
-    [RequireRole("Admin", "Head_Manager", "Operation_Consultant")]
+    [RequireRole("Admin", "Operation_Manager", "Operation_Consultant", "Head_Manager", "Senior_Operation_Consultant", "Operation_Director")]
     public async Task<IActionResult> ToggleRecommendation(int id, [FromBody] ToggleRecommendationRequest request)
     {
         var role = HttpContext.Session.GetRole();

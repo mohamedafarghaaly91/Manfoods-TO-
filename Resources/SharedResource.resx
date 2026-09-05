@@ -1171,6 +1171,15 @@
   <data name="Set_RecGroup_ReasonOther" xml:space="preserve"><value>Dominant Resignation Reason: Other</value></data>
   <data name="Set_RecGroup_EarlyWarningWatchlist" xml:space="preserve"><value>Early-Warning Watchlist</value></data>
   <data name="Set_RecGroup_NoDominantDriver" xml:space="preserve"><value>No Dominant Driver (Fallback)</value></data>
+  <data name="Set_Tab_ActionPlanRole" xml:space="preserve"><value>Action Plan Role</value></data>
+  <data name="Set_AproleSub" xml:space="preserve"><value>Choose which role is authorized to manage each store's Action Plan (add notes, check off recommendations). Defaults to the Operation Consultant, or the Head Manager if no Operation Consultant is assigned — override it to delegate to someone else, e.g. while the default owner is on leave.</value></data>
+  <data name="Set_AproleStore" xml:space="preserve"><value>Store</value></data>
+  <data name="Set_AproleCurrentRole" xml:space="preserve"><value>Action Plan Owner</value></data>
+  <data name="Set_AproleDefault" xml:space="preserve"><value>Default</value></data>
+  <data name="Set_AproleOverridden" xml:space="preserve"><value>Manually assigned</value></data>
+  <data name="Set_AproleReset" xml:space="preserve"><value>Reset to default</value></data>
+  <data name="Set_AproleNoRoles" xml:space="preserve"><value>No manager is assigned to this store yet</value></data>
+  <data name="Set_AproleSearchPlaceholder" xml:space="preserve"><value>Search stores...</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>Error.</value></data>
