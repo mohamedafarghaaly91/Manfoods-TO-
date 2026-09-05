@@ -1142,3 +1142,9 @@ a:hover { color: #fff; }
 
 /* Insight card */
 [dir="rtl"] .insight-card { flex-direction: row-reverse; text-align: right; }
+
+/* Live password-requirements checklist (see wwwroot/js/password-policy.js) */
+.pwck-list { list-style: none; margin: 8px 0 16px; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.pwck-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-3); transition: color .15s; }
+.pwck-item .pwck-icon { font-size: 13px; flex-shrink: 0; }
+.pwck-item.pwck-ok { color: var(--success, #1e9e5a); }

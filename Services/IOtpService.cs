@@ -2,10 +2,15 @@ namespace MvcApp.Services;
 
 public interface IOtpService
 {
-    /// <summary>Generates a fresh OTP for every User-role account that has no
-    /// password set yet (already-activated accounts are skipped entirely).
-    /// Returns the count generated and an Excel file (Email, Phone, OTP).</summary>
-    Task<(int count, byte[] excelBytes)> GenerateBulkOtpsAsync();
+    /// <summary>Generates a compliant random temporary password (PasswordPolicy)
+    /// for every non-Admin account that has no password set yet (bulk-uploaded,
+    /// still pending — already-activated accounts are skipped entirely), sets
+    /// it as the account's real password hash directly (no OTP involved), and
+    /// marks the account MustChangePassword so the owner is forced to replace
+    /// it on first login. Returns the count generated and an Excel file
+    /// (Email, Phone, Temporary Password, and a ready-to-send SMS Message
+    /// column combining a welcome note, the portal link, and both).</summary>
+    Task<(int count, byte[] excelBytes)> GenerateBulkDefaultPasswordsAsync();
 
     /// <summary>Generates a fresh OTP for one specific User-role account,
     /// regardless of whether it already has a password (forgot-password case).

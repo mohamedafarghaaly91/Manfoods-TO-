@@ -185,9 +185,9 @@
   <data name="CP_CurrentPassword" xml:space="preserve"><value>Current Password</value></data>
   <data name="CP_NewPassword" xml:space="preserve"><value>New Password</value></data>
   <data name="CP_ConfirmPassword" xml:space="preserve"><value>Confirm New Password</value></data>
-  <data name="CP_MinChars" xml:space="preserve"><value>Minimum 8 characters required</value></data>
+  <data name="CP_MinChars" xml:space="preserve"><value>Minimum 12 characters, with uppercase, lowercase, a number, and a symbol</value></data>
   <data name="CP_EnterCurrent" xml:space="preserve"><value>Enter current password</value></data>
-  <data name="CP_MinEightChars" xml:space="preserve"><value>Minimum 8 characters</value></data>
+  <data name="CP_MinEightChars" xml:space="preserve"><value>Minimum 12 characters</value></data>
   <data name="CP_RepeatNew" xml:space="preserve"><value>Repeat new password</value></data>
 
   <!-- Recover -->
@@ -604,10 +604,10 @@
   <data name="Users_NewUser" xml:space="preserve"><value>New User</value></data>
   <data name="Users_BulkUpload" xml:space="preserve"><value>Bulk Upload Users</value></data>
   <data name="Users_BulkUploadDesc" xml:space="preserve"><value>Excel with Email + Phone — created as pending "User" accounts, no password yet.</value></data>
-  <data name="Users_GenerateBulkOtps" xml:space="preserve"><value>Generate Bulk OTPs</value></data>
-  <data name="Users_GenerateBulkOtpsDesc" xml:space="preserve"><value>Downloads Email + Phone + OTP for every pending user who doesn't have an active OTP yet.</value></data>
+  <data name="Users_GenerateBulkOtps" xml:space="preserve"><value>Generate Default Passwords</value></data>
+  <data name="Users_GenerateBulkOtpsDesc" xml:space="preserve"><value>Downloads Email + Phone + Temporary Password + a ready-to-send SMS message for every pending user who doesn't have a password yet.</value></data>
   <data name="Users_UploadUsers" xml:space="preserve"><value>Upload Users</value></data>
-  <data name="Users_GenerateDownloadOtps" xml:space="preserve"><value>Generate &amp; Download OTPs</value></data>
+  <data name="Users_GenerateDownloadOtps" xml:space="preserve"><value>Generate &amp; Download Passwords</value></data>
   <data name="Users_NoUsers" xml:space="preserve"><value>No users yet</value></data>
   <data name="Users_Active" xml:space="preserve"><value>Active</value></data>
   <data name="Users_PendingActivation" xml:space="preserve"><value>Pending Activation</value></data>
@@ -616,6 +616,8 @@
   <data name="Users_OtpGenerated" xml:space="preserve"><value>OTP Generated</value></data>
   <data name="Users_ValidFor" xml:space="preserve"><value>Valid for 24 hours, single use. Send this to the user yourself.</value></data>
   <data name="Users_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="Users_UserCreatedTitle" xml:space="preserve"><value>User Created — Temporary Password</value></data>
+  <data name="Users_UserCreatedDesc" xml:space="preserve"><value>Send this to the new user yourself. They'll be required to set their own password on first login.</value></data>
   <data name="Users_ConfirmPassword" xml:space="preserve"><value>Confirm Your Password</value></data>
   <data name="Users_GenerateKey" xml:space="preserve"><value>Generate New Key</value></data>
   <data name="Users_NewRecoveryKey" xml:space="preserve"><value>New Recovery Key</value></data>
@@ -642,6 +644,7 @@
   <!-- Create/Edit User -->
   <data name="CU_SelectRole" xml:space="preserve"><value>Select role...</value></data>
   <data name="CU_CreateUser" xml:space="preserve"><value>Create User</value></data>
+  <data name="CU_PasswordGeneratedNote" xml:space="preserve"><value>A temporary password will be generated automatically once you create this user — you'll get it right here to send them yourself. They'll be required to set their own password on first login.</value></data>
   <data name="EU_NewPasswordNote" xml:space="preserve"><value>New Password (leave blank to keep)</value></data>
   <data name="EU_SaveChanges" xml:space="preserve"><value>Save Changes</value></data>
   <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
@@ -1207,8 +1210,14 @@
   <data name="Val_NewPasswordRequired" xml:space="preserve"><value>New password is required</value></data>
   <data name="Val_PasswordMin8" xml:space="preserve"><value>Password must be at least 8 characters</value></data>
   <data name="Val_PasswordMin6" xml:space="preserve"><value>Password must be at least 6 characters</value></data>
+  <data name="Val_PasswordPolicy" xml:space="preserve"><value>Password must be at least 12 characters and include an uppercase letter, a lowercase letter, a number, and a symbol</value></data>
   <data name="Val_ConfirmNewPassword" xml:space="preserve"><value>Please confirm your new password</value></data>
   <data name="Val_PasswordsDoNotMatch" xml:space="preserve"><value>Passwords do not match</value></data>
+  <data name="PwPolicy_Length" xml:space="preserve"><value>At least 12 characters</value></data>
+  <data name="PwPolicy_Upper" xml:space="preserve"><value>One uppercase letter</value></data>
+  <data name="PwPolicy_Lower" xml:space="preserve"><value>One lowercase letter</value></data>
+  <data name="PwPolicy_Digit" xml:space="preserve"><value>One number</value></data>
+  <data name="PwPolicy_Symbol" xml:space="preserve"><value>One symbol (e.g. ! @ # $ %)</value></data>
   <data name="Val_PhoneOrEmailRequired" xml:space="preserve"><value>Enter your phone or email</value></data>
   <data name="Val_OtpRequired" xml:space="preserve"><value>Enter the OTP you received</value></data>
   <data name="Val_AdminEmailRequired" xml:space="preserve"><value>Admin email is required</value></data>
@@ -1239,7 +1248,7 @@
   <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>Created {0} pending user(s).</value></data>
   <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> Skipped {0} (already existed).</value></data>
   <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>Upload failed. Please check the file format and try again.</value></data>
-  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>No pending users need an OTP right now.</value></data>
+  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>No pending users need a default password right now.</value></data>
   <data name="Msg_IncorrectPassword" xml:space="preserve"><value>Incorrect password.</value></data>
   <data name="Msg_SuperAdminOnly" xml:space="preserve"><value>Only the Super Admin can manage the Master Recovery Key.</value></data>
   <data name="Msg_AdminOtpNotPermitted" xml:space="preserve"><value>Only the Super Admin can generate a password-reset OTP for another Admin.</value></data>

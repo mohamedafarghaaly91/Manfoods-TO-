@@ -185,9 +185,9 @@
   <data name="CP_CurrentPassword" xml:space="preserve"><value>كلمة المرور الحالية</value></data>
   <data name="CP_NewPassword" xml:space="preserve"><value>كلمة المرور الجديدة</value></data>
   <data name="CP_ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور الجديدة</value></data>
-  <data name="CP_MinChars" xml:space="preserve"><value>الحد الأدنى 8 أحرف</value></data>
+  <data name="CP_MinChars" xml:space="preserve"><value>12 حرف على الأقل، وتشمل حرف كبير وحرف صغير ورقم ورمز</value></data>
   <data name="CP_EnterCurrent" xml:space="preserve"><value>أدخل كلمة المرور الحالية</value></data>
-  <data name="CP_MinEightChars" xml:space="preserve"><value>8 أحرف على الأقل</value></data>
+  <data name="CP_MinEightChars" xml:space="preserve"><value>12 حرف على الأقل</value></data>
   <data name="CP_RepeatNew" xml:space="preserve"><value>أعد كلمة المرور الجديدة</value></data>
 
   <!-- Recover -->
@@ -604,10 +604,10 @@
   <data name="Users_NewUser" xml:space="preserve"><value>مستخدم جديد</value></data>
   <data name="Users_BulkUpload" xml:space="preserve"><value>رفع مستخدمين بالجملة</value></data>
   <data name="Users_BulkUploadDesc" xml:space="preserve"><value>ملف Excel بالبريد والهاتف — تُنشأ كحسابات مستخدمين معلقة بدون كلمة مرور.</value></data>
-  <data name="Users_GenerateBulkOtps" xml:space="preserve"><value>توليد رموز OTP بالجملة</value></data>
-  <data name="Users_GenerateBulkOtpsDesc" xml:space="preserve"><value>تنزيل البريد والهاتف ورمز OTP لكل مستخدم معلق لا يملك رمزًا فعالًا بعد.</value></data>
+  <data name="Users_GenerateBulkOtps" xml:space="preserve"><value>توليد باسورد افتراضي</value></data>
+  <data name="Users_GenerateBulkOtpsDesc" xml:space="preserve"><value>تنزيل البريد والهاتف والباسورد المؤقت + رسالة SMS جاهزة للإرسال لكل مستخدم معلّق لسه معندوش باسورد.</value></data>
   <data name="Users_UploadUsers" xml:space="preserve"><value>رفع المستخدمين</value></data>
-  <data name="Users_GenerateDownloadOtps" xml:space="preserve"><value>توليد وتنزيل رموز OTP</value></data>
+  <data name="Users_GenerateDownloadOtps" xml:space="preserve"><value>توليد وتنزيل الباسوردات</value></data>
   <data name="Users_NoUsers" xml:space="preserve"><value>لا يوجد مستخدمون بعد</value></data>
   <data name="Users_Active" xml:space="preserve"><value>نشط</value></data>
   <data name="Users_PendingActivation" xml:space="preserve"><value>في انتظار التفعيل</value></data>
@@ -616,6 +616,8 @@
   <data name="Users_OtpGenerated" xml:space="preserve"><value>تم توليد رمز OTP</value></data>
   <data name="Users_ValidFor" xml:space="preserve"><value>صالح لمدة 24 ساعة، استخدام واحد. أرسله للمستخدم بنفسك.</value></data>
   <data name="Users_Close" xml:space="preserve"><value>إغلاق</value></data>
+  <data name="Users_UserCreatedTitle" xml:space="preserve"><value>تم إنشاء المستخدم — باسورد مؤقت</value></data>
+  <data name="Users_UserCreatedDesc" xml:space="preserve"><value>ابعت ده لليوزر الجديد بنفسك. هيتطلب منه إنه يحط باسورده الخاص أول ما يدخل.</value></data>
   <data name="Users_ConfirmPassword" xml:space="preserve"><value>تأكيد كلمة المرور</value></data>
   <data name="Users_GenerateKey" xml:space="preserve"><value>توليد مفتاح جديد</value></data>
   <data name="Users_NewRecoveryKey" xml:space="preserve"><value>مفتاح الاسترداد الجديد</value></data>
@@ -642,6 +644,7 @@
   <!-- Create/Edit User -->
   <data name="CU_SelectRole" xml:space="preserve"><value>اختر الدور...</value></data>
   <data name="CU_CreateUser" xml:space="preserve"><value>إنشاء مستخدم</value></data>
+  <data name="CU_PasswordGeneratedNote" xml:space="preserve"><value>هيتولّد باسورد مؤقت تلقائيًا أول ما تعمل اليوزر ده — هيبان لك هنا عشان تبعته لليوزر بنفسك. هيتطلب منه إنه يحط باسورده الخاص أول ما يدخل.</value></data>
   <data name="EU_NewPasswordNote" xml:space="preserve"><value>كلمة المرور الجديدة (اتركه فارغًا للإبقاء عليها)</value></data>
   <data name="EU_SaveChanges" xml:space="preserve"><value>حفظ التغييرات</value></data>
   <data name="Role_Admin" xml:space="preserve"><value>أدمن</value></data>
@@ -1208,8 +1211,14 @@
   <data name="Val_NewPasswordRequired" xml:space="preserve"><value>كلمة المرور الجديدة مطلوبة</value></data>
   <data name="Val_PasswordMin8" xml:space="preserve"><value>يجب أن تتكون كلمة المرور من 8 أحرف على الأقل</value></data>
   <data name="Val_PasswordMin6" xml:space="preserve"><value>يجب أن تتكون كلمة المرور من 6 أحرف على الأقل</value></data>
+  <data name="Val_PasswordPolicy" xml:space="preserve"><value>يجب أن تتكون كلمة المرور من 12 حرفًا على الأقل وتحتوي على حرف كبير وحرف صغير ورقم ورمز</value></data>
   <data name="Val_ConfirmNewPassword" xml:space="preserve"><value>يرجى تأكيد كلمة المرور الجديدة</value></data>
   <data name="Val_PasswordsDoNotMatch" xml:space="preserve"><value>كلمتا المرور غير متطابقتين</value></data>
+  <data name="PwPolicy_Length" xml:space="preserve"><value>12 حرف على الأقل</value></data>
+  <data name="PwPolicy_Upper" xml:space="preserve"><value>حرف كبير واحد على الأقل</value></data>
+  <data name="PwPolicy_Lower" xml:space="preserve"><value>حرف صغير واحد على الأقل</value></data>
+  <data name="PwPolicy_Digit" xml:space="preserve"><value>رقم واحد على الأقل</value></data>
+  <data name="PwPolicy_Symbol" xml:space="preserve"><value>رمز واحد على الأقل (مثل ! @ # $ %)</value></data>
   <data name="Val_PhoneOrEmailRequired" xml:space="preserve"><value>أدخل رقم هاتفك أو بريدك الإلكتروني</value></data>
   <data name="Val_OtpRequired" xml:space="preserve"><value>أدخل الرمز المؤقت الذي وصلك</value></data>
   <data name="Val_AdminEmailRequired" xml:space="preserve"><value>البريد الإلكتروني للمسؤول مطلوب</value></data>
@@ -1240,7 +1249,7 @@
   <data name="Msg_BulkUsersCreated" xml:space="preserve"><value>تم إنشاء {0} مستخدم قيد التفعيل.</value></data>
   <data name="Msg_BulkUsersSkipped" xml:space="preserve"><value> تم تخطي {0} (موجود مسبقًا).</value></data>
   <data name="Msg_BulkUploadFailed" xml:space="preserve"><value>فشل الرفع. يرجى التحقق من تنسيق الملف والمحاولة مرة أخرى.</value></data>
-  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>لا يوجد مستخدمون قيد التفعيل بحاجة إلى رمز مؤقت حاليًا.</value></data>
+  <data name="Msg_NoPendingOtps" xml:space="preserve"><value>لا يوجد مستخدمون قيد التفعيل بحاجة إلى باسورد افتراضي حاليًا.</value></data>
   <data name="Msg_IncorrectPassword" xml:space="preserve"><value>كلمة المرور غير صحيحة.</value></data>
   <data name="Msg_SuperAdminOnly" xml:space="preserve"><value>فقط المسؤول الأعلى (Super Admin) يمكنه إدارة مفتاح الاسترداد الرئيسي.</value></data>
   <data name="Msg_AdminOtpNotPermitted" xml:space="preserve"><value>فقط المسؤول الأعلى (Super Admin) يمكنه إنشاء رمز إعادة تعيين كلمة المرور لمسؤول آخر.</value></data>

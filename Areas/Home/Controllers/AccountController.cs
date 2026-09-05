@@ -45,7 +45,7 @@ public class AccountController : Controller
         // Session-fixation mitigation: hand the authenticated identity off
         // via a one-time token rather than writing it into whatever session
         // this request arrived with — see SessionExtensions.BeginSessionRotation.
-        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName);
+        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName, user.MustChangePassword);
         return RedirectToAction("CompleteLogin", new { token });
     }
 
@@ -90,9 +90,14 @@ public class AccountController : Controller
         if (!ModelState.IsValid) return View(vm);
         var userId = HttpContext.Session.GetUserId();
         if (userId == null) return Redirect("/login");
+        var wasForced = HttpContext.Session.GetMustChangePassword();
         var ok = await _auth.ChangePasswordAsync(userId.Value, vm.CurrentPassword, vm.NewPassword);
         if (!ok) { ModelState.AddModelError("CurrentPassword", _L["Msg_CurrentPasswordIncorrect"]); return View(vm); }
+        HttpContext.Session.SetMustChangePassword(false);
         TempData["Success"] = _L["Msg_PasswordChanged"].Value;
-        return RedirectToAction("ChangePassword");
+        // A forced first-time change (temporary password) goes straight into
+        // the portal; a voluntary change from an already-active account
+        // returns to this page so the success message has somewhere to show.
+        return wasForced ? RedirectToAction("Index", "Dashboard", new { area = "Home" }) : RedirectToAction("ChangePassword");
     }
 }

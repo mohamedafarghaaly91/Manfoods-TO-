@@ -45,7 +45,7 @@ public class AccountController : Controller
         }
 
         // Session-fixation mitigation — see SessionExtensions.BeginSessionRotation.
-        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName);
+        var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName, user.MustChangePassword);
         return RedirectToAction("CompleteLogin", new { token });
     }
 
@@ -117,9 +117,11 @@ public class AccountController : Controller
         if (!ModelState.IsValid) return View(vm);
         var userId = HttpContext.Session.GetUserId();
         if (userId == null) return Redirect("/adminlogin");
+        var wasForced = HttpContext.Session.GetMustChangePassword();
         var ok = await _auth.ChangePasswordAsync(userId.Value, vm.CurrentPassword, vm.NewPassword);
         if (!ok) { ModelState.AddModelError("CurrentPassword", _L["Msg_CurrentPasswordIncorrect"]); return View(vm); }
+        HttpContext.Session.SetMustChangePassword(false);
         TempData["Success"] = _L["Msg_PasswordChanged"].Value;
-        return RedirectToAction("ChangePassword");
+        return wasForced ? RedirectToAction("Workforce", "Dashboard", new { area = "Admin" }) : RedirectToAction("ChangePassword");
     }
 }

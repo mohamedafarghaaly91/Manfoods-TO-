@@ -9,12 +9,13 @@ public static class SessionExtensions
     /// has to delete this exact cookie) stay in sync from one source.</summary>
     public const string SessionCookieName = "wicrewsession";
 
-    public static void SetUserSession(this ISession session, int userId, string email, string role, string? assignedName)
+    public static void SetUserSession(this ISession session, int userId, string email, string role, string? assignedName, bool mustChangePassword)
     {
         session.SetInt32("UserId", userId);
         session.SetString("Email", email);
         session.SetString("Role", role);
         session.SetString("AssignedName", assignedName ?? "");
+        session.SetInt32("MustChangePassword", mustChangePassword ? 1 : 0);
     }
 
     public static int? GetUserId(this ISession session) => session.GetInt32("UserId");
@@ -28,7 +29,16 @@ public static class SessionExtensions
 
     public static bool IsAdmin(this ISession session) => session.GetRole() == "Admin";
 
-    private record struct PendingLogin(int UserId, string Email, string Role, string? AssignedName);
+    /// <summary>True while the logged-in account's password is still a
+    /// system-generated temporary one — set at login from User.MustChangePassword,
+    /// and cleared in-session (via SetMustChangePassword(false)) the moment the
+    /// account owner successfully sets their own password, so the forced
+    /// redirect (SessionAuthFilterAttribute) stops immediately without
+    /// requiring a fresh login.</summary>
+    public static bool GetMustChangePassword(this ISession session) => session.GetInt32("MustChangePassword") == 1;
+    public static void SetMustChangePassword(this ISession session, bool value) => session.SetInt32("MustChangePassword", value ? 1 : 0);
+
+    private record struct PendingLogin(int UserId, string Email, string Role, string? AssignedName, bool MustChangePassword);
     private const string PendingLoginPrefix = "pending-login:";
 
     /// <summary>
@@ -46,7 +56,7 @@ public static class SessionExtensions
     /// CompleteSessionRotation below writes the identity into that new
     /// session. Returns the one-time token to redirect with.
     /// </summary>
-    public static string BeginSessionRotation(this HttpContext context, IMemoryCache cache, int userId, string email, string role, string? assignedName)
+    public static string BeginSessionRotation(this HttpContext context, IMemoryCache cache, int userId, string email, string role, string? assignedName, bool mustChangePassword)
     {
         // Deliberately does NOT touch context.Session (no Clear()/Set* call):
         // doing so would mark the old session dirty and could race the
@@ -58,7 +68,7 @@ public static class SessionExtensions
         context.Response.Cookies.Delete(SessionCookieName, new CookieOptions { Path = "/" });
 
         var token = Guid.NewGuid().ToString("N");
-        cache.Set(PendingLoginPrefix + token, new PendingLogin(userId, email, role, assignedName), TimeSpan.FromSeconds(60));
+        cache.Set(PendingLoginPrefix + token, new PendingLogin(userId, email, role, assignedName, mustChangePassword), TimeSpan.FromSeconds(60));
         return token;
     }
 
@@ -71,7 +81,7 @@ public static class SessionExtensions
         var key = PendingLoginPrefix + token;
         if (!cache.TryGetValue(key, out PendingLogin pending)) return false;
         cache.Remove(key);
-        context.Session.SetUserSession(pending.UserId, pending.Email, pending.Role, pending.AssignedName);
+        context.Session.SetUserSession(pending.UserId, pending.Email, pending.Role, pending.AssignedName, pending.MustChangePassword);
         return true;
     }
 }

@@ -507,7 +507,7 @@ public class DashboardController : Controller
     public async Task<IActionResult> CreateUser(MvcApp.Models.ViewModels.CreateUserViewModel vm)
     {
         if (!ModelState.IsValid) return View(vm);
-        var (created, error) = await _users.CreateAsync(vm, HttpContext.Session.GetEmail());
+        var (created, error, temporaryPassword) = await _users.CreateAsync(vm, HttpContext.Session.GetEmail());
         if (error == "duplicate-email")
         {
             ModelState.AddModelError(nameof(vm.Email), _L["Msg_EmailAlreadyExists"].Value);
@@ -524,6 +524,10 @@ public class DashboardController : Controller
             return View(vm);
         }
         TempData["Success"] = _L["Msg_UserCreated"].Value;
+        // Shown once on the Users page — the generated temporary password
+        // never appears again after this redirect.
+        TempData["GeneratedPasswordEmail"] = created!.Email;
+        TempData["GeneratedPassword"] = temporaryPassword;
         return RedirectToAction("Users");
     }
 
@@ -602,13 +606,13 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
-    public async Task<IActionResult> GenerateBulkOtps()
+    public async Task<IActionResult> GenerateDefaultPasswords()
     {
-        var (count, bytes) = await _otp.GenerateBulkOtpsAsync();
+        var (count, bytes) = await _otp.GenerateBulkDefaultPasswordsAsync();
         if (count == 0) { TempData["Error"] = _L["Msg_NoPendingOtps"].Value; return RedirectToAction("Users"); }
         return File(bytes,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            $"Bulk_OTPs_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx");
+            $"Default_Passwords_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx");
     }
 
     [HttpPost, ValidateAntiForgeryToken, RequireAdminAuth]

@@ -26,6 +26,8 @@
     // Super-Admin-only — this only decides what's shown; the server side
     // (UserService/OtpService) is the actual enforcement point.
     var isSuperAdmin = SuperAdminPolicy.IsSuperAdmin(Context.Session.GetEmail());
+    var generatedEmail = TempData["GeneratedPasswordEmail"] as string;
+    var generatedPassword = TempData["GeneratedPassword"] as string;
 }
 
 <style>
@@ -111,7 +113,7 @@
                 <div class="card-icon"><i class="bi bi-key-fill"></i></div>
                 <div><h6 class="mb-0">@L["Users_GenerateBulkOtps"]</h6><p class="text-muted-custom mb-0 small">@L["Users_GenerateBulkOtpsDesc"]</p></div>
             </div>
-            <a href="/admin/dashboard/generatebulkotps" class="btn btn-primary btn-sm w-100"><i class="bi bi-file-earmark-arrow-down me-1"></i>@L["Users_GenerateDownloadOtps"]</a>
+            <a href="/admin/dashboard/generatedefaultpasswords" class="btn btn-primary btn-sm w-100"><i class="bi bi-file-earmark-arrow-down me-1"></i>@L["Users_GenerateDownloadOtps"]</a>
         </div>
     </div>
     @if (isSuperAdmin)
@@ -227,7 +229,24 @@
     }
 </div>
 
-<div id="usL" hidden data-otp-failed="@L["Users_OtpFailed"]" data-something-went-wrong="@L["Common_SomethingWentWrong"]"></div>
+<div id="usL" hidden
+     data-otp-failed="@L["Users_OtpFailed"]"
+     data-something-went-wrong="@L["Common_SomethingWentWrong"]"
+     data-generated-email="@generatedEmail"
+     data-generated-password="@generatedPassword"></div>
+
+<div id="userCreatedModal" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
+    <div class="card-dark" style="max-width:420px;width:90%">
+        <h6 class="mb-2"><i class="bi bi-person-check-fill me-1"></i>@L["Users_UserCreatedTitle"]</h6>
+        <p class="text-muted-custom small mb-2" id="userCreatedEmail"></p>
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <input type="text" id="userCreatedPassword" class="form-control form-control-dark" readonly style="font-size:16px;font-weight:700"/>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="userCreatedCopyBtn" title="@L["Common_Copy"]"><i class="bi bi-clipboard"></i></button>
+        </div>
+        <p class="text-muted-custom small mb-3">@L["Users_UserCreatedDesc"]</p>
+        <button type="button" class="btn btn-primary w-100" id="userCreatedCloseBtn">@L["Users_Close"]</button>
+    </div>
+</div>
 
 <div id="otpResultModal" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
     <div class="card-dark" style="max-width:380px;width:90%">
@@ -271,6 +290,23 @@
 <script>
 (function () {
     const usL = document.getElementById('usL').dataset;
+
+    // ── Auto-shown once after CreateUser redirects back here with a
+    // freshly-generated temporary password (TempData — never persisted, gone on refresh) ──
+    if (usL.generatedPassword) {
+        document.getElementById('userCreatedEmail').textContent = usL.generatedEmail;
+        const pwEl = document.getElementById('userCreatedPassword');
+        pwEl.value = usL.generatedPassword;
+        document.getElementById('userCreatedModal').style.display = 'flex';
+        document.getElementById('userCreatedCopyBtn').addEventListener('click', () => {
+            pwEl.select();
+            navigator.clipboard.writeText(pwEl.value);
+        });
+        document.getElementById('userCreatedCloseBtn').addEventListener('click', () => {
+            document.getElementById('userCreatedModal').style.display = 'none';
+        });
+    }
+
     const modal = document.getElementById('otpResultModal');
     const emailEl = document.getElementById('otpResultEmail');
     const codeEl = document.getElementById('otpResultCode');

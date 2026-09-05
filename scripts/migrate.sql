@@ -36,6 +36,13 @@ IF COL_LENGTH('dbo.users', 'phone') IS NULL
     ALTER TABLE dbo.users ADD phone NVARCHAR(MAX) NOT NULL DEFAULT '';
 ALTER TABLE dbo.users ALTER COLUMN password_hash NVARCHAR(MAX) NULL;
 
+-- True while an account's current password_hash is a system-generated
+-- temporary password (manual Add User, or bulk "Generate Default
+-- Passwords") that hasn't been replaced yet — gates the forced
+-- Change-Password redirect (see SessionAuthFilterAttribute).
+IF COL_LENGTH('dbo.users', 'must_change_password') IS NULL
+    ALTER TABLE dbo.users ADD must_change_password BIT NOT NULL DEFAULT 0;
+
 -- One-time historical cleanup (already applied): Admin_Full/Admin_Read were
 -- folded into Admin, and Viewer into User. Operation_Manager/Operation_Consultant
 -- are valid role values again (per-store access restriction) — do NOT add a
