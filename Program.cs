@@ -279,6 +279,41 @@ if (args.Contains("--run-signal-backfill"))
     return;
 }
 
+// One-off, read-only CLI diagnostic: `dotnet run -- --diagnose-snapshots`
+// reports how many store_action_plans / action_plan_recommendations /
+// action_plan_metric_snapshots rows actually exist in the database, and
+// whether Active plans' snapshot rows line up with their recommendation
+// rows — used to investigate why the Monthly Performance table shows no
+// data across every store. Read-only, no writes, exits without starting
+// the web server.
+if (args.Contains("--diagnose-snapshots"))
+{
+    using var diagScope = app.Services.CreateScope();
+    var db = diagScope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    var totalPlans = await db.StoreActionPlans.CountAsync();
+    var activePlans = await db.StoreActionPlans.CountAsync(p => p.Status == "Active");
+    var totalRecommendations = await db.ActionPlanRecommendations.CountAsync();
+    var totalSnapshots = await db.ActionPlanMetricSnapshots.CountAsync();
+    Console.WriteLine($"DIAG_TOTAL_PLANS={totalPlans}");
+    Console.WriteLine($"DIAG_ACTIVE_PLANS={activePlans}");
+    Console.WriteLine($"DIAG_TOTAL_RECOMMENDATIONS={totalRecommendations}");
+    Console.WriteLine($"DIAG_TOTAL_SNAPSHOTS={totalSnapshots}");
+
+    var sample = await db.StoreActionPlans
+        .Where(p => p.Status == "Active")
+        .OrderByDescending(p => p.CreatedAt)
+        .Take(10)
+        .ToListAsync();
+    foreach (var plan in sample)
+    {
+        var recCount = await db.ActionPlanRecommendations.CountAsync(r => r.StoreActionPlanId == plan.Id);
+        var snapCount = await db.ActionPlanMetricSnapshots.CountAsync(s => s.StoreActionPlanId == plan.Id);
+        Console.WriteLine($"DIAG_PLAN id={plan.Id} store=\"{plan.StoreName}\" createdAt={plan.CreatedAt:O} createdMonth={plan.CreatedMonth} createdYear={plan.CreatedYear} lastEvalMonth={plan.LastEvaluatedMonth} lastEvalYear={plan.LastEvaluatedYear} recommendations={recCount} snapshots={snapCount}");
+    }
+    return;
+}
+
 app.Run();
 
 
