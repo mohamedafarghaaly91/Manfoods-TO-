@@ -1,5 +1,8 @@
 name: Build and Publish
-on: [workflow_dispatch, push]
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
