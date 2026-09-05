@@ -263,6 +263,22 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// One-off CLI mode: `dotnet run -- --run-signal-backfill` runs the existing
+// historical signal backfill (StoreActionPlanService.RunHistoricalSignalBackfillAsync)
+// against whatever database SQLSERVER_CONNECTION_STRING points to, using the
+// exact same DI-wired services as the running app (no separate tool, no risk
+// of the logic drifting from production), then exits without starting the
+// web server. See .github/workflows/backfill-signals.yml for how this is
+// triggered — manual dispatch only, same convention as db-migrate.yml.
+if (args.Contains("--run-signal-backfill"))
+{
+    using var backfillScope = app.Services.CreateScope();
+    var actionPlans = backfillScope.ServiceProvider.GetRequiredService<IStoreActionPlanService>();
+    var written = await actionPlans.RunHistoricalSignalBackfillAsync();
+    Console.WriteLine($"SIGNAL_BACKFILL_WRITTEN={written}");
+    return;
+}
+
 app.Run();
 
 
