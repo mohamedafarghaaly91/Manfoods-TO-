@@ -45,6 +45,7 @@
             new() { Icon = "bi-broadcast", Title = L["AC_Signals"], Body = L["Guide_ActionCenterDetail_Chart_Signals"] },
             new() { Icon = "bi-exclamation-circle", Title = L["SAP_DetectedIssues"], Body = L["Guide_ActionCenterDetail_Chart_Issues"] },
             new() { Icon = "bi-list-check", Title = L["SAP_Recommendations"], Body = L["Guide_ActionCenterDetail_Chart_Recommendations"] },
+            new() { Icon = "bi-clock-history", Title = L["AC_SignalHistoryTitle"], Body = L["AC_SignalHistoryDesc"] },
         }
     };
 }
@@ -102,7 +103,28 @@
      data-manual-close-btn="@L["AC_ManualCloseBtn"]"
      data-manual-close-reason-required="@L["AC_ManualCloseReasonRequired"]"
      data-closed-by="@L["AC_ClosedBy"]"
-     data-closed-reason="@L["AC_ClosedReason"]">
+     data-closed-reason="@L["AC_ClosedReason"]"
+     data-plans-over-time="@L["AC_PlansOverTime"]"
+     data-completed-by="@L["AC_CompletedBy"]"
+     data-no-change="@L["AC_NoChange"]"
+     data-reporting-quarter="@L["AC_ReportingQuarter"]"
+     data-target-window-critical="@L["AC_TargetWindowCritical"]"
+     data-target-window-standard="@L["AC_TargetWindowStandard"]"
+     data-target-window-custom="@L["AC_TargetWindowCustom"]"
+     data-signal-history-title="@L["AC_SignalHistoryTitle"]"
+     data-signal-history-desc="@L["AC_SignalHistoryDesc"]"
+     data-signal-history-no-data="@L["AC_SignalHistoryNoData"]"
+     data-signal-history-clean="@L["AC_SignalHistoryClean"]"
+     data-signal-history-persistent="@L["AC_SignalHistoryPersistent"]"
+     data-signal-history-empty="@L["AC_SignalHistoryEmpty"]"
+     data-signal-name-highoverallturnover="@L["AC_SignalName_HighOverallTurnover"]"
+     data-signal-name-earlyturnover90d="@L["AC_SignalName_EarlyTurnover90D"]"
+     data-signal-name-lowretention6m="@L["AC_SignalName_LowRetention6M"]"
+     data-signal-name-leadershipinstability="@L["AC_SignalName_LeadershipInstability"]"
+     data-signal-name-lowexitsentiment="@L["AC_SignalName_LowExitSentiment"]"
+     data-signal-name-reasonconcentration="@L["AC_SignalName_ReasonConcentration"]"
+     data-signal-name-earlywarningwatchlist="@L["AC_SignalName_EarlyWarningWatchlist"]"
+     data-signal-name-nodominantdriver="@L["AC_SignalName_NoDominantDriver"]">
     <div class="text-center py-5 text-muted">
         <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["SAP_Loading"]
     </div>
@@ -128,6 +150,24 @@ const ACD_SEVERITY_META = {
     Low:      { label: ACD_D.severityLow,      bg: 'var(--card-bg-2)', color: 'var(--text-2)' },
     None:     { label: ACD_D.severityNone,     bg: 'oklch(0.62 0.15 155 / .12)', color: 'oklch(0.5 0.15 155)' },
 };
+const ACD_TARGET_WINDOW_LABEL = {
+    Critical: ACD_D.targetWindowCritical,
+    Standard: ACD_D.targetWindowStandard,
+    Custom:   ACD_D.targetWindowCustom,
+};
+// data-signal-name-* attribute names are the signal code lowercased with
+// underscores stripped (see the data attributes on #acdContent above).
+const SIGNAL_NAME_MAP = {
+    HIGH_OVERALL_TURNOVER:   ACD_D.signalNameHighoverallturnover,
+    EARLY_TURNOVER_90D:      ACD_D.signalNameEarlyturnover90d,
+    LOW_RETENTION_6M:        ACD_D.signalNameLowretention6m,
+    LEADERSHIP_INSTABILITY:  ACD_D.signalNameLeadershipinstability,
+    LOW_EXIT_SENTIMENT:      ACD_D.signalNameLowexitsentiment,
+    REASON_CONCENTRATION:    ACD_D.signalNameReasonconcentration,
+    EARLY_WARNING_WATCHLIST: ACD_D.signalNameEarlywarningwatchlist,
+    NO_DOMINANT_DRIVER:      ACD_D.signalNameNodominantdriver,
+};
+function acdSignalName(code) { return SIGNAL_NAME_MAP[code] || code; }
 
 function acdFmtDate(iso) {
     if (!iso) return '—';
@@ -170,7 +210,46 @@ function acdRenderTrendChart(snapshots) {
     });
 }
 
-function acdRender(data) {
+/// Renders the Signal History card from a SignalHistoryDto (or null if it
+/// couldn't be loaded — the section is simply omitted, never shown broken).
+function acdSignalHistoryHtml(history) {
+    const d = ACD_D;
+    if (!history) return '';
+
+    const persistentCodes = new Set((history.persistence || []).filter(p => p.isPersistent).map(p => p.signalCode));
+
+    let rows;
+    if (!history.periods || history.periods.length === 0) {
+        rows = `<tr><td colspan="2" class="text-center py-3 text-muted-custom">${sapEscape(d.signalHistoryEmpty)}</td></tr>`;
+    } else {
+        rows = history.periods.map(p => {
+            let cell;
+            if (!p.hasData) {
+                cell = `<span class="acd-badge" style="background:var(--card-bg-2);color:var(--text-3)">${sapEscape(d.signalHistoryNoData)}</span>`;
+            } else if (!p.signals || p.signals.length === 0) {
+                cell = `<span style="color:var(--text-3);font-size:12.5px">${sapEscape(d.signalHistoryClean)}</span>`;
+            } else {
+                cell = p.signals.map(code => {
+                    const isPersistent = persistentCodes.has(code);
+                    return `<span class="acd-badge" style="background:${isPersistent ? 'oklch(0.6 0.22 22 / .12)' : 'var(--card-bg-2)'};color:${isPersistent ? ChartColors.SEMANTIC.BAD : 'var(--text-2)'};margin:2px 4px 2px 0" title="${isPersistent ? sapEscape(d.signalHistoryPersistent) : ''}">${sapEscape(acdSignalName(code))}${isPersistent ? ' ★' : ''}</span>`;
+                }).join('');
+            }
+            return `<tr><td style="white-space:nowrap;font-weight:600;font-size:12.5px">${sapEscape(p.label)}</td><td>${cell}</td></tr>`;
+        }).join('');
+    }
+
+    return `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-1">${sapEscape(d.signalHistoryTitle)}</h6>
+        <p class="text-muted-custom mb-3" style="font-size:12px">${sapEscape(d.signalHistoryDesc)}</p>
+        <div style="overflow-x:auto">
+            <table class="table" style="margin-bottom:0">
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
+function acdRender(data, signalHistory) {
     const d = ACD_D;
 
     document.getElementById('acdStoreName').textContent = data.storeName;
@@ -190,6 +269,16 @@ function acdRender(data) {
         ? `${sapEscape(resp.name)}${resp.role ? ` <span style="color:var(--text-3)">(${sapEscape(resp.role.replace('_', ' '))})</span>` : ''}`
         : '—';
 
+    // Small note under the Target Resolution Date saying which window it
+    // reflects (Critical/Standard/Custom) — derived server-side purely from
+    // comparing the date against when the plan opened; doesn't change the
+    // date itself.
+    function acdTargetWindowBadge(d2) {
+        if (!d2.targetWindowType) return '';
+        const label = ACD_TARGET_WINDOW_LABEL[d2.targetWindowType] || d2.targetWindowType;
+        return `<div style="font-size:11px;color:var(--text-3);margin-top:4px">${sapEscape(label)}</div>`;
+    }
+
     if (data.status === 'None') {
         acdContentEl.innerHTML = `<div class="card-dark empty-state"><i class="bi bi-clipboard-check"></i><p>${sapEscape(d.noIssues)}</p></div>`;
         return;
@@ -203,7 +292,7 @@ function acdRender(data) {
     function deltaHtml(base, cur) {
         if (base === null || base === undefined || cur === null || cur === undefined) return '';
         const delta = cur - base;
-        if (Math.abs(delta) < 0.05) return `<div class="acd-kpi-delta" style="color:var(--text-3)">— @L["AC_NoChange"]</div>`;
+        if (Math.abs(delta) < 0.05) return `<div class="acd-kpi-delta" style="color:var(--text-3)">— ${sapEscape(d.noChange)}</div>`;
         const improving = delta < 0;
         return `<div class="acd-kpi-delta" style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pt</div>`;
     }
@@ -238,8 +327,9 @@ function acdRender(data) {
             <div><div class="acd-meta-label">${sapEscape(d.metaResponsible)}</div><div class="fw-semibold mt-1">${respHtml}</div></div>
             <div><div class="acd-meta-label">${sapEscape(d.metaCreated)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.createdAt)}</div></div>
             ${data.status === 'Resolved' ? `<div><div class="acd-meta-label">${sapEscape(d.metaResolved)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.resolvedAt)}</div></div>` : ''}
+            <div><div class="acd-meta-label">${sapEscape(d.reportingQuarter)}</div><div class="fw-semibold mt-1">Q${data.reportingQuarter} ${data.reportingYear}</div></div>
             <div><div class="acd-meta-label">${sapEscape(d.metaHealthyStreak)}</div><div class="fw-semibold mt-1">${data.healthyStreakCount} ${sapEscape(d.healthyStreakSuffix)}</div></div>
-            ${data.isChronic ? `<div><div class="acd-meta-label">${sapEscape(d.chronic)}</div><div class="fw-semibold mt-1">${data.historicalPlanCount} @L["AC_PlansOverTime"]</div></div>` : ''}
+            ${data.isChronic ? `<div><div class="acd-meta-label">${sapEscape(d.chronic)}</div><div class="fw-semibold mt-1">${data.historicalPlanCount} ${sapEscape(d.plansOverTime)}</div></div>` : ''}
         </div>
         <div class="acd-meta-label mb-1">${sapEscape(d.detectedIssues)}</div>
         <div style="white-space:pre-line;font-size:13.5px;color:var(--text-2)">${sapEscape(data.detectedIssuesSummary) || '—'}</div>
@@ -262,6 +352,7 @@ function acdRender(data) {
                 <div class="col-sm-4">
                     <label class="acd-meta-label d-block mb-1">${sapEscape(d.targetDate)}</label>
                     <input type="date" id="acdTargetDate" class="form-control form-control-dark" value="${acdDateInputValue(data.targetResolutionDate)}">
+                    ${acdTargetWindowBadge(data)}
                 </div>
                 <div class="col-sm-3">
                     <button class="btn-primary w-100" id="acdSaveAssignBtn" type="button" onclick="acdSaveAssignment()"><i class="bi bi-check-lg me-1"></i>${sapEscape(d.save)}</button>
@@ -274,7 +365,7 @@ function acdRender(data) {
             <h6 class="fw-bold mb-3">${sapEscape(d.assignmentTitle)}</h6>
             <div class="d-flex flex-wrap gap-4">
                 <div><div class="acd-meta-label">${sapEscape(d.assignedTo)}</div><div class="fw-semibold mt-1">${data.assignedToName ? sapEscape(data.assignedToName) : '—'}</div></div>
-                <div><div class="acd-meta-label">${sapEscape(d.targetDate)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.targetResolutionDate)}</div></div>
+                <div><div class="acd-meta-label">${sapEscape(d.targetDate)}</div><div class="fw-semibold mt-1">${acdFmtDate(data.targetResolutionDate)}</div>${acdTargetWindowBadge(data)}</div>
             </div>
         </div>`;
     }
@@ -296,11 +387,14 @@ function acdRender(data) {
                     <div style="flex:1">
                         <div class="acd-rec-category">${sapEscape(r.category)}</div>
                         <div class="acd-rec-text${r.isCompleted ? ' done' : ''}" style="font-size:13.5px;margin-top:2px">${sapEscape(r.recommendationText)}</div>
-                        ${r.isCompleted && r.completedByName ? `<div style="font-size:11px;color:var(--text-3);margin-top:3px">@L["AC_CompletedBy"] ${sapEscape(r.completedByName)} — ${acdFmtDate(r.completedAt)}</div>` : ''}
+                        ${r.isCompleted && r.completedByName ? `<div style="font-size:11px;color:var(--text-3);margin-top:3px">${sapEscape(d.completedBy)} ${sapEscape(r.completedByName)} — ${acdFmtDate(r.completedAt)}</div>` : ''}
                     </div>
                 </div>`).join('')}
         </div>`}
     </div>`;
+
+    // ── Signal History ──
+    html += acdSignalHistoryHtml(signalHistory);
 
     // ── Notes ──
     const notes = data.notes || [];
@@ -356,7 +450,11 @@ async function acdLoad() {
         return;
     }
 
-    acdRender(data);
+    const signalHistory = data.status !== 'None'
+        ? await sapFetchJson('/api/store-action-plan/action-center/signal-history?store=' + encodeURIComponent(store))
+        : null;
+
+    acdRender(data, signalHistory);
 }
 
 async function acdToggleRec(id, isCompleted) {

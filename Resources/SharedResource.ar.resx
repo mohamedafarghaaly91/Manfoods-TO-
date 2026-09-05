@@ -850,6 +850,24 @@
   <data name="AC_MetricTrendTitle" xml:space="preserve"><value>اتجاه المؤشرات منذ فتح الخطة</value></data>
   <data name="AC_AssignmentTitle" xml:space="preserve"><value>المسؤولية والموعد المستهدف</value></data>
   <data name="AC_TargetDate" xml:space="preserve"><value>تاريخ الحل المستهدف</value></data>
+  <data name="AC_ReportingQuarter" xml:space="preserve"><value>ربع التقرير</value></data>
+  <data name="AC_TargetWindowCritical" xml:space="preserve"><value>مدة حرجة — 30 يومًا من الفتح</value></data>
+  <data name="AC_TargetWindowStandard" xml:space="preserve"><value>مدة عادية — 90 يومًا من الفتح</value></data>
+  <data name="AC_TargetWindowCustom" xml:space="preserve"><value>مخصصة — حددها الأدمن يدويًا</value></data>
+  <data name="AC_SignalHistoryTitle" xml:space="preserve"><value>سجل الإشارات</value></data>
+  <data name="AC_SignalHistoryDesc" xml:space="preserve"><value>الإشارات التي ظهرت في كل فترة رفع فيها الفرع بيانات. الفترة التي لم يتم رفع بيانات لها تظهر "لا توجد بيانات" — ولا تُحسب أبدًا كفترة سليمة. الإشارة المميزة بـ"مستمرة" ظهرت في فترتين على الأقل من آخر 3 فترات فيها بيانات لهذا الفرع.</value></data>
+  <data name="AC_SignalHistoryNoData" xml:space="preserve"><value>لا توجد بيانات مرفوعة</value></data>
+  <data name="AC_SignalHistoryClean" xml:space="preserve"><value>لا توجد إشارات — فترة سليمة</value></data>
+  <data name="AC_SignalHistoryPersistent" xml:space="preserve"><value>مستمرة</value></data>
+  <data name="AC_SignalHistoryEmpty" xml:space="preserve"><value>لا يوجد سجل إشارات مسجّل بعد لهذا الفرع.</value></data>
+  <data name="AC_SignalName_HighOverallTurnover" xml:space="preserve"><value>معدل دوران إجمالي مرتفع</value></data>
+  <data name="AC_SignalName_EarlyTurnover90D" xml:space="preserve"><value>ترك مبكر (خلال 90 يومًا)</value></data>
+  <data name="AC_SignalName_LowRetention6M" xml:space="preserve"><value>معدل استبقاء منخفض بعد 6 أشهر</value></data>
+  <data name="AC_SignalName_LeadershipInstability" xml:space="preserve"><value>عدم استقرار القيادة</value></data>
+  <data name="AC_SignalName_LowExitSentiment" xml:space="preserve"><value>مشاعر خروج سلبية</value></data>
+  <data name="AC_SignalName_ReasonConcentration" xml:space="preserve"><value>تركّز سبب الترك</value></data>
+  <data name="AC_SignalName_EarlyWarningWatchlist" xml:space="preserve"><value>قائمة الإنذار المبكر</value></data>
+  <data name="AC_SignalName_NoDominantDriver" xml:space="preserve"><value>لا يوجد سبب محدد بارز</value></data>
   <data name="AC_Saved" xml:space="preserve"><value>تم الحفظ.</value></data>
   <data name="AC_ManualCloseTitle" xml:space="preserve"><value>إغلاق هذه الخطة يدويًا</value></data>
   <data name="AC_ManualCloseDesc" xml:space="preserve"><value>هل أنت متأكد من إغلاق هذه الخطة؟ يجب أن يتم ذلك فقط إذا تم حل المشكلة خارج دورة الاكتشاف الطبيعية.</value></data>

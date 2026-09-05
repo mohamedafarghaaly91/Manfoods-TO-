@@ -66,6 +66,13 @@ public class StoreActionPlanDto
     // TargetResolutionDate, never stored.
     public int ReportingQuarter { get; set; }
     public int ReportingYear { get; set; }
+
+    // Read-only label describing which window TargetResolutionDate reflects —
+    // derived by comparing it against CreatedAt, not stored anywhere. "Critical"
+    // (~30 days) or "Standard" (~90 days) match the two windows a plan can get
+    // at creation; "Custom" means an Admin manually moved the date afterward.
+    public string? TargetWindowType { get; set; } // Critical | Standard | Custom | null (no target date)
+    public int? TargetWindowDays { get; set; }
 }
 
 /// <summary>One detection cycle's metrics for the progress sparkline/trend on
@@ -125,4 +132,35 @@ public class ActionCenterTrendPointDto
     public string Label { get; set; } = ""; // "MMM yy"
     public int Opened { get; set; }
     public int Resolved { get; set; }
+}
+
+/// <summary>Read-only view over a store's signal_occurrences log, for the
+/// detail page's Signal History section. Purely presentational — does not
+/// change detection, severity, or persistence logic.</summary>
+public class SignalHistoryDto
+{
+    /// <summary>Newest period first. A period with HasData = false had no
+    /// StoreReference upload for this store — its Signals list is always
+    /// empty and must not be read as "healthy."</summary>
+    public List<SignalHistoryPeriodDto> Periods { get; set; } = new();
+
+    /// <summary>Every signal code that has ever fired for this store, with
+    /// whether it currently satisfies "2 of the last 3 data-available
+    /// evaluation periods" as of the most recent period with data.</summary>
+    public List<SignalPersistenceDto> Persistence { get; set; } = new();
+}
+
+public class SignalHistoryPeriodDto
+{
+    public int Month { get; set; }
+    public int Year { get; set; }
+    public string Label { get; set; } = ""; // "MMM yy"
+    public bool HasData { get; set; }
+    public List<string> Signals { get; set; } = new(); // signal codes fired this period; empty + HasData=true means clean
+}
+
+public class SignalPersistenceDto
+{
+    public string SignalCode { get; set; } = "";
+    public bool IsPersistent { get; set; }
 }

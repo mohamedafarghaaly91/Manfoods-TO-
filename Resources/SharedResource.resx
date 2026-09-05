@@ -849,6 +849,24 @@
   <data name="AC_MetricTrendTitle" xml:space="preserve"><value>Metric Trend Since Plan Opened</value></data>
   <data name="AC_AssignmentTitle" xml:space="preserve"><value>Ownership &amp; Target Date</value></data>
   <data name="AC_TargetDate" xml:space="preserve"><value>Target Resolution Date</value></data>
+  <data name="AC_ReportingQuarter" xml:space="preserve"><value>Reporting Quarter</value></data>
+  <data name="AC_TargetWindowCritical" xml:space="preserve"><value>Critical window — 30 days from open</value></data>
+  <data name="AC_TargetWindowStandard" xml:space="preserve"><value>Standard window — 90 days from open</value></data>
+  <data name="AC_TargetWindowCustom" xml:space="preserve"><value>Custom — manually set by an Admin</value></data>
+  <data name="AC_SignalHistoryTitle" xml:space="preserve"><value>Signal History</value></data>
+  <data name="AC_SignalHistoryDesc" xml:space="preserve"><value>Which signals fired in each period this store has uploaded data for. A period with no upload shows "No data" — it's never counted as clean. A signal marked "Persistent" has fired in at least 2 of the store's last 3 periods with data.</value></data>
+  <data name="AC_SignalHistoryNoData" xml:space="preserve"><value>No data uploaded</value></data>
+  <data name="AC_SignalHistoryClean" xml:space="preserve"><value>No signals — clean period</value></data>
+  <data name="AC_SignalHistoryPersistent" xml:space="preserve"><value>Persistent</value></data>
+  <data name="AC_SignalHistoryEmpty" xml:space="preserve"><value>No signal history recorded yet for this store.</value></data>
+  <data name="AC_SignalName_HighOverallTurnover" xml:space="preserve"><value>High Overall Turnover</value></data>
+  <data name="AC_SignalName_EarlyTurnover90D" xml:space="preserve"><value>Early Turnover (90 Days)</value></data>
+  <data name="AC_SignalName_LowRetention6M" xml:space="preserve"><value>Low 6-Month Retention</value></data>
+  <data name="AC_SignalName_LeadershipInstability" xml:space="preserve"><value>Leadership Instability</value></data>
+  <data name="AC_SignalName_LowExitSentiment" xml:space="preserve"><value>Low Exit Sentiment</value></data>
+  <data name="AC_SignalName_ReasonConcentration" xml:space="preserve"><value>Reason Concentration</value></data>
+  <data name="AC_SignalName_EarlyWarningWatchlist" xml:space="preserve"><value>Early-Warning Watchlist</value></data>
+  <data name="AC_SignalName_NoDominantDriver" xml:space="preserve"><value>No Dominant Driver</value></data>
   <data name="AC_Saved" xml:space="preserve"><value>Saved.</value></data>
   <data name="AC_ManualCloseTitle" xml:space="preserve"><value>Manually Close This Plan</value></data>
   <data name="AC_ManualCloseDesc" xml:space="preserve"><value>Are you sure you want to close this plan? This should only be done if the issue is resolved outside the normal detection cycle.</value></data>

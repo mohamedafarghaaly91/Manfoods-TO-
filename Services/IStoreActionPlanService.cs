@@ -72,4 +72,11 @@ public interface IStoreActionPlanService
     /// EARLY_WARNING_WATCHLIST (current-state only, not reconstructable) and any
     /// store/period/signal already logged. Admin-triggered, safe to re-run.</summary>
     Task<int> RunHistoricalSignalBackfillAsync();
+
+    /// <summary>Read-only Signal History for the Action Center detail page:
+    /// every period between the store's first and last upload (missing
+    /// uploads marked, never treated as clean), which signals fired in each,
+    /// and which signals currently satisfy the persistence rule. Returns null
+    /// if the role/email can't access the store.</summary>
+    Task<SignalHistoryDto?> GetSignalHistoryAsync(string storeName, string role, string? email);
 }

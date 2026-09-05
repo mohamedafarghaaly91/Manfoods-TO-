@@ -136,6 +136,21 @@ public class StoreActionPlanApiController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Read-only Signal History for the detail page — see
+    /// IStoreActionPlanService.GetSignalHistoryAsync.</summary>
+    [HttpGet("action-center/signal-history")]
+    public async Task<IActionResult> GetSignalHistory([FromQuery] string store)
+    {
+        if (string.IsNullOrWhiteSpace(store)) return BadRequest(_L["Api_StoreRequired"].Value);
+
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        var result = await _actionPlans.GetSignalHistoryAsync(store, role, email);
+        if (result == null) return NotFound();
+
+        return Ok(result);
+    }
+
     [HttpPost("recommendations/{id:int}/toggle"), ValidateAntiForgeryToken]
     [RequireRole("Admin", "Operation_Manager", "Operation_Consultant", "Head_Manager", "Senior_Operation_Consultant", "Operation_Director")]
     public async Task<IActionResult> ToggleRecommendation(int id, [FromBody] ToggleRecommendationRequest request)
