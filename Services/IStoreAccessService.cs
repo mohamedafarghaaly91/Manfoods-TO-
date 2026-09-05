@@ -27,6 +27,9 @@ public interface IStoreAccessService
     /// <summary>The email value on a StoreReference row for the given restricted role (e.g. for upload validation).</summary>
     string GetEmailForRole(StoreReference store, string role);
 
+    /// <summary>The display-name value on a StoreReference row for the given restricted role (e.g. for the Action Plan Role settings page).</summary>
+    string GetNameForRole(StoreReference store, string role);
+
     /// <summary>True if the given role/email can see the given store — unrestricted
     /// roles (Admin/User) always true; restricted roles checked against the same
     /// latest-period access list as <see cref="GetAccessibleStoreNamesAsync"/>.</summary>

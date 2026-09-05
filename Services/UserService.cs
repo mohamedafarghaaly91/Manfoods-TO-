@@ -66,27 +66,32 @@ public class UserService : IUserService
         return ToVm(u);
     }
 
-    public async Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm, string actorEmail)
+    public async Task<(UserViewModel? user, string? error, string? temporaryPassword)> CreateAsync(CreateUserViewModel vm, string actorEmail)
     {
-        if (!UserManagementPolicy.IsValidRole(vm.Role)) return (null, "invalid-role");
+        if (!UserManagementPolicy.IsValidRole(vm.Role)) return (null, "invalid-role", null);
         var role = UserManagementPolicy.NormalizeRole(vm.Role)!;
-        if (!UserManagementPolicy.CanAssignRole(actorEmail, role)) return (null, "role-forbidden");
+        if (!UserManagementPolicy.CanAssignRole(actorEmail, role)) return (null, "role-forbidden", null);
 
         var email = vm.Email.ToLower();
         if (await _db.Users.AnyAsync(u => u.Email == email))
-            return (null, "duplicate-email");
+            return (null, "duplicate-email", null);
 
+        // The Admin never types a password here — a compliant temporary one
+        // is generated instead, shown once so it can be sent to the new user,
+        // and MustChangePassword forces them to replace it on first login.
+        var temporaryPassword = PasswordPolicy.GenerateTemporaryPassword();
         var user = new User
         {
             Email = email,
             Phone = vm.Phone,
             AssignedName = vm.AssignedName?.Trim() ?? "",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(vm.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword),
             Role = role,
+            MustChangePassword = true,
         };
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-        return (ToVm(user), null);
+        return (ToVm(user), null, temporaryPassword);
     }
 
     private async Task<bool> IsLastAdminAsync() => await _db.Users.CountAsync(u => u.Role == "Admin") <= 1;
@@ -164,6 +169,7 @@ public class UserService : IUserService
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email.ToLower() && u.Role == "Admin");
         if (user == null) return false;
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.MustChangePassword = false;
         await _db.SaveChangesAsync();
         return true;
     }

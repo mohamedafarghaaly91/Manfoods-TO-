@@ -24,34 +24,37 @@ public class OtpService : IOtpService
 
     private static string GenerateCode() => Random.Shared.Next(0, 1_000_000).ToString("D6");
 
-    public async Task<(int count, byte[] excelBytes)> GenerateBulkOtpsAsync()
+    // Portal link and welcome wording for the ready-to-send SMS Message
+    // column in the "Generate Default Passwords" export — kept in English
+    // regardless of the admin's UI language, since it's sent as-is to the
+    // new user via an external SMS/portal tool.
+    private const string PortalUrl = "https://mcd-crew-hub.runasp.net/login";
+    private const string WelcomeMessage = "Welcome to McDonald's Crew Insights Hub!";
+
+    private static string BuildSmsMessage(string email, string password) =>
+        $"{WelcomeMessage}\n{PortalUrl}\nUsername: {email}\nTemporary Password: {password}";
+
+    public async Task<(int count, byte[] excelBytes)> GenerateBulkDefaultPasswordsAsync()
     {
         var pendingUsers = await _db.Users
             .Where(u => u.Role != "Admin" && u.PasswordHash == null)
             .ToListAsync();
 
-        var results = new List<(string Email, string Phone, string Otp)>();
+        var results = new List<(string Email, string Phone, string Password)>();
 
         foreach (var user in pendingUsers)
         {
-            // Replace any existing unused OTP for this user with a fresh one.
-            await _db.PasswordResetOtps.Where(o => o.UserId == user.Id && !o.IsUsed).ExecuteDeleteAsync();
-
-            var code = GenerateCode();
-            _db.PasswordResetOtps.Add(new PasswordResetOtp
-            {
-                UserId = user.Id,
-                OtpCode = BCrypt.Net.BCrypt.HashPassword(code),
-                ExpiresAt = DateTime.UtcNow.Add(Expiry),
-            });
-            results.Add((user.Email, user.Phone, code));
+            var password = PasswordPolicy.GenerateTemporaryPassword();
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
+            user.MustChangePassword = true;
+            results.Add((user.Email, user.Phone, password));
         }
 
         if (results.Count > 0) await _db.SaveChangesAsync();
 
         using var wb = new XLWorkbook();
-        var ws = wb.AddWorksheet("OTPs");
-        var headers = new[] { "Email", "Phone", "OTP" };
+        var ws = wb.AddWorksheet("Default Passwords");
+        var headers = new[] { "Email", "Phone", "Temporary Password", "SMS Message" };
         for (int i = 0; i < headers.Length; i++)
         {
             var cell = ws.Cell(1, i + 1);
@@ -63,11 +66,24 @@ public class OtpService : IOtpService
         }
         for (int i = 0; i < results.Count; i++)
         {
-            ws.Cell(i + 2, 1).Value = results[i].Email;
-            ws.Cell(i + 2, 2).Value = results[i].Phone;
-            ws.Cell(i + 2, 3).Value = results[i].Otp;
+            var row = i + 2;
+            ws.Cell(row, 1).Value = results[i].Email;
+            ws.Cell(row, 2).Value = results[i].Phone;
+            ws.Cell(row, 3).Value = results[i].Password;
+
+            var smsCell = ws.Cell(row, 4);
+            smsCell.Value = BuildSmsMessage(results[i].Email, results[i].Password);
+            // Real line breaks inside the cell (not a delimiter) — copying
+            // this cell into an SMS/portal tool sends each line on its own,
+            // exactly as it's laid out here.
+            smsCell.Style.Alignment.WrapText = true;
+            smsCell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
         }
-        ws.Columns().AdjustToContents();
+        ws.Column(1).Width = 30;
+        ws.Column(2).Width = 18;
+        ws.Column(3).Width = 18;
+        ws.Column(4).Width = 55;
+        ws.Rows().AdjustToContents();
 
         using var stream = new MemoryStream();
         wb.SaveAs(stream);
@@ -121,6 +137,7 @@ public class OtpService : IOtpService
         }
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.MustChangePassword = false;
         otp.IsUsed = true;
         await _db.SaveChangesAsync();
         return (true, _L["Msg_PasswordSetSuccess"].Value);
@@ -184,6 +201,7 @@ public class OtpService : IOtpService
         }
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.MustChangePassword = false;
         otp.IsUsed = true;
         await _db.SaveChangesAsync();
 

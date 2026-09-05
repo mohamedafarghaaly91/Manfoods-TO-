@@ -27,6 +27,14 @@
 .set-rec-field textarea[dir="rtl"] { text-align: right; }
 .set-rec-meta { font-size: 12px; color: var(--text-3); }
 .set-rec-actions { display: flex; align-items: center; gap: 10px; }
+.set-aprole-search { max-width: 320px; margin-bottom: 16px; }
+.set-aprole-table { width: 100%; border-collapse: collapse; }
+.set-aprole-table th { text-align: start; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-3); padding: 8px 10px; border-bottom: 1px solid var(--card-border); }
+.set-aprole-table td { padding: 10px; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+.set-aprole-store { font-weight: 600; }
+.set-aprole-badge { padding: 2px 9px; border-radius: 20px; font-size: 10.5px; font-weight: 700; display: inline-block; margin-inline-start: 8px; }
+.set-aprole-select { min-width: 220px; }
+.set-aprole-actions { display: flex; align-items: center; gap: 8px; }
 </style>
 
 <div class="page-header">
@@ -39,6 +47,7 @@
 <div class="set-tabs">
     <button type="button" class="set-tab-btn active" id="setTabBtnColors" onclick="setShowTab('colors')">@L["Set_Tab_Colors"]</button>
     <button type="button" class="set-tab-btn" id="setTabBtnRec" onclick="setShowTab('rec')">@L["Set_Tab_Recommendations"]</button>
+    <button type="button" class="set-tab-btn" id="setTabBtnAprole" onclick="setShowTab('aprole')">@L["Set_Tab_ActionPlanRole"]</button>
 </div>
 
 @Html.AntiForgeryToken()
@@ -79,7 +88,14 @@
      data-rec-group-reason-onboarding="@L["Set_RecGroup_ReasonOnboarding"]"
      data-rec-group-reason-other="@L["Set_RecGroup_ReasonOther"]"
      data-rec-group-early-warning-watchlist="@L["Set_RecGroup_EarlyWarningWatchlist"]"
-     data-rec-group-no-dominant-driver="@L["Set_RecGroup_NoDominantDriver"]"></div>
+     data-rec-group-no-dominant-driver="@L["Set_RecGroup_NoDominantDriver"]"
+     data-aprole-store="@L["Set_AproleStore"]"
+     data-aprole-current-role="@L["Set_AproleCurrentRole"]"
+     data-aprole-default="@L["Set_AproleDefault"]"
+     data-aprole-overridden="@L["Set_AproleOverridden"]"
+     data-aprole-reset="@L["Set_AproleReset"]"
+     data-aprole-no-roles="@L["Set_AproleNoRoles"]"
+     data-aprole-search-placeholder="@L["Set_AproleSearchPlaceholder"]"></div>
 
 <div id="setTabColors">
     <div id="setSections"></div>
@@ -87,6 +103,24 @@
 <div id="setTabRec" hidden>
     <p class="text-muted-custom mb-4">@L["Set_RecSub"]</p>
     <div id="setRecSections"></div>
+</div>
+<div id="setTabAprole" hidden>
+    <p class="text-muted-custom mb-4">@L["Set_AproleSub"]</p>
+    <input type="text" id="setAproleSearch" class="form-control set-aprole-search" placeholder="@L["Set_AproleSearchPlaceholder"]">
+    <div class="chart-card set-card">
+        <div style="padding:8px 20px 20px;overflow-x:auto">
+            <table class="set-aprole-table">
+                <thead>
+                    <tr>
+                        <th>@L["Set_AproleStore"]</th>
+                        <th>@L["Set_AproleCurrentRole"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="setAproleBody"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="~/js/chart-colors.js" asp-append-version="true"></script>
@@ -251,9 +285,104 @@ async function setInit() {
 function setShowTab(tab) {
     document.getElementById('setTabColors').hidden = tab !== 'colors';
     document.getElementById('setTabRec').hidden = tab !== 'rec';
+    document.getElementById('setTabAprole').hidden = tab !== 'aprole';
     document.getElementById('setTabBtnColors').classList.toggle('active', tab === 'colors');
     document.getElementById('setTabBtnRec').classList.toggle('active', tab === 'rec');
+    document.getElementById('setTabBtnAprole').classList.toggle('active', tab === 'aprole');
     if (tab === 'rec' && !setRecLoaded) setRecInit();
+    if (tab === 'aprole' && !setAproleLoaded) setAproleInit();
+}
+
+// ── Action Plan Role tab ─────────────────────────────────────────
+let setAproleLoaded = false;
+let setAproleRows = [];
+
+function setAproleEsc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+function setAproleRoleLabel(role) { return role ? role.replace(/_/g, ' ') : ''; }
+
+function setAproleRowHtml(row) {
+    const d = setL;
+    const options = row.assignableRoles.map(o =>
+        `<option value="${setAproleEsc(o.role)}" ${o.role === row.effectiveRole ? 'selected' : ''}>${setAproleEsc(setAproleRoleLabel(o.role))} — ${setAproleEsc(o.name)}</option>`
+    ).join('');
+
+    const badge = row.effectiveRole
+        ? (row.isOverridden
+            ? `<span class="set-aprole-badge" style="background:oklch(0.75 0.16 75 / .14);color:oklch(0.6 0.14 75)">${d.aproleOverridden}</span>`
+            : `<span class="set-aprole-badge" style="background:oklch(0.62 0.15 155 / .12);color:oklch(0.5 0.15 155)">${d.aproleDefault}</span>`)
+        : '';
+
+    const controls = row.assignableRoles.length === 0
+        ? `<span class="text-muted-custom" style="font-size:12.5px">${d.aproleNoRoles}</span>`
+        : `<div class="set-aprole-actions">
+            <select class="form-select form-select-sm set-aprole-select">${options}</select>
+            <button type="button" class="btn btn-sm btn-danger set-aprole-save-btn">${d.save}</button>
+            ${row.isOverridden ? `<button type="button" class="btn btn-sm btn-outline-secondary set-aprole-reset-btn">${d.aproleReset}</button>` : ''}
+            <span class="set-save-status set-aprole-status"></span>
+        </div>`;
+
+    return `<tr data-store="${setAproleEsc(row.storeName)}">
+        <td class="set-aprole-store">${setAproleEsc(row.storeName)}</td>
+        <td>${row.effectiveRole ? setAproleEsc(setAproleRoleLabel(row.effectiveRole)) + ' — ' + setAproleEsc(row.effectiveName || '') : '—'}${badge}</td>
+        <td>${controls}</td>
+    </tr>`;
+}
+
+async function setAproleSave(storeName, role) {
+    const rowEl = document.querySelector(`#setAproleBody tr[data-store="${CSS.escape(storeName)}"]`);
+    const statusEl = rowEl.querySelector('.set-aprole-status');
+    const d = setL;
+
+    statusEl.textContent = d.saving;
+    statusEl.style.color = 'var(--text-3)';
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const r = await fetch(`/api/action-plan-role/${encodeURIComponent(storeName)}/set`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify({ role }),
+        });
+        if (!r.ok) { statusEl.textContent = d.saveFailed + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
+        statusEl.textContent = d.saved;
+        statusEl.style.color = ChartColors.SEMANTIC.GOOD;
+        await setAproleRefreshRow(storeName);
+    } catch (e) {
+        statusEl.textContent = d.saveFailed + e.message;
+        statusEl.style.color = ChartColors.SEMANTIC.BAD;
+    }
+}
+
+async function setAproleRefreshRow(storeName) {
+    const r = await fetch('/api/action-plan-role/stores');
+    if (!r.ok) return;
+    setAproleRows = await r.json();
+    setAproleRenderFiltered();
+}
+
+function setAproleBindRow(row) {
+    const rowEl = document.querySelector(`#setAproleBody tr[data-store="${CSS.escape(row.storeName)}"]`);
+    if (!rowEl) return;
+    const select = rowEl.querySelector('.set-aprole-select');
+    const saveBtn = rowEl.querySelector('.set-aprole-save-btn');
+    const resetBtn = rowEl.querySelector('.set-aprole-reset-btn');
+    if (saveBtn) saveBtn.addEventListener('click', () => setAproleSave(row.storeName, select.value));
+    if (resetBtn) resetBtn.addEventListener('click', () => setAproleSave(row.storeName, null));
+}
+
+function setAproleRenderFiltered() {
+    const q = (document.getElementById('setAproleSearch').value || '').trim().toLowerCase();
+    const filtered = q ? setAproleRows.filter(r => r.storeName.toLowerCase().includes(q)) : setAproleRows;
+    const body = document.getElementById('setAproleBody');
+    body.innerHTML = filtered.map(setAproleRowHtml).join('');
+    filtered.forEach(setAproleBindRow);
+}
+
+async function setAproleInit() {
+    setAproleLoaded = true;
+    const r = await fetch('/api/action-plan-role/stores');
+    setAproleRows = r.ok ? await r.json() : [];
+    setAproleRenderFiltered();
+    document.getElementById('setAproleSearch').addEventListener('input', setAproleRenderFiltered);
 }
 
 // ── Recommendations tab ──────────────────────────────────────────

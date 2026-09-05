@@ -123,6 +123,7 @@ builder.Services.AddScoped<IRetentionService, RetentionService>();
 builder.Services.AddScoped<IEarlyWarningService, EarlyWarningService>();
 builder.Services.AddScoped<IScorecardService, ScorecardService>();
 builder.Services.AddScoped<IStoreActionPlanService, StoreActionPlanService>();
+builder.Services.AddScoped<IActionPlanRoleService, ActionPlanRoleService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IColorRulesService, ColorRulesService>();
 builder.Services.AddScoped<IRecommendationTemplateService, RecommendationTemplateService>();

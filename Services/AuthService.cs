@@ -84,6 +84,7 @@ public class AuthService : IAuthService
         if (user == null) return false;
         if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash)) return false;
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.MustChangePassword = false;
         await _db.SaveChangesAsync();
         return true;
     }

@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<ActionPlanRecommendation> ActionPlanRecommendations { get; set; }
     public DbSet<ActionPlanNote> ActionPlanNotes { get; set; }
     public DbSet<ActionPlanMetricSnapshot> ActionPlanMetricSnapshots { get; set; }
+    public DbSet<StoreActionPlanRoleAssignment> StoreActionPlanRoleAssignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,13 @@ public class AppDbContext : DbContext
             .IsUnique()
             .HasFilter("status = 'Active'")
             .HasDatabaseName("ux_store_action_plans_active_store");
+
+        // One Action Plan role override per store — same "config only takes
+        // effect for a fresh EnsureCreated() database" caveat as above.
+        modelBuilder.Entity<StoreActionPlanRoleAssignment>()
+            .HasIndex(a => a.StoreName)
+            .IsUnique()
+            .HasDatabaseName("ux_store_action_plan_role_assignments_store");
 
         // SQL Server's DATETIME2 (unlike Npgsql's TIMESTAMPTZ) has no concept of
         // DateTimeKind — every DateTime read back from it comes back as Kind=

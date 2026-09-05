@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,13 @@ public abstract class SessionAuthFilterAttribute : Attribute, IAsyncActionFilter
             return;
         }
 
+        var mustChangePassword = OnMustChangePasswordCheck(context, session);
+        if (mustChangePassword != null)
+        {
+            context.Result = mustChangePassword;
+            return;
+        }
+
         await next();
     }
 
@@ -51,4 +59,13 @@ public abstract class SessionAuthFilterAttribute : Attribute, IAsyncActionFilter
 
     /// <summary>Optional extra role check, run only once the session is confirmed to still match the database. Return null to allow.</summary>
     protected virtual IActionResult? OnRoleCheck(string role) => null;
+
+    /// <summary>Optional forced-redirect check for an account still on a
+    /// system-generated temporary password (session.GetMustChangePassword()) —
+    /// overridden only by the page-level filters (RequireUserAuth/
+    /// RequireAdminAuth), never by the API filters (RequireAuth/RequireRole),
+    /// since redirecting an API/JSON call would just break it. Must let the
+    /// Change Password action itself through to avoid a redirect loop.
+    /// Return null to allow.</summary>
+    protected virtual IActionResult? OnMustChangePasswordCheck(ActionExecutingContext context, ISession session) => null;
 }

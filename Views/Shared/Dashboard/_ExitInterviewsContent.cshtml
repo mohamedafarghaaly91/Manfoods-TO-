@@ -848,8 +848,8 @@ function eiCommentRowsHtml(rows, includeQuestionCol) {
     return rows.map(c => `
         <tr>
             <td class="px-3 py-2 fw-semibold">${c.store ? sapEscape(c.store) : '<span class="text-muted">—</span>'}</td>
-            <td class="px-3 py-2" style="color:oklch(0.5 0.03 258)">${c.storeLeader ? sapEscape(c.storeLeader) : '<span class="text-muted">—</span>'}</td>
-            ${includeQuestionCol ? `<td class="px-3 py-2" style="white-space:nowrap;color:oklch(0.5 0.03 258)">${sapEscape(c.questionLabel)}</td>` : ''}
+            <td class="px-3 py-2" style="color:var(--text-2)">${c.storeLeader ? sapEscape(c.storeLeader) : '<span class="text-muted">—</span>'}</td>
+            ${includeQuestionCol ? `<td class="px-3 py-2" style="white-space:nowrap;color:var(--text-2)">${sapEscape(c.questionLabel)}</td>` : ''}
             <td class="px-3 py-2">${sapEscape(c.text)}</td>
         </tr>`).join('');
 }

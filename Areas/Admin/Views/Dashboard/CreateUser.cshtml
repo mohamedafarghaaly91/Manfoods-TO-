@@ -36,17 +36,8 @@
             <p class="text-muted-custom small mt-1 mb-0">@L["Users_AssignedNameHelp"]</p>
         </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label asp-for="Password" class="form-label-dark">@L["Login_Password"]</label>
-                <input asp-for="Password" type="password" class="form-control form-control-dark" placeholder="@L["Users_MinSixChars"]"/>
-                <span asp-validation-for="Password" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="ConfirmPassword" class="form-label-dark">@L["Users_ConfirmNewPassword"]</label>
-                <input asp-for="ConfirmPassword" type="password" class="form-control form-control-dark" placeholder="@L["Users_MinSixChars"]"/>
-                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-            </div>
+        <div class="alert-banner mb-3" style="background:var(--card-bg-2);border:1px solid var(--card-border);color:var(--text-2);font-size:13px;padding:10px 14px;border-radius:8px">
+            <i class="bi bi-info-circle me-1"></i>@L["CU_PasswordGeneratedNote"]
         </div>
 
         <div class="mb-4">

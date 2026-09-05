@@ -18,12 +18,16 @@ public interface IUserService
     /// identical to the caller so a hidden Admin/Super-Admin id can't be
     /// distinguished from a nonexistent one.</summary>
     Task<UserViewModel?> GetByIdAsync(int id, string actorEmail);
-    /// <summary>Returns (null, "duplicate-email") when a user with this email
-    /// already exists, (null, "invalid-role") when Role isn't one of
-    /// ValidRoles, or (null, "role-forbidden") when `actorEmail` isn't allowed
-    /// to assign that role (UserManagementPolicy.CanAssignRole — only the
-    /// Super Admin may create an Admin account).</summary>
-    Task<(UserViewModel? user, string? error)> CreateAsync(CreateUserViewModel vm, string actorEmail);
+    /// <summary>Returns (null, "duplicate-email", null) when a user with this
+    /// email already exists, (null, "invalid-role", null) when Role isn't one
+    /// of ValidRoles, or (null, "role-forbidden", null) when `actorEmail`
+    /// isn't allowed to assign that role (UserManagementPolicy.CanAssignRole —
+    /// only the Super Admin may create an Admin account). On success, a
+    /// compliant temporary password (PasswordPolicy) is generated and
+    /// returned once as plaintext — the caller must show it so it can be
+    /// sent to the new user — and the account is created with
+    /// MustChangePassword set, forcing them to replace it on first login.</summary>
+    Task<(UserViewModel? user, string? error, string? temporaryPassword)> CreateAsync(CreateUserViewModel vm, string actorEmail);
     /// <summary>Returns (null, error) when the update is rejected — the user
     /// wasn't found or isn't visible to `actorEmail` (null error, same as
     /// not-found), "invalid-role" (Role isn't one of ValidRoles),
