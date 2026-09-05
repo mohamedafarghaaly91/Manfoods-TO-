@@ -346,7 +346,7 @@
 <div class="chart-card mb-4 p-0" style="overflow:hidden" id="cmpTableCard">
     <div class="table-responsive" style="max-height:420px;overflow-y:auto">
         <table class="table table-hover mb-0" style="font-size:13px">
-            <thead style="background:oklch(0.965 0.008 255);position:sticky;top:0;z-index:1">
+            <thead style="background:var(--bg-2);position:sticky;top:0;z-index:1">
                 <tr>
                     <th class="cmp-sort px-3 py-2" data-col="store" style="cursor:pointer">@L["Common_StoreName"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
                     <th class="cmp-sort px-3 py-2 text-center" data-col="ta" style="cursor:pointer">@L["CMP_TurnoverA"] <i class="bi bi-arrow-down-up text-muted" style="font-size:10px"></i></th>
@@ -686,7 +686,7 @@ function cmpInsightCardHtml(icon, color, title, desc) {
                 <i class="bi ${icon} mt-1 flex-shrink-0" style="color:${color.text};font-size:17px"></i>
                 <div>
                     <div style="font-size:13px;font-weight:700;color:${color.text};margin-bottom:3px">${sapEscape(title)}</div>
-                    <div style="font-size:12.5px;color:oklch(0.5 0.03 258);line-height:1.55">${sapEscape(desc)}</div>
+                    <div style="font-size:12.5px;color:var(--text-2);line-height:1.55">${sapEscape(desc)}</div>
                 </div>
             </div>
         </div>
