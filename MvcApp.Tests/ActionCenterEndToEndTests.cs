@@ -122,9 +122,11 @@ public class ActionCenterEndToEndTests
         var daysToTarget = detail1.TargetResolutionDate!.Value.DayNumber - DateOnly.FromDateTime(detail1.CreatedAt).DayNumber;
         Assert.InRange(daysToTarget, 88, 92);
 
-        // ── Reporting quarter is derived from CreatedAt ──
-        Assert.Equal((jan - 1) / 3 + 1, detail1.ReportingQuarter);
-        Assert.Equal(y, detail1.ReportingYear);
+        // ── Reporting quarter is derived from CreatedAt (the real wall-clock
+        // creation timestamp, always "now" — not CreatedMonth/CreatedYear, which
+        // reflect the simulated historical data period) ──
+        Assert.Equal((detail1.CreatedAt.Month - 1) / 3 + 1, detail1.ReportingQuarter);
+        Assert.Equal(detail1.CreatedAt.Year, detail1.ReportingYear);
 
         // Feb: no upload at all for this store (simulates a missed monthly upload) —
         // deliberately never call RunDetectionForPeriodAsync for it.
