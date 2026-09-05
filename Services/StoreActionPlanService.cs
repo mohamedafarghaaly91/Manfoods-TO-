@@ -383,6 +383,70 @@ public class StoreActionPlanService : IStoreActionPlanService
         return occurrenceCount >= 2;
     }
 
+    /// <summary>Read-only view of a store's signal_occurrences log for the
+    /// Action Center detail page — does not touch detection, severity, or
+    /// persistence logic, it only presents what's already there. Periods
+    /// between the store's first and last StoreReference upload that have no
+    /// upload of their own are included with HasData = false and an empty
+    /// signal list, so the UI can show them as "no data" rather than silently
+    /// implying they were clean (matching the same rule IsSignalPersistentAsync
+    /// already applies). Returns null if the role/email can't access the store,
+    /// same quiet-filtering convention as GetForStoreAsync.</summary>
+    public async Task<SignalHistoryDto?> GetSignalHistoryAsync(string storeName, string role, string? email)
+    {
+        if (!await _storeAccess.CanAccessStoreAsync(role, email, storeName)) return null;
+
+        var availablePeriods = (await _db.StoreReferences
+            .Where(s => s.StoreName == storeName)
+            .Select(s => new { s.Month, s.Year })
+            .Distinct()
+            .ToListAsync())
+            .Select(p => p.Year * 12 + p.Month)
+            .ToHashSet();
+
+        var result = new SignalHistoryDto();
+        if (availablePeriods.Count == 0) return result;
+
+        var occurrences = await _db.SignalOccurrences
+            .Where(o => o.StoreName == storeName)
+            .ToListAsync();
+        var occurrencesByPeriod = occurrences
+            .GroupBy(o => o.Year * 12 + o.Month)
+            .ToDictionary(g => g.Key, g => g.Select(o => o.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+
+        var minKey = availablePeriods.Min();
+        var maxKey = availablePeriods.Max();
+        for (var key = maxKey; key >= minKey; key--)
+        {
+            var year = (key - 1) / 12;
+            var month = key - year * 12;
+            var hasData = availablePeriods.Contains(key);
+            result.Periods.Add(new SignalHistoryPeriodDto
+            {
+                Month = month,
+                Year = year,
+                Label = new DateOnly(year, month, 1).ToString("MMM yy"),
+                HasData = hasData,
+                Signals = hasData && occurrencesByPeriod.TryGetValue(key, out var codes) ? codes : new List<string>(),
+            });
+        }
+
+        var maxYear = (maxKey - 1) / 12;
+        var maxMonth = maxKey - maxYear * 12;
+
+        var distinctSignalCodes = occurrences.Select(o => o.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var code in distinctSignalCodes)
+        {
+            result.Persistence.Add(new SignalPersistenceDto
+            {
+                SignalCode = code,
+                IsPersistent = await IsSignalPersistentAsync(storeName, code, maxMonth, maxYear),
+            });
+        }
+
+        return result;
+    }
+
     /// <summary>Replays historical signal detection directly (bypassing
     /// EvaluateStoreAsync and its "already evaluated this period" early-exit
     /// guard, which would otherwise silently skip logging occurrences for any
@@ -764,6 +828,20 @@ public class StoreActionPlanService : IStoreActionPlanService
     private static (int Quarter, int Year) GetReportingQuarter(DateTime createdAt) =>
         ((createdAt.Month - 1) / 3 + 1, createdAt.Year);
 
+    /// <summary>Labels which window TargetResolutionDate reflects, purely by
+    /// comparing it against CreatedAt — nothing is stored to say "this plan
+    /// opened Critical." A small tolerance absorbs the DateOnly truncation of
+    /// CreatedAt's time-of-day; anything outside both windows means an Admin
+    /// moved the date manually via SetAssignmentAsync.</summary>
+    private static (string? Type, int? Days) ComputeTargetWindow(DateTime createdAt, DateOnly? targetDate)
+    {
+        if (targetDate == null) return (null, null);
+        var days = targetDate.Value.DayNumber - DateOnly.FromDateTime(createdAt).DayNumber;
+        if (days is >= CriticalTargetDays - 2 and <= CriticalTargetDays + 2) return ("Critical", days);
+        if (days is >= StandardTargetDays - 2 and <= StandardTargetDays + 2) return ("Standard", days);
+        return ("Custom", days);
+    }
+
     /// <summary>Severity is computed live from whatever ActionPlanSeverityBandConfig
     /// is current, never stored — so changing the cutoffs on the Settings page
     /// immediately re-classifies every open and historical plan's displayed
@@ -977,6 +1055,9 @@ public class StoreActionPlanService : IStoreActionPlanService
         var (reportingQuarter, reportingYear) = GetReportingQuarter(plan.CreatedAt);
         dto.ReportingQuarter = reportingQuarter;
         dto.ReportingYear = reportingYear;
+        var (targetWindowType, targetWindowDays) = ComputeTargetWindow(plan.CreatedAt, plan.TargetResolutionDate);
+        dto.TargetWindowType = targetWindowType;
+        dto.TargetWindowDays = targetWindowDays;
 
         var snapshots = await _db.ActionPlanMetricSnapshots
             .Where(s => s.StoreActionPlanId == plan.Id)
