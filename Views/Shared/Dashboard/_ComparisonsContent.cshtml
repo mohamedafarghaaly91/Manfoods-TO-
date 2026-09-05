@@ -663,9 +663,9 @@ function cmpInsightCard(metric, aVal, bVal) {
     const flat = Math.abs(delta) < 0.05;
     const improved = delta <= 0;
     const icon  = flat ? 'bi-dash-circle-fill' : improved ? 'bi-arrow-down-circle-fill' : 'bi-arrow-up-circle-fill';
-    const color = flat ? { bg: '#f8f9fa', border: '#6c757d', text: '#6c757d' }
-                : improved ? { bg: '#f0fff4', border: '#198754', text: '#198754' }
-                : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
+    const color = flat ? { bg: 'var(--bg-2)', border: 'var(--text-3)', text: 'var(--text-2)' }
+                : improved ? { bg: 'oklch(0.62 0.15 155 / .1)', border: 'oklch(0.5 0.15 155)', text: 'oklch(0.5 0.15 155)' }
+                : { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
     const title = (flat ? cmpL.titleNoChange : improved ? cmpL.titleImproved : cmpL.titleWorsened).replace('{0}', metric);
     const tail = flat ? cmpL.unchanged
         : (improved ? cmpL.better : cmpL.worse).replace('{0}', Math.abs(delta).toFixed(1));
@@ -704,8 +704,8 @@ function cmpMoverInsightCard(dataA, dataB) {
     if (Math.abs(biggest.dt) < 0.05) return '';
     const improved = biggest.dt <= 0;
     const icon  = improved ? 'bi-trophy-fill' : 'bi-exclamation-triangle-fill';
-    const color = improved ? { bg: '#f0fff4', border: '#198754', text: '#198754' }
-                            : { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
+    const color = improved ? { bg: 'oklch(0.62 0.15 155 / .1)', border: 'oklch(0.5 0.15 155)', text: 'oklch(0.5 0.15 155)' }
+                            : { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD };
     const title = (improved ? cmpL.moverTitleImproved : cmpL.moverTitleWorsened).replace('{0}', biggest.store);
     const desc = (improved ? cmpL.moverDescImproved : cmpL.moverDescWorsened)
         .replace('{0}', biggest.ta.toFixed(1)).replace('{1}', cmpLabel('A'))
