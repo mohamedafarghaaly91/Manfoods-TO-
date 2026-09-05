@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
+using MvcApp.Models.ViewModels;
 using MvcApp.Resources;
 using MvcApp.Services;
 using MvcApp.Tests.TestHelpers;
