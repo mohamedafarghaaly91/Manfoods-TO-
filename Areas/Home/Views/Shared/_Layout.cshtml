@@ -114,18 +114,21 @@
                     <span class="nav-item-label">@L["Nav_Scorecard"]</span>
                 </span>
             </a>
-            <a href="/home/dashboard/actioncenter" class="nav-item @((IsActive("ActionCenter") || IsActive("ActionCenterDetail")) ? "active" : "")">
+            @{ var acSectionActive = IsActive("ActionCenter") || IsActive("ActionCenterDetail") || IsActive("ActionPlanGuide"); }
+            <a href="/home/dashboard/actioncenter" class="nav-item @(acSectionActive ? "active" : "")">
                 <span class="nav-item-inner">
                     <span class="nav-icon-wrap"><i class="bi bi-bullseye"></i></span>
                     <span class="nav-item-label">@L["Nav_ActionCenter"]</span>
                 </span>
             </a>
-            <a href="/home/dashboard/actionplanguide" class="nav-item @(IsActive("ActionPlanGuide") ? "active" : "")">
-                <span class="nav-item-inner">
-                    <span class="nav-icon-wrap"><i class="bi bi-book-half"></i></span>
-                    <span class="nav-item-label">@L["Nav_ActionPlanGuide"]</span>
-                </span>
-            </a>
+            @if (acSectionActive)
+            {
+                <div class="nav-submenu">
+                    <a href="/home/dashboard/actionplanguide" class="nav-subitem @(IsActive("ActionPlanGuide") ? "active" : "")">
+                        <i class="bi bi-book-half"></i><span>@L["Nav_ActionPlanGuide"]</span>
+                    </a>
+                </div>
+            }
             <a href="/home/dashboard/stores" class="nav-item @(IsActive("Stores") ? "active" : "")">
                 <span class="nav-item-inner">
                     <span class="nav-icon-wrap"><i class="bi bi-shop"></i></span>

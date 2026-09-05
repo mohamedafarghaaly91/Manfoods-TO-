@@ -320,6 +320,18 @@ body.admin-theme .admin-nav-link {
 .admin-nav-link.active { background: var(--red-light); color: var(--red); font-weight: 600; }
 .admin-nav-link.active i { color: var(--red); }
 .admin-nav-link.active:hover { transform: none; box-shadow: none; }
+.admin-nav-submenu { display: flex; flex-direction: column; }
+.admin-nav-sublink {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 12px 7px 44px; border-radius: 9px;
+    font-size: 13.5px; font-weight: 400;
+    color: var(--text-2); text-decoration: none;
+    transition: background .15s, color .15s;
+}
+[dir="rtl"] .admin-nav-sublink { padding: 7px 44px 7px 12px; }
+.admin-nav-sublink i { font-size: 16px; width: 20px; text-align: center; }
+.admin-nav-sublink:hover { background: var(--card-bg); color: var(--text); }
+.admin-nav-sublink.active { background: var(--red-light); color: var(--red); font-weight: 600; }
 .admin-nav-badge {
     margin-left: auto; font-size: 9px; font-weight: 700;
     background: var(--red); color: #fff; padding: 2px 6px; border-radius: 20px;

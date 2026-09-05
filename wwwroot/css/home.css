@@ -173,6 +173,24 @@
 }
 .nav-item-label { flex: 1; }
 
+/* Nested sub-page under a nav item (e.g. Action Plan Guide under Action Center) */
+.nav-submenu { margin: 0 8px 2px; }
+.nav-subitem {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px 8px 40px;
+    border-radius: 8px;
+    color: rgba(255,255,255,.5);
+    text-decoration: none;
+    font-size: 12.5px; font-weight: 400;
+    transition: all .2s;
+}
+[dir="rtl"] .nav-subitem { padding: 8px 40px 8px 12px; }
+.nav-subitem:hover { background: rgba(167,139,250,.07); color: var(--gold); }
+.nav-subitem.active {
+    background: rgba(109,93,251,.15);
+    color: var(--gold); font-weight: 700;
+}
+
 /* Sidebar footer */
 .sidebar-footer {
     padding: 0;
@@ -283,6 +301,9 @@
     background: rgba(109,93,251,.1);
     color: var(--red);
 }
+[data-theme="light"] .nav-subitem { color: var(--text-3); }
+[data-theme="light"] .nav-subitem:hover { background: rgba(109,93,251,.05); color: var(--red); }
+[data-theme="light"] .nav-subitem.active { background: rgba(109,93,251,.1); color: var(--red); }
 [data-theme="light"] .sidebar-footer { border-top-color: rgba(0,0,0,.08); }
 [data-theme="light"] .btn-signout-full {
     border-color: rgba(109,93,251,.2);
