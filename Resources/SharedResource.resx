@@ -1328,4 +1328,97 @@
   <data name="Api_AtLeastOneRule" xml:space="preserve"><value>At least one rule is required.</value></data>
   <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>Exactly one rule must have an empty upper bound, and it must be the last one.</value></data>
   <data name="Api_BothLanguagesRequired" xml:space="preserve"><value>Both English and Arabic text are required.</value></data>
+
+  <!-- Action Plan Guide (read-only business guide page under Action Center) -->
+  <data name="Nav_ActionPlanGuide" xml:space="preserve"><value>Action Plan Guide</value></data>
+  <data name="Page_ActionPlanGuide" xml:space="preserve"><value>Action Plan Guide</value></data>
+  <data name="Page_ActionPlanGuideSub" xml:space="preserve"><value>How an Action Plan is detected, created, monitored, and closed</value></data>
+  <data name="APG_Overview" xml:space="preserve"><value>This guide explains, in plain business language, the full lifecycle of a Store Action Plan — how an issue is first detected, when it becomes an official plan, how severity and target dates are set, how progress is tracked month to month, and how a plan is eventually closed. It is a read-only reference and does not change any Action Center data or settings.</value></data>
+
+  <data name="APG_S1_Title" xml:space="preserve"><value>What Is an Action Plan?</value></data>
+  <data name="APG_S1_Purpose" xml:space="preserve"><value>An Action Plan is a formal, tracked response to a workforce problem at a specific store — high turnover, early attrition, leadership churn, poor exit sentiment, or a concentrated resignation reason. It gives the problem an owner, a severity, a target resolution date, and a place to record recommendations, notes, and progress until it is resolved.</value></data>
+  <data name="APG_S1_Trigger" xml:space="preserve"><value>A plan does not need to be opened manually. The first time any one of the detection signals below fires for a store that does not already have an Active plan, a plan opens automatically using that period's uploaded data. A store only ever has one Active plan at a time — a new signal firing later is folded into that same open plan rather than starting a second one.</value></data>
+
+  <data name="APG_S2_Title" xml:space="preserve"><value>Action Plan Lifecycle</value></data>
+  <data name="APG_S2_Body" xml:space="preserve"><value>Every Action Plan follows the same path, whether it closes quickly or runs for months:</value></data>
+  <data name="APG_Stage_Signal" xml:space="preserve"><value>Signal Detection</value></data>
+  <data name="APG_Stage_Persistence" xml:space="preserve"><value>Persistence</value></data>
+  <data name="APG_Stage_Severity" xml:space="preserve"><value>Severity</value></data>
+  <data name="APG_Stage_Creation" xml:space="preserve"><value>Action Plan Creation</value></data>
+  <data name="APG_Stage_Monitoring" xml:space="preserve"><value>Monthly Monitoring</value></data>
+  <data name="APG_Stage_Review" xml:space="preserve"><value>Review</value></data>
+  <data name="APG_Stage_Closure" xml:space="preserve"><value>Closure / Outcome</value></data>
+  <data name="APG_S2_Note" xml:space="preserve"><value>Persistence and Severity are evaluated continuously, even after a plan is created — they aren't a one-time check at the start.</value></data>
+
+  <data name="APG_S3_Title" xml:space="preserve"><value>Signal Detection</value></data>
+  <data name="APG_S3_Intro" xml:space="preserve"><value>Each period's uploaded data is checked against 7 detection signals, plus one fallback note. Any one of them is enough to open or update a plan.</value></data>
+  <data name="APG_Signal_HighOverallTurnover_Desc" xml:space="preserve"><value>Headcount of 5 or more, and an overall turnover rate of 15% or higher. The broadest, headline signal.</value></data>
+  <data name="APG_Signal_EarlyTurnover90D_Desc" xml:space="preserve"><value>3 or more hires in a non-provisional period, with 30% or more of them leaving within their first 90 days. Points to an onboarding or early-fit problem.</value></data>
+  <data name="APG_Signal_LowRetention6M_Desc" xml:space="preserve"><value>3 or more hires, with fewer than 70% still employed at the 6-month mark. Points to a mid-tenure retention problem.</value></data>
+  <data name="APG_Signal_LeadershipInstability_Desc" xml:space="preserve"><value>2 or more different Store Leaders recorded in the trailing 6 months. Frequent leadership changes are strongly linked to team turnover.</value></data>
+  <data name="APG_Signal_LowExitSentiment_Desc" xml:space="preserve"><value>2 or more exit interviews, with fewer than 50% reflecting positive sentiment. Signals a culture or management concern surfacing at exit.</value></data>
+  <data name="APG_Signal_ReasonConcentration_Desc" xml:space="preserve"><value>2 or more exit-interview reason responses, with a single reason cited in 50% or more of them — for example, most departures citing pay or scheduling.</value></data>
+  <data name="APG_Signal_EarlyWarningWatchlist_Desc" xml:space="preserve"><value>2 or more currently active employees flagged high-risk on the Early Warning watchlist — a forward-looking signal based on staff still employed, not past exits.</value></data>
+  <data name="APG_Signal_NoDominantDriver_Desc" xml:space="preserve"><value>Not an independent signal. Added only alongside High Overall Turnover when none of the more specific signals above also fired — an honest note that no single root cause stands out yet.</value></data>
+
+  <data name="APG_S4_Title" xml:space="preserve"><value>Persistence Rule</value></data>
+  <data name="APG_S4_Body" xml:space="preserve"><value>For normal, non-critical issues, a signal is only treated as persistent once it has fired in at least 2 of the store's last 3 evaluation periods that actually have uploaded data. A period with no upload is not counted as a healthy or clean period — it is simply excluded, so a store can't look artificially stable just because a period was skipped.</value></data>
+  <data name="APG_S4_Critical" xml:space="preserve"><value>Critical-severity issues bypass this normal persistence requirement — they are acted on immediately rather than waiting to reappear across periods, given the urgency they represent.</value></data>
+
+  <data name="APG_S5_Title" xml:space="preserve"><value>Severity</value></data>
+  <data name="APG_Severity_MediumDesc" xml:space="preserve"><value>One distinct signal detected on the plan.</value></data>
+  <data name="APG_Severity_HighDesc" xml:space="preserve"><value>Two distinct signals detected on the plan at the same time.</value></data>
+  <data name="APG_Severity_CriticalDesc" xml:space="preserve"><value>Three or more distinct signals detected on the plan at the same time — the most urgent tier.</value></data>
+  <data name="APG_Severity_Body" xml:space="preserve"><value>Severity isn't fixed when a plan is created — it is computed live from how many distinct signals are currently active on that plan.</value></data>
+  <data name="APG_Severity_ConfigNote" xml:space="preserve"><value>The signal-count cutoffs for Medium, High, and Critical are configurable by an Admin on the Action Plan Severity settings page. Changing them re-classifies every plan — open or already resolved — instantly, and can also affect the target resolution window below.</value></data>
+
+  <data name="APG_S6_Title" xml:space="preserve"><value>Target Resolution Date</value></data>
+  <data name="APG_S6_Standard" xml:space="preserve"><value>Standard Action Plan — the target resolution date is set 90 days from the day the plan opens.</value></data>
+  <data name="APG_S6_Critical" xml:space="preserve"><value>Critical / Immediate Action Plan — if the plan is already Critical severity the moment it opens, the target resolution date is set 30 days from the day it opens instead.</value></data>
+  <data name="APG_S6_Quarter" xml:space="preserve"><value>The Reporting Quarter shown on a plan is only a classification label based on when the plan opened, used for reporting and grouping. It is separate from the target resolution date and does not extend or shorten the resolution deadline.</value></data>
+
+  <data name="APG_S7_Title" xml:space="preserve"><value>Inside an Action Plan (Store Action Center Details)</value></data>
+  <data name="APG_Inside_Kpi" xml:space="preserve"><value>KPI / Baseline vs. Latest — the store's Turnover Rate, Early Leaver (90-Day) Rate, and Retention Rate as they stood when the plan opened, compared with the latest recorded values, so progress is visible at a glance.</value></data>
+  <data name="APG_Inside_Monthly" xml:space="preserve"><value>Monthly Performance — every recorded monthly snapshot since the plan opened, showing Turnover %, Early-Leaver %, Retention %, signal count, and the change in Turnover % versus the previous month.</value></data>
+  <data name="APG_Inside_Signals" xml:space="preserve"><value>Signal History — which signals fired in each period the store has uploaded data for, and whether each has become persistent.</value></data>
+  <data name="APG_Inside_Recs" xml:space="preserve"><value>Recommendations — suggested actions tailored to the specific signals detected, grouped by category (e.g. Onboarding, Retention, Leadership), which can be checked off as they're completed.</value></data>
+  <data name="APG_Inside_Notes" xml:space="preserve"><value>Actions / Notes — a running log where the responsible person records what was done and when.</value></data>
+  <data name="APG_Inside_Target" xml:space="preserve"><value>Target Resolution Date — the 90- or 30-day deadline described above, shown alongside the plan's current age.</value></data>
+  <data name="APG_Inside_Streak" xml:space="preserve"><value>Healthy Streak — how many consecutive clean evaluation periods the store has had since the plan opened, out of the 2 needed for automatic resolution.</value></data>
+  <data name="APG_Inside_Closure" xml:space="preserve"><value>Closure / Outcome — once resolved, the plan shows how and when it closed, who closed it (if closed manually), and the recorded closing reason.</value></data>
+
+  <data name="APG_S8_Title" xml:space="preserve"><value>Monthly Monitoring</value></data>
+  <data name="APG_S8_Body" xml:space="preserve"><value>While a plan is open, its store keeps being evaluated every time new monthly data is uploaded — this is what drives the Monthly Performance table and the Healthy Streak. The metrics tracked each month are:</value></data>
+  <data name="APG_Monitoring_Turnover" xml:space="preserve"><value>The store's turnover rate for that month.</value></data>
+  <data name="APG_Monitoring_EarlyLeaver" xml:space="preserve"><value>The 90-day early-leaver rate for that month.</value></data>
+  <data name="APG_Monitoring_Retention" xml:space="preserve"><value>The 6-month retention rate for that month.</value></data>
+  <data name="APG_Monitoring_SignalCount" xml:space="preserve"><value>How many of the 7 detection signals were active that month.</value></data>
+  <data name="APG_Monitoring_Change" xml:space="preserve"><value>The change in turnover rate compared with the previous month, so a trend is visible without checking every prior row.</value></data>
+
+  <data name="APG_S9_Title" xml:space="preserve"><value>Healthy Streak</value></data>
+  <data name="APG_S9_Body1" xml:space="preserve"><value>A month with zero active signals counts as a healthy period and adds to the plan's Healthy Streak. A healthy streak is good evidence that the underlying issue is improving.</value></data>
+  <data name="APG_S9_Body2" xml:space="preserve"><value>Reaching 2 consecutive healthy periods triggers automatic resolution — but any signal firing again resets the streak to zero. Short of that automatic threshold, a healthy streak on its own does not close a plan; closing it early still requires a deliberate review and decision.</value></data>
+
+  <data name="APG_S10_Title" xml:space="preserve"><value>Closure &amp; Outcomes</value></data>
+  <data name="APG_S10_Auto" xml:space="preserve"><value>Automatic Resolution — a plan resolves on its own once its store shows zero active signals for 2 consecutive evaluated periods.</value></data>
+  <data name="APG_S10_Manual" xml:space="preserve"><value>Manual Closure — an Admin can close a plan before that point, recording who closed it and a written reason. This should only be used when the issue was genuinely addressed outside the normal detection cycle.</value></data>
+  <data name="APG_S10_OutcomesIntro" xml:space="preserve"><value>In practice, the recorded closing reason documents one of these outcomes:</value></data>
+  <data name="APG_Outcome_Resolved" xml:space="preserve"><value>Resolved — the issue was fully addressed; metrics returned to a healthy range.</value></data>
+  <data name="APG_Outcome_PartiallyImproved" xml:space="preserve"><value>Partially Improved — meaningful progress was made, but the issue was not fully resolved.</value></data>
+  <data name="APG_Outcome_NotImproved" xml:space="preserve"><value>Not Improved — little or no change since the plan opened.</value></data>
+  <data name="APG_Outcome_Escalated" xml:space="preserve"><value>Escalated — the issue proved more serious than initially detected and was raised for additional attention beyond the plan itself.</value></data>
+
+  <data name="APG_S11_Title" xml:space="preserve"><value>Continuing vs. Chronic / Recurring</value></data>
+  <data name="APG_S11_Continuing" xml:space="preserve"><value>If the underlying issue is still unresolved when a quarter ends, the same Action Plan simply continues into the next quarter — its target date, severity, and history carry forward unchanged. Crossing a quarter boundary is not, by itself, a sign of anything unusual, and it does not make the plan Chronic or Recurring.</value></data>
+  <data name="APG_S11_Chronic" xml:space="preserve"><value>Chronic / Recurring describes a different situation: a store whose Action Plan was genuinely resolved — closed, automatically or manually — and later needed a new plan opened because the same or a related problem came back. The Action Center flags these as "Repeat Problem Stores" and highlights them for a deeper root-cause review, since the earlier fix didn't hold.</value></data>
+
+  <data name="APG_S12_Title" xml:space="preserve"><value>End-to-End Example</value></data>
+  <data name="APG_Example_Step1" xml:space="preserve"><value>Signal — Store #482 uploads its monthly data. Its 90-day early-leaver rate is 34%, above the 30% threshold, so Early Turnover (90 Days) fires.</value></data>
+  <data name="APG_Example_Step2" xml:space="preserve"><value>Persistence — The same signal had already fired in the prior period. That's 2 of the last 3 periods with data, so it's marked persistent.</value></data>
+  <data name="APG_Example_Step3" xml:space="preserve"><value>Plan Creation — No plan was open for Store #482, so an Action Plan opens automatically, carrying this one detected signal.</value></data>
+  <data name="APG_Example_Step4" xml:space="preserve"><value>Severity — With 1 distinct signal active, the plan is classified Medium under the default cutoffs.</value></data>
+  <data name="APG_Example_Step5" xml:space="preserve"><value>Target Date — Because the plan is Medium, not Critical, at creation, its target resolution date is set 90 days out.</value></data>
+  <data name="APG_Example_Step6" xml:space="preserve"><value>Monthly Progress — Over the next two monthly uploads, the Store Leader follows the onboarding recommendations. The early-leaver rate drops to 22%, then 18% — both below threshold, so the signal stops firing.</value></data>
+  <data name="APG_Example_Step7" xml:space="preserve"><value>Healthy Streak — Those two clean months in a row complete the 2-period healthy streak.</value></data>
+  <data name="APG_Example_Step8" xml:space="preserve"><value>Review &amp; Outcome — The plan auto-resolves with outcome Resolved. If the same store spikes again months later, a brand-new plan opens and, since this store now has more than one plan on record, it's flagged as a Repeat Problem Store — not because it merely crossed a quarter, but because the earlier plan had already been closed.</value></data>
 </root>

@@ -1,0 +1,280 @@
+<style>
+.apg-card { margin-bottom: 20px; }
+.apg-lifecycle {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin: 4px 0 6px;
+}
+.apg-stage {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-2); border: 1px solid var(--card-border);
+    border-radius: 20px; padding: 8px 16px;
+    font-size: 12.5px; font-weight: 700; color: var(--text);
+    white-space: nowrap;
+}
+.apg-stage-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--red); color: #fff; font-size: 11px; font-weight: 800;
+}
+.apg-arrow { color: var(--text-3); font-size: 15px; }
+.apg-list { margin: 0; padding-inline-start: 20px; }
+.apg-list li { margin-bottom: 8px; line-height: 1.6; }
+.apg-list li:last-child { margin-bottom: 0; }
+.apg-signal-name { font-weight: 700; color: var(--text); }
+.apg-example-steps { display: flex; flex-direction: column; gap: 10px; }
+.apg-example-step {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--bg-2); border-radius: var(--radius-sm);
+    padding: 10px 14px; font-size: 13.5px; line-height: 1.6;
+}
+.apg-example-step .apg-stage-num { flex: none; margin-top: 2px; }
+.apg-outcome-badge {
+    display: inline-block; font-weight: 700; color: var(--red);
+}
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">@L["Page_ActionPlanGuide"]</h1>
+        <p class="page-subtitle">@L["Page_ActionPlanGuideSub"]</p>
+    </div>
+</div>
+
+<div class="chart-card apg-card">
+    <p class="mb-0" style="color:var(--text-2);line-height:1.65">@L["APG_Overview"]</p>
+</div>
+
+<div class="accordion page-guide-accordion apg-card" id="apgAccordion">
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s1">
+                <i class="bi bi-question-circle me-2" style="color:var(--red)"></i>@L["APG_S1_Title"]
+            </button>
+        </h2>
+        <div id="apg-s1" class="accordion-collapse collapse show" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S1_Purpose"]</p>
+                <p class="mb-0">@L["APG_S1_Trigger"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s2">
+                <i class="bi bi-diagram-3 me-2" style="color:var(--red)"></i>@L["APG_S2_Title"]
+            </button>
+        </h2>
+        <div id="apg-s2" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S2_Body"]</p>
+                <div class="apg-lifecycle">
+                    <span class="apg-stage"><span class="apg-stage-num">1</span>@L["APG_Stage_Signal"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">2</span>@L["APG_Stage_Persistence"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">3</span>@L["APG_Stage_Severity"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">4</span>@L["APG_Stage_Creation"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">5</span>@L["APG_Stage_Monitoring"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">6</span>@L["APG_Stage_Review"]</span>
+                    <i class="bi bi-arrow-right apg-arrow"></i>
+                    <span class="apg-stage"><span class="apg-stage-num">7</span>@L["APG_Stage_Closure"]</span>
+                </div>
+                <p class="mb-0 mt-2" style="color:var(--text-3);font-size:12.5px">@L["APG_S2_Note"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s3">
+                <i class="bi bi-broadcast me-2" style="color:var(--red)"></i>@L["APG_S3_Title"]
+            </button>
+        </h2>
+        <div id="apg-s3" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S3_Intro"]</p>
+                <ul class="apg-list">
+                    <li><span class="apg-signal-name">@L["AC_SignalName_HighOverallTurnover"]</span> — @L["APG_Signal_HighOverallTurnover_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_EarlyTurnover90D"]</span> — @L["APG_Signal_EarlyTurnover90D_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_LowRetention6M"]</span> — @L["APG_Signal_LowRetention6M_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_LeadershipInstability"]</span> — @L["APG_Signal_LeadershipInstability_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_LowExitSentiment"]</span> — @L["APG_Signal_LowExitSentiment_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_ReasonConcentration"]</span> — @L["APG_Signal_ReasonConcentration_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_EarlyWarningWatchlist"]</span> — @L["APG_Signal_EarlyWarningWatchlist_Desc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SignalName_NoDominantDriver"]</span> — @L["APG_Signal_NoDominantDriver_Desc"]</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s4">
+                <i class="bi bi-repeat me-2" style="color:var(--red)"></i>@L["APG_S4_Title"]
+            </button>
+        </h2>
+        <div id="apg-s4" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S4_Body"]</p>
+                <p class="mb-0">@L["APG_S4_Critical"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s5">
+                <i class="bi bi-thermometer-half me-2" style="color:var(--red)"></i>@L["APG_S5_Title"]
+            </button>
+        </h2>
+        <div id="apg-s5" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_Severity_Body"]</p>
+                <ul class="apg-list">
+                    <li><span class="apg-signal-name">@L["AC_SeverityMedium"]</span> — @L["APG_Severity_MediumDesc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SeverityHigh"]</span> — @L["APG_Severity_HighDesc"]</li>
+                    <li><span class="apg-signal-name">@L["AC_SeverityCritical"]</span> — @L["APG_Severity_CriticalDesc"]</li>
+                </ul>
+                <p class="mb-0 mt-2">@L["APG_Severity_ConfigNote"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s6">
+                <i class="bi bi-calendar-check me-2" style="color:var(--red)"></i>@L["APG_S6_Title"]
+            </button>
+        </h2>
+        <div id="apg-s6" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <ul class="apg-list">
+                    <li>@L["APG_S6_Standard"]</li>
+                    <li>@L["APG_S6_Critical"]</li>
+                </ul>
+                <p class="mb-0 mt-2">@L["APG_S6_Quarter"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s7">
+                <i class="bi bi-folder2-open me-2" style="color:var(--red)"></i>@L["APG_S7_Title"]
+            </button>
+        </h2>
+        <div id="apg-s7" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <ul class="apg-list">
+                    <li>@L["APG_Inside_Kpi"]</li>
+                    <li>@L["APG_Inside_Monthly"]</li>
+                    <li>@L["APG_Inside_Signals"]</li>
+                    <li>@L["APG_Inside_Recs"]</li>
+                    <li>@L["APG_Inside_Notes"]</li>
+                    <li>@L["APG_Inside_Target"]</li>
+                    <li>@L["APG_Inside_Streak"]</li>
+                    <li>@L["APG_Inside_Closure"]</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s8">
+                <i class="bi bi-graph-up me-2" style="color:var(--red)"></i>@L["APG_S8_Title"]
+            </button>
+        </h2>
+        <div id="apg-s8" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S8_Body"]</p>
+                <ul class="apg-list">
+                    <li><span class="apg-signal-name">@L["AC_MonthlyPerfTurnover"]</span> — @L["APG_Monitoring_Turnover"]</li>
+                    <li><span class="apg-signal-name">@L["AC_MonthlyPerfEarlyLeaver"]</span> — @L["APG_Monitoring_EarlyLeaver"]</li>
+                    <li><span class="apg-signal-name">@L["AC_MonthlyPerfRetention"]</span> — @L["APG_Monitoring_Retention"]</li>
+                    <li><span class="apg-signal-name">@L["AC_MonthlyPerfSignalCount"]</span> — @L["APG_Monitoring_SignalCount"]</li>
+                    <li><span class="apg-signal-name">@L["AC_MonthlyPerfChange"]</span> — @L["APG_Monitoring_Change"]</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s9">
+                <i class="bi bi-heart-pulse me-2" style="color:var(--red)"></i>@L["APG_S9_Title"]
+            </button>
+        </h2>
+        <div id="apg-s9" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S9_Body1"]</p>
+                <p class="mb-0">@L["APG_S9_Body2"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s10">
+                <i class="bi bi-check2-circle me-2" style="color:var(--red)"></i>@L["APG_S10_Title"]
+            </button>
+        </h2>
+        <div id="apg-s10" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <ul class="apg-list">
+                    <li>@L["APG_S10_Auto"]</li>
+                    <li>@L["APG_S10_Manual"]</li>
+                </ul>
+                <p class="mt-2 mb-2">@L["APG_S10_OutcomesIntro"]</p>
+                <ul class="apg-list">
+                    <li>@L["APG_Outcome_Resolved"]</li>
+                    <li>@L["APG_Outcome_PartiallyImproved"]</li>
+                    <li>@L["APG_Outcome_NotImproved"]</li>
+                    <li>@L["APG_Outcome_Escalated"]</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s11">
+                <i class="bi bi-arrow-repeat me-2" style="color:var(--red)"></i>@L["APG_S11_Title"]
+            </button>
+        </h2>
+        <div id="apg-s11" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <p>@L["APG_S11_Continuing"]</p>
+                <p class="mb-0">@L["APG_S11_Chronic"]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apg-s12">
+                <i class="bi bi-lightbulb me-2" style="color:var(--red)"></i>@L["APG_S12_Title"]
+            </button>
+        </h2>
+        <div id="apg-s12" class="accordion-collapse collapse" data-bs-parent="#apgAccordion">
+            <div class="accordion-body">
+                <div class="apg-example-steps">
+                    <div class="apg-example-step"><span class="apg-stage-num">1</span><span>@L["APG_Example_Step1"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">2</span><span>@L["APG_Example_Step2"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">3</span><span>@L["APG_Example_Step3"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">4</span><span>@L["APG_Example_Step4"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">5</span><span>@L["APG_Example_Step5"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">6</span><span>@L["APG_Example_Step6"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">7</span><span>@L["APG_Example_Step7"]</span></div>
+                    <div class="apg-example-step"><span class="apg-stage-num">8</span><span>@L["APG_Example_Step8"]</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

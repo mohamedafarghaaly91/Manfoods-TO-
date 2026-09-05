@@ -1329,4 +1329,97 @@
   <data name="Api_AtLeastOneRule" xml:space="preserve"><value>مطلوب قاعدة واحدة على الأقل.</value></data>
   <data name="Api_OneOpenEndedRule" xml:space="preserve"><value>يجب أن تحتوي قاعدة واحدة فقط على حد أعلى فارغ، وأن تكون القاعدة الأخيرة.</value></data>
   <data name="Api_BothLanguagesRequired" xml:space="preserve"><value>النص بالإنجليزية والعربية مطلوبان معًا.</value></data>
+
+  <!-- Action Plan Guide (read-only business guide page under Action Center) -->
+  <data name="Nav_ActionPlanGuide" xml:space="preserve"><value>دليل خطة العمل</value></data>
+  <data name="Page_ActionPlanGuide" xml:space="preserve"><value>دليل خطة العمل</value></data>
+  <data name="Page_ActionPlanGuideSub" xml:space="preserve"><value>كيف يتم اكتشاف خطة العمل وإنشاؤها ومتابعتها وإغلاقها</value></data>
+  <data name="APG_Overview" xml:space="preserve"><value>يشرح هذا الدليل، بلغة عملية مبسّطة، دورة حياة خطة العمل الكاملة الخاصة بالفرع — من أول اكتشاف للمشكلة، إلى تحوّلها إلى خطة عمل رسمية، وكيفية تحديد الشدة والتاريخ المستهدف، ومتابعة التقدّم شهريًا، وصولًا إلى إغلاق الخطة. هذا الدليل للقراءة فقط ولا يُغيّر أي بيانات أو إعدادات في مركز العمليات.</value></data>
+
+  <data name="APG_S1_Title" xml:space="preserve"><value>ما هي خطة العمل؟</value></data>
+  <data name="APG_S1_Purpose" xml:space="preserve"><value>خطة العمل هي استجابة رسمية وموثّقة لمشكلة تتعلق بالقوى العاملة في فرع معيّن — ارتفاع معدل الدوران، تسرّب مبكر للموظفين الجدد، عدم استقرار القيادة، انطباع سلبي عند المغادرة، أو تركّز سبب استقالة واحد بشكل ملحوظ. تمنح المشكلة مسؤولًا، ودرجة شدة، وتاريخ حل مستهدف، ومكانًا لتسجيل التوصيات والملاحظات والتقدّم حتى يتم حلّها.</value></data>
+  <data name="APG_S1_Trigger" xml:space="preserve"><value>لا حاجة لفتح الخطة يدويًا. في أول مرة تُفعَّل فيها أي من إشارات الاكتشاف أدناه لفرع لا توجد له خطة نشطة بالفعل، تُفتح خطة عمل تلقائيًا باستخدام بيانات تلك الفترة المرفوعة. لا يمكن أن يكون للفرع أكثر من خطة نشطة واحدة في نفس الوقت — أي إشارة جديدة تظهر لاحقًا تُضاف إلى نفس الخطة المفتوحة بدلًا من فتح خطة ثانية.</value></data>
+
+  <data name="APG_S2_Title" xml:space="preserve"><value>دورة حياة خطة العمل</value></data>
+  <data name="APG_S2_Body" xml:space="preserve"><value>تمر كل خطة عمل بنفس المسار، سواء أُغلقت بسرعة أو استمرت لعدة أشهر:</value></data>
+  <data name="APG_Stage_Signal" xml:space="preserve"><value>اكتشاف الإشارة</value></data>
+  <data name="APG_Stage_Persistence" xml:space="preserve"><value>الاستمرارية</value></data>
+  <data name="APG_Stage_Severity" xml:space="preserve"><value>الشدة</value></data>
+  <data name="APG_Stage_Creation" xml:space="preserve"><value>إنشاء خطة العمل</value></data>
+  <data name="APG_Stage_Monitoring" xml:space="preserve"><value>المتابعة الشهرية</value></data>
+  <data name="APG_Stage_Review" xml:space="preserve"><value>المراجعة</value></data>
+  <data name="APG_Stage_Closure" xml:space="preserve"><value>الإغلاق / النتيجة</value></data>
+  <data name="APG_S2_Note" xml:space="preserve"><value>يتم تقييم الاستمرارية والشدة بشكل مستمر، حتى بعد إنشاء الخطة — وليس مرة واحدة فقط عند البداية.</value></data>
+
+  <data name="APG_S3_Title" xml:space="preserve"><value>اكتشاف الإشارة</value></data>
+  <data name="APG_S3_Intro" xml:space="preserve"><value>يتم فحص بيانات كل فترة مرفوعة مقابل 7 إشارات اكتشاف، بالإضافة إلى ملاحظة احتياطية واحدة. تكفي أي إشارة واحدة لفتح خطة أو تحديثها.</value></data>
+  <data name="APG_Signal_HighOverallTurnover_Desc" xml:space="preserve"><value>عدد موظفين 5 أو أكثر، ومعدل دوران إجمالي 15% أو أعلى. الإشارة الأشمل والرئيسية.</value></data>
+  <data name="APG_Signal_EarlyTurnover90D_Desc" xml:space="preserve"><value>3 توظيفات أو أكثر في فترة غير مبدئية، مع مغادرة 30% أو أكثر منهم خلال أول 90 يومًا. يشير إلى مشكلة في التأهيل أو الملاءمة المبكرة.</value></data>
+  <data name="APG_Signal_LowRetention6M_Desc" xml:space="preserve"><value>3 توظيفات أو أكثر، مع بقاء أقل من 70% منهم في العمل عند علامة الستة أشهر. يشير إلى مشكلة استبقاء في منتصف مدة الخدمة.</value></data>
+  <data name="APG_Signal_LeadershipInstability_Desc" xml:space="preserve"><value>وجود قائدَي فرع مختلفَين أو أكثر خلال آخر 6 أشهر. تغييرات القيادة المتكررة مرتبطة بقوة بدوران الفريق.</value></data>
+  <data name="APG_Signal_LowExitSentiment_Desc" xml:space="preserve"><value>مقابلتا مغادرة أو أكثر، مع انطباع إيجابي أقل من 50%. يشير إلى مشكلة ثقافية أو إدارية تظهر عند المغادرة.</value></data>
+  <data name="APG_Signal_ReasonConcentration_Desc" xml:space="preserve"><value>استجابتان أو أكثر لسبب المغادرة، مع تركّز سبب واحد في 50% أو أكثر منها — مثل غالبية حالات المغادرة بسبب الراتب أو الجدولة.</value></data>
+  <data name="APG_Signal_EarlyWarningWatchlist_Desc" xml:space="preserve"><value>موظفان أو أكثر من الموظفين النشطين حاليًا مصنّفون كعالي الخطورة في قائمة الإنذار المبكر — إشارة استشرافية مبنية على من لا يزال موجودًا في العمل، وليس على من غادر.</value></data>
+  <data name="APG_Signal_NoDominantDriver_Desc" xml:space="preserve"><value>ليست إشارة مستقلة. تُضاف فقط بجانب ارتفاع معدل الدوران الإجمالي عندما لا تُفعَّل أي من الإشارات الأكثر تحديدًا أعلاه — ملاحظة صريحة بأنه لا يوجد سبب جذري واحد واضح بعد.</value></data>
+
+  <data name="APG_S4_Title" xml:space="preserve"><value>قاعدة الاستمرارية</value></data>
+  <data name="APG_S4_Body" xml:space="preserve"><value>بالنسبة للمشكلات العادية غير الحرجة، تُعتبر الإشارة مستمرة فقط بعد ظهورها في فترتين على الأقل من آخر 3 فترات تقييم لديها بيانات مرفوعة فعليًا. الفترة التي لا يوجد فيها رفع بيانات لا تُحتسب كفترة سليمة أو نظيفة — بل تُستبعد ببساطة، حتى لا يبدو الفرع مستقرًا بشكل مصطنع لمجرد تخطي فترة ما.</value></data>
+  <data name="APG_S4_Critical" xml:space="preserve"><value>المشكلات ذات الشدة الحرجة تتجاوز شرط الاستمرارية العادي هذا — ويُتخذ إجراء فوري بشأنها بدل انتظار تكرارها عبر الفترات، نظرًا لما تمثله من إلحاح.</value></data>
+
+  <data name="APG_S5_Title" xml:space="preserve"><value>الشدة</value></data>
+  <data name="APG_Severity_MediumDesc" xml:space="preserve"><value>إشارة واحدة مميزة مكتشفة على الخطة.</value></data>
+  <data name="APG_Severity_HighDesc" xml:space="preserve"><value>إشارتان مميزتان مكتشفتان على الخطة في نفس الوقت.</value></data>
+  <data name="APG_Severity_CriticalDesc" xml:space="preserve"><value>ثلاث إشارات مميزة أو أكثر مكتشفة على الخطة في نفس الوقت — أعلى درجة إلحاحًا.</value></data>
+  <data name="APG_Severity_Body" xml:space="preserve"><value>الشدة ليست ثابتة عند إنشاء الخطة — بل تُحسب مباشرة بناءً على عدد الإشارات المميزة النشطة حاليًا على تلك الخطة.</value></data>
+  <data name="APG_Severity_ConfigNote" xml:space="preserve"><value>الحدود العددية للإشارات الخاصة بمستويات متوسط ومرتفع وحرج قابلة للتهيئة من قبل المسؤول في صفحة إعدادات شدة خطة العمل. تغييرها يعيد تصنيف كل خطة — المفتوحة والمغلقة على حد سواء — فورًا، وقد يؤثر أيضًا في نافذة الحل المستهدف الموضحة أدناه.</value></data>
+
+  <data name="APG_S6_Title" xml:space="preserve"><value>تاريخ الحل المستهدف</value></data>
+  <data name="APG_S6_Standard" xml:space="preserve"><value>خطة العمل القياسية — يُحدَّد تاريخ الحل المستهدف بعد 90 يومًا من تاريخ فتح الخطة.</value></data>
+  <data name="APG_S6_Critical" xml:space="preserve"><value>خطة العمل الحرجة / الفورية — إذا كانت الخطة بدرجة حرجة بالفعل لحظة فتحها، يُحدَّد تاريخ الحل المستهدف بعد 30 يومًا فقط من فتحها.</value></data>
+  <data name="APG_S6_Quarter" xml:space="preserve"><value>الربع السنوي المعروض على الخطة هو مجرد تصنيف يُستخدم للتقارير والتجميع بناءً على تاريخ فتح الخطة. وهو منفصل تمامًا عن تاريخ الحل المستهدف ولا يُطيل أو يُقصّر مهلة الحل.</value></data>
+
+  <data name="APG_S7_Title" xml:space="preserve"><value>داخل خطة العمل (تفاصيل مركز عمليات الفرع)</value></data>
+  <data name="APG_Inside_Kpi" xml:space="preserve"><value>المؤشرات / القيمة الأساسية مقابل الأحدث — معدل الدوران، ومعدل المغادرة المبكرة (90 يومًا)، ومعدل الاستبقاء للفرع كما كانت عند فتح الخطة، مقارنة بأحدث القيم المسجلة، لإظهار التقدّم بسهولة.</value></data>
+  <data name="APG_Inside_Monthly" xml:space="preserve"><value>الأداء الشهري — كل لقطة شهرية مسجّلة منذ فتح الخطة، تعرض معدل الدوران، ومعدل المغادرة المبكرة، ومعدل الاستبقاء، وعدد الإشارات، والتغير في معدل الدوران مقارنة بالشهر السابق.</value></data>
+  <data name="APG_Inside_Signals" xml:space="preserve"><value>سجل الإشارات — الإشارات التي ظهرت في كل فترة رفع فيها الفرع بيانات، وما إذا كانت أيٌّ منها قد أصبحت مستمرة.</value></data>
+  <data name="APG_Inside_Recs" xml:space="preserve"><value>التوصيات — إجراءات مقترحة مصمّمة حسب الإشارات المكتشفة تحديدًا، مصنّفة حسب الفئة (مثل التأهيل، الاستبقاء، القيادة)، ويمكن وضع علامة عليها عند إتمامها.</value></data>
+  <data name="APG_Inside_Notes" xml:space="preserve"><value>الإجراءات / الملاحظات — سجل مستمر يوثّق فيه الشخص المسؤول ما تم إنجازه ومتى.</value></data>
+  <data name="APG_Inside_Target" xml:space="preserve"><value>تاريخ الحل المستهدف — المهلة المحددة بـ 90 أو 30 يومًا الموضحة أعلاه، معروضة إلى جانب عمر الخطة الحالي.</value></data>
+  <data name="APG_Inside_Streak" xml:space="preserve"><value>سلسلة الفترات السليمة — عدد فترات التقييم النظيفة المتتالية التي مرّ بها الفرع منذ فتح الخطة، من أصل الفترتين المطلوبتين للإغلاق التلقائي.</value></data>
+  <data name="APG_Inside_Closure" xml:space="preserve"><value>الإغلاق / النتيجة — بمجرد حل الخطة، تُظهر كيف ومتى أُغلقت، ومن أغلقها (إن أُغلقت يدويًا)، والسبب المسجَّل للإغلاق.</value></data>
+
+  <data name="APG_S8_Title" xml:space="preserve"><value>المتابعة الشهرية</value></data>
+  <data name="APG_S8_Body" xml:space="preserve"><value>طوال فترة فتح الخطة، يستمر تقييم الفرع في كل مرة تُرفع فيها بيانات شهرية جديدة — وهذا ما يغذّي جدول الأداء الشهري وسلسلة الفترات السليمة. المقاييس المتابَعة كل شهر هي:</value></data>
+  <data name="APG_Monitoring_Turnover" xml:space="preserve"><value>معدل دوران الفرع لذلك الشهر.</value></data>
+  <data name="APG_Monitoring_EarlyLeaver" xml:space="preserve"><value>معدل المغادرة المبكرة (90 يومًا) لذلك الشهر.</value></data>
+  <data name="APG_Monitoring_Retention" xml:space="preserve"><value>معدل الاستبقاء لمدة 6 أشهر لذلك الشهر.</value></data>
+  <data name="APG_Monitoring_SignalCount" xml:space="preserve"><value>عدد إشارات الاكتشاف السبع النشطة في ذلك الشهر.</value></data>
+  <data name="APG_Monitoring_Change" xml:space="preserve"><value>التغير في معدل الدوران مقارنة بالشهر السابق، لإظهار الاتجاه دون الحاجة لمراجعة كل صف سابق.</value></data>
+
+  <data name="APG_S9_Title" xml:space="preserve"><value>سلسلة الفترات السليمة</value></data>
+  <data name="APG_S9_Body1" xml:space="preserve"><value>الشهر الذي لا توجد فيه أي إشارة نشطة يُحتسب فترة سليمة ويُضاف إلى سلسلة الفترات السليمة للخطة. سلسلة الفترات السليمة دليل جيد على أن المشكلة الأساسية في تحسّن.</value></data>
+  <data name="APG_S9_Body2" xml:space="preserve"><value>الوصول إلى فترتين سليمتين متتاليتين يُفعّل الإغلاق التلقائي — لكن ظهور أي إشارة مجددًا يعيد السلسلة إلى الصفر. وقبل الوصول إلى هذا الحد التلقائي، لا تُغلق سلسلة الفترات السليمة الخطة وحدها؛ فإغلاقها مبكرًا يتطلب مراجعة وقرارًا مقصودَين.</value></data>
+
+  <data name="APG_S10_Title" xml:space="preserve"><value>الإغلاق والنتائج</value></data>
+  <data name="APG_S10_Auto" xml:space="preserve"><value>الحل التلقائي — تُحل الخطة تلقائيًا بمجرد ألا تُظهر أي إشارات نشطة لفترتي تقييم متتاليتين.</value></data>
+  <data name="APG_S10_Manual" xml:space="preserve"><value>الإغلاق اليدوي — يمكن للمسؤول إغلاق الخطة قبل ذلك، مع تسجيل من قام بالإغلاق وسبب مكتوب. يجب استخدام ذلك فقط عندما تكون المشكلة قد عولجت فعليًا خارج دورة الاكتشاف العادية.</value></data>
+  <data name="APG_S10_OutcomesIntro" xml:space="preserve"><value>عمليًا، يوثّق سبب الإغلاق المسجَّل إحدى هذه النتائج:</value></data>
+  <data name="APG_Outcome_Resolved" xml:space="preserve"><value>تم الحل — عولجت المشكلة بالكامل؛ وعادت المؤشرات إلى نطاق سليم.</value></data>
+  <data name="APG_Outcome_PartiallyImproved" xml:space="preserve"><value>تحسّن جزئي — تحقق تقدّم ملموس، لكن المشكلة لم تُحل بالكامل.</value></data>
+  <data name="APG_Outcome_NotImproved" xml:space="preserve"><value>لم يتحسّن — لم يطرأ تغيير يُذكر منذ فتح الخطة.</value></data>
+  <data name="APG_Outcome_Escalated" xml:space="preserve"><value>تم التصعيد — تبيّن أن المشكلة أخطر مما تم اكتشافه في البداية، ورُفعت لمزيد من الاهتمام خارج نطاق الخطة نفسها.</value></data>
+
+  <data name="APG_S11_Title" xml:space="preserve"><value>استمرار الخطة مقابل المشكلة المزمنة / المتكررة</value></data>
+  <data name="APG_S11_Continuing" xml:space="preserve"><value>إذا ظلت المشكلة الأساسية دون حل عند انتهاء الربع، فإن خطة العمل نفسها تستمر ببساطة إلى الربع التالي — ويبقى تاريخها المستهدف وشدتها وسجلها كما هو دون تغيير. عبور حدود الربع السنوي لا يُعد بحد ذاته أمرًا غير عادي، ولا يجعل الخطة مزمنة أو متكررة.</value></data>
+  <data name="APG_S11_Chronic" xml:space="preserve"><value>المزمن / المتكرر يصف حالة مختلفة تمامًا: فرع تم فيه حل خطة العمل فعليًا — أُغلقت تلقائيًا أو يدويًا — ثم احتاج لاحقًا إلى فتح خطة جديدة لأن نفس المشكلة أو مشكلة مرتبطة بها عادت للظهور. يصنّف مركز العمليات هذه الحالات كـ"فروع المشكلات المتكررة" ويسلّط الضوء عليها لمراجعة أعمق للسبب الجذري، لأن الحل السابق لم يصمد.</value></data>
+
+  <data name="APG_S12_Title" xml:space="preserve"><value>مثال شامل من البداية إلى النهاية</value></data>
+  <data name="APG_Example_Step1" xml:space="preserve"><value>الإشارة — يرفع الفرع رقم 482 بياناته الشهرية. معدل المغادرة المبكرة لديه (90 يومًا) هو 34%، وهو أعلى من حد 30%، فتُفعَّل إشارة "المغادرة المبكرة (90 يومًا)".</value></data>
+  <data name="APG_Example_Step2" xml:space="preserve"><value>الاستمرارية — كانت نفس الإشارة قد ظهرت في الفترة السابقة. هذا يعني فترتين من آخر 3 فترات تحتوي بيانات، لذا تُصنَّف كإشارة مستمرة.</value></data>
+  <data name="APG_Example_Step3" xml:space="preserve"><value>إنشاء الخطة — لا توجد خطة مفتوحة للفرع رقم 482، لذا تُفتح خطة عمل تلقائيًا تحمل هذه الإشارة المكتشفة الواحدة.</value></data>
+  <data name="APG_Example_Step4" xml:space="preserve"><value>الشدة — مع وجود إشارة مميزة واحدة نشطة، تُصنَّف الخطة كمتوسطة الشدة وفق الحدود الافتراضية.</value></data>
+  <data name="APG_Example_Step5" xml:space="preserve"><value>التاريخ المستهدف — بما أن الخطة متوسطة الشدة وليست حرجة عند إنشائها، يُحدَّد تاريخ الحل المستهدف بعد 90 يومًا.</value></data>
+  <data name="APG_Example_Step6" xml:space="preserve"><value>التقدّم الشهري — خلال الرفعين الشهريين التاليين، يتبع قائد الفرع توصيات التأهيل. ينخفض معدل المغادرة المبكرة إلى 22%، ثم إلى 18% — وكلاهما أقل من الحد، فتتوقف الإشارة عن الظهور.</value></data>
+  <data name="APG_Example_Step7" xml:space="preserve"><value>سلسلة الفترات السليمة — هذان الشهران النظيفان المتتاليان يكمّلان سلسلة الفترتين السليمتين المطلوبة.</value></data>
+  <data name="APG_Example_Step8" xml:space="preserve"><value>المراجعة والنتيجة — تُحل الخطة تلقائيًا بنتيجة "تم الحل". وإذا ارتفع المعدل مجددًا في نفس الفرع بعد أشهر، تُفتح خطة جديدة تمامًا، ولأن هذا الفرع أصبح لديه الآن أكثر من خطة مسجّلة، يُصنَّف كـ"فرع مشكلات متكررة" — ليس لمجرد عبوره لربع سنوي، بل لأن الخطة السابقة كانت قد أُغلقت بالفعل.</value></data>
 </root>
