@@ -42,6 +42,7 @@
         {
             new() { Icon = "bi-speedometer2", Title = L["AC_ProgressTitle"], Body = L["Guide_ActionCenterDetail_Chart_Kpis"] },
             new() { Icon = "bi-graph-up-arrow", Title = L["AC_MetricTrendTitle"], Body = L["Guide_ActionCenterDetail_Chart_Trend"] },
+            new() { Icon = "bi-table", Title = L["AC_MonthlyPerfTitle"], Body = L["Guide_ActionCenterDetail_Chart_MonthlyPerf"] },
             new() { Icon = "bi-broadcast", Title = L["AC_Signals"], Body = L["Guide_ActionCenterDetail_Chart_Signals"] },
             new() { Icon = "bi-exclamation-circle", Title = L["SAP_DetectedIssues"], Body = L["Guide_ActionCenterDetail_Chart_Issues"] },
             new() { Icon = "bi-list-check", Title = L["SAP_Recommendations"], Body = L["Guide_ActionCenterDetail_Chart_Recommendations"] },
@@ -92,6 +93,14 @@
      data-chronic-note="@L["AC_ChronicNote"]"
      data-progress-title="@L["AC_ProgressTitle"]"
      data-trend-title="@L["AC_MetricTrendTitle"]"
+     data-monthly-perf-title="@L["AC_MonthlyPerfTitle"]"
+     data-monthly-perf-turnover="@L["AC_MonthlyPerfTurnover"]"
+     data-monthly-perf-early-leaver="@L["AC_MonthlyPerfEarlyLeaver"]"
+     data-monthly-perf-retention="@L["AC_MonthlyPerfRetention"]"
+     data-monthly-perf-signal-count="@L["AC_MonthlyPerfSignalCount"]"
+     data-monthly-perf-change="@L["AC_MonthlyPerfChange"]"
+     data-monthly-perf-empty="@L["AC_MonthlyPerfEmpty"]"
+     data-common-month="@L["Common_Month"]"
      data-assignment-title="@L["AC_AssignmentTitle"]"
      data-assigned-to="@L["AC_AssignedTo"]"
      data-target-date="@L["AC_TargetDate"]"
@@ -210,6 +219,64 @@ function acdRenderTrendChart(snapshots) {
     });
 }
 
+/// Renders the Monthly Performance table straight from data.metricSnapshots —
+/// no new data source, no business logic. Snapshots arrive oldest-first (same
+/// order the trend chart already uses); this renders newest-first for at-a-
+/// glance recency, computing each row's "change vs previous month" from the
+/// chronological (oldest-first) order before reversing for display.
+function acdMonthlyPerformanceHtml(snaps) {
+    const d = ACD_D;
+
+    if (!snaps || snaps.length === 0) {
+        return `<div class="card-dark mb-4">
+            <h6 class="fw-bold mb-3">${sapEscape(d.monthlyPerfTitle)}</h6>
+            <p class="text-muted-custom mb-0">${sapEscape(d.monthlyPerfEmpty)}</p>
+        </div>`;
+    }
+
+    const rows = snaps.map((s, i) => {
+        const prev = i > 0 ? snaps[i - 1] : null;
+        let changeCell = '—';
+        if (prev && s.turnoverRate !== null && s.turnoverRate !== undefined &&
+            prev.turnoverRate !== null && prev.turnoverRate !== undefined) {
+            const delta = s.turnoverRate - prev.turnoverRate;
+            if (Math.abs(delta) < 0.05) {
+                changeCell = `<span style="color:var(--text-3)">— ${sapEscape(d.noChange)}</span>`;
+            } else {
+                const improving = delta < 0;
+                changeCell = `<span style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pt</span>`;
+            }
+        }
+        return { html: `<tr>
+            <td style="white-space:nowrap;font-weight:600;font-size:12.5px">${sapEscape(s.label)}</td>
+            <td>${acdRate(s.turnoverRate)}</td>
+            <td>${acdRate(s.earlyLeaverRate)}</td>
+            <td>${acdRate(s.retentionRate)}</td>
+            <td>${s.signalCount ?? '—'}</td>
+            <td>${changeCell}</td>
+        </tr>` };
+    }).reverse().map(r => r.html).join('');
+
+    return `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-3">${sapEscape(d.monthlyPerfTitle)}</h6>
+        <div style="overflow-x:auto">
+            <table class="table" style="margin-bottom:0">
+                <thead>
+                    <tr>
+                        <th>${sapEscape(d.commonMonth)}</th>
+                        <th>${sapEscape(d.monthlyPerfTurnover)}</th>
+                        <th>${sapEscape(d.monthlyPerfEarlyLeaver)}</th>
+                        <th>${sapEscape(d.monthlyPerfRetention)}</th>
+                        <th>${sapEscape(d.monthlyPerfSignalCount)}</th>
+                        <th>${sapEscape(d.monthlyPerfChange)}</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
 /// Renders the Signal History card from a SignalHistoryDto (or null if it
 /// couldn't be loaded — the section is simply omitted, never shown broken).
 function acdSignalHistoryHtml(history) {
@@ -320,6 +387,10 @@ function acdRender(data, signalHistory) {
             <div class="chart-body" style="height:260px"><canvas id="acdTrendChart"></canvas></div>
         </div>`;
     }
+
+    // ── Monthly Performance table — same data.metricSnapshots the KPI cards
+    // and trend chart above already use, just laid out as one row per month. ──
+    html += acdMonthlyPerformanceHtml(snaps);
 
     // ── Meta card ──
     html += `<div class="card-dark mb-4">
