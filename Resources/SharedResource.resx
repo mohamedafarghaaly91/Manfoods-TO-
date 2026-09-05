@@ -357,6 +357,7 @@
   <data name="Guide_ActionCenterDetail_Overview" xml:space="preserve"><value>This is the single-store drill-down behind one row of the Action Center table: what specifically got flagged for this store, its current metrics, its live-computed severity and auto-set Target Resolution Date, the recommended actions, and a place to track progress and leave notes until it's resolved. See the Action Center page's guide for the full list of detection signals and how severity and target dates are determined.</value></data>
   <data name="Guide_ActionCenterDetail_Chart_Kpis" xml:space="preserve"><value>This store's current Turnover Rate, Early Leaver (90-Day) Rate and Retention Rate, each with the change versus the prior period.</value></data>
   <data name="Guide_ActionCenterDetail_Chart_Trend" xml:space="preserve"><value>How this store's flagged metric(s) have trended over time, so you can see whether the situation is improving since the plan was opened.</value></data>
+  <data name="Guide_ActionCenterDetail_Chart_MonthlyPerf" xml:space="preserve"><value>Every recorded monthly snapshot as a table — Turnover %, Early-Leaver %, Retention %, signal count, and the change in Turnover % versus the previous month — the same data behind the KPI cards and trend chart above, laid out month by month.</value></data>
   <data name="Guide_ActionCenterDetail_Chart_Signals" xml:space="preserve"><value>Which specific detection signals are currently active for this store and how far each is past its threshold.</value></data>
   <data name="Guide_ActionCenterDetail_Chart_Issues" xml:space="preserve"><value>The plain-language explanation of exactly what was detected and why this store was flagged.</value></data>
   <data name="Guide_ActionCenterDetail_Chart_Recommendations" xml:space="preserve"><value>Suggested actions for this store's specific issues, which can be checked off as they're completed.</value></data>
@@ -847,6 +848,13 @@
   <data name="AC_PlansOverTime" xml:space="preserve"><value>plans over time</value></data>
   <data name="AC_ProgressTitle" xml:space="preserve"><value>Progress</value></data>
   <data name="AC_MetricTrendTitle" xml:space="preserve"><value>Metric Trend Since Plan Opened</value></data>
+  <data name="AC_MonthlyPerfTitle" xml:space="preserve"><value>Monthly Performance</value></data>
+  <data name="AC_MonthlyPerfTurnover" xml:space="preserve"><value>Turnover %</value></data>
+  <data name="AC_MonthlyPerfEarlyLeaver" xml:space="preserve"><value>Early-Leaver %</value></data>
+  <data name="AC_MonthlyPerfRetention" xml:space="preserve"><value>Retention %</value></data>
+  <data name="AC_MonthlyPerfSignalCount" xml:space="preserve"><value>Signal Count</value></data>
+  <data name="AC_MonthlyPerfChange" xml:space="preserve"><value>Change vs. Previous Month</value></data>
+  <data name="AC_MonthlyPerfEmpty" xml:space="preserve"><value>No monthly snapshots recorded yet for this plan.</value></data>
   <data name="AC_AssignmentTitle" xml:space="preserve"><value>Ownership &amp; Target Date</value></data>
   <data name="AC_TargetDate" xml:space="preserve"><value>Target Resolution Date</value></data>
   <data name="AC_ReportingQuarter" xml:space="preserve"><value>Reporting Quarter</value></data>
