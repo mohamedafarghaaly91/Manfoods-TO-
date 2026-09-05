@@ -1184,6 +1184,15 @@
   <data name="Set_AproleReset" xml:space="preserve"><value>Reset to default</value></data>
   <data name="Set_AproleNoRoles" xml:space="preserve"><value>No manager is assigned to this store yet</value></data>
   <data name="Set_AproleSearchPlaceholder" xml:space="preserve"><value>Search stores...</value></data>
+  <data name="Set_Tab_Severity" xml:space="preserve"><value>Action Plan Severity</value></data>
+  <data name="Set_SeveritySub" xml:space="preserve"><value>Choose how many distinct fired signals make an Active Action Plan Medium/High/Critical severity. Changing these applies immediately to every open and past plan's displayed severity — it does not change the 7 signal detection thresholds themselves.</value></data>
+  <data name="Set_SeverityMedium" xml:space="preserve"><value>Medium severity at ≥ signals</value></data>
+  <data name="Set_SeverityHigh" xml:space="preserve"><value>High severity at ≥ signals</value></data>
+  <data name="Set_SeverityCritical" xml:space="preserve"><value>Critical severity at ≥ signals</value></data>
+  <data name="Set_SeverityInvalid" xml:space="preserve"><value>Cutoffs must be at least 1 and non-decreasing: Medium ≤ High ≤ Critical.</value></data>
+  <data name="Set_SeverityHistoryTitle" xml:space="preserve"><value>Change history</value></data>
+  <data name="Set_SeverityHistoryNone" xml:space="preserve"><value>No changes yet — using the default cutoffs.</value></data>
+  <data name="Set_SeverityHistoryBy" xml:space="preserve"><value>by</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>Error.</value></data>

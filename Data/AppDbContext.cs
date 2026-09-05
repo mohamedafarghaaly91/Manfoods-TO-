@@ -21,6 +21,9 @@ public class AppDbContext : DbContext
     public DbSet<ActionPlanNote> ActionPlanNotes { get; set; }
     public DbSet<ActionPlanMetricSnapshot> ActionPlanMetricSnapshots { get; set; }
     public DbSet<StoreActionPlanRoleAssignment> StoreActionPlanRoleAssignments { get; set; }
+    public DbSet<ActionPlanSeverityBandConfig> ActionPlanSeverityBandConfigs { get; set; }
+    public DbSet<ActionPlanSeverityBandHistory> ActionPlanSeverityBandHistories { get; set; }
+    public DbSet<SignalOccurrence> SignalOccurrences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +45,13 @@ public class AppDbContext : DbContext
             .HasIndex(a => a.StoreName)
             .IsUnique()
             .HasDatabaseName("ux_store_action_plan_role_assignments_store");
+
+        // One occurrence row per store/signal/period — re-running detection or
+        // the backfill script for an already-logged period must not duplicate it.
+        modelBuilder.Entity<SignalOccurrence>()
+            .HasIndex(s => new { s.StoreName, s.SignalCode, s.Year, s.Month })
+            .IsUnique()
+            .HasDatabaseName("ux_signal_occurrences_store_signal_period");
 
         // SQL Server's DATETIME2 (unlike Npgsql's TIMESTAMPTZ) has no concept of
         // DateTimeKind — every DateTime read back from it comes back as Kind=

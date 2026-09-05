@@ -48,6 +48,7 @@
     <button type="button" class="set-tab-btn active" id="setTabBtnColors" onclick="setShowTab('colors')">@L["Set_Tab_Colors"]</button>
     <button type="button" class="set-tab-btn" id="setTabBtnRec" onclick="setShowTab('rec')">@L["Set_Tab_Recommendations"]</button>
     <button type="button" class="set-tab-btn" id="setTabBtnAprole" onclick="setShowTab('aprole')">@L["Set_Tab_ActionPlanRole"]</button>
+    <button type="button" class="set-tab-btn" id="setTabBtnSeverity" onclick="setShowTab('severity')">@L["Set_Tab_Severity"]</button>
 </div>
 
 @Html.AntiForgeryToken()
@@ -95,7 +96,15 @@
      data-aprole-overridden="@L["Set_AproleOverridden"]"
      data-aprole-reset="@L["Set_AproleReset"]"
      data-aprole-no-roles="@L["Set_AproleNoRoles"]"
-     data-aprole-search-placeholder="@L["Set_AproleSearchPlaceholder"]"></div>
+     data-aprole-search-placeholder="@L["Set_AproleSearchPlaceholder"]"
+     data-sev-sub="@L["Set_SeveritySub"]"
+     data-sev-medium="@L["Set_SeverityMedium"]"
+     data-sev-high="@L["Set_SeverityHigh"]"
+     data-sev-critical="@L["Set_SeverityCritical"]"
+     data-sev-invalid="@L["Set_SeverityInvalid"]"
+     data-sev-history-title="@L["Set_SeverityHistoryTitle"]"
+     data-sev-history-none="@L["Set_SeverityHistoryNone"]"
+     data-sev-history-by="@L["Set_SeverityHistoryBy"]"></div>
 
 <div id="setTabColors">
     <div id="setSections"></div>
@@ -120,6 +129,33 @@
                 <tbody id="setAproleBody"></tbody>
             </table>
         </div>
+    </div>
+</div>
+<div id="setTabSeverity" hidden>
+    <p class="text-muted-custom mb-4">@L["Set_SeveritySub"]</p>
+    <div class="chart-card set-card">
+        <div style="padding:20px" class="set-rules">
+            <div class="set-rule-row">
+                <label style="min-width:180px">@L["Set_SeverityMedium"]</label>
+                <input type="number" min="1" id="setSevMedium" class="form-control">
+            </div>
+            <div class="set-rule-row">
+                <label style="min-width:180px">@L["Set_SeverityHigh"]</label>
+                <input type="number" min="1" id="setSevHigh" class="form-control">
+            </div>
+            <div class="set-rule-row">
+                <label style="min-width:180px">@L["Set_SeverityCritical"]</label>
+                <input type="number" min="1" id="setSevCritical" class="form-control">
+            </div>
+            <div class="set-rule-row">
+                <button type="button" class="btn btn-danger-custom" id="setSevSaveBtn" onclick="setSeveritySave()">@L["Common_Save"]</button>
+                <span class="set-save-status" id="setSevStatus"></span>
+            </div>
+        </div>
+    </div>
+    <div class="chart-card set-card">
+        <div class="chart-header"><h6>@L["Set_SeverityHistoryTitle"]</h6></div>
+        <div style="padding:0 20px 20px" id="setSevHistory"></div>
     </div>
 </div>
 
@@ -286,11 +322,77 @@ function setShowTab(tab) {
     document.getElementById('setTabColors').hidden = tab !== 'colors';
     document.getElementById('setTabRec').hidden = tab !== 'rec';
     document.getElementById('setTabAprole').hidden = tab !== 'aprole';
+    document.getElementById('setTabSeverity').hidden = tab !== 'severity';
     document.getElementById('setTabBtnColors').classList.toggle('active', tab === 'colors');
     document.getElementById('setTabBtnRec').classList.toggle('active', tab === 'rec');
     document.getElementById('setTabBtnAprole').classList.toggle('active', tab === 'aprole');
+    document.getElementById('setTabBtnSeverity').classList.toggle('active', tab === 'severity');
     if (tab === 'rec' && !setRecLoaded) setRecInit();
     if (tab === 'aprole' && !setAproleLoaded) setAproleInit();
+    if (tab === 'severity' && !setSevLoaded) setSeverityInit();
+}
+
+// ── Severity bands tab ────────────────────────────────────────────
+let setSevLoaded = false;
+
+function setSevEsc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
+
+async function setSeverityInit() {
+    setSevLoaded = true;
+    const r = await fetch('/api/action-plan-severity');
+    if (r.ok) {
+        const cfg = await r.json();
+        document.getElementById('setSevMedium').value = cfg.mediumMinSignals;
+        document.getElementById('setSevHigh').value = cfg.highMinSignals;
+        document.getElementById('setSevCritical').value = cfg.criticalMinSignals;
+    }
+    await setSeverityLoadHistory();
+}
+
+async function setSeverityLoadHistory() {
+    const d = setL;
+    const container = document.getElementById('setSevHistory');
+    const r = await fetch('/api/action-plan-severity/history');
+    const rows = r.ok ? await r.json() : [];
+    if (rows.length === 0) { container.innerHTML = `<p class="text-muted-custom">${d.sevHistoryNone}</p>`; return; }
+    container.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">` + rows.map(h => `
+        <div style="font-size:12.5px;color:var(--text-2);padding:8px 0;border-bottom:1px solid var(--card-border)">
+            Medium ≥ ${h.mediumMinSignals} · High ≥ ${h.highMinSignals} · Critical ≥ ${h.criticalMinSignals}
+            — ${d.sevHistoryBy} ${setSevEsc(h.changedByName)}, ${new Date(h.changedAt).toLocaleString()}
+        </div>
+    `).join('') + `</div>`;
+}
+
+async function setSeveritySave() {
+    const d = setL;
+    const statusEl = document.getElementById('setSevStatus');
+    const medium = parseInt(document.getElementById('setSevMedium').value, 10);
+    const high = parseInt(document.getElementById('setSevHigh').value, 10);
+    const critical = parseInt(document.getElementById('setSevCritical').value, 10);
+
+    if (!(medium >= 1 && high >= 1 && critical >= 1 && medium <= high && high <= critical)) {
+        statusEl.textContent = d.sevInvalid;
+        statusEl.style.color = ChartColors.SEMANTIC.BAD;
+        return;
+    }
+
+    statusEl.textContent = d.saving;
+    statusEl.style.color = 'var(--text-3)';
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const r = await fetch('/api/action-plan-severity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+            body: JSON.stringify({ mediumMinSignals: medium, highMinSignals: high, criticalMinSignals: critical }),
+        });
+        if (!r.ok) { statusEl.textContent = d.saveFailed + (await r.text()); statusEl.style.color = ChartColors.SEMANTIC.BAD; return; }
+        statusEl.textContent = d.saved;
+        statusEl.style.color = ChartColors.SEMANTIC.GOOD;
+        await setSeverityLoadHistory();
+    } catch (e) {
+        statusEl.textContent = d.saveFailed + e.message;
+        statusEl.style.color = ChartColors.SEMANTIC.BAD;
+    }
 }
 
 // ── Action Plan Role tab ─────────────────────────────────────────

@@ -59,4 +59,17 @@ public interface IStoreActionPlanService
     /// <summary>Manually closes a store's active plan instead of waiting for the
     /// 2-clean-cycle auto-resolve rule. Admin only; requires a reason.</summary>
     Task<(bool success, string message)> ManualCloseAsync(string storeName, string reason, string role, string closedByName);
+
+    /// <summary>Whether a signal has occurred in at least 2 of the store's last 3
+    /// data-available evaluation periods (StoreReference-uploaded periods) up to
+    /// and including the given period — reads the signal_occurrences log.</summary>
+    Task<bool> IsSignalPersistentAsync(string storeName, string signalCode, int asOfMonth, int asOfYear);
+
+    /// <summary>One-time historical backfill: replays the 6 signals whose source
+    /// data (ActiveEmployees/Resignations/StoreReference/ExitInterviews) is
+    /// retained per historical period against every past period with StoreReference
+    /// data, logging signal_occurrences rows with IsBackfilled = true. Skips
+    /// EARLY_WARNING_WATCHLIST (current-state only, not reconstructable) and any
+    /// store/period/signal already logged. Admin-triggered, safe to re-run.</summary>
+    Task<int> RunHistoricalSignalBackfillAsync();
 }

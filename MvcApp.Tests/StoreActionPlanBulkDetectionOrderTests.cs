@@ -39,6 +39,7 @@ public class StoreActionPlanBulkDetectionOrderTests
         return new StoreActionPlanService(
             db, storeAccess,
             new ActionPlanRoleService(db, storeAccess),
+            new ActionPlanSeverityConfigService(db),
             new NoOpStoreService(),
             dashboard,
             new NoOpNinetyDayTurnoverService(),

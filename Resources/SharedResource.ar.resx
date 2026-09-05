@@ -1185,6 +1185,15 @@
   <data name="Set_AproleReset" xml:space="preserve"><value>رجوع للافتراضي</value></data>
   <data name="Set_AproleNoRoles" xml:space="preserve"><value>لا يوجد مدير متسجل على هذا الفرع بعد</value></data>
   <data name="Set_AproleSearchPlaceholder" xml:space="preserve"><value>ابحث عن فرع...</value></data>
+  <data name="Set_Tab_Severity" xml:space="preserve"><value>خطورة الأكشن بلان</value></data>
+  <data name="Set_SeveritySub" xml:space="preserve"><value>اختر عدد الإشارات المكتشفة اللازمة لتصنيف الأكشن بلان النشط كمتوسط/عالي/حرج الخطورة. أي تغيير هنا يُطبَّق فورًا على كل الخطط المفتوحة والسابقة، ولا يغيّر حدود اكتشاف الإشارات السبع نفسها.</value></data>
+  <data name="Set_SeverityMedium" xml:space="preserve"><value>خطورة متوسطة عند ≥ إشارات</value></data>
+  <data name="Set_SeverityHigh" xml:space="preserve"><value>خطورة عالية عند ≥ إشارات</value></data>
+  <data name="Set_SeverityCritical" xml:space="preserve"><value>خطورة حرجة عند ≥ إشارات</value></data>
+  <data name="Set_SeverityInvalid" xml:space="preserve"><value>يجب أن تكون القيم 1 على الأقل وغير تنازلية: متوسط ≤ عالي ≤ حرج.</value></data>
+  <data name="Set_SeverityHistoryTitle" xml:space="preserve"><value>سجل التعديلات</value></data>
+  <data name="Set_SeverityHistoryNone" xml:space="preserve"><value>لا توجد تعديلات بعد — يتم استخدام القيم الافتراضية.</value></data>
+  <data name="Set_SeverityHistoryBy" xml:space="preserve"><value>بواسطة</value></data>
 
   <!-- Error page -->
   <data name="Error_Title" xml:space="preserve"><value>خطأ.</value></data>
