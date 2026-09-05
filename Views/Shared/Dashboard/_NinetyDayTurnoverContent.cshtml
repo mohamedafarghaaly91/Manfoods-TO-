@@ -1061,10 +1061,10 @@ async function ntdLoadSmartInsights() {
     }
 
     const colorMap = {
-        danger:    { bg: '#fff5f5', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
-        success:   { bg: '#f0fff4', border: '#198754', text: '#198754' },
-        warning:   { bg: '#fffbf0', border: ChartColors.SEMANTIC.WARNING, text: '#9a6c00' },
-        secondary: { bg: '#f8f9fa', border: '#6c757d', text: '#6c757d' }
+        danger:    { bg: 'oklch(0.6 0.22 22 / .08)', border: ChartColors.SEMANTIC.BAD, text: ChartColors.SEMANTIC.BAD },
+        success:   { bg: 'oklch(0.62 0.15 155 / .1)', border: 'oklch(0.5 0.15 155)', text: 'oklch(0.5 0.15 155)' },
+        warning:   { bg: 'oklch(0.75 0.16 75 / .12)', border: ChartColors.SEMANTIC.WARNING, text: 'oklch(0.6 0.14 75)' },
+        secondary: { bg: 'var(--bg-2)', border: 'var(--text-3)', text: 'var(--text-2)' }
     };
 
     container.innerHTML = items.map(item => {
