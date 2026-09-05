@@ -1,0 +1,16 @@
+name: Run DB Migration
+on:
+  workflow_dispatch: {}
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+    - name: Run scripts/migrate.sql against the database
+      env:
+        SQLSERVER_CONNECTION_STRING: ${{ secrets.SQLSERVER_CONNECTION_STRING }}
+      run: bash scripts/db-update.sh
