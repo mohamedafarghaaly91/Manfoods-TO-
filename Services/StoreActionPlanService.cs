@@ -18,6 +18,7 @@ public class StoreActionPlanService : IStoreActionPlanService
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IActionPlanRoleService _actionPlanRoles;
+    private readonly IActionPlanSeverityConfigService _severityConfig;
     private readonly IStoreService _stores;
     private readonly IDashboardService _dashboard;
     private readonly INinetyDayTurnoverService _ninetyDay;
@@ -50,6 +51,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         AppDbContext db,
         IStoreAccessService storeAccess,
         IActionPlanRoleService actionPlanRoles,
+        IActionPlanSeverityConfigService severityConfig,
         IStoreService stores,
         IDashboardService dashboard,
         INinetyDayTurnoverService ninetyDay,
@@ -61,6 +63,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         _db = db;
         _storeAccess = storeAccess;
         _actionPlanRoles = actionPlanRoles;
+        _severityConfig = severityConfig;
         _stores = stores;
         _dashboard = dashboard;
         _ninetyDay = ninetyDay;
@@ -215,16 +218,22 @@ public class StoreActionPlanService : IStoreActionPlanService
         }
 
         var metrics = await ComputeSignalsAsync(storeName, month, year);
+        await LogSignalOccurrencesAsync(storeName, month, year, metrics.Signals);
 
         if (existing == null)
         {
             if (metrics.Signals.Count == 0) return;
 
+            var bands = await _severityConfig.GetAsync();
+            var distinctNewSignals = metrics.Signals.Select(s => s.Code).Distinct(StringComparer.OrdinalIgnoreCase).Count();
+            var creationSeverity = ComputeSeverity("Active", distinctNewSignals, bands);
+            var createdAt = DateTime.UtcNow;
+
             var plan = new StoreActionPlan
             {
                 StoreName = storeName,
                 Status = "Active",
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = createdAt,
                 CreatedMonth = month,
                 CreatedYear = year,
                 BaselineTurnoverRate = metrics.TurnoverRate,
@@ -234,6 +243,10 @@ public class StoreActionPlanService : IStoreActionPlanService
                 HealthyStreakCount = 0,
                 LastEvaluatedMonth = month,
                 LastEvaluatedYear = year,
+                // Critical plans get a shorter, urgent window; every other plan
+                // gets a full 90-day working window regardless of when in the
+                // quarter it qualifies. Admin can still override via SetAssignmentAsync.
+                TargetResolutionDate = DateOnly.FromDateTime(createdAt.AddDays(creationSeverity == "Critical" ? CriticalTargetDays : StandardTargetDays)),
             };
             _db.StoreActionPlans.Add(plan);
             await _db.SaveChangesAsync();
@@ -306,6 +319,116 @@ public class StoreActionPlanService : IStoreActionPlanService
             SignalCount = metrics.Signals.Count,
             RecordedAt = DateTime.UtcNow,
         });
+    }
+
+    /// <summary>Logs one signal_occurrences row per newly-fired signal for this
+    /// store/period, independent of StoreActionPlan/ActionPlanRecommendation —
+    /// this is what the persistence rule (2 of the last 3 data-available
+    /// evaluation periods) reads, so it must exist even before any plan is
+    /// created and must survive plan resolution. Idempotent: safe to call again
+    /// for a period already logged (e.g. a corrective re-upload before a plan
+    /// exists yet, when EvaluateStoreAsync has no early-exit guard to rely on).</summary>
+    private async Task LogSignalOccurrencesAsync(string storeName, int month, int year, List<FiredSignal> signals)
+    {
+        if (signals.Count == 0) return;
+
+        var alreadyLogged = (await _db.SignalOccurrences
+            .Where(o => o.StoreName == storeName && o.Month == month && o.Year == year)
+            .Select(o => o.SignalCode)
+            .ToListAsync())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var signal in signals)
+        {
+            if (alreadyLogged.Contains(signal.Code)) continue;
+            _db.SignalOccurrences.Add(new SignalOccurrence
+            {
+                StoreName = storeName,
+                SignalCode = signal.Code,
+                Month = month,
+                Year = year,
+                OccurredAt = DateTime.UtcNow,
+                IsBackfilled = false,
+            });
+        }
+    }
+
+    /// <summary>Whether a signal is "persistent" for a store: it occurred in at
+    /// least 2 of the last 3 *data-available evaluation periods* — periods
+    /// where a StoreReference row exists for that store, i.e. a period was
+    /// actually uploaded and evaluated. A period with no upload is skipped
+    /// entirely rather than counted as healthy, so a store cannot dodge
+    /// persistence by having a gap in uploads, and cannot be falsely flagged
+    /// persistent from periods that were never evaluated.</summary>
+    public async Task<bool> IsSignalPersistentAsync(string storeName, string signalCode, int asOfMonth, int asOfYear)
+    {
+        var evaluationPeriods = await _db.StoreReferences
+            .Where(s => s.StoreName == storeName && (s.Year * 12 + s.Month) <= (asOfYear * 12 + asOfMonth))
+            .Select(s => new { s.Month, s.Year })
+            .Distinct()
+            .ToListAsync();
+
+        var last3 = evaluationPeriods
+            .OrderByDescending(p => p.Year * 12 + p.Month)
+            .Take(3)
+            .ToList();
+        if (last3.Count < 2) return false;
+
+        var occurrences = await _db.SignalOccurrences
+            .Where(o => o.StoreName == storeName && o.SignalCode == signalCode)
+            .Select(o => new { o.Month, o.Year })
+            .ToListAsync();
+
+        var occurrenceCount = occurrences.Count(o => last3.Any(p => p.Month == o.Month && p.Year == o.Year));
+        return occurrenceCount >= 2;
+    }
+
+    /// <summary>Replays historical signal detection directly (bypassing
+    /// EvaluateStoreAsync and its "already evaluated this period" early-exit
+    /// guard, which would otherwise silently skip logging occurrences for any
+    /// store/period already tied to an existing plan) against every past
+    /// StoreReference period, for the 6 signals whose source data is retained
+    /// per period. EARLY_WARNING_WATCHLIST is excluded — EarlyWarningService
+    /// only reflects current active-employee risk state, so it cannot be
+    /// reconstructed for a past period; it starts logging live from go-live.
+    /// Idempotent — re-running skips any store/period/signal already logged.</summary>
+    public async Task<int> RunHistoricalSignalBackfillAsync()
+    {
+        var periods = await _db.StoreReferences
+            .Select(s => new { s.StoreName, s.Month, s.Year })
+            .Distinct()
+            .ToListAsync();
+
+        var written = 0;
+        foreach (var period in periods)
+        {
+            var metrics = await ComputeSignalsAsync(period.StoreName, period.Month, period.Year);
+            var replayable = metrics.Signals.Where(s => s.Code != "EARLY_WARNING_WATCHLIST").ToList();
+            if (replayable.Count == 0) continue;
+
+            var alreadyLogged = (await _db.SignalOccurrences
+                .Where(o => o.StoreName == period.StoreName && o.Month == period.Month && o.Year == period.Year)
+                .Select(o => o.SignalCode)
+                .ToListAsync())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var signal in replayable)
+            {
+                if (alreadyLogged.Contains(signal.Code)) continue;
+                _db.SignalOccurrences.Add(new SignalOccurrence
+                {
+                    StoreName = period.StoreName,
+                    SignalCode = signal.Code,
+                    Month = period.Month,
+                    Year = period.Year,
+                    OccurredAt = DateTime.UtcNow,
+                    IsBackfilled = true,
+                });
+                written++;
+            }
+            await _db.SaveChangesAsync();
+        }
+        return written;
     }
 
     private void AddRecommendations(int planId, List<FiredSignal> signals)
@@ -628,16 +751,30 @@ public class StoreActionPlanService : IStoreActionPlanService
     private const int StalledAgeDaysThreshold = 45;
     private const double TrendFlatMarginPoints = 1.0;
 
-    private static string ComputeSeverity(string status, int distinctSignalCount)
+    // Target Resolution Date is set once at plan creation from CreatedAt, not
+    // from the calendar quarter's end — a plan qualifying near quarter-end
+    // still gets a full working window instead of just a few days. Calendar
+    // quarter remains purely a reporting bucket (see GetReportingQuarter),
+    // computed independently of this date.
+    private const int StandardTargetDays = 90;
+    private const int CriticalTargetDays = 30;
+
+    /// <summary>Purely a reporting bucket for grouping/rollups — derived from
+    /// CreatedAt, independent of TargetResolutionDate. Not stored.</summary>
+    private static (int Quarter, int Year) GetReportingQuarter(DateTime createdAt) =>
+        ((createdAt.Month - 1) / 3 + 1, createdAt.Year);
+
+    /// <summary>Severity is computed live from whatever ActionPlanSeverityBandConfig
+    /// is current, never stored — so changing the cutoffs on the Settings page
+    /// immediately re-classifies every open and historical plan's displayed
+    /// severity without touching any row in the database.</summary>
+    private static string ComputeSeverity(string status, int distinctSignalCount, ActionPlanSeverityBandConfig bands)
     {
         if (status != "Active") return "None";
-        return distinctSignalCount switch
-        {
-            >= 3 => "Critical",
-            2 => "High",
-            1 => "Medium",
-            _ => "Low",
-        };
+        if (distinctSignalCount >= bands.CriticalMinSignals) return "Critical";
+        if (distinctSignalCount >= bands.HighMinSignals) return "High";
+        if (distinctSignalCount >= bands.MediumMinSignals) return "Medium";
+        return "Low";
     }
 
     private static int SeverityRank(string severity) => severity switch
@@ -680,6 +817,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         if (storeNames.Count == 0) return new List<ActionCenterStoreRowDto>();
 
         var responsibleByStore = await _actionPlanRoles.GetEffectiveResponsiblePartiesAsync(storeNames);
+        var bands = await _severityConfig.GetAsync();
 
         var allPlans = await _db.StoreActionPlans.Where(p => storeNames.Contains(p.StoreName)).ToListAsync();
         var plansByStore = allPlans.GroupBy(p => p.StoreName, StringComparer.OrdinalIgnoreCase)
@@ -722,7 +860,7 @@ public class StoreActionPlanService : IStoreActionPlanService
                 StoreName = storeName,
                 PlanStatus = latest.Status,
                 PlanId = latest.Id,
-                Severity = ComputeSeverity(latest.Status, distinctSignals),
+                Severity = ComputeSeverity(latest.Status, distinctSignals, bands),
                 SignalCount = distinctSignals,
                 AgeDays = ageDays,
                 IsChronic = (storePlans?.Count ?? 0) > 1,
@@ -734,6 +872,8 @@ public class StoreActionPlanService : IStoreActionPlanService
                 TargetResolutionDate = latest.TargetResolutionDate,
                 TasksTotal = recs.Count,
                 TasksCompleted = tasksCompleted,
+                ReportingQuarter = GetReportingQuarter(latest.CreatedAt).Quarter,
+                ReportingYear = GetReportingQuarter(latest.CreatedAt).Year,
             });
         }
 
@@ -751,6 +891,7 @@ public class StoreActionPlanService : IStoreActionPlanService
         var activePlans = allPlans.Where(p => p.Status == "Active").ToList();
         var resolvedPlans = allPlans.Where(p => p.Status == "Resolved" && p.ResolvedAt.HasValue).ToList();
         var now = DateTime.UtcNow;
+        var bands = await _severityConfig.GetAsync();
 
         summary.TotalActive = activePlans.Count;
         summary.OpenedThisMonth = allPlans.Count(p => p.CreatedAt.Year == now.Year && p.CreatedAt.Month == now.Month);
@@ -773,7 +914,7 @@ public class StoreActionPlanService : IStoreActionPlanService
             if (storeGroups.TryGetValue(plan.StoreName, out var histCount) && histCount > 1) chronicCount++;
             var recs = recsByActivePlan.TryGetValue(plan.Id, out var r) ? r : new List<ActionPlanRecommendation>();
             var distinctSignals = recs.Select(x => x.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-            if (ComputeSeverity(plan.Status, distinctSignals) == "Critical") criticalCount++;
+            if (ComputeSeverity(plan.Status, distinctSignals, bands) == "Critical") criticalCount++;
 
             var ageDays = (int)(now - plan.CreatedAt).TotalDays;
             var tasksCompleted = recs.Count(x => x.IsCompleted);
@@ -832,7 +973,10 @@ public class StoreActionPlanService : IStoreActionPlanService
         dto.CanManage = role == "Admin";
 
         var distinctSignals = dto.Recommendations.Select(r => r.SignalCode).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        dto.Severity = ComputeSeverity(dto.Status, distinctSignals);
+        dto.Severity = ComputeSeverity(dto.Status, distinctSignals, await _severityConfig.GetAsync());
+        var (reportingQuarter, reportingYear) = GetReportingQuarter(plan.CreatedAt);
+        dto.ReportingQuarter = reportingQuarter;
+        dto.ReportingYear = reportingYear;
 
         var snapshots = await _db.ActionPlanMetricSnapshots
             .Where(s => s.StoreActionPlanId == plan.Id)

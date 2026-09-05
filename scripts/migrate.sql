@@ -456,6 +456,63 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_store_action_plan_role
     CREATE UNIQUE INDEX ux_store_action_plan_role_assignments_store
         ON dbo.store_action_plan_role_assignments (store_name);
 
+-- ── action_plan_severity_band_config / _history ────────────────────────────
+-- Admin-configurable cutoffs for how many distinct fired signals make an
+-- Active plan Medium/High/Critical (Settings page). Single row (id = 1);
+-- StoreActionPlanService.ComputeSeverity reads it live and seeds it lazily
+-- with the values that used to be hardcoded (1/2/3), so behavior is unchanged
+-- until an Admin edits it. Every save is also appended to the history table
+-- for audit purposes.
+IF OBJECT_ID('dbo.action_plan_severity_band_config', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.action_plan_severity_band_config (
+        id INT NOT NULL PRIMARY KEY,
+        medium_min_signals INT NOT NULL DEFAULT 1,
+        high_min_signals INT NOT NULL DEFAULT 2,
+        critical_min_signals INT NOT NULL DEFAULT 3,
+        updated_by_name NVARCHAR(MAX) NULL,
+        updated_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+
+IF OBJECT_ID('dbo.action_plan_severity_band_history', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.action_plan_severity_band_history (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        medium_min_signals INT NOT NULL,
+        high_min_signals INT NOT NULL,
+        critical_min_signals INT NOT NULL,
+        changed_by_name NVARCHAR(MAX) NULL,
+        changed_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END
+
+-- ── signal_occurrences ──────────────────────────────────────────────────────
+-- One row per store/signal/period where a detection signal fired — logged
+-- live going forward by StoreActionPlanService.LogSignalOccurrencesAsync, and
+-- reconstructed for 6 of the 7 signals from retained historical data by the
+-- one-time Admin-triggered backfill (RunHistoricalSignalBackfillAsync;
+-- is_backfilled = 1 for those rows). EARLY_WARNING_WATCHLIST is never
+-- backfilled — it only reflects current active-employee risk state and
+-- cannot be reconstructed for a past period. This is what the persistence
+-- rule ("2 of the last 3 data-available evaluation periods") reads from,
+-- independent of store_action_plans, so it survives plan creation/resolution.
+IF OBJECT_ID('dbo.signal_occurrences', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.signal_occurrences (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        store_name NVARCHAR(450) NOT NULL DEFAULT '',
+        signal_code NVARCHAR(100) NOT NULL DEFAULT '',
+        month INT NOT NULL,
+        year INT NOT NULL,
+        occurred_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        is_backfilled BIT NOT NULL DEFAULT 0
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_signal_occurrences_store_signal_period' AND object_id = OBJECT_ID('dbo.signal_occurrences'))
+    CREATE UNIQUE INDEX ux_signal_occurrences_store_signal_period
+        ON dbo.signal_occurrences (store_name, signal_code, year, month);
+
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal

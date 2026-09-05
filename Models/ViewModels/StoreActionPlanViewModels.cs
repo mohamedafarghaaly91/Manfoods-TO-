@@ -61,6 +61,11 @@ public class StoreActionPlanDto
     public string? ManualCloseReason { get; set; }
     public bool CanManage { get; set; } // Admin — assign/target-date/manual-close
     public List<ActionCenterMetricSnapshotDto> MetricSnapshots { get; set; } = new();
+
+    // Purely a reporting bucket derived from CreatedAt — independent of
+    // TargetResolutionDate, never stored.
+    public int ReportingQuarter { get; set; }
+    public int ReportingYear { get; set; }
 }
 
 /// <summary>One detection cycle's metrics for the progress sparkline/trend on
@@ -96,6 +101,8 @@ public class ActionCenterStoreRowDto
     public DateOnly? TargetResolutionDate { get; set; }
     public int TasksTotal { get; set; }
     public int TasksCompleted { get; set; }
+    public int ReportingQuarter { get; set; }
+    public int ReportingYear { get; set; }
 }
 
 /// <summary>Company-wide Action Center dashboard summary.</summary>

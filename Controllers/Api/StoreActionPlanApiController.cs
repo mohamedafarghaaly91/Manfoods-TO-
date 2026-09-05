@@ -84,6 +84,27 @@ public class StoreActionPlanApiController : ControllerBase
         return Accepted(new { status = "started", periods = periods.Count });
     }
 
+    /// <summary>
+    /// Admin-only: one-time historical backfill of signal_occurrences for the
+    /// 6 signals whose source data is retained per period (excludes the
+    /// current-state-only Early Warning Watchlist signal). Runs in the
+    /// background and is safe to re-run — see RunHistoricalSignalBackfillAsync.
+    /// </summary>
+    [HttpPost("backfill-signals"), ValidateAntiForgeryToken]
+    public IActionResult RunSignalBackfill()
+    {
+        var role = HttpContext.Session.GetRole();
+        if (role != "Admin") return StatusCode(StatusCodes.Status403Forbidden);
+
+        _ = Task.Run(async () =>
+        {
+            try { await _actionPlans.RunHistoricalSignalBackfillAsync(); }
+            catch { /* best-effort; safe to re-trigger from the Settings page */ }
+        });
+
+        return Accepted(new { status = "started" });
+    }
+
     // ────────────────────────────── Action Center ──────────────────────────────
 
     [HttpGet("action-center/summary")]
