@@ -29,7 +29,7 @@ public class StoreActionPlanBulkDetectionOrderTests
             .Options);
 
     private static readonly IStringLocalizer<SharedResource> Localizer =
-        new ServiceCollection().AddLocalization().BuildServiceProvider()
+        new ServiceCollection().AddLogging().AddLocalization().BuildServiceProvider()
             .GetRequiredService<IStringLocalizer<SharedResource>>();
 
     private static StoreActionPlanService NewService(AppDbContext db)
