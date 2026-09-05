@@ -604,6 +604,15 @@ html, body {
 }
 
 /* ══ TABLES ═══════════════════════════════════════════ */
+/* Bootstrap's own .table sets --bs-table-bg: var(--bs-body-bg), and this app
+   never sets data-bs-theme so --bs-body-bg stays Bootstrap's light default
+   (white) regardless of our own dark/light theme — every plain .table that
+   isn't .table-dark-custom (which already resets this itself, below) was
+   rendering solid white rows in dark mode. Reset it here, once, for all of
+   them; transparent is correct in both themes since the row then just shows
+   its container's own themed background. */
+.table { --bs-table-bg: transparent; --bs-table-color: var(--text); }
+
 .table-dark-custom {
     --bs-table-bg: transparent;
     --bs-table-border-color: rgba(255,255,255,.06);
