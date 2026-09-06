@@ -42,6 +42,7 @@
         {
             new() { Icon = "bi-speedometer2", Title = L["AC_ProgressTitle"], Body = L["Guide_ActionCenterDetail_Chart_Kpis"] },
             new() { Icon = "bi-graph-up-arrow", Title = L["AC_MetricTrendTitle"], Body = L["Guide_ActionCenterDetail_Chart_Trend"] },
+            new() { Icon = "bi-graph-down-arrow", Title = L["AC_MonthlyTurnoverTitle"], Body = L["Guide_ActionCenterDetail_Chart_MonthlyTurnover"] },
             new() { Icon = "bi-table", Title = L["AC_MonthlyPerfTitle"], Body = L["Guide_ActionCenterDetail_Chart_MonthlyPerf"] },
             new() { Icon = "bi-broadcast", Title = L["AC_Signals"], Body = L["Guide_ActionCenterDetail_Chart_Signals"] },
             new() { Icon = "bi-exclamation-circle", Title = L["SAP_DetectedIssues"], Body = L["Guide_ActionCenterDetail_Chart_Issues"] },
@@ -100,6 +101,12 @@
      data-monthly-perf-signal-count="@L["AC_MonthlyPerfSignalCount"]"
      data-monthly-perf-change="@L["AC_MonthlyPerfChange"]"
      data-monthly-perf-empty="@L["AC_MonthlyPerfEmpty"]"
+     data-monthly-turnover-title="@L["AC_MonthlyTurnoverTitle"]"
+     data-monthly-turnover-overall="@L["AC_MonthlyTurnoverOverall"]"
+     data-monthly-turnover-90day="@L["AC_MonthlyTurnover90Day"]"
+     data-monthly-turnover-overall-change="@L["AC_MonthlyTurnoverOverallChange"]"
+     data-monthly-turnover-90day-change="@L["AC_MonthlyTurnover90DayChange"]"
+     data-monthly-turnover-empty="@L["AC_MonthlyTurnoverEmpty"]"
      data-common-month="@L["Common_Month"]"
      data-assignment-title="@L["AC_AssignmentTitle"]"
      data-assigned-to="@L["AC_AssignedTo"]"
@@ -219,6 +226,62 @@ function acdRenderTrendChart(snapshots) {
     });
 }
 
+/// Renders the Monthly Turnover Performance table from a MonthlyTurnoverHistoryDto
+/// (or null if it couldn't be loaded — the section is simply omitted). Periods
+/// arrive newest-first from the API; month-over-month change is a plain
+/// percentage-point subtraction against the chronologically previous row
+/// (index + 1 in this newest-first array), same style as the existing Monthly
+/// Performance table below it — no new calculation rule.
+function acdMonthlyTurnoverHtml(history) {
+    const d = ACD_D;
+    if (!history) return '';
+
+    const periods = history.periods || [];
+    if (periods.length === 0) {
+        return `<div class="card-dark mb-4">
+            <h6 class="fw-bold mb-3">${sapEscape(d.monthlyTurnoverTitle)}</h6>
+            <p class="text-muted-custom mb-0">${sapEscape(d.monthlyTurnoverEmpty)}</p>
+        </div>`;
+    }
+
+    function ppChange(cur, prev) {
+        if (cur === null || cur === undefined || prev === null || prev === undefined) return '—';
+        const delta = cur - prev;
+        if (Math.abs(delta) < 0.05) return `<span style="color:var(--text-3)">— ${sapEscape(d.noChange)}</span>`;
+        const improving = delta < 0;
+        return `<span style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pp</span>`;
+    }
+
+    const rows = periods.map((p, i) => {
+        const prev = i + 1 < periods.length ? periods[i + 1] : null;
+        return `<tr>
+            <td style="white-space:nowrap;font-weight:600;font-size:12.5px">${sapEscape(p.label)}</td>
+            <td>${acdRate(p.overallTurnoverRate)}</td>
+            <td>${acdRate(p.ninetyDayTurnoverRate)}</td>
+            <td>${prev ? ppChange(p.overallTurnoverRate, prev.overallTurnoverRate) : '—'}</td>
+            <td>${prev ? ppChange(p.ninetyDayTurnoverRate, prev.ninetyDayTurnoverRate) : '—'}</td>
+        </tr>`;
+    }).join('');
+
+    return `<div class="card-dark mb-4">
+        <h6 class="fw-bold mb-3">${sapEscape(d.monthlyTurnoverTitle)}</h6>
+        <div style="overflow-x:auto">
+            <table class="table" style="margin-bottom:0">
+                <thead>
+                    <tr>
+                        <th>${sapEscape(d.commonMonth)}</th>
+                        <th>${sapEscape(d.monthlyTurnoverOverall)}</th>
+                        <th>${sapEscape(d.monthlyTurnover90day)}</th>
+                        <th>${sapEscape(d.monthlyTurnoverOverallChange)}</th>
+                        <th>${sapEscape(d.monthlyTurnover90dayChange)}</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    </div>`;
+}
+
 /// Renders the Monthly Performance table straight from data.metricSnapshots —
 /// no new data source, no business logic. Snapshots arrive oldest-first (same
 /// order the trend chart already uses); this renders newest-first for at-a-
@@ -316,7 +379,7 @@ function acdSignalHistoryHtml(history) {
     </div>`;
 }
 
-function acdRender(data, signalHistory) {
+function acdRender(data, signalHistory, monthlyTurnoverHistory) {
     const d = ACD_D;
 
     document.getElementById('acdStoreName').textContent = data.storeName;
@@ -387,6 +450,11 @@ function acdRender(data, signalHistory) {
             <div class="chart-body" style="height:260px"><canvas id="acdTrendChart"></canvas></div>
         </div>`;
     }
+
+    // ── Monthly Turnover Performance table — Overall/90-Day Turnover % per
+    // month straight from the same DashboardService/NinetyDayTurnoverService
+    // calls used for live signal detection. Shown above Monthly Performance. ──
+    html += acdMonthlyTurnoverHtml(monthlyTurnoverHistory);
 
     // ── Monthly Performance table — same data.metricSnapshots the KPI cards
     // and trend chart above already use, just laid out as one row per month. ──
@@ -524,8 +592,11 @@ async function acdLoad() {
     const signalHistory = data.status !== 'None'
         ? await sapFetchJson('/api/store-action-plan/action-center/signal-history?store=' + encodeURIComponent(store))
         : null;
+    const monthlyTurnoverHistory = data.status !== 'None'
+        ? await sapFetchJson('/api/store-action-plan/action-center/monthly-turnover?store=' + encodeURIComponent(store))
+        : null;
 
-    acdRender(data, signalHistory);
+    acdRender(data, signalHistory, monthlyTurnoverHistory);
 }
 
 async function acdToggleRec(id, isCompleted) {

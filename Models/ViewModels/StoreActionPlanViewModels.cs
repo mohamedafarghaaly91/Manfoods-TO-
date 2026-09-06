@@ -164,3 +164,26 @@ public class SignalPersistenceDto
     public string SignalCode { get; set; } = "";
     public bool IsPersistent { get; set; }
 }
+
+/// <summary>Per-store monthly Overall Turnover % / 90-Day Turnover % history
+/// for the detail page's Monthly Turnover Performance table — read directly
+/// from the same DashboardService/NinetyDayTurnoverService KPI calls
+/// StoreActionPlanService.ComputeSignalsAsync already makes for live signal
+/// detection, just looped across every period the store has data for. No new
+/// calculation rule: month-over-month change is computed client-side as a
+/// plain percentage-point subtraction, the same way the existing Monthly
+/// Performance table already does it.</summary>
+public class MonthlyTurnoverHistoryDto
+{
+    /// <summary>Newest period first.</summary>
+    public List<MonthlyTurnoverPeriodDto> Periods { get; set; } = new();
+}
+
+public class MonthlyTurnoverPeriodDto
+{
+    public int Month { get; set; }
+    public int Year { get; set; }
+    public string Label { get; set; } = ""; // "MMM yy"
+    public double? OverallTurnoverRate { get; set; }
+    public double? NinetyDayTurnoverRate { get; set; }
+}

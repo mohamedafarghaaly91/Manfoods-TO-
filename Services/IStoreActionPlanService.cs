@@ -79,4 +79,9 @@ public interface IStoreActionPlanService
     /// and which signals currently satisfy the persistence rule. Returns null
     /// if the role/email can't access the store.</summary>
     Task<SignalHistoryDto?> GetSignalHistoryAsync(string storeName, string role, string? email);
+
+    /// <summary>Read-only monthly Overall Turnover % / 90-Day Turnover % history
+    /// for the Action Center detail page's Monthly Turnover Performance table.
+    /// Returns null if the role/email can't access the store.</summary>
+    Task<MonthlyTurnoverHistoryDto?> GetMonthlyTurnoverHistoryAsync(string storeName, string role, string? email);
 }
