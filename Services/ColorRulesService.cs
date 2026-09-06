@@ -15,7 +15,12 @@ namespace MvcApp.Services;
 /// </summary>
 public class ColorRulesService : IColorRulesService
 {
-    public static readonly string[] Metrics = { "turnover", "ninety-day", "retention", "early-warning" };
+    public static readonly string[] Metrics =
+    {
+        "turnover", "turnover-total",
+        "ninety-day", "ninety-day-total",
+        "retention", "early-warning"
+    };
 
     private static readonly Dictionary<string, List<ColorRule>> Defaults = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -27,11 +32,25 @@ public class ColorRulesService : IColorRulesService
             new ColorRule { UpTo = 15, Color = "warning_strong" },
             new ColorRule { UpTo = null, Color = "bad" },
         },
+        ["turnover-total"] = new()
+        {
+            new ColorRule { UpTo = 10, Color = "good" },
+            new ColorRule { UpTo = 20, Color = "warning" },
+            new ColorRule { UpTo = 35, Color = "warning_strong" },
+            new ColorRule { UpTo = null, Color = "bad" },
+        },
         ["ninety-day"] = new()
         {
             new ColorRule { UpTo = 10, Color = "good" },
             new ColorRule { UpTo = 25, Color = "warning" },
             new ColorRule { UpTo = 50, Color = "warning_strong" },
+            new ColorRule { UpTo = null, Color = "bad" },
+        },
+        ["ninety-day-total"] = new()
+        {
+            new ColorRule { UpTo = 25, Color = "good" },
+            new ColorRule { UpTo = 50, Color = "warning" },
+            new ColorRule { UpTo = 75, Color = "warning_strong" },
             new ColorRule { UpTo = null, Color = "bad" },
         },
         // Retention had no threshold coloring before this feature — higher is

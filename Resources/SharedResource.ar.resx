@@ -1464,11 +1464,8 @@
   <data name="SLP_NoData" xml:space="preserve"><value>لا توجد بيانات تتبع لمدير الفرع ده.</value></data>
   <data name="SLP_NoExitData" xml:space="preserve"><value>لا توجد بيانات مقابلات خروج للاختيار ده.</value></data>
   <data name="SLP_NoComments" xml:space="preserve"><value>لا توجد تعليقات مجهّلة.</value></data>
-  <data name="Set_TotalColumnsTitle" xml:space="preserve"><value>أعمدة الإجمالي</value></data>
-  <data name="Set_TotalColumnsSub" xml:space="preserve"><value>اختار إذا كان عمود الإجمالي يظهر في جدول البيانات الكامل لكل تحليل.</value></data>
-  <data name="Set_TotalTurnover" xml:space="preserve"><value>إظهار الإجمالي في جدول الدوران</value></data>
-  <data name="Set_TotalNinety" xml:space="preserve"><value>إظهار الإجمالي في جدول دوران 90 يومًا</value></data>
-  <data name="Set_TotalColumnsSave" xml:space="preserve"><value>حفظ إعدادات الأعمدة</value></data>
-  <data name="Set_TotalColumnsSaved" xml:space="preserve"><value>تم حفظ إعدادات الأعمدة.</value></data>
-  <data name="Set_TotalColumnsSaveFailed" xml:space="preserve"><value>فشل الحفظ: </value></data>
+  <data name="Set_MetricTurnoverTotalTitle" xml:space="preserve"><value>إجمالي الدوران</value></data>
+  <data name="Set_MetricTurnoverTotalSub" xml:space="preserve"><value>حدود ألوان مستقلة لعمود الإجمالي في جدول اتجاهات الدوران.</value></data>
+  <data name="Set_MetricNinetyTotalTitle" xml:space="preserve"><value>إجمالي دوران 90 يومًا</value></data>
+  <data name="Set_MetricNinetyTotalSub" xml:space="preserve"><value>حدود ألوان مستقلة لعمود الإجمالي في جدول اتجاهات دوران 90 يومًا.</value></data>
 </root>

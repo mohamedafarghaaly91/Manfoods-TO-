@@ -512,9 +512,13 @@ let tvStoreData = [], tvSortCol = 'turnoverRate', tvSortAsc = false;
 
 /* Admin-configurable via the Settings page (loaded once in loadAll below). */
 let tvTurnoverColorRules = null;
-let tvTotalColumnVisible = true;
+let tvTurnoverTotalColorRules = null;
 function tvRateColor(rate) {
     const c = ChartColors.rateColor(tvTurnoverColorRules, rate);
+    return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
+}
+function tvTotalRateColor(rate) {
+    const c = ChartColors.rateColor(tvTurnoverTotalColorRules, rate);
     return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
 }
 
@@ -841,10 +845,7 @@ loadKpis = tvLoadKpis;
 const _tvOrigLoadAll = loadAll;
 loadAll = async function () {
     if (!tvTurnoverColorRules) tvTurnoverColorRules = await ChartColors.loadRateRules('turnover');
-    if (tvTotalColumnVisible === true) {
-        const totalSettings = await ChartColors.loadTotalColumnSettings();
-        tvTotalColumnVisible = totalSettings.turnoverTotalVisible !== false;
-    }
+    if (!tvTurnoverTotalColorRules) tvTurnoverTotalColorRules = await ChartColors.loadRateRules('turnover-total');
     await _tvOrigLoadAll();
     tvSetTitleBadge('tvJobTitleTitle', true);
     tvSetTitleBadge('tvTenureTitle', true);
@@ -877,13 +878,14 @@ function fmtPeriod(pk) {
     return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
 }
 
-function mxRateCell(rate) {
+function mxRateCell(rate, rules = tvTurnoverColorRules) {
     if (rate === null || rate === undefined)
         return `<td class="px-2 py-2 text-center text-muted" style="color:#ccc">—</td>`;
-    const c = tvRateColor(rate);
-    const style = c.bg === 'transparent'
+    const c = ChartColors.rateColor(rules, rate);
+    const cellColor = { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
+    const style = cellColor.bg === 'transparent'
         ? 'font-weight:700;white-space:nowrap'
-        : `background:${c.bg};color:${c.fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap`;
+        : `background:${cellColor.bg};color:${cellColor.fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap`;
     return `<td class="px-2 py-2 text-center">
         <span style="${style}">${rate.toFixed(1)}%</span>
     </td>`;
@@ -899,7 +901,6 @@ function mxTotalRate(row) {
 function mxBuildHeader(periods) {
     const tr = document.querySelector('#matrixHead tr');
     const totalTh = tr.querySelector('[data-mcol="total"]');
-    totalTh.style.display = tvTotalColumnVisible ? '' : 'none';
     tr.querySelectorAll('[data-mcol^="p-"]').forEach(el => el.remove());
 
     periods.forEach(pk => {
@@ -935,7 +936,7 @@ function mxRender() {
         return mxSortAsc ? va - vb : vb - va;
     });
 
-    const colSpan = 2 + mxData.periods.length + (tvTotalColumnVisible ? 1 : 0);
+    const colSpan = 2 + mxData.periods.length + 1;
     if (!rows.length) {
         document.getElementById('matrixBody').innerHTML =
             `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">${tvL.noMatchingStores}</td></tr>`;
@@ -944,9 +945,8 @@ function mxRender() {
 
     document.getElementById('matrixBody').innerHTML = rows.map(r => {
         const periodCells = mxData.periods.map(pk => mxRateCell(r.periodRates[pk])).join('');
-        const totalCell = tvTotalColumnVisible
-            ? mxRateCell(mxTotalRate(r)).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"')
-            : '';
+        const totalCell = mxRateCell(mxTotalRate(r), tvTurnoverTotalColorRules)
+            .replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"');
         return `<tr>
             <td class="px-3 py-2" style="color:var(--text-2);white-space:nowrap">${r.operationConsultant ? sapEscape(r.operationConsultant) : '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 fw-semibold" style="white-space:nowrap"><a href="${__AREA_PREFIX}/dashboard/turnover?store=${encodeURIComponent(r.storeName)}" style="color:inherit;text-decoration:none" onmouseover="this.style.color='oklch(0.5 0.18 25)'" onmouseout="this.style.color='inherit'">${sapEscape(r.storeName)}</a></td>

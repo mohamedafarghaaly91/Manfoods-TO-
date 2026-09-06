@@ -126,7 +126,6 @@ builder.Services.AddScoped<IStoreActionPlanService, StoreActionPlanService>();
 builder.Services.AddScoped<IActionPlanRoleService, ActionPlanRoleService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IColorRulesService, ColorRulesService>();
-builder.Services.AddScoped<ITableTotalColumnSettingsService, TableTotalColumnSettingsService>();
 builder.Services.AddScoped<IRecommendationTemplateService, RecommendationTemplateService>();
 builder.Services.AddScoped<IActionPlanSeverityConfigService, ActionPlanSeverityConfigService>();
 

@@ -965,7 +965,7 @@ let ntdStoreData = [], ntdStoreSortCol = 'rate', ntdStoreSortAsc = false;
 
 /* Admin-configurable via the Settings page (loaded once in init below). */
 let ntdNinetyDayColorRules = null;
-let ntdTotalColumnVisible = true;
+let ntdNinetyDayTotalColorRules = null;
 function ntdRateColor(rate) {
     const c = ChartColors.rateColor(ntdNinetyDayColorRules, rate);
     return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
@@ -1106,13 +1106,14 @@ function ndMxFmtPeriod(pk) {
     return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
 }
 
-function ndMxRateCell(rate) {
+function ndMxRateCell(rate, rules = ntdNinetyDayColorRules) {
     if (rate === null || rate === undefined)
         return `<td class="px-2 py-2 text-center text-muted" style="color:#ccc">—</td>`;
     // Reuses ntdRateColor so this stays consistent with every other 90-Day
     // Rate badge on the page (this cell used to have its own hardcoded
     // Turnover-style thresholds, mismatched with the rest of the page).
-    const c = ntdRateColor(rate);
+    const rateColor = ChartColors.rateColor(rules, rate);
+    const c = { bg: rateColor.bg || 'transparent', fg: rateColor.fg || 'var(--text)' };
     const style = c.bg === 'transparent'
         ? 'font-weight:700;white-space:nowrap'
         : `background:${c.bg};color:${c.fg};padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap`;
@@ -1131,7 +1132,6 @@ function ndMxTotalRate(row) {
 function ndMxBuildHeader(periods) {
     const tr = document.querySelector('#ntdMatrixHead tr');
     const totalTh = tr.querySelector('[data-ndcol="total"]');
-    totalTh.style.display = ntdTotalColumnVisible ? '' : 'none';
     tr.querySelectorAll('[data-ndcol^="p-"]').forEach(el => el.remove());
 
     periods.forEach(pk => {
@@ -1167,7 +1167,7 @@ function ndMxRender() {
         return ndMxSortAsc ? va - vb : vb - va;
     });
 
-    const colSpan = 2 + ndMxData.periods.length + (ntdTotalColumnVisible ? 1 : 0);
+    const colSpan = 2 + ndMxData.periods.length + 1;
     if (!rows.length) {
         document.getElementById('ntdMatrixBody').innerHTML =
             `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">${ntdL.noMatchingStores}</td></tr>`;
@@ -1176,9 +1176,8 @@ function ndMxRender() {
 
     document.getElementById('ntdMatrixBody').innerHTML = rows.map(r => {
         const periodCells = ndMxData.periods.map(pk => ndMxRateCell(r.periodRates[pk])).join('');
-        const totalCell = ntdTotalColumnVisible
-            ? ndMxRateCell(ndMxTotalRate(r)).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"')
-            : '';
+        const totalCell = ndMxRateCell(ndMxTotalRate(r), ntdNinetyDayTotalColorRules)
+            .replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"');
         return `<tr>
             <td class="px-3 py-2" style="color:var(--text-2);white-space:nowrap">${r.operationConsultant ? sapEscape(r.operationConsultant) : '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 fw-semibold" style="white-space:nowrap">${sapEscape(r.storeName)}</td>
@@ -1247,12 +1246,12 @@ document.querySelectorAll('#ntdLeaversTable .ntd-sort').forEach(th => {
 });
 
 (async function init() {
-    const [colorRules, totalSettings] = await Promise.all([
+    const [colorRules, totalColorRules] = await Promise.all([
         ChartColors.loadRateRules('ninety-day'),
-        ChartColors.loadTotalColumnSettings()
+        ChartColors.loadRateRules('ninety-day-total')
     ]);
     ntdNinetyDayColorRules = colorRules;
-    ntdTotalColumnVisible = totalSettings.ninetyDayTotalVisible !== false;
+    ntdNinetyDayTotalColorRules = totalColorRules;
     const hasData = await ntdLoadFilters();
     if (hasData) await Promise.all([ntdLoadTrend(), ntdLoadAll(), ntdLoadTrendMatrix()]);
 })();
