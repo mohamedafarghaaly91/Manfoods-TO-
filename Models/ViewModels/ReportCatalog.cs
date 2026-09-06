@@ -96,15 +96,6 @@ public static class ReportCatalog
             Icon = "bi-table", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
             UsesYear = true, UsesMonths = true, UsesOmOc = true,
         },
-        new ReportDefinition
-        {
-            Id = "stores", Section = "Turnover", Title = "Store Comparison",
-            Description = "Side-by-side view of all stores for the selected month — Headcount, Hires, Resignations, and Turnover Rate per store.",
-            SectionKey = "Rep_Section_Turnover", TitleKey = "Rep_Title_Stores", DescriptionKey = "Rep_Desc_Stores",
-            Icon = "bi-shop-window", IconBg = "oklch(0.5 0.18 25 / .10)", IconColor = "oklch(0.5 0.18 25)",
-            UsesPeriod = true, UsesOmOc = true,
-        },
-
         // ── Comparison ────────────────────────────────────────
         new ReportDefinition
         {
