@@ -743,6 +743,25 @@ async function scLoadFilters() {
    Computed client-side from the leader-dimension ranking (fetched here
    regardless of the Ranking toggle) plus the Rollup response — same
    philosophy as the Stores page's insights, no extra historical data needed. */
+const SC_I18N = {
+    kpiTotalLeaders: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiTotalLeaders"].Value)),
+    kpiTotalLeadersDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiTotalLeadersDesc"].Value)),
+    kpiTotalHeadcount: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiTotalHeadcount"].Value)),
+    kpiTotalHeadcountDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiTotalHeadcountDesc"].Value)),
+    kpiAvgTurnover: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiAvgTurnover"].Value)),
+    averageTurnover: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_AverageTurnover"].Value)),
+    kpiFlaggedLeaders: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiFlaggedLeaders"].Value)),
+    kpiFlaggedLeadersDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_KpiFlaggedLeadersDesc"].Value)),
+    insightBestLeaderTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightBestLeaderTitle"].Value)),
+    insightBestLeaderDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightBestLeaderDesc"].Value)),
+    insightWorstLeaderTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightWorstLeaderTitle"].Value)),
+    insightWorstLeaderDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightWorstLeaderDesc"].Value)),
+    insightTopOcTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightTopOcTitle"].Value)),
+    insightTopOcDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightTopOcDesc"].Value)),
+    insightTopOmTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightTopOmTitle"].Value)),
+    insightTopOmDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SC_InsightTopOmDesc"].Value))
+};
+
 function scRenderKpis(leaderRows, rollup) {
     const el = document.getElementById('scKpiCards');
     const totalLeaders = leaderRows.length;
@@ -752,10 +771,10 @@ function scRenderKpis(leaderRows, rollup) {
     const flaggedPercent = totalLeaders ? Math.round((flagged / totalLeaders) * 100) : 0;
 
     el.innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-person-badge-fill"></i></div><div class="kpi-value">${totalLeaders}</div><div class="kpi-label">@L["SC_KpiTotalLeaders"]</div><div class="kpi-desc">@L["SC_KpiTotalLeadersDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${totalHeadcount}</div><div class="kpi-label">@L["SC_KpiTotalHeadcount"]</div><div class="kpi-desc">@L["SC_KpiTotalHeadcountDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${avgTurnover.toFixed(1)}%</div><div class="kpi-label">@L["SC_KpiAvgTurnover"]</div><div class="kpi-desc">@L["SC_AverageTurnover"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${flagged} <span style="font-size:13px;font-weight:600">(${flaggedPercent}%)</span></div><div class="kpi-label">@L["SC_KpiFlaggedLeaders"]</div><div class="kpi-desc">@L["SC_KpiFlaggedLeadersDesc"]</div></div>`;
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-person-badge-fill"></i></div><div class="kpi-value">${totalLeaders}</div><div class="kpi-label">${sapEscape(SC_I18N.kpiTotalLeaders)}</div><div class="kpi-desc">${sapEscape(SC_I18N.kpiTotalLeadersDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${totalHeadcount}</div><div class="kpi-label">${sapEscape(SC_I18N.kpiTotalHeadcount)}</div><div class="kpi-desc">${sapEscape(SC_I18N.kpiTotalHeadcountDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${avgTurnover.toFixed(1)}%</div><div class="kpi-label">${sapEscape(SC_I18N.kpiAvgTurnover)}</div><div class="kpi-desc">${sapEscape(SC_I18N.averageTurnover)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-exclamation-triangle-fill"></i></div><div class="kpi-value text-danger">${flagged} <span style="font-size:13px;font-weight:600">(${flaggedPercent}%)</span></div><div class="kpi-label">${sapEscape(SC_I18N.kpiFlaggedLeaders)}</div><div class="kpi-desc">${sapEscape(SC_I18N.kpiFlaggedLeadersDesc)}</div></div>`;
 }
 
 function scRenderInsights(leaderRows, rollup) {
@@ -765,24 +784,24 @@ function scRenderInsights(leaderRows, rollup) {
 
     if (withHeadcount.length >= 2) {
         const best = withHeadcount.slice().sort((a, b) => a.turnoverRate - b.turnoverRate)[0];
-        items.push({ icon: 'bi-trophy-fill', color: 'success', title: '@L["SC_InsightBestLeaderTitle"]',
-            description: `${best.name} — ${best.turnoverRate.toFixed(1)}% @L["SC_InsightBestLeaderDesc"]` });
+        items.push({ icon: 'bi-trophy-fill', color: 'success', title: SC_I18N.insightBestLeaderTitle,
+            description: `${best.name} — ${best.turnoverRate.toFixed(1)}% ${SC_I18N.insightBestLeaderDesc}` });
 
         const worst = withHeadcount.slice().sort((a, b) => b.turnoverRate - a.turnoverRate)[0];
         if (worst.name !== best.name)
-            items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: '@L["SC_InsightWorstLeaderTitle"]',
-                description: `${worst.name} — ${worst.turnoverRate.toFixed(1)}% @L["SC_InsightWorstLeaderDesc"]` });
+            items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: SC_I18N.insightWorstLeaderTitle,
+                description: `${worst.name} — ${worst.turnoverRate.toFixed(1)}% ${SC_I18N.insightWorstLeaderDesc}` });
     }
 
     const topOc = (rollup.byOperationConsultant || []).slice().sort((a, b) => b.flaggedPercent - a.flaggedPercent)[0];
     if (topOc && topOc.flaggedPercent > 0)
-        items.push({ icon: 'bi-person-badge', color: 'warning', title: '@L["SC_InsightTopOcTitle"]',
-            description: `${topOc.name} — ${topOc.flaggedLeaders}/${topOc.totalLeaders} (${topOc.flaggedPercent.toFixed(0)}%) @L["SC_InsightTopOcDesc"]` });
+        items.push({ icon: 'bi-person-badge', color: 'warning', title: SC_I18N.insightTopOcTitle,
+            description: `${topOc.name} — ${topOc.flaggedLeaders}/${topOc.totalLeaders} (${topOc.flaggedPercent.toFixed(0)}%) ${SC_I18N.insightTopOcDesc}` });
 
     const topOm = (rollup.byOperationManager || []).slice().sort((a, b) => b.flaggedPercent - a.flaggedPercent)[0];
     if (topOm && topOm.flaggedPercent > 0)
-        items.push({ icon: 'bi-person-gear', color: 'warning', title: '@L["SC_InsightTopOmTitle"]',
-            description: `${topOm.name} — ${topOm.flaggedLeaders}/${topOm.totalLeaders} (${topOm.flaggedPercent.toFixed(0)}%) @L["SC_InsightTopOmDesc"]` });
+        items.push({ icon: 'bi-person-gear', color: 'warning', title: SC_I18N.insightTopOmTitle,
+            description: `${topOm.name} — ${topOm.flaggedLeaders}/${topOm.totalLeaders} (${topOm.flaggedPercent.toFixed(0)}%) ${SC_I18N.insightTopOmDesc}` });
 
     if (!items.length) {
         el.innerHTML = `<div class="text-muted" style="font-size:13px">${document.getElementById('scContent').dataset.noInsights}</div>`;

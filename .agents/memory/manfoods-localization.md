@@ -44,11 +44,14 @@ Both `Areas/Admin/Views/_ViewImports.cshtml` and `Areas/Home/Views/_ViewImports.
 ```
 
 ## JS localization pattern
-Views with inline JS strings use:
+For localized strings embedded in inline JavaScript, serialize the value as JSON before emitting it:
 ```javascript
-const _L = { key: '@L["ResourceKey"]' };
-// then use _L.key in JS template literals
+const _L = {
+    key: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ResourceKey"].Value))
+};
+// then use _L.key in JS template literals and escape it before innerHTML
 ```
+Do not place `@L["ResourceKey"]` directly inside a `<script>` string. Razor HTML-encodes Arabic there, but script contents do not decode HTML entities, so the entity text becomes visible in dynamically rendered cards. Values in normal HTML or `data-*` attributes are decoded by the browser and do not have this problem.
 
 ## RTL/LTR in layouts
 Layouts read cookie directly (not from ASP.NET culture) for `html lang` and `dir` attributes.

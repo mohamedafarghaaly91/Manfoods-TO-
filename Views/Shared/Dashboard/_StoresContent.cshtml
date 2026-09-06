@@ -171,6 +171,36 @@ let stSort = 'turnover_desc';
 
 const stContainerEl = document.getElementById('storeCardsContainer');
 const ST_D = stContainerEl.dataset;
+const ST_I18N = {
+    noDataForPeriod: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["Common_NoDataForPeriod"].Value)),
+    insightBestTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightBestTitle"].Value)),
+    insightBestDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightBestDesc"].Value)),
+    insightWorstTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightWorstTitle"].Value)),
+    insightWorstDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightWorstDesc"].Value)),
+    insightCriticalTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightCriticalTitle"].Value)),
+    insightCriticalDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightCriticalDesc"].Value)),
+    insightNoCriticalTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightNoCriticalTitle"].Value)),
+    insightNoCriticalDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightNoCriticalDesc"].Value)),
+    insightImprovingTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightImprovingTitle"].Value)),
+    insightWorseningTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightWorseningTitle"].Value)),
+    insightImprovingDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightImprovingDesc"].Value)),
+    insightWorseningDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightWorseningDesc"].Value)),
+    insightHighRiskTitle: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightHighRiskTitle"].Value)),
+    insightHighRiskDesc1: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightHighRiskDesc1"].Value)),
+    insightHighRiskDesc2: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_InsightHighRiskDesc2"].Value)),
+    kpiTotalStores: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalStores"].Value)),
+    kpiTotalStoresDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalStoresDesc"].Value)),
+    kpiTotalHeadcount: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalHeadcount"].Value)),
+    kpiTotalHeadcountDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalHeadcountDesc"].Value)),
+    kpiTotalResignations: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalResignations"].Value)),
+    kpiTotalResignationsDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiTotalResignationsDesc"].Value)),
+    kpiAvgTurnover: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiAvgTurnover"].Value)),
+    kpiAvgTurnoverDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiAvgTurnoverDesc"].Value)),
+    kpiCriticalStores: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiCriticalStores"].Value)),
+    kpiCriticalStoresDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiCriticalStoresDesc"].Value)),
+    kpiHighRiskStores: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiHighRiskStores"].Value)),
+    kpiHighRiskStoresDesc: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["ST_KpiHighRiskStoresDesc"].Value))
+};
 
 /* Admin-configurable via the Settings page (loaded once in loadAll below). */
 let stTurnoverColorRules = null;
@@ -288,18 +318,18 @@ function stRenderInsights(rows) {
     };
     const items = [];
 
-    if (!rows.length) { el.innerHTML = `<div class="text-muted" style="font-size:13px">@L["Common_NoDataForPeriod"]</div>`; return; }
+    if (!rows.length) { el.innerHTML = `<div class="text-muted" style="font-size:13px">${sapEscape(ST_I18N.noDataForPeriod)}</div>`; return; }
 
     const eligible = rows.filter(r => r.headcount >= 3);
     if (eligible.length) {
         const best = [...eligible].sort((a, b) => a.turnoverRate - b.turnoverRate)[0];
-        items.push({ icon: 'bi-trophy-fill', color: 'success', title: '@L["ST_InsightBestTitle"]',
-            description: `${best.storeName} — ${best.turnoverRate.toFixed(1)}% @L["ST_InsightBestDesc"]` });
+        items.push({ icon: 'bi-trophy-fill', color: 'success', title: ST_I18N.insightBestTitle,
+            description: `${best.storeName} — ${best.turnoverRate.toFixed(1)}% ${ST_I18N.insightBestDesc}` });
 
         const worst = [...eligible].sort((a, b) => b.turnoverRate - a.turnoverRate)[0];
         if (worst.turnoverRate > 0) {
-            items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: '@L["ST_InsightWorstTitle"]',
-                description: `${worst.storeName} — ${worst.turnoverRate.toFixed(1)}% @L["ST_InsightWorstDesc"]` });
+            items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: ST_I18N.insightWorstTitle,
+                description: `${worst.storeName} — ${worst.turnoverRate.toFixed(1)}% ${ST_I18N.insightWorstDesc}` });
         }
     }
 
@@ -308,10 +338,10 @@ function stRenderInsights(rows) {
         return ac && ac.planStatus === 'Active' && (ac.severity === 'Critical' || ac.severity === 'High');
     });
     if (criticalStores.length > 0) {
-        items.push({ icon: 'bi-clipboard2-pulse-fill', color: 'danger', title: '@L["ST_InsightCriticalTitle"]',
-            description: `${criticalStores.length} @L["ST_InsightCriticalDesc"]` });
+        items.push({ icon: 'bi-clipboard2-pulse-fill', color: 'danger', title: ST_I18N.insightCriticalTitle,
+            description: `${criticalStores.length} ${ST_I18N.insightCriticalDesc}` });
     } else {
-        items.push({ icon: 'bi-check-circle-fill', color: 'success', title: '@L["ST_InsightNoCriticalTitle"]', description: '@L["ST_InsightNoCriticalDesc"]' });
+        items.push({ icon: 'bi-check-circle-fill', color: 'success', title: ST_I18N.insightNoCriticalTitle, description: ST_I18N.insightNoCriticalDesc });
     }
 
     const withPrev = rows.filter(r => stPrevByStore[r.storeName] !== undefined && stPrevByStore[r.storeName] !== null);
@@ -322,16 +352,16 @@ function stRenderInsights(rows) {
         if (Math.abs(delta) >= 0.1) {
             const improving = delta < 0;
             items.push({ icon: improving ? 'bi-graph-down-arrow' : 'bi-graph-up-arrow', color: improving ? 'success' : 'warning',
-                title: improving ? '@L["ST_InsightImprovingTitle"]' : '@L["ST_InsightWorseningTitle"]',
-                description: `${Math.abs(delta).toFixed(1)}pt ${improving ? '@L["ST_InsightImprovingDesc"]' : '@L["ST_InsightWorseningDesc"]'}` });
+                title: improving ? ST_I18N.insightImprovingTitle : ST_I18N.insightWorseningTitle,
+                description: `${Math.abs(delta).toFixed(1)}pt ${improving ? ST_I18N.insightImprovingDesc : ST_I18N.insightWorseningDesc}` });
         }
     }
 
     const highRiskStores = Object.entries(stHighRiskByStore).filter(([store, count]) => count > 0 && rows.some(r => r.storeName === store));
     if (highRiskStores.length > 0) {
         const totalHighRisk = highRiskStores.reduce((s, [, c]) => s + c, 0);
-        items.push({ icon: 'bi-eye-fill', color: 'warning', title: '@L["ST_InsightHighRiskTitle"]',
-            description: `${totalHighRisk} @L["ST_InsightHighRiskDesc1"] ${highRiskStores.length} @L["ST_InsightHighRiskDesc2"]` });
+        items.push({ icon: 'bi-eye-fill', color: 'warning', title: ST_I18N.insightHighRiskTitle,
+            description: `${totalHighRisk} ${ST_I18N.insightHighRiskDesc1} ${highRiskStores.length} ${ST_I18N.insightHighRiskDesc2}` });
     }
 
     el.innerHTML = '<div class="row g-3">' + items.map(item => {
@@ -362,12 +392,12 @@ function stRenderSummary(rows) {
     const highRiskStoreCount = rows.filter(r => (stHighRiskByStore[r.storeName] || 0) > 0).length;
 
     document.getElementById('stSummaryCards').innerHTML = `
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-shop"></i></div><div class="kpi-value">${totalStores}</div><div class="kpi-label">@L["ST_KpiTotalStores"]</div><div class="kpi-desc">@L["ST_KpiTotalStoresDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${totalHeadcount}</div><div class="kpi-label">@L["ST_KpiTotalHeadcount"]</div><div class="kpi-desc">@L["ST_KpiTotalHeadcountDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${totalResignations}</div><div class="kpi-label">@L["ST_KpiTotalResignations"]</div><div class="kpi-desc">@L["ST_KpiTotalResignationsDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${avgTurnover.toFixed(1)}%</div><div class="kpi-label">@L["ST_KpiAvgTurnover"]</div><div class="kpi-desc">@L["ST_KpiAvgTurnoverDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-clipboard2-pulse-fill"></i></div><div class="kpi-value text-danger">${criticalCount}</div><div class="kpi-label">@L["ST_KpiCriticalStores"]</div><div class="kpi-desc">@L["ST_KpiCriticalStoresDesc"]</div></div>
-        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${highRiskStoreCount}</div><div class="kpi-label">@L["ST_KpiHighRiskStores"]</div><div class="kpi-desc">@L["ST_KpiHighRiskStoresDesc"]</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-shop"></i></div><div class="kpi-value">${totalStores}</div><div class="kpi-label">${sapEscape(ST_I18N.kpiTotalStores)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiTotalStoresDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-people-fill"></i></div><div class="kpi-value">${totalHeadcount}</div><div class="kpi-label">${sapEscape(ST_I18N.kpiTotalHeadcount)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiTotalHeadcountDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-person-dash-fill"></i></div><div class="kpi-value text-danger">${totalResignations}</div><div class="kpi-label">${sapEscape(ST_I18N.kpiTotalResignations)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiTotalResignationsDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-graph-up"></i></div><div class="kpi-value">${avgTurnover.toFixed(1)}%</div><div class="kpi-label">${sapEscape(ST_I18N.kpiAvgTurnover)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiAvgTurnoverDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon text-danger"><i class="bi bi-clipboard2-pulse-fill"></i></div><div class="kpi-value text-danger">${criticalCount}</div><div class="kpi-label">${sapEscape(ST_I18N.kpiCriticalStores)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiCriticalStoresDesc)}</div></div>
+        <div class="kpi-card"><div class="kpi-icon"><i class="bi bi-eye-fill"></i></div><div class="kpi-value">${highRiskStoreCount}</div><div class="kpi-label">${sapEscape(ST_I18N.kpiHighRiskStores)}</div><div class="kpi-desc">${sapEscape(ST_I18N.kpiHighRiskStoresDesc)}</div></div>
     `;
 }
 
