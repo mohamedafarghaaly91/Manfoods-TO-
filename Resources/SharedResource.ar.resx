@@ -860,8 +860,8 @@
   <data name="AC_MonthlyTurnoverTitle" xml:space="preserve"><value>أداء معدل الدوران الشهري</value></data>
   <data name="AC_MonthlyTurnoverOverall" xml:space="preserve"><value>معدل الدوران الإجمالي %</value></data>
   <data name="AC_MonthlyTurnover90Day" xml:space="preserve"><value>معدل الدوران خلال 90 يومًا %</value></data>
-  <data name="AC_MonthlyTurnoverOverallChange" xml:space="preserve"><value>التغيّر في معدل الدوران الإجمالي عن الشهر السابق (نقطة مئوية)</value></data>
-  <data name="AC_MonthlyTurnover90DayChange" xml:space="preserve"><value>التغيّر في معدل الدوران خلال 90 يومًا عن الشهر السابق (نقطة مئوية)</value></data>
+  <data name="AC_MonthlyTurnoverOverallChange" xml:space="preserve"><value>التغيّر الإجمالي عن الشهر السابق (نقطة مئوية)</value></data>
+  <data name="AC_MonthlyTurnover90DayChange" xml:space="preserve"><value>تغيّر 90 يومًا عن الشهر السابق (نقطة مئوية)</value></data>
   <data name="AC_MonthlyTurnoverEmpty" xml:space="preserve"><value>لا توجد بيانات دوران شهرية متاحة بعد لهذا الفرع.</value></data>
   <data name="AC_AssignmentTitle" xml:space="preserve"><value>المسؤولية والموعد المستهدف</value></data>
   <data name="AC_TargetDate" xml:space="preserve"><value>تاريخ الحل المستهدف</value></data>

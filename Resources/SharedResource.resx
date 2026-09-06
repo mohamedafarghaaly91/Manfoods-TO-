@@ -859,8 +859,8 @@
   <data name="AC_MonthlyTurnoverTitle" xml:space="preserve"><value>Monthly Turnover Performance</value></data>
   <data name="AC_MonthlyTurnoverOverall" xml:space="preserve"><value>Overall Turnover %</value></data>
   <data name="AC_MonthlyTurnover90Day" xml:space="preserve"><value>90-Day Turnover %</value></data>
-  <data name="AC_MonthlyTurnoverOverallChange" xml:space="preserve"><value>Overall Turnover Change vs. Previous Month (pp)</value></data>
-  <data name="AC_MonthlyTurnover90DayChange" xml:space="preserve"><value>90-Day Turnover Change vs. Previous Month (pp)</value></data>
+  <data name="AC_MonthlyTurnoverOverallChange" xml:space="preserve"><value>Overall Change vs. Previous Month (pp)</value></data>
+  <data name="AC_MonthlyTurnover90DayChange" xml:space="preserve"><value>90-Day Change vs. Previous Month (pp)</value></data>
   <data name="AC_MonthlyTurnoverEmpty" xml:space="preserve"><value>No monthly turnover data available yet for this store.</value></data>
   <data name="AC_AssignmentTitle" xml:space="preserve"><value>Ownership &amp; Target Date</value></data>
   <data name="AC_TargetDate" xml:space="preserve"><value>Target Resolution Date</value></data>
