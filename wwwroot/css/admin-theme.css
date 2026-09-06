@@ -256,13 +256,15 @@ body.admin-theme .empty-state { color: var(--text-3); }
     background: var(--nav-bg);
     border-bottom: 1px solid var(--nav-border);
     box-shadow: var(--shadow-lg);
+    direction: ltr;
 }
 /* Pinned physical (not logical) left so the brand block stays top-left
    regardless of LTR/RTL. The logo sits before the two text lines, in a row,
    so it reads "logo, then name" either way. */
 .admin-global-brand {
     position: absolute; top: 50%; left: 32px; transform: translateY(-50%);
-    display: flex; flex-direction: row; align-items: center; gap: 14px;
+    display: flex; flex-direction: row; direction: ltr;
+    align-items: center; gap: 14px;
     text-decoration: none;
 }
 .admin-global-brand-line1 {
@@ -276,8 +278,10 @@ body.admin-theme .empty-state { color: var(--text-3); }
 }
 .admin-global-right {
     position: absolute; top: 50%; right: 32px; transform: translateY(-50%);
-    display: flex; align-items: center; gap: 18px;
+    display: flex; flex-direction: row; direction: ltr;
+    align-items: center; gap: 18px;
 }
+.admin-global-right .notif-badge { right: -3px; left: auto; }
 .admin-global-logo { display: flex; align-items: center; justify-content: center; }
 .admin-global-logo img { height: var(--global-logo-h); width: auto; object-fit: contain; }
 
