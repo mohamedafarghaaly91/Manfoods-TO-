@@ -266,9 +266,9 @@ body.admin-theme .empty-state { color: var(--text-3); }
 /* ══ Sidebar shell (replaces the old fixed topnav) ══════════ */
 .admin-shell { display: flex; flex-direction: column; min-height: calc(100vh / var(--portal-zoom)); }
 
-/* ── Global header: full-width white bar, brand text on one side, the
-   McDonald's logo pinned to the physical top-right corner (absolute,
-   not flex order) so it stays right in both LTR and RTL. ── */
+/* ── Global header: keep the two groups on physical sides. LTR places the
+   brand on the left and notifications on the right; RTL mirrors those
+   positions so the Arabic brand stays on the right. ── */
 .admin-global-header {
     position: sticky; top: 0; z-index: 300;
     height: var(--global-header-h);
@@ -277,9 +277,7 @@ body.admin-theme .empty-state { color: var(--text-3); }
     box-shadow: var(--shadow-lg);
     direction: ltr;
 }
-/* Pinned physical (not logical) left so the brand block stays top-left
-   regardless of LTR/RTL. The logo sits before the two text lines, in a row,
-   so it reads "logo, then name" either way. */
+/* Default LTR placement. */
 .admin-global-brand {
     position: absolute; top: 50%; left: 32px; transform: translateY(-50%);
     display: flex; flex-direction: row; direction: ltr;
@@ -303,6 +301,23 @@ body.admin-theme .empty-state { color: var(--text-3); }
 .admin-global-right .notif-badge { right: -3px; left: auto; }
 .admin-global-logo { display: flex; align-items: center; justify-content: center; }
 .admin-global-logo img { height: var(--global-logo-h); width: auto; object-fit: contain; }
+
+/* In Arabic, the complete brand group belongs to the physical right side and
+   the notification group belongs to the physical left side. Reverse the
+   brand row too so the arches are the outermost item on the right. */
+html[dir="rtl"] .admin-global-brand {
+    left: auto; right: 32px;
+    flex-direction: row-reverse;
+}
+html[dir="rtl"] .admin-global-brand > div:last-child {
+    text-align: right;
+}
+html[dir="rtl"] .admin-global-right {
+    right: auto; left: 32px;
+}
+html[dir="rtl"] .admin-global-right .notif-badge {
+    right: auto; left: -3px;
+}
 
 .admin-body { display: flex; flex: 1; min-height: 0; gap: 20px; }
 
