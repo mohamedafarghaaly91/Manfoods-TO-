@@ -137,7 +137,7 @@ public static class ReportCatalog
             Description = "At-risk employee watchlist with ★ risk stars (7 scoring criteria), flagged reasons, hire date, and tenure — scoped to the selected store(s).",
             SectionKey = "Rep_Section_PerformanceRisk", TitleKey = "Rep_Title_EarlyWarning", DescriptionKey = "Rep_Desc_EarlyWarning",
             Icon = "bi-exclamation-diamond-fill", IconBg = "oklch(0.6 0.22 22 / .10)", IconColor = "oklch(0.6 0.22 22)",
-            UsesStore = true,
+            UsesYear = true, UsesMonths = true, UsesStore = true, UsesOmOc = true,
         },
 
         // ── Exit Interviews ───────────────────────────────────

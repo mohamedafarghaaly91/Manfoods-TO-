@@ -566,6 +566,12 @@ public class ReportService : IReportService
         return $"{year} ({string.Join(", ", names)})";
     }
 
+    private static string DescribeFilter(string? value)
+    {
+        var values = MultiValueFilter.Split(value);
+        return values == null || values.Count == 0 ? "All" : string.Join(", ", values);
+    }
+
     // ── Scorecard ───────────────────────────────────────────
     private async Task AddScorecardSheetAsync(XLWorkbook wb, string dimension, string sheetName, string nameHeader, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
     {
@@ -605,17 +611,26 @@ public class ReportService : IReportService
     }
 
     // ── Early Warning ───────────────────────────────────────
-    private async Task AddEarlyWarningSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? store = null)
+    private async Task AddEarlyWarningSheetsAsync(XLWorkbook wb, string role, string? assignedName, string? store = null,
+        string? om = null, string? oc = null, string? soc = null, string? od = null,
+        string? months = null, int? year = null)
     {
-        var summary = await _earlyWarning.GetSummaryAsync(store, role, assignedName);
-        var watchlist = await _earlyWarning.GetWatchlistAsync(store, role, assignedName);
+        var summary = await _earlyWarning.GetSummaryAsync(store, role, assignedName, months, year, om, oc, soc, od);
+        var watchlist = await _earlyWarning.GetWatchlistAsync(store, role, assignedName, months, year, om, oc, soc, od);
+        var periodScope = year.HasValue ? DescribePeriodScope(months, year) : "Latest Uploaded Period";
 
         var wsSummary = AddSheet(wb, "Early Warning Summary");
         StyleHeader(wsSummary, new[] { "Metric", "Value" });
-        wsSummary.Cell(2, 1).Value = "Total On Watchlist"; SetIntCell(wsSummary.Cell(2, 2), summary.TotalWatchlist);
-        wsSummary.Cell(3, 1).Value = "High Risk (4–5 stars)"; SetIntCell(wsSummary.Cell(3, 2), summary.HighRiskCount);
-        wsSummary.Cell(4, 1).Value = "In First 90 Days"; SetIntCell(wsSummary.Cell(4, 2), summary.NewHireWindowCount);
-        wsSummary.Cell(5, 1).Value = "Company Baseline Early-Leave Rate"; SetPercentCell(wsSummary.Cell(5, 2), summary.CompanyBaselineRate);
+        wsSummary.Cell(2, 1).Value = "Selected Snapshot"; wsSummary.Cell(2, 2).Value = periodScope;
+        wsSummary.Cell(3, 1).Value = "Store Filter"; wsSummary.Cell(3, 2).Value = DescribeFilter(store);
+        wsSummary.Cell(4, 1).Value = "Operation Manager Filter"; wsSummary.Cell(4, 2).Value = DescribeFilter(om);
+        wsSummary.Cell(5, 1).Value = "Operation Consultant Filter"; wsSummary.Cell(5, 2).Value = DescribeFilter(oc);
+        wsSummary.Cell(6, 1).Value = "Senior Operation Consultant Filter"; wsSummary.Cell(6, 2).Value = DescribeFilter(soc);
+        wsSummary.Cell(7, 1).Value = "Operation Director Filter"; wsSummary.Cell(7, 2).Value = DescribeFilter(od);
+        wsSummary.Cell(8, 1).Value = "Total On Watchlist"; SetIntCell(wsSummary.Cell(8, 2), summary.TotalWatchlist);
+        wsSummary.Cell(9, 1).Value = "High Risk (4–5 stars)"; SetIntCell(wsSummary.Cell(9, 2), summary.HighRiskCount);
+        wsSummary.Cell(10, 1).Value = "In First 90 Days"; SetIntCell(wsSummary.Cell(10, 2), summary.NewHireWindowCount);
+        wsSummary.Cell(11, 1).Value = "Company Baseline Early-Leave Rate"; SetPercentCell(wsSummary.Cell(11, 2), summary.CompanyBaselineRate);
         Finalize(wsSummary);
 
         var leadership = await BuildLeadershipMapAsync(role, assignedName);
@@ -628,7 +643,7 @@ public class ReportService : IReportService
             var w = watchlist[i];
             wsWatchlist.Cell(i + 2, 1).Value = SafeText(w.Name);
             wsWatchlist.Cell(i + 2, 2).Value = SafeText(w.Store);
-            wsWatchlist.Cell(i + 2, 3).Value = $"As Of {asOf}";
+            wsWatchlist.Cell(i + 2, 3).Value = year.HasValue ? $"Selected: {periodScope}" : $"As Of {asOf}";
             int col = WriteLeadershipCells(wsWatchlist, i + 2, 4, leadership, w.Store);
             wsWatchlist.Cell(i + 2, col).Value = SafeText(w.JobTitle);
             SetDateCell(wsWatchlist.Cell(i + 2, col + 1), w.HireDate);
@@ -641,10 +656,12 @@ public class ReportService : IReportService
         Finalize(wsWatchlist);
     }
 
-    public async Task<XLWorkbook> BuildEarlyWarningReportAsync(string role, string? assignedName, string? store = null)
+    public async Task<XLWorkbook> BuildEarlyWarningReportAsync(string role, string? assignedName, string? store = null,
+        string? om = null, string? oc = null, string? soc = null, string? od = null,
+        string? months = null, int? year = null)
     {
         var wb = new XLWorkbook();
-        await AddEarlyWarningSheetsAsync(wb, role, assignedName, store);
+        await AddEarlyWarningSheetsAsync(wb, role, assignedName, store, om, oc, soc, od, months, year);
         return wb;
     }
 

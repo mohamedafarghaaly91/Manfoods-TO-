@@ -57,9 +57,9 @@ public class ActionCenterEndToEndTests
     private class AlwaysHighRiskEarlyWarningService : IEarlyWarningService
     {
         public Task<List<string>> GetStoreListAsync(string role, string? assignedName) => Task.FromResult(new List<string>());
-        public Task<List<EarlyWarningItem>> GetWatchlistAsync(string? store, string role, string? assignedName, string? months = null, int? year = null) =>
+        public Task<List<EarlyWarningItem>> GetWatchlistAsync(string? store, string role, string? assignedName, string? months = null, int? year = null, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
             Task.FromResult(new List<EarlyWarningItem>());
-        public Task<EarlyWarningSummary> GetSummaryAsync(string? store, string role, string? assignedName, string? months = null, int? year = null) =>
+        public Task<EarlyWarningSummary> GetSummaryAsync(string? store, string role, string? assignedName, string? months = null, int? year = null, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
             Task.FromResult(new EarlyWarningSummary { HighRiskCount = 5 });
     }
 

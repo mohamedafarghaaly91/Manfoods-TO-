@@ -163,7 +163,7 @@ public class EarlyWarningService : IEarlyWarningService
         }
 
         (int Month, int Year) anchor;
-        if (year.HasValue && !string.IsNullOrWhiteSpace(months))
+        if (year.HasValue)
         {
             var resolved = DashboardService.ResolvePeriods(null, year, null, null, months)
                 .Where(p => periods.Any(x => x.Month == p.Month && x.Year == p.Year))
@@ -367,17 +367,36 @@ public class EarlyWarningService : IEarlyWarningService
     // Operation-Consultant-per-store lookup — same underlying StoreReferences
     // table, previously queried twice (with slightly different filters) on
     // every call.
-    private async Task<List<(string StoreName, string StoreLeader, string OperationConsultant, int Year, int Month)>> LoadStoreReferenceRowsAsync()
+    private async Task<List<(string StoreName, string StoreLeader, string OperationConsultant, string OperationManager, string SeniorOperationConsultant, string OperationDirector, int Year, int Month)>> LoadStoreReferenceRowsAsync()
     {
-        if (_cache.TryGetValue(StoreReferenceRowsCacheKey, out List<(string, string, string, int, int)>? cached) && cached != null)
+        if (_cache.TryGetValue(StoreReferenceRowsCacheKey, out List<(string, string, string, string, string, string, int, int)>? cached) && cached != null)
             return cached;
 
         var rows = await _db.StoreReferences
             .Where(s => !string.IsNullOrEmpty(s.StoreName))
-            .Select(s => new { s.StoreName, s.StoreLeader, s.OperationConsultant, s.Year, s.Month })
+            .Select(s => new
+            {
+                s.StoreName,
+                s.StoreLeader,
+                s.OperationConsultant,
+                s.OperationManager,
+                s.SeniorOperationConsultant,
+                s.OperationDirector,
+                s.Year,
+                s.Month
+            })
             .ToListAsync();
 
-        var result = rows.Select(s => (s.StoreName, s.StoreLeader, s.OperationConsultant, s.Year, s.Month)).ToList();
+        var result = rows.Select(s => (
+            s.StoreName,
+            s.StoreLeader,
+            s.OperationConsultant,
+            s.OperationManager,
+            s.SeniorOperationConsultant,
+            s.OperationDirector,
+            s.Year,
+            s.Month
+        )).ToList();
         _cache.Set(StoreReferenceRowsCacheKey, result, WatchlistCacheDuration);
         return result;
     }
@@ -457,9 +476,10 @@ public class EarlyWarningService : IEarlyWarningService
     }
 
     public async Task<List<EarlyWarningItem>> GetWatchlistAsync(
-        string? store, string role, string? assignedName, string? months = null, int? year = null)
+        string? store, string role, string? assignedName, string? months = null, int? year = null,
+        string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
-        var cacheKey = $"early-warning:watchlist_{store}_{role}_{assignedName}_{months}_{year}";
+        var cacheKey = $"early-warning:watchlist_{store}_{role}_{assignedName}_{months}_{year}_{om}_{oc}_{soc}_{od}";
         if (_cache.TryGetValue(cacheKey, out List<EarlyWarningItem>? cachedWatchlist) && cachedWatchlist != null)
             return cachedWatchlist;
 
@@ -521,15 +541,26 @@ public class EarlyWarningService : IEarlyWarningService
         //    anchor period, so it matches the same snapshot the candidates come
         //    from (falls back to the latest known assignment if none is ≤ anchor).
         var storeRefRows = await LoadStoreReferenceRowsAsync();
-        var ocByStore = storeRefRows
+        var leadershipByStore = storeRefRows
             .GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g =>
             {
                 var upToAnchor = g.Where(s => s.Year < anchorYear || (s.Year == anchorYear && s.Month <= anchorMonth)).ToList();
-                var chosen = (upToAnchor.Count > 0 ? upToAnchor : g.ToList())
+                return (upToAnchor.Count > 0 ? upToAnchor : g.ToList())
                     .OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First();
-                return chosen.OperationConsultant ?? "";
             });
+        var ocByStore = leadershipByStore.ToDictionary(
+            x => x.Key,
+            x => x.Value.OperationConsultant ?? "");
+
+        if (MultiValueFilter.Split(om) is { } oms)
+            candidates = candidates.Where(c => leadershipByStore.TryGetValue(c.Store, out var l) && oms.Contains(l.OperationManager ?? "")).ToList();
+        if (MultiValueFilter.Split(oc) is { } ocs)
+            candidates = candidates.Where(c => leadershipByStore.TryGetValue(c.Store, out var l) && ocs.Contains(l.OperationConsultant ?? "")).ToList();
+        if (MultiValueFilter.Split(soc) is { } socs)
+            candidates = candidates.Where(c => leadershipByStore.TryGetValue(c.Store, out var l) && socs.Contains(l.SeniorOperationConsultant ?? "")).ToList();
+        if (MultiValueFilter.Split(od) is { } ods)
+            candidates = candidates.Where(c => leadershipByStore.TryGetValue(c.Store, out var l) && ods.Contains(l.OperationDirector ?? "")).ToList();
 
         // ── Score each active employee ────────────────────────────────────────
         var result = new List<EarlyWarningItem>();
@@ -653,7 +684,8 @@ public class EarlyWarningService : IEarlyWarningService
     }
 
     public async Task<EarlyWarningSummary> GetSummaryAsync(
-        string? store, string role, string? assignedName, string? months = null, int? year = null)
+        string? store, string role, string? assignedName, string? months = null, int? year = null,
+        string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         // Same go-live-gated (early leavers ÷ new hires) formula as GetWatchlistAsync,
         // NinetyDayTurnoverService, and ScorecardService — kept in sync.
@@ -663,7 +695,7 @@ public class EarlyWarningService : IEarlyWarningService
         var companyEarly = goLiveHistorical.Count(h => MetricsCalculationService.IsEarlyLeaver(h.TenureDays));
         var companyRate  = MetricsCalculationService.NinetyDayRate(companyTotal, companyEarly);
 
-        var list = await GetWatchlistAsync(store, role, assignedName, months, year);
+        var list = await GetWatchlistAsync(store, role, assignedName, months, year, om, oc, soc, od);
         return new EarlyWarningSummary
         {
             TotalWatchlist      = list.Count,

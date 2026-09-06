@@ -1140,7 +1140,7 @@
   <data name="Rep_Title_Scorecard" xml:space="preserve"><value>بطاقة الأداء</value></data>
   <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>ترتيب مؤشرات الأداء لمديري الفروع واستشاريي العمليات ومديري التشغيل — الدوران و90 يومًا والاحتفاظ وانطباع إنهاء الخدمة.</value></data>
   <data name="Rep_Title_EarlyWarning" xml:space="preserve"><value>الإنذار المبكر</value></data>
-  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>قائمة متابعة الموظفين المعرضين للخطر مع نجوم الخطورة ★ (7 معايير تقييم)، والأسباب المرصودة، وتاريخ التعيين، ومدة الخدمة — للفروع المحددة.</value></data>
+  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>قائمة متابعة الموظفين المعرضين للخطر مع نجوم الخطورة ★ (7 معايير تقييم)، والأسباب المرصودة، وتاريخ التعيين، ومدة الخدمة — مع إمكانية التصفية حسب الفترة والفرع وقيادات التشغيل.</value></data>
   <data name="Rep_Title_ExitInterviews" xml:space="preserve"><value>تقرير مقابلات إنهاء الخدمة</value></data>
   <data name="Rep_Desc_ExitInterviews" xml:space="preserve"><value>أسباب المغادرة، ومحركات الاندماج، وتقييمات عبء العمل، والتجربة العامة، والتعليقات المجهولة — مجمّعة عبر كل الفترات المطابقة للفلاتر المحددة.</value></data>
   <data name="Rep_UploadPayrollHint" xml:space="preserve"><value>قم برفع بيانات الرواتب لإتاحة جميع التقارير.</value></data>

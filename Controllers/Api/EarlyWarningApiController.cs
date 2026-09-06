@@ -27,16 +27,18 @@ public class EarlyWarningApiController : ControllerBase
     }
 
     [HttpGet("watchlist")]
-    public async Task<IActionResult> Watchlist([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year)
+    public async Task<IActionResult> Watchlist([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year,
+        [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _earlyWarning.GetWatchlistAsync(store, role, assignedName, months, year));
+        return Ok(await _earlyWarning.GetWatchlistAsync(store, role, assignedName, months, year, om, oc, soc, od));
     }
 
     [HttpGet("summary")]
-    public async Task<IActionResult> Summary([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year)
+    public async Task<IActionResult> Summary([FromQuery] string? store, [FromQuery] string? months, [FromQuery] int? year,
+        [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _earlyWarning.GetSummaryAsync(store, role, assignedName, months, year));
+        return Ok(await _earlyWarning.GetSummaryAsync(store, role, assignedName, months, year, om, oc, soc, od));
     }
 }

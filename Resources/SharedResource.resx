@@ -1139,7 +1139,7 @@
   <data name="Rep_Title_Scorecard" xml:space="preserve"><value>Scorecard</value></data>
   <data name="Rep_Desc_Scorecard" xml:space="preserve"><value>KPI rankings for Store Leaders, Operation Consultants, and Operation Managers — Turnover, 90-Day, Retention, and Exit Sentiment.</value></data>
   <data name="Rep_Title_EarlyWarning" xml:space="preserve"><value>Early Warning</value></data>
-  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>At-risk employee watchlist with ★ risk stars (7 scoring criteria), flagged reasons, hire date, and tenure — scoped to the selected store(s).</value></data>
+  <data name="Rep_Desc_EarlyWarning" xml:space="preserve"><value>At-risk employee watchlist with ★ risk stars (7 scoring criteria), flagged reasons, hire date, and tenure — filterable by period, store, and operations leadership.</value></data>
   <data name="Rep_Title_ExitInterviews" xml:space="preserve"><value>Exit Interviews Report</value></data>
   <data name="Rep_Desc_ExitInterviews" xml:space="preserve"><value>Reasons for leaving, engagement drivers, workload ratings, overall experience, and anonymous comments — aggregated across all periods matching the selected filters.</value></data>
   <data name="Rep_UploadPayrollHint" xml:space="preserve"><value>Upload payroll data to unlock all reports.</value></data>

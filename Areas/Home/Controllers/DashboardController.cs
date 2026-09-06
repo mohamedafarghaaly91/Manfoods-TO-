@@ -129,7 +129,9 @@ public class DashboardController : Controller
             case "scorecard":
                 return await DownloadWorkbookAsync(await _reports.BuildScorecardReportAsync(role, assignedName, om, oc, soc, od, months, year > 0 ? year : null), "Scorecard_Report.xlsx");
             case "early-warning":
-                return await DownloadWorkbookAsync(await _reports.BuildEarlyWarningReportAsync(role, assignedName, store), "Early_Warning_Report.xlsx");
+                return await DownloadWorkbookAsync(
+                    await _reports.BuildEarlyWarningReportAsync(role, assignedName, store, om, oc, soc, od, months, year > 0 ? year : null),
+                    "Early_Warning_Report.xlsx");
             case "trend-matrix":
                 return await DownloadWorkbookAsync(
                     await _reports.BuildTrendMatrixReportAsync(role, assignedName, om, oc, soc, od, year > 0 ? year : null, months),
