@@ -114,6 +114,25 @@ body.admin-theme[data-theme="dark"] {
     --shadow-lg:     0 8px 32px rgba(0,0,0,.6);
 }
 
+/* Keep the structural areas of every Admin page on the dark canvas too.
+   Without these explicit backgrounds, the light-theme page canvas can show
+   through in the gaps around dark cards. */
+body.admin-theme[data-theme="dark"] {
+    --bs-body-bg: var(--bg);
+    --bs-body-color: var(--text);
+    --bs-secondary-bg: var(--bg-2);
+    --bs-tertiary-bg: var(--card-bg);
+    --bs-border-color: var(--card-border);
+    background-color: var(--bg);
+}
+body.admin-theme[data-theme="dark"] .admin-shell,
+body.admin-theme[data-theme="dark"] .admin-body,
+body.admin-theme[data-theme="dark"] .admin-main,
+body.admin-theme[data-theme="dark"] .admin-content,
+body.admin-theme[data-theme="dark"] .page-content {
+    background-color: var(--bg);
+}
+
 body.admin-theme h1, body.admin-theme h2, body.admin-theme h3,
 body.admin-theme h4, body.admin-theme h5, body.admin-theme h6 {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
