@@ -20,9 +20,13 @@ function sapEscape(s) {
 // that do not load dashboard.js.
 if (typeof Chart !== 'undefined') {
     Chart.defaults.interaction.mode = 'nearest';
-    Chart.defaults.interaction.intersect = true;
+    // Do not require the pointer to hit the exact rendered pixel. This is
+    // especially important for thin line points and narrow bars on dense or
+    // RTL dashboard layouts.
+    Chart.defaults.interaction.intersect = false;
     Chart.defaults.plugins.tooltip.mode = 'nearest';
-    Chart.defaults.plugins.tooltip.intersect = true;
+    Chart.defaults.plugins.tooltip.intersect = false;
+    Chart.defaults.plugins.tooltip.position = 'nearest';
 }
 
 const ChartColors = (function () {
