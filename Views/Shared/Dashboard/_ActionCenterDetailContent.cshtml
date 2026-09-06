@@ -17,6 +17,21 @@
 .acd-rec-text.done { text-decoration:line-through; color:var(--text-3); }
 .acd-note-item { border-bottom:1px solid var(--card-border); padding-bottom:10px; }
 .acd-badge { padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; display:inline-block; }
+.acd-monthly-turnover-table { width:100%; table-layout:fixed; direction:ltr; }
+.acd-monthly-turnover-table th,
+.acd-monthly-turnover-table td { vertical-align:middle; text-align:left; }
+.acd-monthly-turnover-table th { white-space:normal; line-height:1.3; }
+.acd-monthly-turnover-table td { white-space:nowrap; }
+.acd-monthly-turnover-table th:nth-child(1),
+.acd-monthly-turnover-table td:nth-child(1) { width:12%; }
+.acd-monthly-turnover-table th:nth-child(2),
+.acd-monthly-turnover-table td:nth-child(2),
+.acd-monthly-turnover-table th:nth-child(3),
+.acd-monthly-turnover-table td:nth-child(3) { width:15%; }
+.acd-monthly-turnover-table th:nth-child(4),
+.acd-monthly-turnover-table td:nth-child(4),
+.acd-monthly-turnover-table th:nth-child(5),
+.acd-monthly-turnover-table td:nth-child(5) { width:29%; }
 .chart-body canvas { direction:ltr; }
 .acd-check { width:18px; height:18px; cursor:pointer; accent-color:oklch(0.5 0.15 155); margin-top:2px; flex-shrink:0; }
 </style>
@@ -228,15 +243,16 @@ function acdRenderTrendChart(snapshots) {
 
 /// Renders the Monthly Turnover Performance table from a MonthlyTurnoverHistoryDto
 /// (or null if it couldn't be loaded — the section is simply omitted). Periods
-/// arrive newest-first from the API; month-over-month change is a plain
-/// percentage-point subtraction against the chronologically previous row
-/// (index + 1 in this newest-first array), same style as the existing Monthly
+/// are sorted oldest-first for display so January is the first row; the
+/// month-over-month change is a plain percentage-point subtraction against the
+/// chronologically previous row, same style as the existing Monthly
 /// Performance table below it — no new calculation rule.
 function acdMonthlyTurnoverHtml(history) {
     const d = ACD_D;
     if (!history) return '';
 
-    const periods = history.periods || [];
+    const periods = [...(history.periods || [])].sort((a, b) =>
+        (a.year * 12 + a.month) - (b.year * 12 + b.month));
     if (periods.length === 0) {
         return `<div class="card-dark mb-4">
             <h6 class="fw-bold mb-3">${sapEscape(d.monthlyTurnoverTitle)}</h6>
@@ -253,7 +269,7 @@ function acdMonthlyTurnoverHtml(history) {
     }
 
     const rows = periods.map((p, i) => {
-        const prev = i + 1 < periods.length ? periods[i + 1] : null;
+        const prev = i > 0 ? periods[i - 1] : null;
         return `<tr>
             <td style="white-space:nowrap;font-weight:600;font-size:12.5px">${sapEscape(p.label)}</td>
             <td>${acdRate(p.overallTurnoverRate)}</td>
@@ -266,14 +282,14 @@ function acdMonthlyTurnoverHtml(history) {
     return `<div class="card-dark mb-4">
         <h6 class="fw-bold mb-3">${sapEscape(d.monthlyTurnoverTitle)}</h6>
         <div style="overflow-x:auto">
-            <table class="table" style="margin-bottom:0">
+            <table class="table acd-monthly-turnover-table" style="margin-bottom:0">
                 <thead>
                     <tr>
-                        <th>${sapEscape(d.commonMonth)}</th>
-                        <th>${sapEscape(d.monthlyTurnoverOverall)}</th>
-                        <th>${sapEscape(d.monthlyTurnover90day)}</th>
-                        <th>${sapEscape(d.monthlyTurnoverOverallChange)}</th>
-                        <th>${sapEscape(d.monthlyTurnover90dayChange)}</th>
+                        <th scope="col">${sapEscape(d.commonMonth)}</th>
+                        <th scope="col">${sapEscape(d.monthlyTurnoverOverall)}</th>
+                        <th scope="col">${sapEscape(d.monthlyTurnover90day)}</th>
+                        <th scope="col">${sapEscape(d.monthlyTurnoverOverallChange)}</th>
+                        <th scope="col">${sapEscape(d.monthlyTurnover90dayChange)}</th>
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
