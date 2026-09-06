@@ -514,12 +514,12 @@ public class ReportService : IReportService
         var drivers = await _exitInterviews.GetEngagementDriversAsync(filter, role, assignedName);
         var comments = await _exitInterviews.GetCommentsAsync(filter, role, assignedName);
 
-        WriteLabelValueSheet(wb, "EI Reasons for Leaving", "Reason", "Count", reasons);
-        WriteLabelValueSheet(wb, "EI Would Return", "Answer", "Count", wouldReturn);
-        WriteLabelValueSheet(wb, "EI Overall Experience", "Answer", "Count", overallExperience);
-        WriteLabelValueSheet(wb, "EI Workload Condition", "Answer", "Count", workload);
+        WriteLabelValueSheet(wb, "Reasons for Leaving", "Reason", "Count", reasons);
+        WriteLabelValueSheet(wb, "Would Return", "Answer", "Count", wouldReturn);
+        WriteLabelValueSheet(wb, "Overall Experience", "Answer", "Count", overallExperience);
+        WriteLabelValueSheet(wb, "Workload Condition", "Answer", "Count", workload);
 
-        var wsDrivers = AddSheet(wb, "EI Engagement Drivers");
+        var wsDrivers = AddSheet(wb, "Engagement Drivers");
         StyleHeader(wsDrivers, new[] { "Driver", "Positive", "Total Responses" });
         for (int i = 0; i < drivers.Count; i++)
         {
@@ -530,7 +530,7 @@ public class ReportService : IReportService
         Finalize(wsDrivers);
 
         var leadership = await BuildLeadershipMapAsync(role, assignedName);
-        var wsComments = AddSheet(wb, "EI Comments (Anonymous)");
+        var wsComments = AddSheet(wb, "Comments (Anonymous)");
         StyleHeader(wsComments, new[] { "Store", "Store Leader" }.Concat(LeadershipHeaders)
             .Concat(new[] { "Question", "Comment", "Submitted At" }).ToArray());
         for (int i = 0; i < comments.Count; i++)

@@ -316,6 +316,12 @@ public class ExitInterviewService : IExitInterviewService
 
         foreach (var e in rows)
         {
+            // A comment without its store and store-leader context is an
+            // incomplete exit-interview row. Exclude it at the service boundary
+            // so the page table and the Excel comments sheet stay consistent.
+            if (string.IsNullOrWhiteSpace(e.Store) || string.IsNullOrWhiteSpace(e.StoreLeader))
+                continue;
+
             AddIfPresent(e, e.ReasonOtherText, "Other Reason");
             AddIfPresent(e, e.WorkPressureReasonText, "Workload Pressure Reason");
             AddIfPresent(e, e.WhatWouldChangeText, "What They'd Change");
