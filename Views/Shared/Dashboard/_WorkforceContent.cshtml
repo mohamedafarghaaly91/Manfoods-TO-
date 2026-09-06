@@ -44,6 +44,12 @@
         <div class="wf-select-wrap"><select id="ocSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
         <div class="wf-select-wrap"><select id="socSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
         <div class="wf-select-wrap"><select id="odSelect" class="wf-select"></select><i class="bi bi-chevron-down"></i></div>
+        <div class="job-filter-wrap">
+            <button type="button" id="jobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="jobSelectLabel">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="jobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
         <button type="button" class="reset-filters-btn" onclick="resetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
         </button>
@@ -367,6 +373,7 @@ async function wfLoadHeadcountTrend() {
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
+    if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
     const data = await fetchJson(`/api/dashboard/headcount-trend?${q.toString()}`);
     const fmt = pk => { const [y, m] = pk.split('-'); return new Date(+y, +m - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' }); };
@@ -419,6 +426,7 @@ async function wfLoadStoreTable() {
     const q = new URLSearchParams({ month: periodMonth, year: periodYear });
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
+    if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     const data = await fetchJson(`/api/dashboard/store-headcount-breakdown?${q.toString()}`);
     wfRenderStoreTable(data);
 }

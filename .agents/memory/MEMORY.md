@@ -2,3 +2,4 @@
 - [Speedee font CORS](speedee-font-cors.md) — McDonald's Speedee woff2 files on mcdonalds.com CDN are CORS-blocked; fallback stack (system-ui → -apple-system → Segoe UI → Roboto) renders acceptably.
 - [Localization ResourcesPath trap](localization-resourcespath.md) — Use ResourcesPath="" not "Resources" to avoid double-path lookup; use custom MfLangCookieProvider (not CookieRequestCultureProvider) for plain cookie values.
 - [Manfoods AR/EN localization setup](manfoods-localization.md) — Full localization architecture: cookie "mf-lang" (plain "ar"/"en"), MfLangCookieProvider, satellite DLL in ar/, JS uses const _L={} blocks, Arabic output is HTML entities (correct).
+- [.NET SDK environment](dotnet-sdk.md) — Imported project targets .NET 9; default workflows may resolve SDK 7 until the .NET 9 module is available.

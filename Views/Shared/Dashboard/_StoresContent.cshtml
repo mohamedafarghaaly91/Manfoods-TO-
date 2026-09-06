@@ -66,6 +66,15 @@
             </div>
         </div>
         <div class="st-filter-group">
+            <span class="st-filter-label">@L["Common_JobTitle"]</span>
+            <div class="job-filter-wrap">
+                <button type="button" id="jobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                    <span id="jobSelectLabel">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+                </button>
+                <div id="jobSelectPanel" class="job-filter-panel" hidden></div>
+            </div>
+        </div>
+        <div class="st-filter-group">
             <span class="st-filter-label">@L["ST_SortLabel"]</span>
             <div class="st-select-wrap">
                 <select id="stSortSelect" class="st-select">
@@ -417,6 +426,7 @@ async function stLoadStores() {
     if (ocFilter) q.set('oc', ocFilter);
     if (socFilter) q.set('soc', socFilter);
     if (odFilter) q.set('od', odFilter);
+    if (jobFilter.length) q.set('jobs', jobFilter.join(','));
 
     const [current, acStores, watchlist, prevPeriod] = await Promise.all([
         fetchJson(`/api/dashboard/store-comparison?${q.toString()}`),
@@ -441,6 +451,7 @@ async function stLoadStores() {
         if (ocFilter) pq.set('oc', ocFilter);
         if (socFilter) pq.set('soc', socFilter);
         if (odFilter) pq.set('od', odFilter);
+        if (jobFilter.length) pq.set('jobs', jobFilter.join(','));
         const previous = await fetchJson(`/api/dashboard/store-comparison?${pq.toString()}`);
         (previous || []).forEach(p => { stPrevByStore[p.storeName] = p.turnoverRate; });
     }

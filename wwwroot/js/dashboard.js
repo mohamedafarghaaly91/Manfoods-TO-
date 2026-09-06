@@ -1,7 +1,7 @@
 /* Shared dashboard chart logic — Admin & Home areas */
 Chart.defaults.color = '#5B5875';
 
-let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '', socFilter = '', odFilter = '';
+let periodMonth, periodYear, fromPeriodMonth, fromPeriodYear, storeFilter = '', omFilter = '', ocFilter = '', socFilter = '', odFilter = '', jobFilter = [];
 let jobTitleChart, tenureChart, genderChart;
 
 /* Small badge shown next to a chart/table title, telling the user whether
@@ -50,6 +50,7 @@ function buildQuery() {
     if (ocFilter)        p.set('oc',        ocFilter);
     if (socFilter)       p.set('soc',       socFilter);
     if (odFilter)        p.set('od',        odFilter);
+    if (jobFilter.length) p.set('jobs', jobFilter.join(','));
     return p.toString();
 }
 
@@ -86,6 +87,7 @@ async function loadPeriods() {
         if (document.getElementById('ocSelect'))    await loadOperationConsultants();
         if (document.getElementById('socSelect'))   await loadSeniorOperationConsultants();
         if (document.getElementById('odSelect'))    await loadOperationDirectors();
+        if (document.getElementById('jobSelectButton')) await loadJobTitles();
         await loadAll();
     }
 }
@@ -170,6 +172,33 @@ async function loadOperationDirectors() {
     if (cur) sel.value = cur;
 }
 
+async function loadJobTitles() {
+    if (!periodMonth || !periodYear) return;
+    const jobs = await fetchJson(`/api/dashboard/job-titles?month=${periodMonth}&year=${periodYear}`);
+    const panel = document.getElementById('jobSelectPanel');
+    if (!panel) return;
+    const selected = new Set(jobFilter);
+    panel.innerHTML = jobs.map(job => `
+        <label class="job-filter-option">
+            <input type="checkbox" value="${escapeHtml(job)}" ${selected.has(job) ? 'checked' : ''}>
+            <span>${escapeHtml(job)}</span>
+        </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    updateJobFilterLabel();
+}
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function updateJobFilterLabel() {
+    const label = document.getElementById('jobSelectLabel');
+    const button = document.getElementById('jobSelectButton');
+    if (!label || !button) return;
+    const all = document.documentElement.dir === 'rtl' ? 'كل الوظائف' : 'All Jobs';
+    label.textContent = jobFilter.length ? `${jobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}` : all;
+    button.classList.toggle('has-selection', jobFilter.length > 0);
+}
+
 async function loadKpis() {
     const kpiEl = document.getElementById('kpiCards');
     if (!kpiEl) return;
@@ -223,12 +252,14 @@ async function loadCharts() {
 async function loadAll() { await Promise.all([loadKpis(), loadCharts()]); }
 
 async function resetFilters() {
-    storeFilter = ''; omFilter = ''; ocFilter = ''; socFilter = ''; odFilter = '';
+    storeFilter = ''; omFilter = ''; ocFilter = ''; socFilter = ''; odFilter = ''; jobFilter = [];
     const stSel = document.getElementById('storeSelect'); if (stSel) stSel.value = '';
     const omSel = document.getElementById('omSelect');    if (omSel) omSel.value = '';
     const ocSel = document.getElementById('ocSelect');    if (ocSel) ocSel.value = '';
     const socSel = document.getElementById('socSelect');  if (socSel) socSel.value = '';
     const odSel = document.getElementById('odSelect');    if (odSel) odSel.value = '';
+    document.querySelectorAll('#jobSelectPanel input[type="checkbox"]').forEach(input => input.checked = false);
+    updateJobFilterLabel();
     const search = document.getElementById('storeCardSearch'); if (search) search.value = '';
     await loadPeriods();
 }
@@ -251,6 +282,10 @@ if (periodSel) {
         if (document.getElementById('ocSelect')) await loadOperationConsultants();
         if (document.getElementById('socSelect')) await loadSeniorOperationConsultants();
         if (document.getElementById('odSelect')) await loadOperationDirectors();
+        if (document.getElementById('jobSelectButton')) {
+            jobFilter = [];
+            await loadJobTitles();
+        }
         await loadAll();
     });
 }
@@ -302,6 +337,28 @@ if (odSel) {
     odSel.addEventListener('change', async function() {
         odFilter = this.value || '';
         await loadAll();
+    });
+}
+
+const jobButton = document.getElementById('jobSelectButton');
+const jobPanel = document.getElementById('jobSelectPanel');
+if (jobButton && jobPanel) {
+    jobButton.addEventListener('click', event => {
+        event.stopPropagation();
+        jobPanel.hidden = !jobPanel.hidden;
+        jobButton.setAttribute('aria-expanded', String(!jobPanel.hidden));
+    });
+    jobPanel.addEventListener('change', async event => {
+        if (!event.target.matches('input[type="checkbox"]')) return;
+        jobFilter = [...jobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        updateJobFilterLabel();
+        await loadAll();
+    });
+    document.addEventListener('click', event => {
+        if (!jobPanel.contains(event.target) && !jobButton.contains(event.target)) {
+            jobPanel.hidden = true;
+            jobButton.setAttribute('aria-expanded', 'false');
+        }
     });
 }
 
