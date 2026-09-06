@@ -15,6 +15,16 @@ function sapEscape(s) {
     return div.innerHTML;
 }
 
+// Keep tooltip hit-testing consistent across every dashboard chart. This file
+// is loaded after Chart.js on all chart pages, including Action Center pages
+// that do not load dashboard.js.
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.interaction.mode = 'nearest';
+    Chart.defaults.interaction.intersect = true;
+    Chart.defaults.plugins.tooltip.mode = 'nearest';
+    Chart.defaults.plugins.tooltip.intersect = true;
+}
+
 const ChartColors = (function () {
     const SEMANTIC = {
         GOOD:           'oklch(0.62 0.15 155)', // green

@@ -745,7 +745,7 @@ function cmpRenderCharts(dataA, dataB) {
             { label: cmpLabel('B'), data: t.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
         ] },
         options: {
-            interaction: { mode: 'index', intersect: false },
+            interaction: { mode: 'nearest', intersect: true },
             plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
                 datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
             scales: { y: { ticks: { callback: v => v + '%' } } }
@@ -760,7 +760,7 @@ function cmpRenderCharts(dataA, dataB) {
             { label: cmpLabel('B'), data: n.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
         ] },
         options: {
-            interaction: { mode: 'index', intersect: false },
+            interaction: { mode: 'nearest', intersect: true },
             plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
                 datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v.toFixed(1) + '%' : '' } },
             scales: { y: { ticks: { callback: v => v + '%' } } }

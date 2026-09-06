@@ -377,7 +377,7 @@ async function wfLoadHeadcountTrend() {
             datasets: [{ data: data.map(d => d.value), borderColor: 'oklch(0.5 0.18 25)', backgroundColor: 'oklch(0.5 0.18 25 / .12)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 6 }]
         },
         options: {
-            interaction: { mode: 'index', intersect: false },
+            interaction: { mode: 'nearest', intersect: true },
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: true, callbacks: { label: c => ` ${c.formattedValue} ${wfL.employeesSuffix}` } }
