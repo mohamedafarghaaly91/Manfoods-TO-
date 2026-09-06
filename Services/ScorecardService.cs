@@ -249,6 +249,38 @@ public class ScorecardService : IScorecardService
         return await q.Select(s => s.StoreLeader).Distinct().OrderBy(s => s).ToListAsync();
     }
 
+    public async Task<StoreLeaderProfileViewModel> GetLeaderProfileAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
+    {
+        var profile = new StoreLeaderProfileViewModel { Name = leaderName };
+        if (string.IsNullOrWhiteSpace(leaderName)) return profile;
+
+        var effectiveYear = await ResolveEffectiveYearAsync(year);
+        var scorecard = await GetScorecardAsync("leader", role, assignedName, months: months, year: effectiveYear);
+        profile.Summary = scorecard.FirstOrDefault(r => r.Name == leaderName);
+        profile.History = await GetLeaderHistoryAsync(leaderName, role, assignedName, months, effectiveYear);
+
+        var filter = new ExitInterviewFilter
+        {
+            StoreLeader = leaderName,
+            Months = months,
+            Year = effectiveYear,
+        };
+
+        profile.ExitSentiment = await _exitInterviews.GetSentimentSummaryAsync(filter, role, assignedName);
+        profile.ExitReasons = await _exitInterviews.GetReasonsForLeavingAsync(filter, role, assignedName);
+        profile.WouldReturn = await _exitInterviews.GetWouldReturnAsync(filter, role, assignedName);
+        profile.OverallExperience = await _exitInterviews.GetOverallExperienceAsync(filter, role, assignedName);
+        profile.WorkloadCondition = await _exitInterviews.GetWorkloadConditionAsync(filter, role, assignedName);
+        profile.Training = await _exitInterviews.GetTrainingAsync(filter, role, assignedName);
+        profile.FairTreatment = await _exitInterviews.GetFairTreatmentAsync(filter, role, assignedName);
+        profile.JobTitles = await _exitInterviews.GetByJobTitleAsync(filter, role, assignedName);
+        profile.EngagementDrivers = await _exitInterviews.GetEngagementDriversAsync(filter, role, assignedName);
+        profile.Comments = await _exitInterviews.GetCommentsAsync(filter, role, assignedName);
+        profile.ReasonsTrend = await _exitInterviews.GetReasonsTrendAsync(filter, role, assignedName);
+        profile.ReasonVsWouldReturn = await _exitInterviews.GetReasonVsWouldReturnAsync(filter, role, assignedName);
+        return profile;
+    }
+
     public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
     {
         if (string.IsNullOrWhiteSpace(leaderName)) return new List<LeaderHistoryRow>();

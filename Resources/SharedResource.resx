@@ -1428,4 +1428,39 @@
   <data name="APG_Example_Step6" xml:space="preserve"><value>Monthly Progress — Over the next two monthly uploads, the Store Leader follows the onboarding recommendations. The early-leaver rate drops to 22%, then 18% — both below threshold, so the signal stops firing.</value></data>
   <data name="APG_Example_Step7" xml:space="preserve"><value>Healthy Streak — Those two clean months in a row complete the 2-period healthy streak.</value></data>
   <data name="APG_Example_Step8" xml:space="preserve"><value>Review &amp; Outcome — The plan auto-resolves with outcome Resolved. If the same store spikes again months later, a brand-new plan opens and, since this store now has more than one plan on record, it's flagged as a Repeat Problem Store — not because it merely crossed a quarter, but because the earlier plan had already been closed.</value></data>
+  <data name="SLP_PageTitle" xml:space="preserve"><value>Store Leader Tracking</value></data>
+  <data name="SLP_PageSub" xml:space="preserve"><value>Complete history, performance, workforce movement, and exit sentiment for this Store Leader</value></data>
+  <data name="SLP_Back" xml:space="preserve"><value>Back to Scorecard</value></data>
+  <data name="SLP_History" xml:space="preserve"><value>Store Leader History</value></data>
+  <data name="SLP_TurnoverTrend" xml:space="preserve"><value>Turnover and Headcount Tracking</value></data>
+  <data name="SLP_TurnoverTrendSub" xml:space="preserve"><value>Monthly performance across every store assignment</value></data>
+  <data name="SLP_StoreHistory" xml:space="preserve"><value>Store Assignment History</value></data>
+  <data name="SLP_StoreHistorySub" xml:space="preserve"><value>Transfers are highlighted in the timeline</value></data>
+  <data name="SLP_ExitInsights" xml:space="preserve"><value>Exit Sentiment and Experience</value></data>
+  <data name="SLP_ExitInsightsSub" xml:space="preserve"><value>Anonymous exit-interview signals for this leader's stores</value></data>
+  <data name="SLP_ExitSentiment" xml:space="preserve"><value>Exit Sentiment</value></data>
+  <data name="SLP_ExitSentimentSub" xml:space="preserve"><value>Top leaving reasons over time</value></data>
+  <data name="SLP_ExitResponses" xml:space="preserve"><value>Exit responses</value></data>
+  <data name="SLP_ReasonsLeaving" xml:space="preserve"><value>Reasons for Leaving</value></data>
+  <data name="SLP_WouldReturn" xml:space="preserve"><value>Would Return</value></data>
+  <data name="SLP_OverallExperience" xml:space="preserve"><value>Overall Experience</value></data>
+  <data name="SLP_EngagementDrivers" xml:space="preserve"><value>Engagement Drivers</value></data>
+  <data name="SLP_Workload" xml:space="preserve"><value>Workload Condition</value></data>
+  <data name="SLP_Training" xml:space="preserve"><value>Training</value></data>
+  <data name="SLP_FairTreatment" xml:space="preserve"><value>Fair Treatment</value></data>
+  <data name="SLP_ReasonVsReturn" xml:space="preserve"><value>Leaving Reason vs Would Return</value></data>
+  <data name="SLP_JobTitles" xml:space="preserve"><value>Exit Responses by Job Title</value></data>
+  <data name="SLP_Comments" xml:space="preserve"><value>Anonymous Exit Comments</value></data>
+  <data name="SLP_Question" xml:space="preserve"><value>Question</value></data>
+  <data name="SLP_Comment" xml:space="preserve"><value>Comment</value></data>
+  <data name="SLP_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="SLP_Store" xml:space="preserve"><value>Store</value></data>
+  <data name="SLP_Period" xml:space="preserve"><value>Period</value></data>
+  <data name="SLP_Headcount" xml:space="preserve"><value>Headcount</value></data>
+  <data name="SLP_Resignations" xml:space="preserve"><value>Resignations</value></data>
+  <data name="SLP_Turnover" xml:space="preserve"><value>Turnover</value></data>
+  <data name="SLP_Transferred" xml:space="preserve"><value>Transferred here</value></data>
+  <data name="SLP_NoData" xml:space="preserve"><value>No tracking data is available for this Store Leader.</value></data>
+  <data name="SLP_NoExitData" xml:space="preserve"><value>No exit-interview data is available for this selection.</value></data>
+  <data name="SLP_NoComments" xml:space="preserve"><value>No anonymous comments are available.</value></data>
 </root>

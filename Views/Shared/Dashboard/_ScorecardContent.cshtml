@@ -58,6 +58,8 @@
 .sc-combo-option { padding:8px 10px; border-radius:6px; font-size:13px; color:var(--text-2); cursor:pointer; }
 .sc-combo-option:hover { background:var(--card-bg-2); }
 .sc-combo-option.active { color:var(--red); font-weight:700; background:var(--red-light); }
+.sc-leader-link { color:var(--text); text-decoration:none; border-bottom:1px dashed var(--red); }
+.sc-leader-link:hover { color:var(--red); border-bottom-style:solid; }
 
 .sc-dim-btn { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--card-border); }
 .sc-dim-btn.active { background: oklch(0.55 0.19 25); color: #fff; border-color: oklch(0.55 0.19 25); }
@@ -523,6 +525,7 @@ const scOdCombo  = scCreateCombobox({ inputId: 'scOdInput',  panelId: 'scOdPanel
 /* Ranking table ----------------------------------------------------------- */
 let scRankingRows = [];
 const scSortState = { key: 'turnoverRate', dir: 'desc' };
+const scLeaderProfileUrl = '@Url.Action("StoreLeaderProfile", "Dashboard")';
 
 function scSortValue(row, key) {
     const v = row[key];
@@ -565,7 +568,7 @@ function scRenderRankingTable() {
     const rows = scApplySort(scRankingRows);
     tbody.innerHTML = rows.map(r => `
         <tr>
-            <td class="px-3 py-2 fw-semibold">${sapEscape(r.name)}</td>
+            <td class="px-3 py-2 fw-semibold"><a class="sc-leader-link" href="${scLeaderProfileHref(r.name)}">${sapEscape(r.name)}</a></td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
             <td class="px-3 py-2 text-center">${scMetricBadge(r.turnoverRate, 'turnover')}</td>
@@ -573,6 +576,13 @@ function scRenderRankingTable() {
             <td class="px-3 py-2 text-center">${scMetricBadge(r.retention180Rate, 'retention')}</td>
             <td class="px-3 py-2 text-center">${r.exitResponseCount > 0 ? scRateBadge(r.exitSentimentPercent, true) : `<span class="text-muted" style="font-size:11px">${noSentimentText}</span>`}</td>
         </tr>`).join('');
+}
+
+function scLeaderProfileHref(name) {
+    const q = new URLSearchParams({ leader: name });
+    if (scYear) q.set('year', scYear);
+    if (scMonths.length) q.set('months', scMonths.join(','));
+    return `${scLeaderProfileUrl}?${q.toString()}`;
 }
 
 async function scLoadRanking() {

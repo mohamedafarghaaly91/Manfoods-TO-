@@ -37,6 +37,14 @@ public class ScorecardApiController : ControllerBase
         return Ok(await _scorecard.GetLeaderNamesAsync(role, assignedName));
     }
 
+    [HttpGet("leader-profile")]
+    public async Task<IActionResult> LeaderProfile([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
+    {
+        if (string.IsNullOrWhiteSpace(leader)) return BadRequest(new { error = "Leader name is required." });
+        var (role, assignedName) = Identity();
+        return Ok(await _scorecard.GetLeaderProfileAsync(leader, role, assignedName, months, year));
+    }
+
     [HttpGet("leader-history")]
     public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {

@@ -1429,4 +1429,39 @@
   <data name="APG_Example_Step6" xml:space="preserve"><value>التقدّم الشهري — خلال الرفعين الشهريين التاليين، يتبع قائد الفرع توصيات التأهيل. ينخفض معدل المغادرة المبكرة إلى 22%، ثم إلى 18% — وكلاهما أقل من الحد، فتتوقف الإشارة عن الظهور.</value></data>
   <data name="APG_Example_Step7" xml:space="preserve"><value>سلسلة الفترات السليمة — هذان الشهران النظيفان المتتاليان يكمّلان سلسلة الفترتين السليمتين المطلوبة.</value></data>
   <data name="APG_Example_Step8" xml:space="preserve"><value>المراجعة والنتيجة — تُحل الخطة تلقائيًا بنتيجة "تم الحل". وإذا ارتفع المعدل مجددًا في نفس الفرع بعد أشهر، تُفتح خطة جديدة تمامًا، ولأن هذا الفرع أصبح لديه الآن أكثر من خطة مسجّلة، يُصنَّف كـ"فرع مشكلات متكررة" — ليس لمجرد عبوره لربع سنوي، بل لأن الخطة السابقة كانت قد أُغلقت بالفعل.</value></data>
+  <data name="SLP_PageTitle" xml:space="preserve"><value>تتبع مدير الفرع</value></data>
+  <data name="SLP_PageSub" xml:space="preserve"><value>التاريخ الكامل والأداء وحركة الموظفين ومشاعر مقابلات الخروج لمدير الفرع ده</value></data>
+  <data name="SLP_Back" xml:space="preserve"><value>العودة إلى السكور كارد</value></data>
+  <data name="SLP_History" xml:space="preserve"><value>تاريخ مدير الفرع</value></data>
+  <data name="SLP_TurnoverTrend" xml:space="preserve"><value>تتبع الدوران وعدد الموظفين</value></data>
+  <data name="SLP_TurnoverTrendSub" xml:space="preserve"><value>الأداء الشهري في كل الفروع التي أدارها</value></data>
+  <data name="SLP_StoreHistory" xml:space="preserve"><value>تاريخ الفروع</value></data>
+  <data name="SLP_StoreHistorySub" xml:space="preserve"><value>التنقلات بين الفروع موضحة في الخط الزمني</value></data>
+  <data name="SLP_ExitInsights" xml:space="preserve"><value>مشاعر وتجربة مقابلات الخروج</value></data>
+  <data name="SLP_ExitInsightsSub" xml:space="preserve"><value>مؤشرات مجهّلة من مقابلات الخروج لفروع مدير الفرع ده</value></data>
+  <data name="SLP_ExitSentiment" xml:space="preserve"><value>مشاعر مقابلات الخروج</value></data>
+  <data name="SLP_ExitSentimentSub" xml:space="preserve"><value>أهم أسباب المغادرة عبر الوقت</value></data>
+  <data name="SLP_ExitResponses" xml:space="preserve"><value>ردود الخروج</value></data>
+  <data name="SLP_ReasonsLeaving" xml:space="preserve"><value>أسباب المغادرة</value></data>
+  <data name="SLP_WouldReturn" xml:space="preserve"><value>هل سيعود للعمل؟</value></data>
+  <data name="SLP_OverallExperience" xml:space="preserve"><value>التجربة بشكل عام</value></data>
+  <data name="SLP_EngagementDrivers" xml:space="preserve"><value>عوامل المشاركة</value></data>
+  <data name="SLP_Workload" xml:space="preserve"><value>حالة ضغط العمل</value></data>
+  <data name="SLP_Training" xml:space="preserve"><value>التدريب</value></data>
+  <data name="SLP_FairTreatment" xml:space="preserve"><value>المعاملة العادلة</value></data>
+  <data name="SLP_ReasonVsReturn" xml:space="preserve"><value>سبب المغادرة مقابل الرغبة في العودة</value></data>
+  <data name="SLP_JobTitles" xml:space="preserve"><value>ردود الخروج حسب المسمى الوظيفي</value></data>
+  <data name="SLP_Comments" xml:space="preserve"><value>تعليقات الخروج المجهّلة</value></data>
+  <data name="SLP_Question" xml:space="preserve"><value>السؤال</value></data>
+  <data name="SLP_Comment" xml:space="preserve"><value>التعليق</value></data>
+  <data name="SLP_Date" xml:space="preserve"><value>التاريخ</value></data>
+  <data name="SLP_Store" xml:space="preserve"><value>الفرع</value></data>
+  <data name="SLP_Period" xml:space="preserve"><value>الفترة</value></data>
+  <data name="SLP_Headcount" xml:space="preserve"><value>عدد الموظفين</value></data>
+  <data name="SLP_Resignations" xml:space="preserve"><value>الاستقالات</value></data>
+  <data name="SLP_Turnover" xml:space="preserve"><value>الدوران</value></data>
+  <data name="SLP_Transferred" xml:space="preserve"><value>انتقل إلى هنا</value></data>
+  <data name="SLP_NoData" xml:space="preserve"><value>لا توجد بيانات تتبع لمدير الفرع ده.</value></data>
+  <data name="SLP_NoExitData" xml:space="preserve"><value>لا توجد بيانات مقابلات خروج للاختيار ده.</value></data>
+  <data name="SLP_NoComments" xml:space="preserve"><value>لا توجد تعليقات مجهّلة.</value></data>
 </root>
