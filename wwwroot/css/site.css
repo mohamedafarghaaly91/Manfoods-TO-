@@ -541,12 +541,10 @@ html, body {
 }
 .chart-card:hover { border-color: var(--card-border-h); }
 
-/* Keep the OC card aligned with the three adjacent rollup cards.
-   The row's stretched column supplies the height, while the table body
-   remains the only scrollable area when the OC list is longer. */
+/* The OC card can contain many more rows than the three adjacent rollup
+   cards. Keep the cards aligned and scroll only the OC table body. */
 .oc-analysis-card {
-    height: 100% !important;
-    min-height: 430px;
+    height: 430px !important;
 }
 .oc-analysis-card .table-responsive {
     flex: 1 1 auto;
@@ -557,7 +555,6 @@ html, body {
 @media (max-width: 991.98px) {
     .oc-analysis-card {
         height: auto !important;
-        min-height: 0;
     }
     .oc-analysis-card .table-responsive {
         overflow-y: visible;
