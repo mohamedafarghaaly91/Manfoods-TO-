@@ -10,7 +10,9 @@ public class ReportService : IReportService
     private const string BandFill = "#FAFAFA";
     private const string GridColor = "#D9D9D9";
     private const string PercentFormat = "0.0%";
-    private const string DateFormat = "yyyy-mm-dd";
+    // DateOnly does not support the DateTime "mm" minute token. Use "MM" for
+    // month so both DateOnly.ToString and Excel's date format are valid.
+    private const string DateFormat = "yyyy-MM-dd";
 
     // Formula-injection guard (CWE-1236): any free-text value written into a
     // workbook cell — employee/leader/OC/OM names, store names, comments,

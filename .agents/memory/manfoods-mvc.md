@@ -10,6 +10,7 @@ description: Key decisions and quirks from converting Manfoods HR analytics from
 ## Packages
 - BCrypt.Net-Next 4.0.3 and ClosedXML 0.102.3 restore successfully from NuGet on Replit .NET 9.
 - dotnet-ef global tool v10.x conflicts with .NET 9 SDK — do not install it.
+- DateOnly custom date formats must use uppercase `MM` for month; lowercase `mm` is a minute token unsupported by DateOnly and throws FormatException.
 
 ## Razor views
 - `@new SomeType(args).Method()` fails in Razor. Always use `@(new SomeType(args).Method())` with explicit parentheses.
