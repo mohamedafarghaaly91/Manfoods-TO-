@@ -68,6 +68,8 @@ public class DashboardController : Controller
 
     public IActionResult StoreLeaderProfile() => View();
 
+    public IActionResult StoreProfile() => View();
+
     public IActionResult ActionCenter() => View();
 
     public IActionResult ActionCenterDetail() => View();

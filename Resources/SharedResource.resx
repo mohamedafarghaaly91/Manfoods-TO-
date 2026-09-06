@@ -1467,4 +1467,43 @@
   <data name="Set_MetricTurnoverTotalSub" xml:space="preserve"><value>Independent color thresholds for the Total column in the Turnover trend table.</value></data>
   <data name="Set_MetricNinetyTotalTitle" xml:space="preserve"><value>90-Day Turnover Total</value></data>
   <data name="Set_MetricNinetyTotalSub" xml:space="preserve"><value>Independent color thresholds for the Total column in the 90-Day Turnover trend table.</value></data>
+  <data name="SP_PageTitle" xml:space="preserve"><value>Store 360 Overview</value></data>
+  <data name="SP_PageSub" xml:space="preserve"><value>One view for this store's workforce, performance, retention, risk, and action plan.</value></data>
+  <data name="SP_NoStore" xml:space="preserve"><value>Select a store from the Stores page to view its profile.</value></data>
+  <data name="SP_Loading" xml:space="preserve"><value>Loading store data...</value></data>
+  <data name="SP_NoData" xml:space="preserve"><value>No data is available for this selection.</value></data>
+  <data name="SP_From" xml:space="preserve"><value>From</value></data>
+  <data name="SP_To" xml:space="preserve"><value>To</value></data>
+  <data name="SP_Overview" xml:space="preserve"><value>Overview</value></data>
+  <data name="SP_TurnoverTrend" xml:space="preserve"><value>Turnover Trend</value></data>
+  <data name="SP_HeadcountTrend" xml:space="preserve"><value>Headcount Trend</value></data>
+  <data name="SP_RiskSummary" xml:space="preserve"><value>Risk Summary</value></data>
+  <data name="SP_QuickInsights" xml:space="preserve"><value>Quick Insights</value></data>
+  <data name="SP_Watchlist" xml:space="preserve"><value>Early Warning Watchlist</value></data>
+  <data name="SP_HighRisk" xml:space="preserve"><value>High Risk Employees</value></data>
+  <data name="SP_ActionPlan" xml:space="preserve"><value>Action Plan</value></data>
+  <data name="SP_ExitSentiment" xml:space="preserve"><value>Exit Sentiment</value></data>
+  <data name="SP_ByJobTitle" xml:space="preserve"><value>Headcount by Job Title</value></data>
+  <data name="SP_ByPayroll" xml:space="preserve"><value>Headcount by Payroll Group</value></data>
+  <data name="SP_ByTenure" xml:space="preserve"><value>Headcount by Tenure</value></data>
+  <data name="SP_ByGender" xml:space="preserve"><value>Headcount by Gender</value></data>
+  <data name="SP_TurnoverByJob" xml:space="preserve"><value>Turnover by Job Title</value></data>
+  <data name="SP_TurnoverByTenure" xml:space="preserve"><value>Turnover by Tenure</value></data>
+  <data name="SP_TurnoverByPayroll" xml:space="preserve"><value>Turnover by Payroll Group</value></data>
+  <data name="SP_ExitReasons" xml:space="preserve"><value>Exit Reasons</value></data>
+  <data name="SP_RetentionTenure" xml:space="preserve"><value>Retention by Tenure</value></data>
+  <data name="SP_RetentionJobs" xml:space="preserve"><value>Retention by Job Title</value></data>
+  <data name="SP_RetentionGender" xml:space="preserve"><value>Retention by Gender</value></data>
+  <data name="SP_HiringTrend" xml:space="preserve"><value>Hiring Trend</value></data>
+  <data name="SP_NinetyDayKpi" xml:space="preserve"><value>90-Day Early Leaver Rate</value></data>
+  <data name="SP_NinetyDayTrend" xml:space="preserve"><value>90-Day Trend</value></data>
+  <data name="SP_WouldReturn" xml:space="preserve"><value>Would Return</value></data>
+  <data name="SP_Experience" xml:space="preserve"><value>Overall Experience</value></data>
+  <data name="SP_Workload" xml:space="preserve"><value>Workload</value></data>
+  <data name="SP_Training" xml:space="preserve"><value>Training</value></data>
+  <data name="SP_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="SP_Severity" xml:space="preserve"><value>Severity</value></data>
+  <data name="SP_Recommendations" xml:space="preserve"><value>Recommendations</value></data>
+  <data name="Common_Employees" xml:space="preserve"><value>employees</value></data>
+  <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>

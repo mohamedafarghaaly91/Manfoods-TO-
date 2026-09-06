@@ -1,0 +1,320 @@
+@{
+    var storeFromUrl = Context.Request.Query["store"].ToString();
+}
+
+<style>
+.sp-page { --sp-accent: #0072B2; --sp-soft: rgba(0,114,178,.1); }
+.sp-hero { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap; padding:24px; margin-bottom:18px; background:var(--card-bg); border:1px solid var(--card-border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); }
+.sp-hero h1 { margin:0; font-size:clamp(1.4rem,2.4vw,2rem); }
+.sp-hero p { margin:6px 0 0; color:var(--text-2); font-size:13px; }
+.sp-hero-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.sp-filter { display:flex; gap:8px; align-items:center; padding:7px 10px; background:var(--bg-2); border:1px solid var(--card-border); border-radius:8px; color:var(--text-2); font-size:12px; }
+.sp-filter select { min-width:118px; border:0; outline:0; background:transparent; color:var(--text); font-size:12px; }
+.sp-back { display:inline-flex; align-items:center; gap:7px; color:var(--text-2); text-decoration:none; font-size:12.5px; font-weight:700; }
+.sp-back:hover { color:var(--red); }
+.sp-state { margin-bottom:16px; }
+.sp-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+.sp-kpi { padding:16px; background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; }
+.sp-kpi-icon { color:var(--sp-accent); font-size:17px; margin-bottom:10px; }
+.sp-kpi-value { font-size:23px; font-weight:800; color:var(--text); }
+.sp-kpi-label { color:var(--text-2); font-size:12px; margin-top:3px; }
+.sp-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.sp-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:18px; min-width:0; }
+.sp-card-wide { grid-column:1/-1; }
+.sp-card-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+.sp-card-title h3 { margin:0; font-size:15px; font-weight:800; }
+.sp-card-title i { color:var(--sp-accent); margin-inline-end:7px; }
+.sp-muted { color:var(--text-2); font-size:12px; }
+.sp-list { display:grid; gap:10px; }
+.sp-row { display:grid; grid-template-columns:minmax(110px,1fr) minmax(100px,2fr) auto; gap:10px; align-items:center; font-size:12px; }
+.sp-row-label { color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sp-track { height:8px; overflow:hidden; background:var(--bg-2); border-radius:99px; }
+.sp-fill { height:100%; min-width:2px; background:var(--sp-accent); border-radius:99px; }
+.sp-row-value { color:var(--text); font-weight:700; white-space:nowrap; }
+.sp-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 16px; }
+.sp-tab { padding:9px 13px; border:1px solid var(--card-border); border-radius:8px; color:var(--text-2); background:var(--card-bg); font-size:12px; font-weight:700; cursor:pointer; }
+.sp-tab:hover,.sp-tab.active { color:#fff; background:var(--sp-accent); border-color:var(--sp-accent); }
+.sp-panel { display:none; }
+.sp-panel.active { display:block; }
+.sp-table-wrap { overflow:auto; }
+.sp-table { width:100%; border-collapse:collapse; font-size:12px; }
+.sp-table th,.sp-table td { padding:9px 8px; text-align:start; border-bottom:1px solid var(--card-border); }
+.sp-table th { color:var(--text-2); font-weight:700; }
+.sp-badge { display:inline-flex; padding:4px 8px; border-radius:999px; background:var(--sp-soft); color:var(--sp-accent); font-size:11px; font-weight:800; }
+.sp-empty { padding:24px 10px; text-align:center; color:var(--text-2); font-size:12px; }
+.sp-chart-wrap { height:250px; position:relative; }
+.sp-chart-wrap canvas { direction:ltr; }
+@media (max-width: 900px) { .sp-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width: 640px) { .sp-grid { grid-template-columns:1fr; } .sp-card-wide { grid-column:auto; } .sp-kpis { grid-template-columns:1fr 1fr; } .sp-hero { padding:18px; } .sp-row { grid-template-columns:1fr auto; } .sp-track { grid-column:1/-1; grid-row:2; } }
+</style>
+
+<div id="spRoot" class="sp-page" data-store="@storeFromUrl"
+     data-area-prefix="@((ViewContext.RouteData.Values["area"]?.ToString() ?? "Home") == "Admin" ? "/admin" : "/home")"
+     data-title="@L["SP_PageTitle"]" data-subtitle="@L["SP_PageSub"]"
+     data-no-store="@L["SP_NoStore"]" data-loading="@L["SP_Loading"]"
+     data-no-data="@L["SP_NoData"]" data-employees="@L["Common_Employees"]"
+     data-resignations="@L["Common_Resignations"]" data-percent="@L["Common_Percent"]">
+    <div class="sp-hero">
+        <div>
+            <a class="sp-back" id="spBackLink" href="#"><i class="bi bi-arrow-left"></i>@L["Common_Back"]</a>
+            <h1 id="spStoreName" class="mt-2">@L["SP_PageTitle"]</h1>
+            <p id="spSubtitle">@L["SP_PageSub"]</p>
+        </div>
+        <div class="sp-hero-actions">
+            <label class="sp-filter"><i class="bi bi-calendar3"></i><span>@L["SP_From"]</span><select id="spFromPeriod"></select></label>
+            <label class="sp-filter"><i class="bi bi-calendar-check"></i><span>@L["SP_To"]</span><select id="spToPeriod"></select></label>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="spRefresh"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
+    </div>
+
+    <div id="spState" class="sp-state"></div>
+    <div id="spKpis" class="sp-kpis"></div>
+
+    <div class="sp-tabs" role="tablist">
+        <button class="sp-tab active" data-panel="overview">@L["SP_Overview"]</button>
+        <button class="sp-tab" data-panel="workforce">@L["Nav_Workforce"]</button>
+        <button class="sp-tab" data-panel="turnover">@L["Nav_Turnover"]</button>
+        <button class="sp-tab" data-panel="retention">@L["Nav_Retention"]</button>
+        <button class="sp-tab" data-panel="ninety">@L["Nav_NinetyDay"]</button>
+        <button class="sp-tab" data-panel="warning">@L["Nav_EarlyWarning"]</button>
+        <button class="sp-tab" data-panel="exit">@L["Nav_ExitInterviews"]</button>
+        <button class="sp-tab" data-panel="action">@L["Nav_ActionCenter"]</button>
+    </div>
+
+    <section class="sp-panel active" id="spPanel-overview"><div class="sp-grid">
+        <div class="sp-card"><div class="sp-card-title"><h3><i class="bi bi-graph-up"></i>@L["SP_TurnoverTrend"]</h3></div><div class="sp-chart-wrap"><canvas id="spTurnoverChart"></canvas></div></div>
+        <div class="sp-card"><div class="sp-card-title"><h3><i class="bi bi-people"></i>@L["SP_HeadcountTrend"]</h3></div><div class="sp-chart-wrap"><canvas id="spHeadcountChart"></canvas></div></div>
+        <div class="sp-card"><div class="sp-card-title"><h3><i class="bi bi-person-exclamation"></i>@L["SP_RiskSummary"]</h3></div><div id="spRiskSummary"></div></div>
+        <div class="sp-card"><div class="sp-card-title"><h3><i class="bi bi-lightbulb"></i>@L["SP_QuickInsights"]</h3></div><div id="spInsights"></div></div>
+    </div></section>
+
+    <section class="sp-panel" id="spPanel-workforce"><div id="spWorkforce"></div></section>
+    <section class="sp-panel" id="spPanel-turnover"><div id="spTurnover"></div></section>
+    <section class="sp-panel" id="spPanel-retention"><div id="spRetention"></div></section>
+    <section class="sp-panel" id="spPanel-ninety"><div id="spNinety"></div></section>
+    <section class="sp-panel" id="spPanel-warning"><div id="spWarning"></div></section>
+    <section class="sp-panel" id="spPanel-exit"><div id="spExit"></div></section>
+    <section class="sp-panel" id="spPanel-action"><div id="spAction"></div></section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
+<script>
+(function () {
+    const root = document.getElementById('spRoot');
+    if (!root) return;
+    const d = root.dataset;
+    const store = d.store || '';
+    const areaPrefix = d.areaPrefix || '/home';
+    let periods = [], fromPeriod = null, toPeriod = null, loadedPanels = new Set();
+    let turnoverChart = null, headcountChart = null, overviewData = {};
+
+    const $ = id => document.getElementById(id);
+    const esc = value => sapEscape(value ?? '');
+    const arr = value => Array.isArray(value) ? value : [];
+    const number = value => Number.isFinite(Number(value)) ? Number(value) : 0;
+    const labelOf = row => row?.label ?? row?.name ?? row?.storeName ?? row?.reason ?? '—';
+    const valueOf = row => number(row?.value ?? row?.count ?? row?.total ?? row?.rate ?? row?.turnoverRate ?? row?.retentionRate ?? row?.positivePercent ?? row?.percentage ?? row?.earlyLeaverRate);
+    const fmt = value => number(value).toLocaleString();
+    const pct = value => `${number(value).toFixed(1)}%`;
+
+    function setState(message, type) {
+        $('spState').innerHTML = message ? `<div class="alert alert-${type || 'info'} py-2 small">${esc(message)}</div>` : '';
+    }
+
+    async function get(url, fallback) {
+        try {
+            const response = await fetch(url);
+            return response.ok ? await response.json() : fallback;
+        } catch { return fallback; }
+    }
+
+    function periodValue(p) { return `${p.month}-${p.year}`; }
+    function periodQuery() {
+        const q = new URLSearchParams({ store });
+        if (toPeriod) { q.set('month', toPeriod.month); q.set('year', toPeriod.year); }
+        if (fromPeriod) { q.set('fromMonth', fromPeriod.month); q.set('fromYear', fromPeriod.year); }
+        if (fromPeriod) q.set('sinceYear', fromPeriod.year);
+        return q;
+    }
+    function singlePeriodQuery() {
+        const q = periodQuery();
+        if (toPeriod) { q.set('months', toPeriod.month); }
+        return q;
+    }
+
+    function renderBars(items, suffix) {
+        const rows = arr(items).map(r => ({ label: labelOf(r), value: valueOf(r) })).filter(r => r.label !== '—');
+        if (!rows.length) return `<div class="sp-empty">${esc(d.noData)}</div>`;
+        const max = Math.max(...rows.map(r => r.value), 1);
+        return `<div class="sp-list">${rows.slice(0, 10).map(r => `<div class="sp-row">
+            <span class="sp-row-label" title="${esc(r.label)}">${esc(r.label)}</span>
+            <span class="sp-track"><span class="sp-fill" style="width:${Math.max(2, r.value / max * 100)}%"></span></span>
+            <span class="sp-row-value">${fmt(r.value)}${suffix || ''}</span>
+        </div>`).join('')}</div>`;
+    }
+    function card(title, icon, body, wide) {
+        return `<div class="sp-card${wide ? ' sp-card-wide' : ''}"><div class="sp-card-title"><h3><i class="bi ${icon}"></i>${esc(title)}</h3></div>${body}</div>`;
+    }
+    function renderCards(items) {
+        return `<div class="sp-grid">${items.join('')}</div>`;
+    }
+
+    function renderKpis(kpis, warning, sentiment) {
+        const watchCount = number(warning?.inWatchlist ?? warning?.watchlistCount ?? overviewData.watchlist?.length);
+        const sentimentValue = sentiment?.positivePercent ?? sentiment?.positiveRate;
+        const cards = [
+            ['bi-people-fill', d.employees, fmt(kpis?.totalHeadcount ?? kpis?.headcount)],
+            ['bi-person-dash-fill', d.resignations, fmt(kpis?.totalResignations ?? kpis?.resignations)],
+            ['bi-arrow-repeat', '@L["Common_TurnoverRate"]', pct(kpis?.turnoverRate)],
+            ['bi-person-exclamation', '@L["SP_Watchlist"]', fmt(watchCount)],
+            ['bi-chat-heart', '@L["SP_ExitSentiment"]', sentimentValue == null ? '—' : pct(sentimentValue)],
+        ];
+        $('spKpis').innerHTML = cards.map(c => `<div class="sp-kpi"><div class="sp-kpi-icon"><i class="bi ${c[0]}"></i></div><div class="sp-kpi-value">${esc(c[2])}</div><div class="sp-kpi-label">${esc(c[1])}</div></div>`).join('');
+    }
+
+    function renderRisk(warning, watchlist, action) {
+        const highRisk = arr(watchlist).filter(x => number(x.stars ?? x.riskScore) >= 4).length;
+        const status = action?.status ?? action?.planStatus ?? 'None';
+        $('spRiskSummary').innerHTML = `<div class="sp-list">
+            <div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Watchlist"]')}</span><span></span><span class="sp-row-value">${fmt(watchlist.length)}</span></div>
+            <div class="sp-row"><span class="sp-row-label">${esc('@L["SP_HighRisk"]')}</span><span></span><span class="sp-row-value">${fmt(highRisk)}</span></div>
+            <div class="sp-row"><span class="sp-row-label">${esc('@L["SP_ActionPlan"]')}</span><span></span><span class="sp-badge">${esc(status)}</span></div>
+        </div>`;
+    }
+
+    function renderInsights(kpis, warning, action) {
+        const items = [];
+        if (number(kpis?.turnoverRate) > 0) items.push(`${d.resignations}: ${pct(kpis.turnoverRate)}`);
+        if (arr(overviewData.watchlist).length) items.push(`${esc('@L["SP_Watchlist"]')}: ${overviewData.watchlist.length}`);
+        if (action?.status && action.status !== 'None') items.push(`${esc('@L["SP_ActionPlan"]')}: ${esc(action.status)}`);
+        $('spInsights').innerHTML = items.length ? `<div class="sp-list">${items.map(x => `<div class="sp-row"><span class="sp-row-label">${x}</span></div>`).join('')}</div>` : `<div class="sp-empty">${esc(d.noData)}</div>`;
+    }
+
+    function renderTrend(canvasId, existing, data, valueKey, color, fill) {
+        if (existing) existing.destroy();
+        const rows = arr(data);
+        const canvas = $(canvasId);
+        if (!canvas) return null;
+        return new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { labels: rows.map(r => r.label ?? r.periodLabel ?? ''), datasets: [{ data: rows.map(r => number(r[valueKey] ?? r.value ?? r.rate)), borderColor: color, backgroundColor: fill, fill: true, tension: .3, pointRadius: 3, pointHoverRadius: 6 }] },
+            options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, datalabels:{display:false} }, scales:{ x:{grid:{display:false}}, y:{beginAtZero:true} } }
+        });
+    }
+
+    async function loadStoreTurnoverTrend() {
+        const ordered = periods.slice().sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month));
+        const values = await Promise.all(ordered.map(p => get(`/api/dashboard/kpis?store=${encodeURIComponent(store)}&month=${p.month}&year=${p.year}`, {})));
+        return ordered.map((p, i) => ({ label: periodValue(p), value: number(values[i]?.turnoverRate) }));
+    }
+
+    async function loadOverview() {
+        if (!store) { setState(d.noStore, 'warning'); return; }
+        setState(d.loading, 'info');
+        const q = periodQuery(), sq = singlePeriodQuery();
+        const [kpis, turnoverTrend, headcountTrend, warning, watchlist, sentiment, action] = await Promise.all([
+            get(`/api/dashboard/kpis?${q}`, {}),
+            loadStoreTurnoverTrend(),
+            get(`/api/dashboard/headcount-trend?${q}`, []),
+            get(`/api/early-warning/summary?${sq}`, {}),
+            get(`/api/early-warning/watchlist?${sq}`, []),
+            get(`/api/exit-interviews/sentiment-summary?${sq}`, {}),
+            get(`/api/store-action-plan/action-center/detail?store=${encodeURIComponent(store)}`, null)
+        ]);
+        overviewData = { kpis, turnoverTrend, headcountTrend, warning, watchlist, sentiment, action };
+        $('spStoreName').textContent = store;
+        $('spSubtitle').textContent = `${d.subtitle} · ${toPeriod ? periodValue(toPeriod) : ''}`;
+        renderKpis(kpis, warning, sentiment);
+        renderRisk(warning, arr(watchlist), action);
+        renderInsights(kpis, warning, action);
+        turnoverChart = renderTrend('spTurnoverChart', turnoverChart, turnoverTrend, 'rate', ChartColors.SERIES.SECONDARY, ChartColors.SERIES_FILL.SECONDARY);
+        headcountChart = renderTrend('spHeadcountChart', headcountChart, headcountTrend, 'value', ChartColors.SERIES.PRIMARY, ChartColors.SERIES_FILL.PRIMARY);
+        setState('', '');
+    }
+
+    async function loadPanel(panel) {
+        const q = periodQuery(), sq = singlePeriodQuery();
+        const target = $(`sp${panel[0].toUpperCase()}${panel.slice(1)}`);
+        if (!target || loadedPanels.has(panel)) return;
+        target.innerHTML = `<div class="sp-card"><div class="sp-empty">${esc(d.loading)}</div></div>`;
+        let html = '';
+        if (panel === 'workforce') {
+            const [jobs, payroll, tenure, gender] = await Promise.all([
+                get(`/api/dashboard/headcount-by-job-title?${q}`, []), get(`/api/dashboard/headcount-by-payroll-group?${q}`, []),
+                get(`/api/dashboard/headcount-by-tenure?${q}`, []), get(`/api/dashboard/gender-breakdown?${q}`, [])
+            ]);
+            html = renderCards([card('@L["SP_ByJobTitle"]','bi-person-badge',renderBars(jobs,d.employees)),card('@L["SP_ByPayroll"]','bi-wallet2',renderBars(payroll,d.employees)),card('@L["SP_ByTenure"]','bi-hourglass-split',renderBars(tenure,d.employees)),card('@L["SP_ByGender"]','bi-gender-ambiguous',renderBars(gender,d.employees))]);
+        } else if (panel === 'turnover') {
+            const [jobs, tenure, payroll, reasons] = await Promise.all([
+                get(`/api/dashboard/turnover-by-job-title?${q}`, []), get(`/api/dashboard/turnover-by-tenure?${q}`, []),
+                get(`/api/dashboard/turnover-by-payroll-group?${q}`, []), get(`/api/exit-interviews/reasons?${sq}`, [])
+            ]);
+            html = renderCards([card('@L["SP_TurnoverByJob"]','bi-person-badge',renderBars(jobs,d.resignations)),card('@L["SP_TurnoverByTenure"]','bi-hourglass-split',renderBars(tenure,d.resignations)),card('@L["SP_TurnoverByPayroll"]','bi-wallet2',renderBars(payroll,d.resignations)),card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,''))]);
+        } else if (panel === 'retention') {
+            const [tenure, jobs, gender, hiring] = await Promise.all([
+                get(`/api/retention/tenure-distribution?${q}`, []), get(`/api/retention/by-job-title?${q}`, []),
+                get(`/api/retention/by-gender?${q}`, []), get(`/api/retention/monthly-hiring-volume?${q}`, [])
+            ]);
+            html = renderCards([card('@L["SP_RetentionTenure"]','bi-hourglass-split',renderBars(tenure,d.employees)),card('@L["SP_RetentionJobs"]','bi-person-badge',renderBars(jobs,'')),card('@L["SP_RetentionGender"]','bi-gender-ambiguous',renderBars(gender,'')),card('@L["SP_HiringTrend"]','bi-person-plus',renderBars(hiring,d.employees))]);
+        } else if (panel === 'ninety') {
+            const [kpi, trend] = await Promise.all([get(`/api/ninety-day-turnover/kpi?${q}`, {}), get(`/api/ninety-day-turnover/trend?${q}`, [])]);
+            html = renderCards([card('@L["SP_NinetyDayKpi"]','bi-hourglass-split',`<div class="sp-kpi-value">${pct(kpi?.rate ?? kpi?.earlyLeaverRate)}</div><div class="sp-muted mt-2">${esc(d.subtitle)}</div>`),card('@L["SP_NinetyDayTrend"]','bi-graph-up',renderBars(trend,d.percent))]);
+        } else if (panel === 'warning') {
+            const rows = arr(overviewData.watchlist);
+            const table = rows.length ? `<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>${esc('@L["EW_HireName"]')}</th><th>${esc('@L["EW_JobTitle"]')}</th><th>${esc('@L["EW_RiskScore"]')}</th><th>${esc('@L["EW_Reasons"]')}</th></tr></thead><tbody>${rows.slice(0,20).map(r => `<tr><td>${esc(r.employeeName ?? r.name)}</td><td>${esc(r.jobTitle)}</td><td>${esc(r.stars ?? r.riskScore ?? '—')}</td><td>${esc(Array.isArray(r.reasons) ? r.reasons.join(', ') : r.reason ?? '—')}</td></tr>`).join('')}</tbody></table></div>` : `<div class="sp-empty">${esc(d.noData)}</div>`;
+            html = renderCards([card('@L["SP_Watchlist"]','bi-person-exclamation',table,true)]);
+        } else if (panel === 'exit') {
+            const [reasons, wouldReturn, experience, workload, training] = await Promise.all([
+                get(`/api/exit-interviews/reasons?${sq}`, []), get(`/api/exit-interviews/would-return?${sq}`, []),
+                get(`/api/exit-interviews/overall-experience?${sq}`, []), get(`/api/exit-interviews/workload?${sq}`, []),
+                get(`/api/exit-interviews/training?${sq}`, [])
+            ]);
+            html = renderCards([card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,'')),card('@L["SP_WouldReturn"]','bi-arrow-return-left',renderBars(wouldReturn,'')),card('@L["SP_Experience"]','bi-star',renderBars(experience,'')),card('@L["SP_Workload"]','bi-speedometer2',renderBars(workload,'')),card('@L["SP_Training"]','bi-mortarboard',renderBars(training,''))]);
+        } else if (panel === 'action') {
+            const action = overviewData.action;
+            html = renderCards([card('@L["SP_ActionPlan"]','bi-bullseye',action ? `<div class="sp-list"><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Status"]')}</span><span></span><span class="sp-badge">${esc(action.status ?? action.planStatus ?? 'None')}</span></div><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Severity"]')}</span><span></span><span class="sp-row-value">${esc(action.severity ?? action.riskLevel ?? '—')}</span></div><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Recommendations"]')}</span><span></span><span class="sp-row-value">${fmt(arr(action.recommendations).length)}</span></div></div>` : `<div class="sp-empty">${esc(d.noData)}</div>`,true)]);
+        }
+        target.innerHTML = html;
+        loadedPanels.add(panel);
+    }
+
+    async function initPeriods() {
+        periods = await get('/api/dashboard/available-periods', []);
+        const from = $('spFromPeriod'), to = $('spToPeriod');
+        const options = periods.map(p => `<option value="${periodValue(p)}">${esc(new Date(p.year,p.month-1,1).toLocaleString(undefined,{month:'short',year:'numeric'}))}</option>`).join('');
+        from.innerHTML = options; to.innerHTML = options;
+        if (periods.length) {
+            toPeriod = periods[0]; fromPeriod = periods[0];
+            to.value = periodValue(toPeriod); from.value = periodValue(fromPeriod);
+        }
+        await loadOverview();
+    }
+    function updatePeriod(select, isFrom) {
+        const value = select.value.split('-').map(Number);
+        const picked = periods.find(p => p.month === value[0] && p.year === value[1]);
+        if (picked) { if (isFrom) fromPeriod = picked; else toPeriod = picked; }
+        loadedPanels.clear();
+        loadOverview().then(() => {
+            const active = document.querySelector('.sp-tab.active')?.dataset.panel;
+            if (active && active !== 'overview') loadPanel(active);
+        });
+    }
+
+    $('spBackLink').href = `${areaPrefix}/dashboard/stores`;
+    document.querySelectorAll('.sp-tab').forEach(tab => tab.addEventListener('click', async () => {
+        document.querySelectorAll('.sp-tab').forEach(x => x.classList.toggle('active', x === tab));
+        document.querySelectorAll('.sp-panel').forEach(x => x.classList.toggle('active', x.id === `spPanel-${tab.dataset.panel}`));
+        await loadPanel(tab.dataset.panel);
+    }));
+    $('spFromPeriod').addEventListener('change', e => updatePeriod(e.target, true));
+    $('spToPeriod').addEventListener('change', e => updatePeriod(e.target, false));
+    $('spRefresh').addEventListener('click', async () => {
+        loadedPanels.clear();
+        await loadOverview();
+        const active = document.querySelector('.sp-tab.active')?.dataset.panel;
+        if (active && active !== 'overview') await loadPanel(active);
+    });
+    initPeriods();
+})();
+</script>

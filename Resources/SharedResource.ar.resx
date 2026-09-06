@@ -1468,4 +1468,43 @@
   <data name="Set_MetricTurnoverTotalSub" xml:space="preserve"><value>حدود ألوان مستقلة لعمود الإجمالي في جدول اتجاهات الدوران.</value></data>
   <data name="Set_MetricNinetyTotalTitle" xml:space="preserve"><value>إجمالي دوران 90 يومًا</value></data>
   <data name="Set_MetricNinetyTotalSub" xml:space="preserve"><value>حدود ألوان مستقلة لعمود الإجمالي في جدول اتجاهات دوران 90 يومًا.</value></data>
+  <data name="SP_PageTitle" xml:space="preserve"><value>نظرة شاملة على الفرع</value></data>
+  <data name="SP_PageSub" xml:space="preserve"><value>عرض موحّد للقوى العاملة والأداء والاحتفاظ والمخاطر وخطة العمل الخاصة بالفرع.</value></data>
+  <data name="SP_NoStore" xml:space="preserve"><value>اختار فرعًا من صفحة الفروع لعرض ملفه.</value></data>
+  <data name="SP_Loading" xml:space="preserve"><value>جاري تحميل بيانات الفرع...</value></data>
+  <data name="SP_NoData" xml:space="preserve"><value>لا توجد بيانات متاحة للاختيار الحالي.</value></data>
+  <data name="SP_From" xml:space="preserve"><value>من</value></data>
+  <data name="SP_To" xml:space="preserve"><value>إلى</value></data>
+  <data name="SP_Overview" xml:space="preserve"><value>نظرة عامة</value></data>
+  <data name="SP_TurnoverTrend" xml:space="preserve"><value>اتجاه معدل الدوران</value></data>
+  <data name="SP_HeadcountTrend" xml:space="preserve"><value>اتجاه عدد الموظفين</value></data>
+  <data name="SP_RiskSummary" xml:space="preserve"><value>ملخص المخاطر</value></data>
+  <data name="SP_QuickInsights" xml:space="preserve"><value>ملخص سريع</value></data>
+  <data name="SP_Watchlist" xml:space="preserve"><value>قائمة المتابعة والإنذار المبكر</value></data>
+  <data name="SP_HighRisk" xml:space="preserve"><value>موظفون عالي الخطورة</value></data>
+  <data name="SP_ActionPlan" xml:space="preserve"><value>خطة العمل</value></data>
+  <data name="SP_ExitSentiment" xml:space="preserve"><value>انطباع مقابلات الخروج</value></data>
+  <data name="SP_ByJobTitle" xml:space="preserve"><value>عدد الموظفين حسب المسمى الوظيفي</value></data>
+  <data name="SP_ByPayroll" xml:space="preserve"><value>عدد الموظفين حسب مجموعة الرواتب</value></data>
+  <data name="SP_ByTenure" xml:space="preserve"><value>عدد الموظفين حسب مدة الخدمة</value></data>
+  <data name="SP_ByGender" xml:space="preserve"><value>عدد الموظفين حسب النوع</value></data>
+  <data name="SP_TurnoverByJob" xml:space="preserve"><value>الدوران حسب المسمى الوظيفي</value></data>
+  <data name="SP_TurnoverByTenure" xml:space="preserve"><value>الدوران حسب مدة الخدمة</value></data>
+  <data name="SP_TurnoverByPayroll" xml:space="preserve"><value>الدوران حسب مجموعة الرواتب</value></data>
+  <data name="SP_ExitReasons" xml:space="preserve"><value>أسباب الاستقالة</value></data>
+  <data name="SP_RetentionTenure" xml:space="preserve"><value>الاحتفاظ حسب مدة الخدمة</value></data>
+  <data name="SP_RetentionJobs" xml:space="preserve"><value>الاحتفاظ حسب المسمى الوظيفي</value></data>
+  <data name="SP_RetentionGender" xml:space="preserve"><value>الاحتفاظ حسب النوع</value></data>
+  <data name="SP_HiringTrend" xml:space="preserve"><value>اتجاه التعيينات</value></data>
+  <data name="SP_NinetyDayKpi" xml:space="preserve"><value>معدل المغادرة خلال 90 يومًا</value></data>
+  <data name="SP_NinetyDayTrend" xml:space="preserve"><value>اتجاه 90 يومًا</value></data>
+  <data name="SP_WouldReturn" xml:space="preserve"><value>هل سيعود الموظف؟</value></data>
+  <data name="SP_Experience" xml:space="preserve"><value>التجربة العامة</value></data>
+  <data name="SP_Workload" xml:space="preserve"><value>ضغط العمل</value></data>
+  <data name="SP_Training" xml:space="preserve"><value>التدريب</value></data>
+  <data name="SP_Status" xml:space="preserve"><value>الحالة</value></data>
+  <data name="SP_Severity" xml:space="preserve"><value>درجة الخطورة</value></data>
+  <data name="SP_Recommendations" xml:space="preserve"><value>التوصيات</value></data>
+  <data name="Common_Employees" xml:space="preserve"><value>موظف</value></data>
+  <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>
