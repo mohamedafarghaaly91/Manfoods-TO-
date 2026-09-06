@@ -1176,14 +1176,14 @@ a:hover { color: #fff; }
    The page guide trigger is an LTR control and must stay on the physical
    left, otherwise its logical end position overlaps the RTL sidebar.
    Keep it fixed below the global header while the page content scrolls. */
-[dir="rtl"] .page-guide-orb {
-    position: fixed;
+html[dir="rtl"] .page-guide-orb {
+    position: fixed !important;
     direction: ltr;
-    left: 28px;
-    right: auto;
-    inset-inline-start: auto;
-    inset-inline-end: auto;
-    top: calc(var(--global-header-h, var(--header-h)) + 14px);
+    left: 32px !important;
+    right: auto !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: auto !important;
+    top: calc(var(--global-header-h, var(--header-h)) + 8px) !important;
 }
 
 /* Arabic page headers: keep the title block on the physical right and the
@@ -1211,10 +1211,10 @@ a:hover { color: #fff; }
 }
 
 @media (max-width: 760px) {
-    [dir="rtl"] .page-guide-orb {
-        left: 14px;
-        right: auto;
-        top: calc(var(--global-header-h, var(--header-h)) + 10px);
+    html[dir="rtl"] .page-guide-orb {
+        left: 14px !important;
+        right: auto !important;
+        top: calc(var(--global-header-h, var(--header-h)) + 10px) !important;
     }
 }
 
