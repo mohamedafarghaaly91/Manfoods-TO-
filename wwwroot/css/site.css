@@ -541,6 +541,26 @@ html, body {
 }
 .chart-card:hover { border-color: var(--card-border-h); }
 
+/* The OC card can contain many more rows than the three adjacent rollup
+   cards. Keep the cards aligned and scroll only the OC table body. */
+.oc-analysis-card {
+    height: 430px !important;
+}
+.oc-analysis-card .table-responsive {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+@media (max-width: 991.98px) {
+    .oc-analysis-card {
+        height: auto !important;
+    }
+    .oc-analysis-card .table-responsive {
+        overflow-y: visible;
+    }
+}
+
 .chart-header h6 {
     font-size: 15px; font-weight: 700;
     margin: 0 0 2px; color: var(--text);
