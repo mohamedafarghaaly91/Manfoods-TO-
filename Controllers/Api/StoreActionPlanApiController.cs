@@ -151,6 +151,21 @@ public class StoreActionPlanApiController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>Read-only Monthly Turnover Performance history for the detail
+    /// page — see IStoreActionPlanService.GetMonthlyTurnoverHistoryAsync.</summary>
+    [HttpGet("action-center/monthly-turnover")]
+    public async Task<IActionResult> GetMonthlyTurnoverHistory([FromQuery] string store)
+    {
+        if (string.IsNullOrWhiteSpace(store)) return BadRequest(_L["Api_StoreRequired"].Value);
+
+        var role = HttpContext.Session.GetRole();
+        var email = HttpContext.Session.GetEmail();
+        var result = await _actionPlans.GetMonthlyTurnoverHistoryAsync(store, role, email);
+        if (result == null) return NotFound();
+
+        return Ok(result);
+    }
+
     [HttpPost("recommendations/{id:int}/toggle"), ValidateAntiForgeryToken]
     [RequireRole("Admin", "Operation_Manager", "Operation_Consultant", "Head_Manager", "Senior_Operation_Consultant", "Operation_Director")]
     public async Task<IActionResult> ToggleRecommendation(int id, [FromBody] ToggleRecommendationRequest request)

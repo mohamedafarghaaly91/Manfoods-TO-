@@ -447,6 +447,44 @@ public class StoreActionPlanService : IStoreActionPlanService
         return result;
     }
 
+    /// <summary>Monthly Overall Turnover % / 90-Day Turnover % history for the
+    /// detail page's Monthly Turnover Performance table. Reads the same
+    /// DashboardService/NinetyDayTurnoverService KPI calls ComputeSignalsAsync
+    /// already makes for live detection, one period at a time, for every
+    /// period this store has StoreReference data — no new calculation rule,
+    /// no new data source. Returns null if the role/email can't access the
+    /// store, same quiet-filtering convention as GetForStoreAsync.</summary>
+    public async Task<MonthlyTurnoverHistoryDto?> GetMonthlyTurnoverHistoryAsync(string storeName, string role, string? email)
+    {
+        if (!await _storeAccess.CanAccessStoreAsync(role, email, storeName)) return null;
+
+        var periods = (await _db.StoreReferences
+            .Where(s => s.StoreName == storeName)
+            .Select(s => new { s.Month, s.Year })
+            .Distinct()
+            .ToListAsync())
+            .OrderByDescending(p => p.Year * 12 + p.Month)
+            .ToList();
+
+        var result = new MonthlyTurnoverHistoryDto();
+        foreach (var p in periods)
+        {
+            var kpi = await _dashboard.GetKpisAsync(p.Month, p.Year, storeName, SystemRole, null);
+            var ninety = await _ninetyDay.GetKpiAsync(p.Month, p.Year, storeName, SystemRole, null);
+
+            result.Periods.Add(new MonthlyTurnoverPeriodDto
+            {
+                Month = p.Month,
+                Year = p.Year,
+                Label = new DateOnly(p.Year, p.Month, 1).ToString("MMM yy"),
+                OverallTurnoverRate = kpi.TotalHeadcount > 0 ? kpi.TurnoverRate : null,
+                NinetyDayTurnoverRate = ninety.TotalHires > 0 ? ninety.Rate : null,
+            });
+        }
+
+        return result;
+    }
+
     /// <summary>Replays historical signal detection directly (bypassing
     /// EvaluateStoreAsync and its "already evaluated this period" early-exit
     /// guard, which would otherwise silently skip logging occurrences for any
