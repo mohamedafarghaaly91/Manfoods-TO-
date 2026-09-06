@@ -654,11 +654,11 @@ async function scLoadLeaderDetail() {
             datasets: [{
                 label: chartLabel,
                 data: rows.map(r => r.turnoverRate),
-                borderColor: 'oklch(0.55 0.19 25)',
-                backgroundColor: 'oklch(0.55 0.19 25 / .15)',
+                borderColor: ChartColors.SERIES.PRIMARY,
+                backgroundColor: ChartColors.SERIES_FILL.PRIMARY,
                 tension: 0.3, fill: true,
                 pointRadius: rows.map(r => r.isStoreTransition ? 7 : 3),
-                pointBackgroundColor: rows.map(r => r.isStoreTransition ? 'oklch(0.75 0.16 75)' : 'oklch(0.55 0.19 25)'),
+                pointBackgroundColor: rows.map(r => r.isStoreTransition ? ChartColors.SEMANTIC.WARNING : ChartColors.SERIES.PRIMARY),
                 pointStyle: rows.map(r => r.isStoreTransition ? 'triangle' : 'circle'),
             }]
         },

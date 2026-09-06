@@ -42,18 +42,41 @@ const ChartColors = (function () {
     // 5-level Likert gradient, index 0 = level 1 (worst) .. index 4 = level 5 (best).
     const LIKERT_SCALE = [SEMANTIC.BAD, SEMANTIC.WARNING_STRONG, SEMANTIC.WARNING, SEMANTIC.GOOD_LIGHT, SEMANTIC.GOOD];
 
-    // Categorical palette: deliberately clear of the reds/greens used above,
-    // so a category chart can never read as a good/bad signal.
+    // Categorical palette: use colors with clearly separated hue and lightness.
+    // This keeps adjacent bars/segments distinguishable even in dense charts,
+    // while staying separate from the semantic good/warning/bad colors above.
     const CATEGORICAL_PALETTE = [
-        'oklch(0.65 0.15 190)', // teal
-        'oklch(0.6 0.16 280)',  // violet
-        'oklch(0.55 0.15 258)', // blue
-        'oklch(0.68 0.15 310)', // magenta
-        'oklch(0.72 0.17 60)',  // gold
-        'oklch(0.62 0.18 15)',  // brick
-        'oklch(0.66 0.14 230)', // steel blue
-        'oklch(0.6 0.02 258)',  // slate
+        '#0072B2', // blue
+        '#D55E00', // vermilion
+        '#009E73', // green-teal
+        '#CC79A7', // purple
+        '#E69F00', // orange
+        '#56B4E9', // sky blue
+        '#6A3D9A', // deep violet
+        '#8C8C8C', // neutral gray
     ];
+
+    // Shared series colors for charts with more than one measured series.
+    // Keep these intentionally far apart so lines/bars do not merge visually.
+    const SERIES = {
+        PRIMARY: CATEGORICAL_PALETTE[0],
+        SECONDARY: CATEGORICAL_PALETTE[1],
+        TERTIARY: CATEGORICAL_PALETTE[2],
+        QUATERNARY: CATEGORICAL_PALETTE[3],
+        QUINARY: CATEGORICAL_PALETTE[4],
+        SKY: CATEGORICAL_PALETTE[5],
+        VIOLET: CATEGORICAL_PALETTE[6],
+    };
+
+    const SERIES_FILL = {
+        PRIMARY: 'rgba(0, 114, 178, .14)',
+        SECONDARY: 'rgba(213, 94, 0, .14)',
+        TERTIARY: 'rgba(0, 158, 115, .14)',
+        QUATERNARY: 'rgba(204, 121, 167, .14)',
+        QUINARY: 'rgba(230, 159, 0, .14)',
+        SKY: 'rgba(86, 180, 233, .14)',
+        VIOLET: 'rgba(106, 61, 154, .14)',
+    };
 
     // Deterministic fallback for labels with no fixed mapping (e.g. free-text
     // resignation reasons): same label always hashes to the same palette slot.
@@ -230,6 +253,8 @@ const ChartColors = (function () {
         SEMANTIC,
         LIKERT_SCALE,
         CATEGORICAL_PALETTE,
+        SERIES,
+        SERIES_FILL,
         GENDER_COLORS,
         RETENTION_MILESTONE_COLORS,
         RETENTION_TENURE_BUCKET_COLORS,

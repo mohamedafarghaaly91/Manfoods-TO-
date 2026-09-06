@@ -745,8 +745,8 @@ async function ntdLoadTrend() {
             datasets: [{
                 label: ntdL.kpiRate,
                 data: data.map(d => d.rate),
-                borderColor: 'oklch(0.5 0.18 25)',
-                backgroundColor: 'oklch(0.5 0.18 25 / .15)',
+                borderColor: ChartColors.SERIES.PRIMARY,
+                backgroundColor: ChartColors.SERIES_FILL.PRIMARY,
                 segment: { borderDash: ctx => data[ctx.p1DataIndex]?.isProvisional ? [6, 4] : undefined },
                 tension: 0.3, fill: true, pointRadius: 4, spanGaps: true
             }]

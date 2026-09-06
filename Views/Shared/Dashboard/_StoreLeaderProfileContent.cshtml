@@ -116,6 +116,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/js/chart-colors.js" asp-append-version="true"></script>
 <script>
 (() => {
     const page = document.getElementById('slpPage');
@@ -168,8 +169,8 @@
         const ctx = document.getElementById('slpHistoryChart');
         if (historyChart) historyChart.destroy();
         historyChart = new Chart(ctx, { type:'line', data:{ labels:rows.map(r => r.periodLabel), datasets:[
-            { label:labels.turnover, data:rows.map(r => r.turnoverRate), borderColor:'oklch(0.55 0.19 25)', backgroundColor:'oklch(0.55 0.19 25 / .14)', fill:true, tension:.3 },
-            { label:labels.headcount, data:rows.map(r => r.headcount), borderColor:'oklch(0.55 0.19 250)', backgroundColor:'transparent', yAxisID:'y1', tension:.3 }
+            { label:labels.turnover, data:rows.map(r => r.turnoverRate), borderColor:ChartColors.SERIES.SECONDARY, backgroundColor:ChartColors.SERIES_FILL.SECONDARY, fill:true, tension:.3 },
+            { label:labels.headcount, data:rows.map(r => r.headcount), borderColor:ChartColors.SERIES.PRIMARY, backgroundColor:'transparent', yAxisID:'y1', tension:.3 }
         ]}, options:{ responsive:true, interaction:{mode:'index',intersect:false}, scales:{ y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}, y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false}} } }});
     }
     function renderExitTrend(rows) {
@@ -177,7 +178,7 @@
         if (!rows || !rows.length) { ctx.parentElement.innerHTML = `<div class="slp-empty">${esc(labels.noExit)}</div>`; return; }
         const keys = [...new Set(rows.flatMap(r => Object.keys(r.counts || {})))].slice(0, 5);
         if (exitTrendChart) exitTrendChart.destroy();
-        exitTrendChart = new Chart(ctx, { type:'bar', data:{ labels:rows.map(r => r.label), datasets:keys.map((key, i) => ({ label:key, data:rows.map(r => (r.counts || {})[key] || 0), backgroundColor:['oklch(0.55 0.19 25)','oklch(0.55 0.19 250)','oklch(0.58 0.16 150)','oklch(0.72 0.16 75)','oklch(0.55 0.2 300)'][i] })) }, options:{ responsive:true, scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}} }});
+        exitTrendChart = new Chart(ctx, { type:'bar', data:{ labels:rows.map(r => r.label), datasets:keys.map((key, i) => ({ label:key, data:rows.map(r => (r.counts || {})[key] || 0), backgroundColor:[ChartColors.SERIES.SECONDARY, ChartColors.SERIES.PRIMARY, ChartColors.SERIES.TERTIARY, ChartColors.SERIES.QUINARY, ChartColors.SERIES.VIOLET][i % 5] })) }, options:{ responsive:true, scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}} }});
     }
     async function load() {
         if (!leader) { document.getElementById('slpError').textContent = labels.noData; document.getElementById('slpError').style.display=''; return; }

@@ -995,12 +995,12 @@ let trendChartInstance;
 function tvRenderTrendChart() {
     if (!mxData || !mxData.periods || !mxData.periods.length) return;
     const colors = [
-        'oklch(0.55 0.19 25)', 'oklch(0.65 0.15 190)', 'oklch(0.7 0.16 145)',
-        'oklch(0.72 0.17 60)', 'oklch(0.62 0.2 15)', 'oklch(0.6 0.16 25)'
+        ChartColors.SERIES.PRIMARY, ChartColors.SERIES.SECONDARY, ChartColors.SERIES.TERTIARY,
+        ChartColors.SERIES.QUATERNARY, ChartColors.SERIES.QUINARY, ChartColors.SERIES.SKY
     ];
     const colorsFill = [
-        'oklch(0.55 0.19 25 / .15)', 'oklch(0.65 0.15 190 / .15)', 'oklch(0.7 0.16 145 / .15)',
-        'oklch(0.72 0.17 60 / .15)', 'oklch(0.62 0.2 15 / .15)', 'oklch(0.6 0.16 25 / .15)'
+        ChartColors.SERIES_FILL.PRIMARY, ChartColors.SERIES_FILL.SECONDARY, ChartColors.SERIES_FILL.TERTIARY,
+        ChartColors.SERIES_FILL.QUATERNARY, ChartColors.SERIES_FILL.QUINARY, ChartColors.SERIES_FILL.SKY
     ];
     const subtitle = document.getElementById('trendChartSubtitle');
 

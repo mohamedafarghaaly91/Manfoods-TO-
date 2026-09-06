@@ -646,7 +646,7 @@ function ewLoadStoreChart(rows) {
         type: 'bar',
         data: {
             labels: entries.map(e => e[0]),
-            datasets: [{ data: entries.map(e => e[1]), backgroundColor: 'oklch(0.55 0.19 25)', borderRadius: 4, maxBarThickness: 34 }],
+            datasets: [{ data: entries.map(e => e[1]), backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4, maxBarThickness: 34 }],
         },
         options: {
             indexAxis: 'y', maintainAspectRatio: false,
@@ -772,7 +772,7 @@ async function ewLoadTrendChart() {
         data: {
             labels,
             datasets: [
-                { label: 'Total Watchlist', data: results.map(r => r?.totalWatchlist ?? null), borderColor: 'oklch(0.55 0.19 25)', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
+                { label: 'Total Watchlist', data: results.map(r => r?.totalWatchlist ?? null), borderColor: ChartColors.SERIES.PRIMARY, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
                 { label: 'High Risk (4-5★)', data: results.map(r => r?.highRiskCount ?? null), borderColor: ChartColors.SEMANTIC.BAD, backgroundColor: 'transparent', tension: 0.3, pointRadius: 3, spanGaps: true },
             ]
         },

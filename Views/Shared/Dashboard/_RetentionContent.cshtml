@@ -641,8 +641,8 @@ async function rtLoadSurvivalCurve() {
             datasets: [{
                 label: rtL.stillOnTeam,
                 data: data.map(d => d.retentionRate),
-                borderColor: 'oklch(0.55 0.19 25)',
-                backgroundColor: 'oklch(0.55 0.19 25 / .15)',
+                borderColor: ChartColors.SERIES.PRIMARY,
+                backgroundColor: ChartColors.SERIES_FILL.PRIMARY,
                 tension: 0.3, fill: true, pointRadius: 4, spanGaps: true
             }]
         },
@@ -892,7 +892,7 @@ async function rtLoadHiringVolumeChart() {
     if (rtHiringVolumeInstance) rtHiringVolumeInstance.destroy();
     rtHiringVolumeInstance = new Chart(ctx.getContext('2d'), {
         type: 'line',
-        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), borderColor: 'oklch(0.5 0.18 25)', backgroundColor: 'oklch(0.5 0.18 25 / .12)', tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 6 }] },
+        data: { labels: data.map(d => d.label), datasets: [{ data: data.map(d => d.value), borderColor: ChartColors.SERIES.PRIMARY, backgroundColor: ChartColors.SERIES_FILL.PRIMARY, tension: 0.35, fill: true, pointRadius: 3, pointHoverRadius: 6 }] },
         options: {
             interaction: { mode: 'nearest', intersect: false },
             plugins: {

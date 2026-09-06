@@ -741,8 +741,8 @@ function cmpRenderCharts(dataA, dataB) {
     cmpTurnoverChart = mkChart(cmpTurnoverChart, 'cmpTurnoverChart', {
         type: 'bar',
         data: { labels: t.labels, datasets: [
-            { label: cmpLabel('A'), data: t.seriesA, backgroundColor: 'oklch(0.5 0.18 25)', borderRadius: 4 },
-            { label: cmpLabel('B'), data: t.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
+            { label: cmpLabel('A'), data: t.seriesA, backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: t.seriesB, backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
         ] },
         options: {
             interaction: { mode: 'nearest', intersect: false },
@@ -756,8 +756,8 @@ function cmpRenderCharts(dataA, dataB) {
     cmpNinetyChart = mkChart(cmpNinetyChart, 'cmpNinetyChart', {
         type: 'bar',
         data: { labels: n.labels, datasets: [
-            { label: cmpLabel('A'), data: n.seriesA, backgroundColor: 'oklch(0.5 0.18 25)', borderRadius: 4 },
-            { label: cmpLabel('B'), data: n.seriesB, backgroundColor: 'oklch(0.65 0.15 190)', borderRadius: 4 }
+            { label: cmpLabel('A'), data: n.seriesA, backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: n.seriesB, backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
         ] },
         options: {
             interaction: { mode: 'nearest', intersect: false },
