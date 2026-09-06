@@ -15,7 +15,9 @@
     <span class="page-guide-orb-label">@L["Guide_TriggerLabel"]</span>
 </button>
 
-<div class="offcanvas offcanvas-end page-guide-panel" dir="ltr" tabindex="-1" id="@offcanvasId" aria-labelledby="@(offcanvasId)-label">
+<div class="offcanvas offcanvas-end page-guide-panel" dir="ltr" tabindex="-1"
+     data-bs-backdrop="false" data-bs-scroll="true"
+     id="@offcanvasId" aria-labelledby="@(offcanvasId)-label">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title d-flex align-items-center gap-2" id="@(offcanvasId)-label">
             <i class="bi bi-compass" style="color:var(--red)"></i> @L["Guide_TriggerLabel"]
