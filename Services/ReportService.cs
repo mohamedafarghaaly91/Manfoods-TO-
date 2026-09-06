@@ -21,12 +21,17 @@ public class ReportService : IReportService
     // database/imported content goes through it. Never applied to numeric,
     // date, or the app's own fixed status/enum strings.
     private static readonly char[] FormulaTriggerChars = { '=', '+', '-', '@', '\t', '\r' };
+    private const int ExcelCellTextLimit = 32767;
 
     private static string SafeText(string? value)
     {
         if (string.IsNullOrEmpty(value)) return value ?? "";
-        return FormulaTriggerChars.Contains(value[0]) ? "'" + value : value;
+        var text = value.Length > ExcelCellTextLimit ? value[..ExcelCellTextLimit] : value;
+        if (!FormulaTriggerChars.Contains(text[0])) return text;
+        return "'" + (text.Length >= ExcelCellTextLimit ? text[..(ExcelCellTextLimit - 1)] : text);
     }
+
+    private static string StoreKey(string? storeName) => storeName?.Trim() ?? "";
 
     /// <summary>Column order requested for every store-scoped report row:
     /// Head Manager, Operation Consultant, Senior Operation Consultant,
@@ -72,8 +77,16 @@ public class ReportService : IReportService
     {
         var all = await _stores.GetStoresAsync(null, null, role, assignedName);
         return all
-            .GroupBy(s => s.StoreName)
-            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year * 100 + s.Month).First());
+            .Select(s => (Store: s, Key: StoreKey(s.StoreName)))
+            .Where(x => x.Key.Length > 0)
+            .GroupBy(x => x.Key, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.Store.Year * 100 + x.Store.Month)
+                    .ThenByDescending(x => x.Store.Id)
+                    .Select(x => x.Store)
+                    .First(),
+                StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>Writes the 5 leadership cells (Head Manager, OC, SOC, OM, OD) for
@@ -81,7 +94,7 @@ public class ReportService : IReportService
     /// column index.</summary>
     private static int WriteLeadershipCells(IXLWorksheet ws, int row, int col, Dictionary<string, StoreReference> map, string? storeName)
     {
-        map.TryGetValue(storeName ?? "", out var s);
+        map.TryGetValue(StoreKey(storeName), out var s);
         ws.Cell(row, col).Value = SafeText(s?.HeadManager ?? "—");
         ws.Cell(row, col + 1).Value = SafeText(s?.OperationConsultant ?? "—");
         ws.Cell(row, col + 2).Value = SafeText(s?.SeniorOperationConsultant ?? "—");
@@ -618,7 +631,8 @@ public class ReportService : IReportService
             wsWatchlist.Cell(i + 2, col).Value = SafeText(w.JobTitle);
             SetDateCell(wsWatchlist.Cell(i + 2, col + 1), w.HireDate);
             SetIntCell(wsWatchlist.Cell(i + 2, col + 2), w.TenureDays);
-            wsWatchlist.Cell(i + 2, col + 3).Value = new string('★', w.Stars) + new string('☆', 5 - w.Stars);
+            var stars = Math.Clamp(w.Stars, 0, 5);
+            wsWatchlist.Cell(i + 2, col + 3).Value = new string('★', stars) + new string('☆', 5 - stars);
             SetIntCell(wsWatchlist.Cell(i + 2, col + 4), w.RiskScore);
             wsWatchlist.Cell(i + 2, col + 5).Value = string.Join(" | ", w.Reasons.Select(r => r.Type));
         }
@@ -711,7 +725,7 @@ public class ReportService : IReportService
         {
             stores = stores.Where(s =>
             {
-                leadership.TryGetValue(s.StoreName, out var l);
+                leadership.TryGetValue(StoreKey(s.StoreName), out var l);
                 if (oms != null && !oms.Contains(l?.OperationManager ?? "")) return false;
                 if (ocs != null && !ocs.Contains(l?.OperationConsultant ?? "")) return false;
                 if (socs != null && !socs.Contains(l?.SeniorOperationConsultant ?? "")) return false;
@@ -730,13 +744,13 @@ public class ReportService : IReportService
             wsStores.Cell(i + 2, 1).Value = SafeText(s.StoreName);
             wsStores.Cell(i + 2, 2).Value = $"As Of {asOf}";
             int col = WriteLeadershipCells(wsStores, i + 2, 3, leadership, s.StoreName);
-            wsStores.Cell(i + 2, col).Value = s.PlanStatus;
-            wsStores.Cell(i + 2, col + 1).Value = s.Severity;
+            wsStores.Cell(i + 2, col).Value = SafeText(s.PlanStatus);
+            wsStores.Cell(i + 2, col + 1).Value = SafeText(s.Severity);
             SetIntCell(wsStores.Cell(i + 2, col + 2), s.SignalCount);
             SetIntCell(wsStores.Cell(i + 2, col + 3), s.AgeDays);
             wsStores.Cell(i + 2, col + 4).Value = s.IsChronic ? "Yes" : "No";
             wsStores.Cell(i + 2, col + 5).Value = s.IsStalled ? "Yes" : "No";
-            wsStores.Cell(i + 2, col + 6).Value = s.Trend;
+            wsStores.Cell(i + 2, col + 6).Value = SafeText(s.Trend);
             wsStores.Cell(i + 2, col + 7).Value = SafeText(s.ResponsibleName ?? "—");
             wsStores.Cell(i + 2, col + 8).Value = SafeText(s.AssignedToName ?? "—");
             SetDateCell(wsStores.Cell(i + 2, col + 9), s.TargetResolutionDate?.ToDateTime(TimeOnly.MinValue));

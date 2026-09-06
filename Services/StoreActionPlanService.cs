@@ -929,7 +929,12 @@ public class StoreActionPlanService : IStoreActionPlanService
     public async Task<List<ActionCenterStoreRowDto>> GetActionCenterStoresAsync(string role, string? email)
     {
         var storeRefs = await _stores.GetStoresAsync(null, null, role, email);
-        var storeNames = storeRefs.Select(s => s.StoreName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var storeNames = storeRefs
+            .Select(s => s.StoreName?.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s!)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
         if (storeNames.Count == 0) return new List<ActionCenterStoreRowDto>();
 
         var responsibleByStore = await _actionPlanRoles.GetEffectiveResponsiblePartiesAsync(storeNames);
