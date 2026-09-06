@@ -1177,6 +1177,7 @@ a:hover { color: #fff; }
    left, otherwise its logical end position overlaps the RTL sidebar.
    Keep it fixed below the global header while the page content scrolls. */
 [dir="rtl"] .page-guide-orb {
+    position: fixed;
     direction: ltr;
     left: 28px;
     right: auto;
@@ -1185,28 +1186,28 @@ a:hover { color: #fff; }
     top: calc(var(--global-header-h, var(--header-h)) + 14px);
 }
 
-/* Keep every page heading in the same physical, left-aligned position in
-   Arabic instead of letting the surrounding RTL flex direction move it. */
+/* Arabic page headers: keep the title block on the physical right and the
+   filter/action block on the physical left. */
 [dir="rtl"] .page-header {
-    direction: ltr;
+    direction: rtl;
     flex-direction: row;
 }
 [dir="rtl"] .page-header .page-title,
 [dir="rtl"] .page-header .page-subtitle {
-    direction: ltr;
-    text-align: left;
+    direction: rtl;
+    text-align: right;
 }
 [dir="rtl"] .page-title {
-    padding-left: 16px;
-    padding-right: 0;
+    padding-left: 0;
+    padding-right: 16px;
 }
 [dir="rtl"] .page-title::before {
-    left: 0;
-    right: auto;
+    left: auto;
+    right: 0;
 }
 [dir="rtl"] .page-subtitle {
-    margin-left: 16px;
-    margin-right: 0;
+    margin-left: 0;
+    margin-right: 16px;
 }
 
 @media (max-width: 760px) {
