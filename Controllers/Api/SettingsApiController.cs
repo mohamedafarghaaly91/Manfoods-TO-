@@ -15,13 +15,31 @@ namespace MvcApp.Controllers.Api;
 public class SettingsApiController : ControllerBase
 {
     private readonly IColorRulesService _colorRules;
+    private readonly ITableTotalColumnSettingsService _totalColumnSettings;
     private readonly IRecommendationTemplateService _recTemplates;
     private readonly IStringLocalizer<SharedResource> _L;
-    public SettingsApiController(IColorRulesService colorRules, IRecommendationTemplateService recTemplates, IStringLocalizer<SharedResource> localizer)
+    public SettingsApiController(
+        IColorRulesService colorRules,
+        ITableTotalColumnSettingsService totalColumnSettings,
+        IRecommendationTemplateService recTemplates,
+        IStringLocalizer<SharedResource> localizer)
     {
         _colorRules = colorRules;
+        _totalColumnSettings = totalColumnSettings;
         _recTemplates = recTemplates;
         _L = localizer;
+    }
+
+    [HttpGet("total-columns")]
+    public async Task<IActionResult> GetTotalColumnSettings()
+        => Ok(await _totalColumnSettings.GetAsync());
+
+    [HttpPost("total-columns"), ValidateAntiForgeryToken, RequireRole("Admin")]
+    public async Task<IActionResult> SaveTotalColumnSettings([FromBody] TableTotalColumnSettings settings)
+    {
+        if (settings == null) return BadRequest();
+        await _totalColumnSettings.SaveAsync(settings);
+        return Ok();
     }
 
     [HttpGet("color-rules/{metric}")]

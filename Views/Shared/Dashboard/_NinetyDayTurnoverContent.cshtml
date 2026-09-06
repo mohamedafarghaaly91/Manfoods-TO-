@@ -965,6 +965,7 @@ let ntdStoreData = [], ntdStoreSortCol = 'rate', ntdStoreSortAsc = false;
 
 /* Admin-configurable via the Settings page (loaded once in init below). */
 let ntdNinetyDayColorRules = null;
+let ntdTotalColumnVisible = true;
 function ntdRateColor(rate) {
     const c = ChartColors.rateColor(ntdNinetyDayColorRules, rate);
     return { bg: c.bg || 'transparent', fg: c.fg || 'var(--text)' };
@@ -1130,6 +1131,7 @@ function ndMxTotalRate(row) {
 function ndMxBuildHeader(periods) {
     const tr = document.querySelector('#ntdMatrixHead tr');
     const totalTh = tr.querySelector('[data-ndcol="total"]');
+    totalTh.style.display = ntdTotalColumnVisible ? '' : 'none';
     tr.querySelectorAll('[data-ndcol^="p-"]').forEach(el => el.remove());
 
     periods.forEach(pk => {
@@ -1165,7 +1167,7 @@ function ndMxRender() {
         return ndMxSortAsc ? va - vb : vb - va;
     });
 
-    const colSpan = 2 + ndMxData.periods.length + 1;
+    const colSpan = 2 + ndMxData.periods.length + (ntdTotalColumnVisible ? 1 : 0);
     if (!rows.length) {
         document.getElementById('ntdMatrixBody').innerHTML =
             `<tr><td colspan="${colSpan}" class="text-center py-4 text-muted">${ntdL.noMatchingStores}</td></tr>`;
@@ -1174,7 +1176,9 @@ function ndMxRender() {
 
     document.getElementById('ntdMatrixBody').innerHTML = rows.map(r => {
         const periodCells = ndMxData.periods.map(pk => ndMxRateCell(r.periodRates[pk])).join('');
-        const totalCell = ndMxRateCell(ndMxTotalRate(r)).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"');
+        const totalCell = ntdTotalColumnVisible
+            ? ndMxRateCell(ndMxTotalRate(r)).replace('<td', '<td style="background:oklch(0.5 0.18 25 / .06)"')
+            : '';
         return `<tr>
             <td class="px-3 py-2" style="color:var(--text-2);white-space:nowrap">${r.operationConsultant ? sapEscape(r.operationConsultant) : '<span class="text-muted">—</span>'}</td>
             <td class="px-3 py-2 fw-semibold" style="white-space:nowrap">${sapEscape(r.storeName)}</td>
@@ -1243,7 +1247,12 @@ document.querySelectorAll('#ntdLeaversTable .ntd-sort').forEach(th => {
 });
 
 (async function init() {
-    ntdNinetyDayColorRules = await ChartColors.loadRateRules('ninety-day');
+    const [colorRules, totalSettings] = await Promise.all([
+        ChartColors.loadRateRules('ninety-day'),
+        ChartColors.loadTotalColumnSettings()
+    ]);
+    ntdNinetyDayColorRules = colorRules;
+    ntdTotalColumnVisible = totalSettings.ninetyDayTotalVisible !== false;
     const hasData = await ntdLoadFilters();
     if (hasData) await Promise.all([ntdLoadTrend(), ntdLoadAll(), ntdLoadTrendMatrix()]);
 })();

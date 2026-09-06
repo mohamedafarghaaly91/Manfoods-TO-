@@ -189,6 +189,7 @@ const ChartColors = (function () {
     };
 
     const _rateRulesCache = {};
+    let _totalColumnSettingsPromise = null;
     async function loadRateRules(metric) {
         if (_rateRulesCache[metric]) return _rateRulesCache[metric];
         const promise = fetch(`/api/settings/color-rules/${metric}`)
@@ -199,6 +200,15 @@ const ChartColors = (function () {
         if (!rules || !rules.length) { delete _rateRulesCache[metric]; return null; }
         _rateRulesCache[metric] = rules;
         return rules;
+    }
+
+    async function loadTotalColumnSettings() {
+        if (_totalColumnSettingsPromise) return _totalColumnSettingsPromise;
+        _totalColumnSettingsPromise = fetch('/api/settings/total-columns')
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
+        const settings = await _totalColumnSettingsPromise;
+        return settings || { turnoverTotalVisible: true, ninetyDayTotalVisible: true };
     }
 
     function matchRateColorName(rules, percent) {
@@ -238,6 +248,7 @@ const ChartColors = (function () {
         likertColor,
         colorsByLikert,
         loadRateRules,
+        loadTotalColumnSettings,
         matchRateColorName,
         rateColor,
         rateBadgeHtml,

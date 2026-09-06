@@ -1463,4 +1463,11 @@
   <data name="SLP_NoData" xml:space="preserve"><value>No tracking data is available for this Store Leader.</value></data>
   <data name="SLP_NoExitData" xml:space="preserve"><value>No exit-interview data is available for this selection.</value></data>
   <data name="SLP_NoComments" xml:space="preserve"><value>No anonymous comments are available.</value></data>
+  <data name="Set_TotalColumnsTitle" xml:space="preserve"><value>Total Columns</value></data>
+  <data name="Set_TotalColumnsSub" xml:space="preserve"><value>Choose whether the Total column appears in each full-data trend table.</value></data>
+  <data name="Set_TotalTurnover" xml:space="preserve"><value>Show Total in Turnover table</value></data>
+  <data name="Set_TotalNinety" xml:space="preserve"><value>Show Total in 90-Day Turnover table</value></data>
+  <data name="Set_TotalColumnsSave" xml:space="preserve"><value>Save column settings</value></data>
+  <data name="Set_TotalColumnsSaved" xml:space="preserve"><value>Column settings saved.</value></data>
+  <data name="Set_TotalColumnsSaveFailed" xml:space="preserve"><value>Save failed: </value></data>
 </root>
