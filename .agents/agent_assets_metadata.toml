@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "FfO327Ufm1vXHrc_Oy0Hz"
+uri = "file://docs/HR-portal-enterprise-assessment.md"
+type = "text"
+title = "التقييم المؤسسي لبورتال HR"
+description = "تقييم شامل لكل صفحات البورتال، النواقص المطلوبة، والصفحات الجديدة المقترحة لتحويله إلى منصة HR مؤسسية."
+logical_id = "89e25430-41a8-4dd4-a663-1900c2491d58"
+content_hash = "sha256:fae2034e6bac4381ab0c023c1eb7b28222853c3e7ea2a2ef2136ced77b3bccc2"
+size = 44531
+mtime_ms = 1788795151913
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:4ba92a9e-4e37-4114-aa4e-57cac261ef50/89e25430-41a8-4dd4-a663-1900c2491d58/20be373a-06e8-4aaa-a809-23ce263aede4"
+storage_version_token = "1788795168646346"
+content_type = "text/markdown"
