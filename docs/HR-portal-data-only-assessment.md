@@ -822,9 +822,20 @@
 
 ---
 
-## 2. Branch Health Command Center
+## 2. تطوير Store Profile إلى Branch Health Command Center
 
-صفحة تجمع كل شيء عن الفرع:
+هذه ليست صفحة جديدة منفصلة؛ فصفحة **Store Profile** موجودة بالفعل في البورتال وتحتوي حاليًا على تبويبات:
+
+- Overview.
+- Workforce.
+- Turnover.
+- Retention.
+- 90-Day.
+- Early Warning.
+- Exit Interviews.
+- Action Center.
+
+المقترح هو تطوير الصفحة الحالية لتصبح Branch Health Command Center حقيقية، تجمع كل شيء عن الفرع:
 
 - Workforce composition.
 - Turnover.
@@ -835,7 +846,7 @@
 - Signals.
 - Action Plans.
 
-هذه أهم صفحة جديدة قابلة للتنفيذ فورًا من البيانات الحالية.
+هذه أهم ترقية قابلة للتنفيذ فورًا من البيانات الحالية، وليست صفحة جديدة منفصلة.
 
 ---
 
@@ -950,7 +961,7 @@
 
 ## المرحلة الأولى — أعلى قيمة بدون بيانات جديدة
 
-1. **Branch Health Command Center**
+1. **تطوير Store Profile إلى Branch Health Command Center**
 2. **Attrition Root Cause Explorer**
 3. **Action Effectiveness Dashboard**
 4. **Executive Workforce Summary**
