@@ -88,6 +88,12 @@
     const $ = id => document.getElementById(id);
     const esc = value => typeof sapEscape === 'function' ? sapEscape(value ?? '') : String(value ?? '');
     const clean = value => String(value ?? '').trim();
+     const monthLabel = month => {
+         const monthNumber = Number(month);
+         if (!Number.isInteger(monthNumber) || monthNumber < 1 || monthNumber > 12) return '';
+         const locale = document.documentElement.lang?.toLowerCase().startsWith('ar') ? 'ar-EG' : 'en-US';
+         return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2000, monthNumber - 1, 1));
+     };
     let periods = [];
 
     const roleKeys = [
@@ -157,6 +163,10 @@
     async function loadRows() {
         const month = $('ocMonth').value;
         const year = $('ocYear').value;
+         if (!month || !year) {
+             $('ocBoard').innerHTML = `<div class="oc-empty">${esc(d.noData)}</div>`;
+             return;
+         }
         $('ocBoard').innerHTML = `<div class="oc-loading"><span class="spinner-border spinner-border-sm"></span>${esc(d.loading)}</div>`;
         try {
             const response = await fetch(`/api/dashboard/operation-chart?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`, { credentials: 'same-origin' });
@@ -172,13 +182,22 @@
             const response = await fetch('/api/dashboard/available-periods', { credentials: 'same-origin' });
             periods = response.ok ? await response.json() : [];
         } catch { periods = []; }
-        const yearValues = [...new Set(periods.map(p => p.year))].sort((a, b) => b - a);
+         const yearValues = [...new Set(
+             periods
+                 .map(p => Number(p.year))
+                 .filter(year => Number.isInteger(year) && year > 0)
+         )].sort((a, b) => b - a);
         $('ocYear').innerHTML = yearValues.map(y => `<option value="${y}">${y}</option>`).join('');
         const selectedYear = yearValues[0];
-        const monthsForYear = () => periods.filter(p => Number(p.year) === Number($('ocYear').value)).sort((a, b) => b.month - a.month);
+         const monthsForYear = () => periods
+             .filter(p => Number(p.year) === Number($('ocYear').value))
+             .filter(p => Number.isInteger(Number(p.month)) && Number(p.month) >= 1 && Number(p.month) <= 12)
+             .sort((a, b) => Number(b.month) - Number(a.month));
         const refillMonths = () => {
             const list = monthsForYear();
-            $('ocMonth').innerHTML = list.map(p => `<option value="${p.month}">${p.label}</option>`).join('');
+             $('ocMonth').innerHTML = list
+                 .map(p => `<option value="${Number(p.month)}">${esc(monthLabel(p.month))}</option>`)
+                 .join('');
         };
         $('ocYear').addEventListener('change', () => { refillMonths(); loadRows(); });
         $('ocMonth').addEventListener('change', loadRows);
