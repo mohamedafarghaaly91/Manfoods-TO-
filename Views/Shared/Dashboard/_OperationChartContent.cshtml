@@ -77,7 +77,6 @@
   .oc-detail-card.oc-root { --node-color:#e5a11b; }
   .oc-detail-card.oc-role { --node-color:#e5a11b; }
   .oc-detail-card.oc-store { --node-color:#3da8c4; }
-  .oc-detail-card.oc-leader { --node-color:#5c9c6a; }
   .oc-detail-card .oc-avatar { width:50px; height:50px; font-size:21px; }
   .oc-detail-card strong { display:block; margin-top:8px; color:var(--text); font-size:13px; line-height:1.3; }
   .oc-detail-card small { display:block; margin-top:4px; color:var(--text-2); font-size:10.5px; }
@@ -118,11 +117,9 @@
      data-senior-operation-consultant="@L["OC_SeniorOperationConsultant"]"
      data-operation-consultant="@L["OC_OperationConsultant"]"
      data-head-manager="@L["OC_HeadManager"]"
-     data-store-leader="@L["OC_StoreLeader"]"
      data-click-to-extend="@L["OC_ClickToExtend"]"
      data-back="@L["OC_Back"]"
-     data-no-subordinates="@L["OC_NoSubordinates"]"
-     data-store-leader-line="@L["OC_StoreLeaderLine"]">
+     data-no-subordinates="@L["OC_NoSubordinates"]">
     <div class="oc-head">
         <div>
             <h1>@L["Page_OperationChart"]</h1>
@@ -138,7 +135,6 @@
         <div class="oc-legend">
             <span><i class="bi bi-person-badge"></i>@L["OC_Leadership"]</span>
             <span><i class="bi bi-shop"></i>@L["OC_Stores"]</span>
-            <span><i class="bi bi-person-check"></i>@L["OC_StoreLeader"]</span>
         </div>
     </div>
     <div class="oc-board" id="ocBoard">
@@ -217,7 +213,6 @@
 
     function avatarIcon(kind) {
         if (kind === 'store') return 'bi-shop';
-        if (kind === 'leader') return 'bi-person-check-fill';
         return 'bi-person-fill';
     }
 
