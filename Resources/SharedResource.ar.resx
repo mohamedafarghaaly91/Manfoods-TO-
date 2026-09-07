@@ -1551,6 +1551,12 @@
   <data name="OC_SeniorOperationConsultant" xml:space="preserve"><value>استشاري أول العمليات</value></data>
   <data name="OC_OperationConsultant" xml:space="preserve"><value>استشاري العمليات</value></data>
   <data name="OC_HeadManager" xml:space="preserve"><value>مدير المطعم</value></data>
+  <data name="OC_GeneralManagerName" xml:space="preserve"><value>علاء فتحي</value></data>
+  <data name="OC_AssistantGeneralManagerName" xml:space="preserve"><value>عصام رضا</value></data>
+  <data name="OC_ClickToExtend" xml:space="preserve"><value>اضغط للعرض</value></data>
+  <data name="OC_Back" xml:space="preserve"><value>العودة إلى الهيكل التشغيلي</value></data>
+  <data name="OC_NoSubordinates" xml:space="preserve"><value>لا توجد بيانات للمرؤوسين لهذا الشخص.</value></data>
+  <data name="OC_StoreLeaderLine" xml:space="preserve"><value>قائد الفرع</value></data>
   <data name="Guide_StoreProfile_Overview" xml:space="preserve"><value>هذا هو الملف الشامل لفرع واحد. استخدمه لفهم وضع القوى العاملة الحالي، ونمط الدوران والمغادرة المبكرة، وإشارات المخاطر، وموضوعات مقابلات الخروج، وتقدم خطة الإجراء دون مغادرة سياق الفرع.</value></data>
   <data name="Guide_StoreProfile_Health" xml:space="preserve"><value>يجمع مركز صحة الفرع مؤشرات الفترة المختارة مع خطوط أساس خطط الإجراءات الموجودة، والإشارات المتكررة، والموظفين مرتفعي الخطورة. الحالة المعروضة أداة لاتخاذ القرار وليست مؤشرًا جديدًا أو مصدر بيانات جديدًا.</value></data>
   <data name="Guide_StoreProfile_WorkforceRisk" xml:space="preserve"><value>يوضح تبويبا القوى العاملة والإنذار المبكر من يعمل حاليًا في الفرع، وكيف يتوزع الفريق، وأي موظفين أو إشارات تحتاج إلى متابعة. استخدم التقسيم حسب الوظيفة ومدة الخدمة ومجموعة الرواتب والجنس وتصنيفات مركز التكلفة لتحديد أماكن التركّز.</value></data>

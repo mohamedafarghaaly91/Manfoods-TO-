@@ -29,9 +29,10 @@
  .oc-tree li:only-child::before,.oc-tree li:only-child::after { display:none; }
  .oc-tree ul ul::before { position:absolute; top:0; left:50%; height:48px; content:""; border-left:2px dotted var(--oc-line); }
  .oc-node { position:relative; z-index:1; display:flex; width:180px; flex-direction:column; align-items:center; border:0; background:transparent; color:var(--text); text-align:center; }
+  .oc-node.oc-person-open { padding:0; font-family:inherit; cursor:pointer; }
+  .oc-node.oc-person-open:focus-visible { outline:3px solid color-mix(in srgb,var(--node-color) 35%,transparent); outline-offset:6px; border-radius:8px; }
  .oc-node strong { display:block; max-width:190px; margin-top:8px; color:var(--text); font-size:13px; line-height:1.3; }
  .oc-node small { display:block; max-width:190px; margin-top:3px; color:var(--text-2); font-size:10.5px; line-height:1.3; }
-  .oc-node:has(.oc-toggle) { cursor:pointer; }
  .oc-avatar { display:flex; width:58px; height:58px; align-items:center; justify-content:center; border:3px solid color-mix(in srgb,var(--node-color) 32%,white); border-radius:50%; background:var(--node-color); box-shadow:0 2px 0 color-mix(in srgb,var(--node-color) 20%,transparent), 0 5px 12px rgba(24,39,75,.13); color:#fff; font-size:25px; }
  .oc-node.oc-root { --node-color:#e5a11b; }
  .oc-node.oc-role { --node-color:#e5a11b; }
@@ -41,14 +42,35 @@
   .oc-store-link:hover strong { color:var(--node-color); }
  .oc-node.oc-leader { --node-color:#5c9c6a; }
  .oc-node em { display:inline-flex; align-items:center; gap:4px; margin-top:6px; padding:3px 8px; border:1px solid color-mix(in srgb,var(--node-color) 24%,var(--card-border)); border-radius:999px; background:color-mix(in srgb,var(--node-color) 8%,var(--card-bg)); color:var(--node-color); font-size:10px; font-style:normal; font-weight:800; }
- .oc-toggle { position:absolute; right:3px; bottom:1px; display:flex; width:20px; height:20px; align-items:center; justify-content:center; border:1px solid color-mix(in srgb,var(--node-color) 30%,var(--card-border)); border-radius:50%; background:var(--card-bg); color:var(--node-color); cursor:pointer; font-size:10px; transition:transform .18s ease, background .18s ease; }
- .oc-toggle:hover { background:color-mix(in srgb,var(--node-color) 10%,var(--card-bg)); }
- .oc-toggle i { transition:transform .18s ease; }
- .oc-item.is-collapsed > ul { display:none; }
- .oc-item.is-collapsed > .oc-node .oc-toggle i { transform:rotate(-90deg); }
- .oc-item.is-collapsed > .oc-node .oc-toggle { background:color-mix(in srgb,var(--node-color) 9%,var(--card-bg)); }
  .oc-empty { padding:50px 16px; text-align:center; color:var(--text-2); }
  .oc-loading { display:flex; align-items:center; justify-content:center; gap:8px; padding:50px 16px; color:var(--text-2); }
+  .oc-home-guide { display:flex; align-items:center; justify-content:center; gap:6px; margin:0 0 22px; color:var(--text-2); font-size:12px; }
+  .oc-home-guide i { color:var(--oc-accent); }
+  .oc-detail-view { width:min(100%,980px); margin:0 auto; }
+  .oc-back { display:inline-flex; align-items:center; gap:7px; margin-bottom:22px; padding:8px 12px; border:1px solid var(--card-border); border-radius:8px; background:var(--card-bg); color:var(--text-2); cursor:pointer; font:inherit; font-size:12px; }
+  .oc-back:hover { border-color:var(--oc-accent); color:var(--oc-accent); }
+  .oc-detail-flow { display:flex; flex-direction:column; align-items:center; }
+  .oc-detail-hero { display:flex; flex-direction:column; align-items:center; }
+  .oc-detail-hero .oc-detail-card { min-width:220px; }
+  .oc-detail-section { position:relative; width:100%; padding-top:38px; }
+  .oc-detail-section::before { position:absolute; top:0; left:50%; height:28px; content:""; border-left:2px dotted var(--oc-line); }
+  .oc-detail-section h3 { margin:0 0 14px; color:var(--text-2); font-size:12px; font-weight:800; text-align:center; }
+  .oc-detail-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; }
+  .oc-detail-card { display:flex; min-height:124px; flex-direction:column; align-items:center; justify-content:center; padding:14px 12px; border:1px solid var(--card-border); border-radius:12px; background:var(--card-bg); box-shadow:var(--shadow-sm); text-align:center; }
+  .oc-detail-card.oc-root { --node-color:#e5a11b; }
+  .oc-detail-card.oc-role { --node-color:#e5a11b; }
+  .oc-detail-card.oc-store { --node-color:#3da8c4; }
+  .oc-detail-card.oc-leader { --node-color:#5c9c6a; }
+  .oc-detail-card .oc-avatar { width:50px; height:50px; font-size:21px; }
+  .oc-detail-card strong { display:block; margin-top:8px; color:var(--text); font-size:13px; line-height:1.3; }
+  .oc-detail-card small { display:block; margin-top:4px; color:var(--text-2); font-size:10.5px; }
+  .oc-stores-list { display:flex; flex-direction:column; gap:10px; }
+  .oc-detail-store { display:flex; align-items:center; gap:12px; width:100%; padding:13px 15px; border:1px solid var(--card-border); border-radius:10px; background:var(--card-bg); color:var(--text); text-decoration:none; box-shadow:var(--shadow-sm); }
+  .oc-detail-store:hover { border-color:#3da8c4; }
+  .oc-detail-store .oc-store-icon { display:flex; width:38px; height:38px; flex:0 0 38px; align-items:center; justify-content:center; border-radius:50%; background:#3da8c4; color:#fff; }
+  .oc-detail-store strong { display:block; font-size:13px; }
+  .oc-detail-store small { display:block; margin-top:3px; color:var(--text-2); font-size:11px; }
+  .oc-detail-empty { padding:26px 12px; color:var(--text-2); text-align:center; }
  @@media (max-width:700px) {
      .oc-head { display:block; }
      .oc-filters { margin-top:14px; }
@@ -57,6 +79,8 @@
      .oc-tree li { padding-right:4px; padding-left:4px; }
      .oc-node { width:150px; }
      .oc-avatar { width:50px; height:50px; font-size:21px; }
+     .oc-detail-grid { grid-template-columns:1fr; }
+     .oc-detail-card { min-height:108px; }
  }
 </style>
 
@@ -70,12 +94,18 @@
      data-store="@L["OC_Store"]"
      data-general-manager="@L["OC_GeneralManager"]"
      data-assistant-general-manager="@L["OC_AssistantGeneralManager"]"
+     data-general-manager-name="@L["OC_GeneralManagerName"]"
+     data-assistant-general-manager-name="@L["OC_AssistantGeneralManagerName"]"
      data-operation-director="@L["OC_OperationDirector"]"
      data-operation-manager="@L["OC_OperationManager"]"
      data-senior-operation-consultant="@L["OC_SeniorOperationConsultant"]"
      data-operation-consultant="@L["OC_OperationConsultant"]"
      data-head-manager="@L["OC_HeadManager"]"
-     data-store-leader="@L["OC_StoreLeader"]">
+     data-store-leader="@L["OC_StoreLeader"]"
+     data-click-to-extend="@L["OC_ClickToExtend"]"
+     data-back="@L["OC_Back"]"
+     data-no-subordinates="@L["OC_NoSubordinates"]"
+     data-store-leader-line="@L["OC_StoreLeaderLine"]">
     <div class="oc-head">
         <div>
             <h1>@L["Page_OperationChart"]</h1>
@@ -116,85 +146,127 @@
     let periods = [];
      const board = $('ocBoard');
 
-     board.addEventListener('click', event => {
-         let toggle = event.target.closest('.oc-toggle');
-         if (!toggle && !event.target.closest('a')) {
-             const nodeElement = event.target.closest('.oc-node');
-             toggle = nodeElement?.querySelector('.oc-toggle');
-         }
-         if (!toggle || !board.contains(toggle)) return;
-         const item = toggle.closest('.oc-item');
-         if (!item) return;
-         const expanded = toggle.getAttribute('aria-expanded') === 'true';
-         toggle.setAttribute('aria-expanded', String(!expanded));
-         item.classList.toggle('is-collapsed', expanded);
-     });
+    board.addEventListener('click', event => {
+        const person = event.target.closest('.oc-person-open');
+        if (person && board.contains(person)) {
+            renderDetail(currentRows, person.dataset.personKind, person.dataset.personName);
+            return;
+        }
+        const back = event.target.closest('.oc-back');
+        if (back && board.contains(back)) renderHome(currentRows);
+    });
 
-    const roleKeys = [
-        ['operationDirector', d.operationDirector],
-        ['operationManager', d.operationManager],
-        ['seniorOperationConsultant', d.seniorOperationConsultant],
-        ['operationConsultant', d.operationConsultant],
-        ['headManager', d.headManager],
-        ['storeName', d.store],
-    ];
+    let currentRows = [];
 
-    function node(name, role, kind = 'role') {
-        return { name, role, kind, children: [], stores: 0 };
+    function sameName(left, right) {
+        return clean(left).toLocaleLowerCase() === clean(right).toLocaleLowerCase();
     }
 
-    function addChild(parent, name, role, kind = 'role') {
-        let child = parent.children.find(x => x.name.toLowerCase() === name.toLowerCase() && x.role === role && x.kind === kind);
-        if (!child) {
-            child = node(name, role, kind);
-            parent.children.push(child);
-        }
-        if (kind === 'store') parent.stores += 1;
+    function uniqueNames(rows, key) {
+        const seen = new Set();
+        return rows
+            .map(row => clean(row[key]))
+            .filter(name => name && !seen.has(name.toLocaleLowerCase()) && seen.add(name.toLocaleLowerCase()));
+    }
+
+    function node(name, role, kind = 'role', clickable = false, personKind = '') {
+        return { name, role, kind, clickable, personKind, children: [] };
+    }
+
+    function addChild(parent, name, role, kind = 'role', clickable = false, personKind = '') {
+        const existing = parent.children.find(child =>
+            sameName(child.name, name) && child.role === role && child.kind === kind
+        );
+        if (existing) return existing;
+        const child = node(name, role, kind, clickable, personKind);
+        parent.children.push(child);
         return child;
     }
 
-    function insertRow(rootNode, row) {
-        let parent = rootNode;
-        for (const [key, role] of roleKeys) {
-            const value = clean(row[key]);
-            if (!value) continue;
-            const kind = key === 'storeName' ? 'store' : 'role';
-            parent = addChild(parent, value, role, kind);
-        }
-        const leader = clean(row.storeLeader);
-        if (leader && parent.kind === 'store') addChild(parent, leader, d.storeLeader, 'leader');
+    function buildHomeTree(rows) {
+        const rootNode = node(d.generalManagerName, d.generalManager, 'root');
+        const assistant = addChild(rootNode, d.assistantGeneralManagerName, d.assistantGeneralManager);
+
+        uniqueNames(rows, 'operationDirector').forEach(directorName => {
+            const directorRows = rows.filter(row => sameName(row.operationDirector, directorName));
+            const director = addChild(assistant, directorName, d.operationDirector, 'role', true, 'director');
+            uniqueNames(directorRows, 'operationManager').forEach(managerName => {
+                addChild(director, managerName, d.operationManager, 'role', true, 'manager');
+            });
+        });
+
+        return rootNode;
     }
 
-    function storeCount(item) {
-        if (item.kind === 'store') return 1;
-        return item.children.reduce((total, child) => total + storeCount(child), 0);
+    function avatarIcon(kind) {
+        if (kind === 'store') return 'bi-shop';
+        if (kind === 'leader') return 'bi-person-check-fill';
+        return 'bi-person-fill';
     }
 
     function nodeMarkup(item) {
-         const nodeClass = `oc-node oc-${item.kind === 'store' ? 'store' : item.kind === 'leader' ? 'leader' : item.kind === 'root' ? 'root' : 'role'}`;
-        const href = item.kind === 'store' ? `${d.areaPrefix}/dashboard/storeprofile?store=${encodeURIComponent(item.name)}` : '';
-         const icon = item.kind === 'store' ? 'bi-shop' : item.kind === 'leader' ? 'bi-person-check-fill' : 'bi-person-fill';
-         const nameMarkup = href
-             ? `<a class="oc-store-link" href="${href}" title="${esc(item.name)}"><strong>${esc(item.name)}</strong></a>`
-             : `<strong>${esc(item.name)}</strong>`;
-        const count = item.kind === 'store' || item.kind === 'leader' ? '' : `<em>${storeCount(item)} ${esc(d.stores)}</em>`;
-         const toggle = item.children.length
-             ? `<button class="oc-toggle" type="button" aria-expanded="true" aria-label="${esc(item.name)}"><i class="bi bi-chevron-down"></i></button>`
-             : '';
-         const children = item.children.length ? `<ul>${item.children.map(nodeMarkup).join('')}</ul>` : '';
-         return `<li class="oc-item"><div class="${nodeClass}"><div class="oc-avatar"><i class="bi ${icon}"></i></div>${nameMarkup}<small>${esc(item.role)}</small>${count}${toggle}</div>${children}</li>`;
+        const visualKind = item.kind === 'root' ? 'root' : 'role';
+        const classes = `oc-node oc-${visualKind}${item.clickable ? ' oc-person-open' : ''}`;
+        const attrs = item.clickable
+            ? ` type="button" data-person-kind="${esc(item.personKind)}" data-person-name="${esc(item.name)}"`
+            : '';
+        const tag = item.clickable ? `<button class="${classes}"${attrs}>` : `<div class="${classes}">`;
+        const close = item.clickable ? '</button>' : '</div>';
+        const children = item.children.length ? `<ul>${item.children.map(nodeMarkup).join('')}</ul>` : '';
+        return `<li class="oc-item">${tag}<div class="oc-avatar"><i class="bi ${avatarIcon(item.kind)}"></i></div><strong>${esc(item.name)}</strong><small>${esc(item.role)}</small>${close}${children}</li>`;
     }
 
-    function render(rows) {
+    function detailCard(name, role, kind = 'role') {
+        return `<div class="oc-detail-card oc-${kind}"><div class="oc-avatar"><i class="bi ${avatarIcon(kind)}"></i></div><strong>${esc(name)}</strong><small>${esc(role)}</small></div>`;
+    }
+
+    function detailLevel(title, values, role, kind = 'role') {
+        if (!values.length) return '';
+        const cards = values.map(name => detailCard(name, role, kind)).join('');
+        return `<section class="oc-detail-section"><h3>${esc(title)}</h3><div class="oc-detail-grid">${cards}</div></section>`;
+    }
+
+    function detailStores(rows) {
+        const seen = new Set();
+        const stores = rows
+            .map(row => ({ name: clean(row.storeName), leader: clean(row.storeLeader) }))
+            .filter(store => store.name && !seen.has(store.name.toLocaleLowerCase()) && seen.add(store.name.toLocaleLowerCase()));
+        if (!stores.length) return '';
+        const items = stores.map(store => {
+            const href = `${d.areaPrefix}/dashboard/storeprofile?store=${encodeURIComponent(store.name)}`;
+            const leader = store.leader || '—';
+            return `<a class="oc-detail-store" href="${href}" title="${esc(store.name)}"><span class="oc-store-icon"><i class="bi bi-shop"></i></span><span><strong>${esc(store.name)}</strong><small>${esc(d.storeLeaderLine)}: ${esc(leader)}</small></span></a>`;
+        }).join('');
+        return `<section class="oc-detail-section"><h3>${esc(d.store)}</h3><div class="oc-stores-list">${items}</div></section>`;
+    }
+
+    function renderHome(rows) {
         if (!rows.length) {
             board.innerHTML = `<div class="oc-empty"><i class="bi bi-diagram-3 fs-2 d-block mb-2"></i>${esc(d.noData)}</div>`;
             return;
         }
-        const rootNode = node('علاء فتحي', d.generalManager, 'root');
-        const assistant = addChild(rootNode, 'عصام رضا', d.assistantGeneralManager);
-        rows.forEach(row => insertRow(assistant, row));
-        $('ocPeriodLabel').textContent = `${$('ocMonth').selectedOptions[0]?.textContent ?? ''} ${$('ocYear').value}`;
-         board.innerHTML = `<div class="oc-tree"><ul>${nodeMarkup(rootNode)}</ul></div>`;
+        const rootNode = buildHomeTree(rows);
+        board.innerHTML = `<div class="oc-home-guide"><i class="bi bi-hand-index-thumb"></i>${esc(d.clickToExtend)}</div><div class="oc-tree"><ul>${nodeMarkup(rootNode)}</ul></div>`;
+    }
+
+    function renderDetail(rows, personKind, personName) {
+        const isDirector = personKind === 'director';
+        const selectedRole = isDirector ? d.operationDirector : d.operationManager;
+        const filterKey = isDirector ? 'operationDirector' : 'operationManager';
+        const scopedRows = rows.filter(row => sameName(row[filterKey], personName));
+        const management = isDirector ? uniqueNames(scopedRows, 'operationManager') : [];
+        const seniorConsultants = uniqueNames(scopedRows, 'seniorOperationConsultant');
+        const consultants = uniqueNames(scopedRows, 'operationConsultant');
+        const headManagers = uniqueNames(scopedRows, 'headManager');
+        const levels = [
+            detailLevel(d.operationManager, management, d.operationManager),
+            detailLevel(d.seniorOperationConsultant, seniorConsultants, d.seniorOperationConsultant),
+            detailLevel(d.operationConsultant, consultants, d.operationConsultant),
+            detailLevel(d.headManager, headManagers, d.headManager),
+            detailStores(scopedRows),
+        ].join('');
+        const content = levels || `<div class="oc-detail-empty">${esc(d.noSubordinates)}</div>`;
+        board.innerHTML = `<div class="oc-detail-view"><button class="oc-back" type="button"><i class="bi bi-arrow-left"></i>${esc(d.back)}</button><div class="oc-detail-flow"><div class="oc-detail-hero">${detailCard(personName, selectedRole, 'root')}</div>${content}</div></div>`;
     }
 
     async function loadRows() {
@@ -208,7 +280,8 @@
         try {
             const response = await fetch(`/api/dashboard/operation-chart?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`, { credentials: 'same-origin' });
             if (!response.ok) throw new Error('operation-chart');
-            render(await response.json());
+            currentRows = await response.json();
+            renderHome(currentRows);
         } catch {
             $('ocBoard').innerHTML = `<div class="oc-empty">${esc(d.noData)}</div>`;
         }
