@@ -28,20 +28,18 @@
  .oc-tree li::after { left:50%; width:calc(50% + 10px); }
  .oc-tree li:only-child::before,.oc-tree li:only-child::after { display:none; }
  .oc-tree ul ul::before { position:absolute; top:0; left:50%; height:48px; content:""; border-left:2px dotted var(--oc-line); }
-  .oc-item-parent-head > ul,
-  .oc-item-parent-store > ul { flex-direction:column; align-items:center; gap:22px; }
-  .oc-item-parent-head > ul { width:min(100%, 760px); align-items:stretch; }
-  .oc-item-parent-head > ul > li { display:grid; width:100%; grid-template-columns:154px minmax(260px,1fr); align-items:start; column-gap:20px; padding-top:0; }
-  .oc-item-parent-head > ul > li > ul { display:flex; width:100%; flex-direction:column; align-items:stretch; gap:12px; margin:0; padding:0 0 0 18px; border-left:2px dotted var(--oc-line); }
-  .oc-item-parent-head > ul > li > ul::before { display:none; }
-  .oc-item-parent-head > ul > li > ul > li { width:100%; align-items:flex-start; padding:0; }
-  .oc-item-parent-head > ul > li > ul > li::before,
-  .oc-item-parent-head > ul > li > ul > li::after { display:none; }
-  .oc-item-parent-store > ul::before { height:100%; }
-  .oc-item-parent-head > ul > li::before,
-  .oc-item-parent-head > ul > li::after,
-  .oc-item-parent-store > ul > li::before,
-  .oc-item-parent-store > ul > li::after { display:none; }
+  /* Head managers and their stores render as vertical lists; every other level stays a normal side-by-side chart */
+  .oc-list-head,
+  .oc-list-store { flex-direction:column; align-items:stretch; gap:16px; padding:14px 0 0 22px; margin-top:0; border-left:2px dotted var(--oc-line); }
+  .oc-list-head::before,
+  .oc-list-store::before { display:none; }
+  .oc-list-head > li,
+  .oc-list-store > li { padding-top:0; align-items:flex-start; }
+  .oc-list-head > li::before,
+  .oc-list-head > li::after,
+  .oc-list-store > li::before,
+  .oc-list-store > li::after { display:none; }
+  .oc-tree li.oc-item-parent-head { flex-direction:row; align-items:flex-start; gap:6px; }
   .oc-node { position:relative; z-index:1; display:flex; width:154px; flex-direction:column; align-items:center; border:0; background:transparent; color:var(--text); text-align:center; }
   .oc-node.oc-person-open { padding:0; font-family:inherit; cursor:pointer; }
   .oc-node.oc-person-open:focus-visible { outline:3px solid color-mix(in srgb,var(--node-color) 35%,transparent); outline-offset:6px; border-radius:8px; }
@@ -228,7 +226,9 @@
         const nameMarkup = href
             ? `<a class="oc-store-link" href="${href}" title="${esc(item.name)}"><strong>${esc(item.name)}</strong></a>`
             : `<strong>${esc(item.name)}</strong>`;
-        const children = item.children.length ? `<ul>${item.children.map(nodeMarkup).join('')}</ul>` : '';
+        const childKind = item.children.length ? (item.children[0].kind || '') : '';
+        const listClass = childKind === 'head' || childKind === 'store' ? ` class="oc-list-${childKind}"` : '';
+        const children = item.children.length ? `<ul${listClass}>${item.children.map(nodeMarkup).join('')}</ul>` : '';
         return `<li class="oc-item oc-item-parent-${visualKind}">${tag}<div class="oc-avatar"><i class="bi ${avatarIcon(item.kind)}"></i></div>${nameMarkup}<small>${esc(item.role)}</small>${close}${children}</li>`;
     }
 
