@@ -1505,6 +1505,16 @@
   <data name="SP_Status" xml:space="preserve"><value>الحالة</value></data>
   <data name="SP_Severity" xml:space="preserve"><value>درجة الخطورة</value></data>
   <data name="SP_Recommendations" xml:space="preserve"><value>التوصيات</value></data>
+  <data name="SP_StoreLeaders" xml:space="preserve"><value>قادة المطعم</value></data>
+  <data name="SP_MonthlyTurnover" xml:space="preserve"><value>الدوران الشهري خلال الفترة</value></data>
+  <data name="SP_MonthlyNinety" xml:space="preserve"><value>الدوران الشهري خلال 90 يوم</value></data>
+  <data name="SP_MonthlyExit" xml:space="preserve"><value>مقابلات الخروج الشهرية</value></data>
+  <data name="SP_Responses" xml:space="preserve"><value>الردود</value></data>
+  <data name="SP_LeaderName" xml:space="preserve"><value>قائد المطعم</value></data>
+  <data name="SP_LeaderFrom" xml:space="preserve"><value>من</value></data>
+  <data name="SP_LeaderTo" xml:space="preserve"><value>إلى</value></data>
+  <data name="SP_LeaderMonths" xml:space="preserve"><value>عدد الشهور</value></data>
+  <data name="SP_NoLeaderHistory" xml:space="preserve"><value>لا يوجد سجل لقادة هذا المطعم.</value></data>
   <data name="Common_Employees" xml:space="preserve"><value>موظف</value></data>
   <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>

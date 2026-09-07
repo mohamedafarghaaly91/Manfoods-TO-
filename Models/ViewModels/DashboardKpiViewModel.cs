@@ -108,6 +108,18 @@ public class StoreHeadcountRow
     public Dictionary<string, int> PayrollGroupBreakdown { get; set; } = new();
 }
 
+public class StoreLeaderTrackingRow
+{
+    public string StoreLeader { get; set; } = "";
+    public int FromMonth { get; set; }
+    public int FromYear { get; set; }
+    public int ToMonth { get; set; }
+    public int ToYear { get; set; }
+    public string FromPeriod { get; set; } = "";
+    public string ToPeriod { get; set; } = "";
+    public int Months { get; set; }
+}
+
 /// <summary>One active-employee row for the Workforce report's detailed sheet.</summary>
 public class EmployeeDetailRow
 {

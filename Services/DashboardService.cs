@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
@@ -1145,6 +1146,64 @@ public class DashboardService : IDashboardService
             })
             .OrderByDescending(r => r.Headcount)
             .ToList();
+    }
+
+    public async Task<List<StoreLeaderTrackingRow>> GetStoreLeaderTrackingAsync(string store, string role, string? assignedName)
+    {
+        var accessible = await GetAccessibleStoresAsync(role, assignedName, null, null);
+        if (accessible != null && !accessible.Contains(store)) return new List<StoreLeaderTrackingRow>();
+
+        var snapshots = (await _db.StoreReferences
+                .AsNoTracking()
+                .Where(s => s.StoreName == store && s.StoreLeader != "")
+                .OrderBy(s => s.Year).ThenBy(s => s.Month).ThenBy(s => s.Id)
+                .Select(s => new { s.StoreLeader, s.Month, s.Year })
+                .ToListAsync())
+            .GroupBy(s => (s.Year, s.Month))
+            .Select(g => g.First())
+            .OrderBy(s => s.Year).ThenBy(s => s.Month)
+            .ToList();
+
+        if (snapshots.Count == 0) return new List<StoreLeaderTrackingRow>();
+
+        static string Period(int month, int year) =>
+            new DateTime(year, month, 1).ToString("MMM yyyy", CultureInfo.InvariantCulture);
+
+        var result = new List<StoreLeaderTrackingRow>();
+        var currentLeader = snapshots[0].StoreLeader;
+        var start = (snapshots[0].Month, snapshots[0].Year);
+        var previous = start;
+
+        void AddSegment(string leader, (int Month, int Year) from, (int Month, int Year) to)
+        {
+            var months = (to.Year - from.Year) * 12 + to.Month - from.Month + 1;
+            result.Add(new StoreLeaderTrackingRow
+            {
+                StoreLeader = leader,
+                FromMonth = from.Month,
+                FromYear = from.Year,
+                ToMonth = to.Month,
+                ToYear = to.Year,
+                FromPeriod = Period(from.Month, from.Year),
+                ToPeriod = Period(to.Month, to.Year),
+                Months = months,
+            });
+        }
+
+        foreach (var snapshot in snapshots.Skip(1))
+        {
+            var isNextMonth = snapshot.Year * 12 + snapshot.Month == previous.Year * 12 + previous.Month + 1;
+            if (!isNextMonth || !string.Equals(snapshot.StoreLeader, currentLeader, StringComparison.OrdinalIgnoreCase))
+            {
+                AddSegment(currentLeader, start, previous);
+                currentLeader = snapshot.StoreLeader;
+                start = (snapshot.Month, snapshot.Year);
+            }
+            previous = (snapshot.Month, snapshot.Year);
+        }
+
+        AddSegment(currentLeader, start, previous);
+        return result;
     }
 
     public async Task<List<EmployeeDetailRow>> GetEmployeeDetailsAsync(int month, int year, string? store, string role, string? assignedName,

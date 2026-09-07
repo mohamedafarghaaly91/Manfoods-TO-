@@ -44,6 +44,12 @@
 .sp-empty { padding:24px 10px; text-align:center; color:var(--text-2); font-size:12px; }
 .sp-chart-wrap { height:250px; position:relative; }
 .sp-chart-wrap canvas { direction:ltr; }
+.sp-rate-table-wrap { overflow:auto; }
+.sp-rate-table { width:100%; border-collapse:collapse; font-size:12px; }
+.sp-rate-table th,.sp-rate-table td { padding:9px 8px; text-align:start; border-bottom:1px solid var(--card-border); white-space:nowrap; }
+.sp-rate-table th { color:var(--text-2); font-weight:700; }
+.sp-rate-table td.rate { color:var(--sp-accent); font-weight:800; text-align:end; }
+.sp-leader-current { display:inline-flex; align-items:center; gap:6px; padding:4px 9px; border-radius:999px; background:var(--sp-soft); color:var(--sp-accent); font-weight:800; font-size:11px; }
 @@media (max-width: 900px) { .sp-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @@media (max-width: 640px) { .sp-grid { grid-template-columns:1fr; } .sp-card-wide { grid-column:auto; } .sp-kpis { grid-template-columns:1fr 1fr; } .sp-hero { padding:18px; } .sp-row { grid-template-columns:1fr auto; } .sp-track { grid-column:1/-1; grid-row:2; } }
 </style>
@@ -79,6 +85,7 @@
         <button class="sp-tab" data-panel="warning">@L["Nav_EarlyWarning"]</button>
         <button class="sp-tab" data-panel="exit">@L["Nav_ExitInterviews"]</button>
         <button class="sp-tab" data-panel="action">@L["Nav_ActionCenter"]</button>
+         <button class="sp-tab" data-panel="leaders">@L["SP_StoreLeaders"]</button>
     </div>
 
     <section class="sp-panel active" id="spPanel-overview"><div class="sp-grid">
@@ -88,6 +95,7 @@
         <div class="sp-card"><div class="sp-card-title"><h3><i class="bi bi-lightbulb"></i>@L["SP_QuickInsights"]</h3></div><div id="spInsights"></div></div>
     </div></section>
 
+    <section class="sp-panel" id="spPanel-leaders"><div id="spLeaders"></div></section>
     <section class="sp-panel" id="spPanel-workforce"><div id="spWorkforce"></div></section>
     <section class="sp-panel" id="spPanel-turnover"><div id="spTurnover"></div></section>
     <section class="sp-panel" id="spPanel-retention"><div id="spRetention"></div></section>
@@ -130,6 +138,17 @@
     }
 
     function periodValue(p) { return `${p.month}-${p.year}`; }
+    function periodKey(p) { return p.year * 100 + p.month; }
+    function periodLabel(p) {
+        return new Date(p.year, p.month - 1, 1).toLocaleString(undefined, { month: 'short', year: 'numeric' });
+    }
+    function selectedPeriods() {
+        if (!fromPeriod || !toPeriod) return periods.slice().sort((a, b) => periodKey(a) - periodKey(b));
+        const from = Math.min(periodKey(fromPeriod), periodKey(toPeriod));
+        const to = Math.max(periodKey(fromPeriod), periodKey(toPeriod));
+        return periods.filter(p => periodKey(p) >= from && periodKey(p) <= to)
+            .slice().sort((a, b) => periodKey(a) - periodKey(b));
+    }
     function periodQuery() {
         const q = new URLSearchParams({ store });
         if (toPeriod) { q.set('month', toPeriod.month); q.set('year', toPeriod.year); }
@@ -137,9 +156,23 @@
         if (fromPeriod) q.set('sinceYear', fromPeriod.year);
         return q;
     }
-    function singlePeriodQuery() {
-        const q = periodQuery();
-        if (toPeriod) { q.set('months', toPeriod.month); }
+    function snapshotQuery() {
+        const q = new URLSearchParams({ store });
+        if (toPeriod) {
+            q.set('year', toPeriod.year);
+            q.set('months', toPeriod.month);
+        }
+        return q;
+    }
+    function exitRangeQuery() {
+        const q = new URLSearchParams({ store });
+        const range = selectedPeriods();
+        if (range.length && range.every(p => p.year === range[0].year)) {
+            q.set('year', range[0].year);
+            q.set('months', range.map(p => p.month).join(','));
+        } else if (toPeriod) {
+            q.set('year', toPeriod.year);
+        }
         return q;
     }
 
@@ -158,6 +191,30 @@
     }
     function renderCards(items) {
         return `<div class="sp-grid">${items.join('')}</div>`;
+    }
+    function renderRateTable(rows, rateKey, extraColumns) {
+        if (!rows.length) return `<div class="sp-empty">${esc(d.noData)}</div>`;
+        const headers = [`<th>${esc('@L["SP_To"]')}</th>`, `<th class="text-end">${esc('@L["Common_Percent"]')}</th>`]
+            .concat((extraColumns || []).map(c => `<th class="text-end">${esc(c.label)}</th>`)).join('');
+        const body = rows.map(r => `<tr>
+            <td>${esc(r.periodLabel || r.label)}</td>
+            <td class="rate">${pct(r[rateKey])}</td>
+            ${(extraColumns || []).map(c => `<td class="text-end">${fmt(r[c.key])}</td>`).join('')}
+        </tr>`).join('');
+        return `<div class="sp-rate-table-wrap"><table class="sp-rate-table"><thead><tr>${headers}</tr></thead><tbody>${body}</tbody></table></div>`;
+    }
+    function renderLeaderTracking(rows) {
+        if (!rows.length) return `<div class="sp-card"><div class="sp-empty">${esc('@L["SP_NoLeaderHistory"]')}</div></div>`;
+        const body = rows.map((r, index) => `<tr>
+            <td><span class="sp-leader-current">${index === rows.length - 1 ? '<i class="bi bi-person-check"></i>' : '<i class="bi bi-person"></i>'}${esc(r.storeLeader)}</span></td>
+            <td>${esc(r.fromPeriod)}</td>
+            <td>${esc(r.toPeriod)}</td>
+            <td class="text-end">${fmt(r.months)}</td>
+        </tr>`).join('');
+        return `<div class="sp-card sp-card-wide"><div class="sp-card-title"><h3><i class="bi bi-person-badge"></i>${esc('@L["SP_StoreLeaders"]')}</h3></div>
+            <div class="sp-table-wrap"><table class="sp-table"><thead><tr>
+                <th>${esc('@L["SP_LeaderName"]')}</th><th>${esc('@L["SP_LeaderFrom"]')}</th><th>${esc('@L["SP_LeaderTo"]')}</th><th class="text-end">${esc('@L["SP_LeaderMonths"]')}</th>
+            </tr></thead><tbody>${body}</tbody></table></div></div>`;
     }
 
     function renderKpis(kpis, warning, sentiment) {
@@ -193,9 +250,23 @@
 
     function renderTrend(canvasId, existing, data, valueKey, color, fill) {
         if (existing) existing.destroy();
-        const rows = arr(data);
+        const rows = arr(data).filter(r => r && (r[valueKey] != null || r.value != null || r.rate != null));
         const canvas = $(canvasId);
         if (!canvas) return null;
+        const wrap = canvas.parentElement;
+        const empty = wrap?.querySelector('.sp-chart-empty');
+        if (!rows.length || typeof Chart === 'undefined') {
+            canvas.style.display = 'none';
+            if (wrap && !empty) {
+                const message = document.createElement('div');
+                message.className = 'sp-chart-empty sp-empty';
+                message.textContent = d.noData;
+                wrap.appendChild(message);
+            }
+            return null;
+        }
+        canvas.style.display = '';
+        empty?.remove();
         return new Chart(canvas.getContext('2d'), {
             type: 'line',
             data: { labels: rows.map(r => r.label ?? r.periodLabel ?? ''), datasets: [{ data: rows.map(r => number(r[valueKey] ?? r.value ?? r.rate)), borderColor: color, backgroundColor: fill, fill: true, tension: .3, pointRadius: 3, pointHoverRadius: 6 }] },
@@ -203,38 +274,69 @@
         });
     }
 
-    async function loadStoreTurnoverTrend() {
-        const ordered = periods.slice().sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month));
-        const values = await Promise.all(ordered.map(p => get(`/api/dashboard/kpis?store=${encodeURIComponent(store)}&month=${p.month}&year=${p.year}`, {})));
-        return ordered.map((p, i) => ({ label: periodValue(p), value: number(values[i]?.turnoverRate) }));
+    async function loadStorePeriodData() {
+        const ordered = selectedPeriods();
+        const values = await Promise.all(ordered.map(p =>
+            get(`/api/dashboard/kpis?store=${encodeURIComponent(store)}&month=${p.month}&year=${p.year}`, {})));
+        return ordered.map((p, i) => ({
+            label: periodLabel(p),
+            periodLabel: periodLabel(p),
+            turnoverRate: number(values[i]?.turnoverRate),
+            headcount: number(values[i]?.totalHeadcount ?? values[i]?.headcount),
+            resignations: number(values[i]?.totalResignations ?? values[i]?.resignations)
+        }));
+    }
+
+    async function loadNinetyTrend() {
+        const ordered = selectedPeriods();
+        const values = await Promise.all(ordered.map(p =>
+            get(`/api/ninety-day-turnover/kpi?store=${encodeURIComponent(store)}&month=${p.month}&year=${p.year}`, {})));
+        return ordered.map((p, i) => ({
+            label: periodLabel(p),
+            periodLabel: periodLabel(p),
+            rate: number(values[i]?.rate),
+            totalHires: number(values[i]?.totalHires),
+            earlyLeavers: number(values[i]?.earlyLeavers)
+        }));
+    }
+
+    async function loadExitTrend() {
+        const ordered = selectedPeriods();
+        const values = await Promise.all(ordered.map(p =>
+            get(`/api/exit-interviews/sentiment-summary?store=${encodeURIComponent(store)}&year=${p.year}&months=${p.month}`, {})));
+        return ordered.map((p, i) => ({
+            label: periodLabel(p),
+            periodLabel: periodLabel(p),
+            positivePercent: number(values[i]?.positivePercent),
+            totalResponses: number(values[i]?.totalResponses)
+        }));
     }
 
     async function loadOverview() {
         if (!store) { setState(d.noStore, 'warning'); return; }
         setState(d.loading, 'info');
-        const q = periodQuery(), sq = singlePeriodQuery();
-        const [kpis, turnoverTrend, headcountTrend, warning, watchlist, sentiment, action] = await Promise.all([
+        const q = periodQuery(), sq = snapshotQuery(), eq = exitRangeQuery();
+        const [kpis, periodData, warning, watchlist, sentiment, action] = await Promise.all([
             get(`/api/dashboard/kpis?${q}`, {}),
-            loadStoreTurnoverTrend(),
-            get(`/api/dashboard/headcount-trend?${q}`, []),
+            loadStorePeriodData(),
             get(`/api/early-warning/summary?${sq}`, {}),
             get(`/api/early-warning/watchlist?${sq}`, []),
-            get(`/api/exit-interviews/sentiment-summary?${sq}`, {}),
+            get(`/api/exit-interviews/sentiment-summary?${eq}`, {}),
             get(`/api/store-action-plan/action-center/detail?store=${encodeURIComponent(store)}`, null)
         ]);
-        overviewData = { kpis, turnoverTrend, headcountTrend, warning, watchlist, sentiment, action };
+        overviewData = { kpis, periodData, warning, watchlist, sentiment, action };
         $('spStoreName').textContent = store;
-        $('spSubtitle').textContent = `${d.subtitle} · ${toPeriod ? periodValue(toPeriod) : ''}`;
+        $('spSubtitle').textContent = `${d.subtitle} · ${fromPeriod && toPeriod ? `${periodLabel(fromPeriod)} – ${periodLabel(toPeriod)}` : ''}`;
         renderKpis(kpis, warning, sentiment);
         renderRisk(warning, arr(watchlist), action);
         renderInsights(kpis, warning, action);
-        turnoverChart = renderTrend('spTurnoverChart', turnoverChart, turnoverTrend, 'rate', ChartColors.SERIES.SECONDARY, ChartColors.SERIES_FILL.SECONDARY);
-        headcountChart = renderTrend('spHeadcountChart', headcountChart, headcountTrend, 'value', ChartColors.SERIES.PRIMARY, ChartColors.SERIES_FILL.PRIMARY);
+        turnoverChart = renderTrend('spTurnoverChart', turnoverChart, periodData, 'turnoverRate', ChartColors.SERIES.SECONDARY, ChartColors.SERIES_FILL.SECONDARY);
+        headcountChart = renderTrend('spHeadcountChart', headcountChart, periodData, 'headcount', ChartColors.SERIES.PRIMARY, ChartColors.SERIES_FILL.PRIMARY);
         setState('', '');
     }
 
     async function loadPanel(panel) {
-        const q = periodQuery(), sq = singlePeriodQuery();
+        const q = periodQuery(), sq = snapshotQuery(), eq = exitRangeQuery();
         const target = $(`sp${panel[0].toUpperCase()}${panel.slice(1)}`);
         if (!target || loadedPanels.has(panel)) return;
         target.innerHTML = `<div class="sp-card"><div class="sp-empty">${esc(d.loading)}</div></div>`;
@@ -246,11 +348,20 @@
             ]);
             html = renderCards([card('@L["SP_ByJobTitle"]','bi-person-badge',renderBars(jobs,d.employees)),card('@L["SP_ByPayroll"]','bi-wallet2',renderBars(payroll,d.employees)),card('@L["SP_ByTenure"]','bi-hourglass-split',renderBars(tenure,d.employees)),card('@L["SP_ByGender"]','bi-gender-ambiguous',renderBars(gender,d.employees))]);
         } else if (panel === 'turnover') {
-            const [jobs, tenure, payroll, reasons] = await Promise.all([
+            const [jobs, tenure, payroll, reasons, periodData] = await Promise.all([
                 get(`/api/dashboard/turnover-by-job-title?${q}`, []), get(`/api/dashboard/turnover-by-tenure?${q}`, []),
-                get(`/api/dashboard/turnover-by-payroll-group?${q}`, []), get(`/api/exit-interviews/reasons?${sq}`, [])
+                get(`/api/dashboard/turnover-by-payroll-group?${q}`, []), get(`/api/exit-interviews/reasons?${eq}`, []),
+                loadStorePeriodData()
             ]);
-            html = renderCards([card('@L["SP_TurnoverByJob"]','bi-person-badge',renderBars(jobs,d.resignations)),card('@L["SP_TurnoverByTenure"]','bi-hourglass-split',renderBars(tenure,d.resignations)),card('@L["SP_TurnoverByPayroll"]','bi-wallet2',renderBars(payroll,d.resignations)),card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,''))]);
+            html = renderCards([
+                card('@L["SP_TurnoverByJob"]','bi-person-badge',renderBars(jobs,d.resignations)),
+                card('@L["SP_TurnoverByTenure"]','bi-hourglass-split',renderBars(tenure,d.resignations)),
+                card('@L["SP_TurnoverByPayroll"]','bi-wallet2',renderBars(payroll,d.resignations)),
+                card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,'')),
+                card('@L["SP_MonthlyTurnover"]','bi-graph-up-arrow',renderRateTable(periodData,'turnoverRate',[
+                    { key:'headcount', label:d.employees }, { key:'resignations', label:d.resignations }
+                ]),true)
+            ]);
         } else if (panel === 'retention') {
             const [tenure, jobs, gender, hiring] = await Promise.all([
                 get(`/api/retention/tenure-distribution?${q}`, []), get(`/api/retention/by-job-title?${q}`, []),
@@ -258,22 +369,39 @@
             ]);
             html = renderCards([card('@L["SP_RetentionTenure"]','bi-hourglass-split',renderBars(tenure,d.employees)),card('@L["SP_RetentionJobs"]','bi-person-badge',renderBars(jobs,'')),card('@L["SP_RetentionGender"]','bi-gender-ambiguous',renderBars(gender,'')),card('@L["SP_HiringTrend"]','bi-person-plus',renderBars(hiring,d.employees))]);
         } else if (panel === 'ninety') {
-            const [kpi, trend] = await Promise.all([get(`/api/ninety-day-turnover/kpi?${q}`, {}), get(`/api/ninety-day-turnover/trend?${q}`, [])]);
-            html = renderCards([card('@L["SP_NinetyDayKpi"]','bi-hourglass-split',`<div class="sp-kpi-value">${pct(kpi?.rate ?? kpi?.earlyLeaverRate)}</div><div class="sp-muted mt-2">${esc(d.subtitle)}</div>`),card('@L["SP_NinetyDayTrend"]','bi-graph-up',renderBars(trend,d.percent))]);
+            const [kpi, trend] = await Promise.all([get(`/api/ninety-day-turnover/kpi?${q}`, {}), loadNinetyTrend()]);
+            html = renderCards([
+                card('@L["SP_NinetyDayKpi"]','bi-hourglass-split',`<div class="sp-kpi-value">${pct(kpi?.rate ?? kpi?.earlyLeaverRate)}</div><div class="sp-muted mt-2">${esc(d.subtitle)}</div>`),
+                card('@L["SP_MonthlyNinety"]','bi-graph-up',renderRateTable(trend,'rate',[
+                    { key:'totalHires', label:'@L["Common_NewHires"]' }, { key:'earlyLeavers', label:'@L["Common_Resignations"]' }
+                ]),true)
+            ]);
         } else if (panel === 'warning') {
             const rows = arr(overviewData.watchlist);
             const table = rows.length ? `<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>${esc('@L["EW_HireName"]')}</th><th>${esc('@L["EW_JobTitle"]')}</th><th>${esc('@L["EW_RiskScore"]')}</th><th>${esc('@L["EW_Reasons"]')}</th></tr></thead><tbody>${rows.slice(0,20).map(r => `<tr><td>${esc(r.employeeName ?? r.name)}</td><td>${esc(r.jobTitle)}</td><td>${esc(r.stars ?? r.riskScore ?? '—')}</td><td>${esc(Array.isArray(r.reasons) ? r.reasons.join(', ') : r.reason ?? '—')}</td></tr>`).join('')}</tbody></table></div>` : `<div class="sp-empty">${esc(d.noData)}</div>`;
             html = renderCards([card('@L["SP_Watchlist"]','bi-person-exclamation',table,true)]);
         } else if (panel === 'exit') {
-            const [reasons, wouldReturn, experience, workload, training] = await Promise.all([
-                get(`/api/exit-interviews/reasons?${sq}`, []), get(`/api/exit-interviews/would-return?${sq}`, []),
-                get(`/api/exit-interviews/overall-experience?${sq}`, []), get(`/api/exit-interviews/workload?${sq}`, []),
-                get(`/api/exit-interviews/training?${sq}`, [])
+            const [reasons, wouldReturn, experience, workload, training, exitTrend] = await Promise.all([
+                get(`/api/exit-interviews/reasons?${eq}`, []), get(`/api/exit-interviews/would-return?${eq}`, []),
+                get(`/api/exit-interviews/overall-experience?${eq}`, []), get(`/api/exit-interviews/workload?${eq}`, []),
+                get(`/api/exit-interviews/training?${eq}`, []), loadExitTrend()
             ]);
-            html = renderCards([card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,'')),card('@L["SP_WouldReturn"]','bi-arrow-return-left',renderBars(wouldReturn,'')),card('@L["SP_Experience"]','bi-star',renderBars(experience,'')),card('@L["SP_Workload"]','bi-speedometer2',renderBars(workload,'')),card('@L["SP_Training"]','bi-mortarboard',renderBars(training,''))]);
+            html = renderCards([
+                card('@L["SP_ExitReasons"]','bi-chat-square-text',renderBars(reasons,'')),
+                card('@L["SP_WouldReturn"]','bi-arrow-return-left',renderBars(wouldReturn,'')),
+                card('@L["SP_Experience"]','bi-star',renderBars(experience,'')),
+                card('@L["SP_Workload"]','bi-speedometer2',renderBars(workload,'')),
+                card('@L["SP_Training"]','bi-mortarboard',renderBars(training,'')),
+                card('@L["SP_MonthlyExit"]','bi-chat-heart',renderRateTable(exitTrend,'positivePercent',[
+                    { key:'totalResponses', label:'@L["SP_Responses"]' }
+                ]),true)
+            ]);
         } else if (panel === 'action') {
             const action = overviewData.action;
             html = renderCards([card('@L["SP_ActionPlan"]','bi-bullseye',action ? `<div class="sp-list"><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Status"]')}</span><span></span><span class="sp-badge">${esc(action.status ?? action.planStatus ?? 'None')}</span></div><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Severity"]')}</span><span></span><span class="sp-row-value">${esc(action.severity ?? action.riskLevel ?? '—')}</span></div><div class="sp-row"><span class="sp-row-label">${esc('@L["SP_Recommendations"]')}</span><span></span><span class="sp-row-value">${fmt(arr(action.recommendations).length)}</span></div></div>` : `<div class="sp-empty">${esc(d.noData)}</div>`,true)]);
+        } else if (panel === 'leaders') {
+            const rows = await get(`/api/dashboard/store-leader-tracking?store=${encodeURIComponent(store)}`, []);
+            html = renderLeaderTracking(rows);
         }
         target.innerHTML = html;
         loadedPanels.add(panel);
@@ -282,10 +410,15 @@
     async function initPeriods() {
         periods = await get('/api/dashboard/available-periods', []);
         const from = $('spFromPeriod'), to = $('spToPeriod');
-        const options = periods.map(p => `<option value="${periodValue(p)}">${esc(new Date(p.year,p.month-1,1).toLocaleString(undefined,{month:'short',year:'numeric'}))}</option>`).join('');
+        const options = periods.map(p => `<option value="${periodValue(p)}">${esc(periodLabel(p))}</option>`).join('');
         from.innerHTML = options; to.innerHTML = options;
         if (periods.length) {
-            toPeriod = periods[0]; fromPeriod = periods[0];
+            const currentYear = new Date().getFullYear();
+            const sameYear = periods.filter(p => p.year === currentYear);
+            const defaultPeriods = sameYear.length ? sameYear : periods.filter(p => p.year === periods[0].year);
+            const ordered = defaultPeriods.slice().sort((a, b) => periodKey(a) - periodKey(b));
+            fromPeriod = ordered[0];
+            toPeriod = ordered[ordered.length - 1];
             to.value = periodValue(toPeriod); from.value = periodValue(fromPeriod);
         }
         await loadOverview();

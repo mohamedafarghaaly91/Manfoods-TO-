@@ -189,6 +189,15 @@ public class DashboardApiController : ControllerBase
         return Ok(await _dashboard.GetStoreHeadcountBreakdownAsync(month, year, role, assignedName, om, oc, soc, od, jobs));
     }
 
+    [HttpGet("store-leader-tracking")]
+    public async Task<IActionResult> StoreLeaderTracking([FromQuery] string store)
+    {
+        if (string.IsNullOrWhiteSpace(store)) return BadRequest(new { error = "Store is required." });
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        return Ok(await _dashboard.GetStoreLeaderTrackingAsync(store, role, assignedName));
+    }
+
     [HttpGet("senior-operation-consultants")]
     public async Task<IActionResult> SeniorOperationConsultants([FromQuery] int? month, [FromQuery] int? year)
     {

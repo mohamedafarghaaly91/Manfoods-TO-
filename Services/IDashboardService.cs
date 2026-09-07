@@ -42,6 +42,7 @@ public interface IDashboardService
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, string? jobTitles = null);
     Task<List<ChartDataItem>> GetHeadcountTrendAsync(string? store, string role, string? assignedName, string? om, string? oc, string? soc, string? od, int? sinceYear, string? jobTitles = null);
     Task<List<StoreHeadcountRow>> GetStoreHeadcountBreakdownAsync(int month, int year, string role, string? assignedName, string? om, string? oc, string? soc, string? od, string? jobTitles = null);
+    Task<List<StoreLeaderTrackingRow>> GetStoreLeaderTrackingAsync(string store, string role, string? assignedName);
     /// <summary>Row-level active-employee listing for the selected month/year —
     /// the detailed sheet on the Workforce report.</summary>
     Task<List<EmployeeDetailRow>> GetEmployeeDetailsAsync(int month, int year, string? store, string role, string? assignedName,

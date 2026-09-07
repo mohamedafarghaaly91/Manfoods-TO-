@@ -1,4 +1,4 @@
-modules = ["web", "dotnet-7.0", "nodejs-20"]
+modules = ["web", "dotnet-9.0", "nodejs-20", "python-base-3.13"]
 
 [deployment]
 router = "application"
@@ -40,13 +40,13 @@ expertMode = true
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
 
-[[ports]]
-localPort = 5000
-externalPort = 80
-
 [nix]
 channel = "stable-25_05"
 
 [userenv]
 
 [userenv.shared]
+
+[[ports]]
+localPort = 5000
+externalPort = 80

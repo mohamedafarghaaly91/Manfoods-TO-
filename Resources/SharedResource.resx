@@ -1504,6 +1504,16 @@
   <data name="SP_Status" xml:space="preserve"><value>Status</value></data>
   <data name="SP_Severity" xml:space="preserve"><value>Severity</value></data>
   <data name="SP_Recommendations" xml:space="preserve"><value>Recommendations</value></data>
+  <data name="SP_StoreLeaders" xml:space="preserve"><value>Store Leaders</value></data>
+  <data name="SP_MonthlyTurnover" xml:space="preserve"><value>Monthly Turnover by Period</value></data>
+  <data name="SP_MonthlyNinety" xml:space="preserve"><value>Monthly 90-Day Turnover</value></data>
+  <data name="SP_MonthlyExit" xml:space="preserve"><value>Monthly Exit Interviews</value></data>
+  <data name="SP_Responses" xml:space="preserve"><value>Responses</value></data>
+  <data name="SP_LeaderName" xml:space="preserve"><value>Store Leader</value></data>
+  <data name="SP_LeaderFrom" xml:space="preserve"><value>From</value></data>
+  <data name="SP_LeaderTo" xml:space="preserve"><value>To</value></data>
+  <data name="SP_LeaderMonths" xml:space="preserve"><value>Months</value></data>
+  <data name="SP_NoLeaderHistory" xml:space="preserve"><value>No Store Leader history is available for this store.</value></data>
   <data name="Common_Employees" xml:space="preserve"><value>employees</value></data>
   <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>
