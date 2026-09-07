@@ -50,8 +50,35 @@
 .sp-rate-table th { color:var(--text-2); font-weight:700; }
 .sp-rate-table td.rate { color:var(--sp-accent); font-weight:800; text-align:end; }
 .sp-leader-current { display:inline-flex; align-items:center; gap:6px; padding:4px 9px; border-radius:999px; background:var(--sp-soft); color:var(--sp-accent); font-weight:800; font-size:11px; }
-@@media (max-width: 900px) { .sp-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-@@media (max-width: 640px) { .sp-grid { grid-template-columns:1fr; } .sp-card-wide { grid-column:auto; } .sp-kpis { grid-template-columns:1fr 1fr; } .sp-hero { padding:18px; } .sp-row { grid-template-columns:1fr auto; } .sp-track { grid-column:1/-1; grid-row:2; } }
+.sp-health { display:grid; grid-template-columns:minmax(230px,.85fr) minmax(0,1.6fr); gap:16px; margin-bottom:18px; }
+.sp-health-hero { padding:20px; border:1px solid var(--card-border); border-radius:var(--radius-lg); background:linear-gradient(135deg,var(--card-bg),var(--bg-2)); box-shadow:var(--shadow-sm); }
+.sp-health-kicker { color:var(--text-2); font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.sp-health-title { display:flex; align-items:center; gap:9px; margin-top:10px; font-size:23px; font-weight:850; }
+.sp-health-title i { font-size:18px; }
+.sp-health-copy { margin:9px 0 0; color:var(--text-2); font-size:12px; line-height:1.6; }
+.sp-health-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+.sp-health-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; background:var(--card-bg); border:1px solid var(--card-border); color:var(--text-2); font-size:11px; font-weight:750; }
+.sp-health-good { --health-color:oklch(0.5 0.15 155); --health-bg:oklch(0.62 0.15 155 / .1); }
+.sp-health-watch { --health-color:oklch(0.6 0.14 75); --health-bg:oklch(0.75 0.16 75 / .13); }
+.sp-health-critical { --health-color:oklch(0.6 0.22 22); --health-bg:oklch(0.6 0.22 22 / .1); }
+.sp-health-state { color:var(--health-color); }
+.sp-health-state .sp-health-title { color:var(--health-color); }
+.sp-health-state .sp-health-hero { border-color:color-mix(in srgb,var(--health-color) 36%,var(--card-border)); background:linear-gradient(135deg,var(--health-bg),var(--card-bg)); }
+.sp-health-panels { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.sp-health-panel { min-width:0; padding:15px; border:1px solid var(--card-border); border-radius:10px; background:var(--card-bg); }
+.sp-health-panel-title { display:flex; align-items:center; gap:7px; margin-bottom:11px; color:var(--text); font-size:12.5px; font-weight:800; }
+.sp-health-panel-title i { color:var(--sp-accent); }
+.sp-health-list { display:grid; gap:8px; }
+.sp-health-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; font-size:12px; }
+.sp-health-row-label { color:var(--text-2); min-width:0; }
+.sp-health-row-value { color:var(--text); font-weight:800; text-align:end; white-space:nowrap; }
+.sp-health-issue { display:flex; align-items:flex-start; gap:7px; color:var(--text-2); font-size:12px; line-height:1.45; }
+.sp-health-issue i { margin-top:2px; color:var(--health-color,var(--sp-accent)); }
+.sp-health-progress { height:7px; margin-top:5px; overflow:hidden; background:var(--bg-2); border-radius:99px; }
+.sp-health-progress > span { display:block; height:100%; background:var(--sp-accent); border-radius:inherit; }
+.sp-health-empty { color:var(--text-3); font-size:12px; }
+@@media (max-width: 900px) { .sp-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .sp-health { grid-template-columns:1fr; } }
+@@media (max-width: 640px) { .sp-grid { grid-template-columns:1fr; } .sp-card-wide { grid-column:auto; } .sp-kpis { grid-template-columns:1fr 1fr; } .sp-hero { padding:18px; } .sp-row { grid-template-columns:1fr auto; } .sp-track { grid-column:1/-1; grid-row:2; } .sp-health-panels { grid-template-columns:1fr; } }
 </style>
 
 <div id="spRoot" class="sp-page" data-store="@storeFromUrl"
@@ -74,6 +101,7 @@
     </div>
 
     <div id="spState" class="sp-state"></div>
+    <div id="spHealthSummary"></div>
     <div id="spKpis" class="sp-kpis"></div>
 
     <div class="sp-tabs" role="tablist">
@@ -248,6 +276,100 @@
         $('spInsights').innerHTML = items.length ? `<div class="sp-list">${items.map(x => `<div class="sp-row"><span class="sp-row-label">${x}</span></div>`).join('')}</div>` : `<div class="sp-empty">${esc(d.noData)}</div>`;
     }
 
+    function healthTone(kpis, ninety, warning, action) {
+        const turnover = number(kpis?.turnoverRate);
+        const severity = String(action?.severity || '').toLowerCase();
+        if (severity === 'critical' || turnover >= 15) return { tone: 'critical', label: '@L["SP_HealthCritical"]', icon: 'bi-exclamation-octagon-fill' };
+        if (severity === 'high' || severity === 'medium' || turnover >= 8 || number(warning?.watchlistCount ?? overviewData.watchlist?.length) > 0 || action?.status === 'Active') {
+            return { tone: 'watch', label: '@L["SP_HealthWatch"]', icon: 'bi-exclamation-triangle-fill' };
+        }
+        return { tone: 'good', label: '@L["SP_HealthGood"]', icon: 'bi-check-circle-fill' };
+    }
+
+    function metricChange(baseline, current) {
+        if (baseline == null || current == null || !Number.isFinite(Number(baseline)) || !Number.isFinite(Number(current))) return null;
+        return Number(current) - Number(baseline);
+    }
+
+    function changeMarkup(delta) {
+        if (delta == null || Math.abs(delta) < 0.05) return `<span class="sp-health-row-value">—</span>`;
+        const color = delta < 0 ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD;
+        const icon = delta < 0 ? 'bi-arrow-down-right' : 'bi-arrow-up-right';
+        return `<span class="sp-health-row-value" style="color:${color}"><i class="bi ${icon}"></i> ${Math.abs(delta).toFixed(1)}pt</span>`;
+    }
+
+    function renderHealthSummary(kpis, ninety, warning, watchlist, action, signalHistory) {
+        const root = $('spHealthSummary');
+        if (!root) return;
+
+        const health = healthTone(kpis, ninety, warning, action);
+        const recommendations = arr(action?.recommendations);
+        const completed = recommendations.filter(r => r.isCompleted).length;
+        const progress = recommendations.length ? Math.round(completed / recommendations.length * 100) : 0;
+        const persistentSignals = arr(signalHistory?.persistence).filter(x => x.isPersistent);
+        const latestSignals = arr(signalHistory?.periods).find(x => x.hasData);
+        const turnoverDelta = metricChange(action?.baselineTurnoverRate, kpis?.turnoverRate);
+        const earlyDelta = metricChange(action?.baselineEarlyLeaverRate, ninety?.rate ?? ninety?.earlyLeaverRate);
+        const issues = [];
+        const addIssue = (icon, text) => issues.push({ icon, text });
+
+        if (action?.status === 'Active') addIssue('bi-clipboard2-pulse-fill', esc('@L["SP_HealthActivePlan"]'));
+        if (persistentSignals.length) addIssue('bi-arrow-repeat', `${persistentSignals.length} ${esc('@L["SP_HealthRecurringSignals"]')}`);
+        if (number(watchlist?.length) > 0) addIssue('bi-person-exclamation', `${watchlist.length} ${esc('@L["SP_HighRisk"]')}`);
+        if (turnoverDelta != null && turnoverDelta > 0.05) addIssue('bi-graph-up-arrow', esc('@L["SP_HealthTurnoverRising"]'));
+        if (!issues.length) addIssue('bi-check2-circle', esc('@L["SP_NoPriorityIssues"]'));
+
+        const latestSignalText = latestSignals
+            ? (latestSignals.hasData
+                ? (latestSignals.signals?.length ? `${latestSignals.signals.length} ${esc('@L["SP_HealthSignalsThisPeriod"]')}` : esc('@L["SP_HealthNoSignalsThisPeriod"]'))
+                : esc('@L["SP_HealthNoDataThisPeriod"]'))
+            : esc('@L["SP_HealthNoSignalHistory"]');
+
+        root.innerHTML = `
+            <div class="sp-health sp-health-state sp-health-${health.tone}">
+                <div class="sp-health-hero">
+                    <div class="sp-health-kicker">${esc('@L["SP_HealthKicker"]')}</div>
+                    <div class="sp-health-title"><i class="bi ${health.icon}"></i>${esc(health.label)}</div>
+                    <p class="sp-health-copy">${esc('@L["SP_HealthDescription"]')}</p>
+                    <div class="sp-health-meta">
+                        <span class="sp-health-chip"><i class="bi bi-calendar3"></i>${esc(fromPeriod && toPeriod ? `${periodLabel(fromPeriod)} – ${periodLabel(toPeriod)}` : d.noData)}</span>
+                        <span class="sp-health-chip"><i class="bi bi-broadcast-pin"></i>${esc(latestSignalText)}</span>
+                    </div>
+                </div>
+                <div class="sp-health-panels">
+                    <div class="sp-health-panel">
+                        <div class="sp-health-panel-title"><i class="bi bi-flag-fill"></i>${esc('@L["SP_PriorityIssues"]')}</div>
+                        <div class="sp-health-list">${issues.map(item => `<div class="sp-health-issue"><i class="bi ${item.icon}"></i><span>${item.text}</span></div>`).join('')}</div>
+                    </div>
+                    <div class="sp-health-panel">
+                        <div class="sp-health-panel-title"><i class="bi bi-clipboard-check"></i>${esc('@L["SP_ActionProgress"]')}</div>
+                        <div class="sp-health-list">
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_ActionPlan"]')}</span><span class="sp-health-row-value">${esc(action?.status ?? 'None')}</span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_Recommendations"]')}</span><span class="sp-health-row-value">${completed}/${recommendations.length}</span></div>
+                            <div class="sp-health-progress"><span style="width:${progress}%"></span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_HealthBaselineChange"]')}</span>${changeMarkup(turnoverDelta)}</div>
+                        </div>
+                    </div>
+                    <div class="sp-health-panel">
+                        <div class="sp-health-panel-title"><i class="bi bi-arrow-down-up"></i>${esc('@L["SP_HealthBaseline"]')}</div>
+                        <div class="sp-health-list">
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["Common_TurnoverRate"]')}</span><span class="sp-health-row-value">${pct(kpis?.turnoverRate)}</span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_NinetyDayKpi"]')}</span><span class="sp-health-row-value">${pct(ninety?.rate ?? ninety?.earlyLeaverRate)}</span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_HealthEarlyChange"]')}</span>${changeMarkup(earlyDelta)}</div>
+                        </div>
+                    </div>
+                    <div class="sp-health-panel">
+                        <div class="sp-health-panel-title"><i class="bi bi-shield-exclamation"></i>${esc('@L["SP_SignalHistory"]')}</div>
+                        <div class="sp-health-list">
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_HealthRecurringSignals"]')}</span><span class="sp-health-row-value">${persistentSignals.length}</span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_HighRisk"]')}</span><span class="sp-health-row-value">${watchlist.length}</span></div>
+                            <div class="sp-health-row"><span class="sp-health-row-label">${esc('@L["SP_HealthHistoricalPlans"]')}</span><span class="sp-health-row-value">${fmt(action?.historicalPlanCount)}</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
     function renderTrend(canvasId, existing, data, valueKey, color, fill) {
         if (existing) existing.destroy();
         const rows = arr(data).filter(r => r && (r[valueKey] != null || r.value != null || r.rate != null));
@@ -316,17 +438,20 @@
         if (!store) { setState(d.noStore, 'warning'); return; }
         setState(d.loading, 'info');
         const q = periodQuery(), sq = snapshotQuery(), eq = exitRangeQuery();
-        const [kpis, periodData, warning, watchlist, sentiment, action] = await Promise.all([
+        const [kpis, periodData, warning, watchlist, sentiment, action, ninety, signalHistory] = await Promise.all([
             get(`/api/dashboard/kpis?${q}`, {}),
             loadStorePeriodData(),
             get(`/api/early-warning/summary?${sq}`, {}),
             get(`/api/early-warning/watchlist?${sq}`, []),
             get(`/api/exit-interviews/sentiment-summary?${eq}`, {}),
-            get(`/api/store-action-plan/action-center/detail?store=${encodeURIComponent(store)}`, null)
+            get(`/api/store-action-plan/action-center/detail?store=${encodeURIComponent(store)}`, null),
+            get(`/api/ninety-day-turnover/kpi?${q}`, {}),
+            get(`/api/store-action-plan/action-center/signal-history?store=${encodeURIComponent(store)}`, {})
         ]);
-        overviewData = { kpis, periodData, warning, watchlist, sentiment, action };
+        overviewData = { kpis, periodData, warning, watchlist, sentiment, action, ninety, signalHistory };
         $('spStoreName').textContent = store;
         $('spSubtitle').textContent = `${d.subtitle} · ${fromPeriod && toPeriod ? `${periodLabel(fromPeriod)} – ${periodLabel(toPeriod)}` : ''}`;
+        renderHealthSummary(kpis, ninety, warning, arr(watchlist), action, signalHistory);
         renderKpis(kpis, warning, sentiment);
         renderRisk(warning, arr(watchlist), action);
         renderInsights(kpis, warning, action);

@@ -1515,6 +1515,26 @@
   <data name="SP_LeaderTo" xml:space="preserve"><value>إلى</value></data>
   <data name="SP_LeaderMonths" xml:space="preserve"><value>عدد الشهور</value></data>
   <data name="SP_NoLeaderHistory" xml:space="preserve"><value>لا يوجد سجل لقادة هذا المطعم.</value></data>
+  <data name="SP_HealthKicker" xml:space="preserve"><value>مركز صحة الفرع</value></data>
+  <data name="SP_HealthGood" xml:space="preserve"><value>الفرع مستقر</value></data>
+  <data name="SP_HealthWatch" xml:space="preserve"><value>الفرع يحتاج متابعة</value></data>
+  <data name="SP_HealthCritical" xml:space="preserve"><value>الفرع في حالة حرجة</value></data>
+  <data name="SP_HealthDescription" xml:space="preserve"><value>ملخص لاتخاذ القرار مبني على بيانات القوى العاملة والدوران والاحتفاظ والمخاطر ومقابلات الخروج وخطط الإجراءات الموجودة لهذا الفرع.</value></data>
+  <data name="SP_PriorityIssues" xml:space="preserve"><value>أولويات المتابعة</value></data>
+  <data name="SP_ActionProgress" xml:space="preserve"><value>تقدم خطة الإجراء</value></data>
+  <data name="SP_HealthBaseline" xml:space="preserve"><value>الوضع الحالي</value></data>
+  <data name="SP_HealthBaselineChange" xml:space="preserve"><value>التغير عن خط أساس الخطة</value></data>
+  <data name="SP_HealthEarlyChange" xml:space="preserve"><value>تغير معدل 90 يومًا عن خط الأساس</value></data>
+  <data name="SP_SignalHistory" xml:space="preserve"><value>تاريخ الإشارات</value></data>
+  <data name="SP_HealthRecurringSignals" xml:space="preserve"><value>إشارات متكررة</value></data>
+  <data name="SP_HealthActivePlan" xml:space="preserve"><value>يوجد للفرع خطة إجراء نشطة</value></data>
+  <data name="SP_HealthTurnoverRising" xml:space="preserve"><value>الدوران أعلى من خط أساس خطة الإجراء</value></data>
+  <data name="SP_HealthSignalsThisPeriod" xml:space="preserve"><value>إشارة في أحدث فترة بيانات</value></data>
+  <data name="SP_HealthNoSignalsThisPeriod" xml:space="preserve"><value>لا توجد إشارات في أحدث فترة بيانات</value></data>
+  <data name="SP_HealthNoDataThisPeriod" xml:space="preserve"><value>لا توجد بيانات مرجعية لأحدث فترة</value></data>
+  <data name="SP_HealthNoSignalHistory" xml:space="preserve"><value>لا يوجد تاريخ إشارات متاح</value></data>
+  <data name="SP_HealthHistoricalPlans" xml:space="preserve"><value>خطط إجراءات سابقة</value></data>
+  <data name="SP_NoPriorityIssues" xml:space="preserve"><value>لم يتم اكتشاف أولوية متابعة في البيانات المختارة</value></data>
   <data name="Common_Employees" xml:space="preserve"><value>موظف</value></data>
   <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>

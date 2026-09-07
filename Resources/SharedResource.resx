@@ -1514,6 +1514,26 @@
   <data name="SP_LeaderTo" xml:space="preserve"><value>To</value></data>
   <data name="SP_LeaderMonths" xml:space="preserve"><value>Months</value></data>
   <data name="SP_NoLeaderHistory" xml:space="preserve"><value>No Store Leader history is available for this store.</value></data>
+  <data name="SP_HealthKicker" xml:space="preserve"><value>Branch Health Command Center</value></data>
+  <data name="SP_HealthGood" xml:space="preserve"><value>Healthy</value></data>
+  <data name="SP_HealthWatch" xml:space="preserve"><value>Needs attention</value></data>
+  <data name="SP_HealthCritical" xml:space="preserve"><value>Critical</value></data>
+  <data name="SP_HealthDescription" xml:space="preserve"><value>A decision-ready view built from this store's existing workforce, turnover, retention, risk, exit-interview, and action-plan data.</value></data>
+  <data name="SP_PriorityIssues" xml:space="preserve"><value>Priority issues</value></data>
+  <data name="SP_ActionProgress" xml:space="preserve"><value>Action progress</value></data>
+  <data name="SP_HealthBaseline" xml:space="preserve"><value>Current position</value></data>
+  <data name="SP_HealthBaselineChange" xml:space="preserve"><value>Change from plan baseline</value></data>
+  <data name="SP_HealthEarlyChange" xml:space="preserve"><value>90-day change from baseline</value></data>
+  <data name="SP_SignalHistory" xml:space="preserve"><value>Signal history</value></data>
+  <data name="SP_HealthRecurringSignals" xml:space="preserve"><value>recurring signals</value></data>
+  <data name="SP_HealthActivePlan" xml:space="preserve"><value>There is an active action plan for this store</value></data>
+  <data name="SP_HealthTurnoverRising" xml:space="preserve"><value>Turnover is above the action-plan baseline</value></data>
+  <data name="SP_HealthSignalsThisPeriod" xml:space="preserve"><value>signals in the latest data period</value></data>
+  <data name="SP_HealthNoSignalsThisPeriod" xml:space="preserve"><value>No signals in the latest data period</value></data>
+  <data name="SP_HealthNoDataThisPeriod" xml:space="preserve"><value>No reference data for the latest period</value></data>
+  <data name="SP_HealthNoSignalHistory" xml:space="preserve"><value>No signal history available</value></data>
+  <data name="SP_HealthHistoricalPlans" xml:space="preserve"><value>historical action plans</value></data>
+  <data name="SP_NoPriorityIssues" xml:space="preserve"><value>No priority issue was detected in the selected data</value></data>
   <data name="Common_Employees" xml:space="preserve"><value>employees</value></data>
   <data name="Common_Percent" xml:space="preserve"><value>%</value></data>
 </root>

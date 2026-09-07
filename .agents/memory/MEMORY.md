@@ -3,3 +3,4 @@
 - [Localization ResourcesPath trap](localization-resourcespath.md) — Use ResourcesPath="" not "Resources" to avoid double-path lookup; use custom MfLangCookieProvider (not CookieRequestCultureProvider) for plain cookie values.
 - [Manfoods AR/EN localization setup](manfoods-localization.md) — Full localization architecture: cookie "mf-lang" (plain "ar"/"en"), MfLangCookieProvider, satellite DLL in ar/, JS uses const _L={} blocks, Arabic output is HTML entities (correct).
 - [.NET SDK environment](dotnet-sdk.md) — Imported project targets .NET 9; default workflows may resolve SDK 7 until the .NET 9 module is available.
+- [Preview database provider mismatch](preview-database-provider.md) — setup accepts DATABASE_URL, but the app and DbMigrator currently require SQL Server connection strings.
