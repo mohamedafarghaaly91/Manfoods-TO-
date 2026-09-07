@@ -1515,6 +1515,14 @@
   <data name="SP_LeaderTo" xml:space="preserve"><value>إلى</value></data>
   <data name="SP_LeaderMonths" xml:space="preserve"><value>عدد الشهور</value></data>
   <data name="SP_NoLeaderHistory" xml:space="preserve"><value>لا يوجد سجل لقادة هذا المطعم.</value></data>
+  <data name="Guide_StoreProfile_Overview" xml:space="preserve"><value>هذا هو الملف الشامل لفرع واحد. استخدمه لفهم وضع القوى العاملة الحالي، ونمط الدوران والمغادرة المبكرة، وإشارات المخاطر، وموضوعات مقابلات الخروج، وتقدم خطة الإجراء دون مغادرة سياق الفرع.</value></data>
+  <data name="Guide_StoreProfile_Health" xml:space="preserve"><value>يجمع مركز صحة الفرع مؤشرات الفترة المختارة مع خطوط أساس خطط الإجراءات الموجودة، والإشارات المتكررة، والموظفين مرتفعي الخطورة. الحالة المعروضة أداة لاتخاذ القرار وليست مؤشرًا جديدًا أو مصدر بيانات جديدًا.</value></data>
+  <data name="Guide_StoreProfile_WorkforceRisk" xml:space="preserve"><value>يوضح تبويبا القوى العاملة والإنذار المبكر من يعمل حاليًا في الفرع، وكيف يتوزع الفريق، وأي موظفين أو إشارات تحتاج إلى متابعة. استخدم التقسيم حسب الوظيفة ومدة الخدمة ومجموعة الرواتب والجنس وتصنيفات مركز التكلفة لتحديد أماكن التركّز.</value></data>
+  <data name="Guide_StoreProfile_Turnover" xml:space="preserve"><value>يعرض تبويب الدوران نمط الاستقالات في الفرع خلال الفترة المختارة وتاريخه المتاح. قارن المعدل الحالي بالاتجاه وخط أساس خطة الإجراء قبل تحديد ما إذا كانت المشكلة جديدة أم متكررة.</value></data>
+  <data name="Guide_StoreProfile_EarlyLeavers" xml:space="preserve"><value>يركز تبويب 90 يومًا على الموظفين الذين استقالوا خلال أول 90 يومًا، باستخدام سجلات التعيين والاستقالة الموجودة. ويساعد على التمييز بين نمط مرتبط ببداية الخدمة وبين مشكلة دوران أوسع في الفرع.</value></data>
+  <data name="Guide_StoreProfile_Exit" xml:space="preserve"><value>يربط تبويب مقابلات الخروج أسباب الاستقالة والرغبة في العودة وتقييمات التجربة والتعليقات بالفرع والفترة المختارة. استخدمه لإضافة سياق إلى مؤشرات الدوران والمخاطر الكمية.</value></data>
+  <data name="Guide_StoreProfile_ActionPlan" xml:space="preserve"><value>يعرض تبويب مركز الإجراءات الخطة النشطة أو المحلولة، وتوصياتها، ونسبة الإنجاز، والملاحظات، واللقطات الدورية للمؤشرات، وتاريخ الإشارات، والتغير عن خط الأساس. وهو مساحة متابعة تنفيذية للمشكلات التي ظهرت في بقية الملف.</value></data>
+  <data name="Guide_StoreProfile_FilterNote" xml:space="preserve"><value>تتحكم اختيارات "من/إلى" في مؤشرات وتحليلات الفترة داخل الملف. أما تفاصيل خطة الإجراء وتاريخ الإشارات فتأتي من السجلات الموجودة للفرع؛ وتبقى نفس هوية الفرع والسياق المختار عند التنقل بين التبويبات.</value></data>
   <data name="SP_HealthKicker" xml:space="preserve"><value>مركز صحة الفرع</value></data>
   <data name="SP_HealthGood" xml:space="preserve"><value>الفرع مستقر</value></data>
   <data name="SP_HealthWatch" xml:space="preserve"><value>الفرع يحتاج متابعة</value></data>

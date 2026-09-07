@@ -100,6 +100,25 @@
         </div>
     </div>
 
+    @{
+        var storeProfileGuide = new PageGuideViewModel
+        {
+            PageKey = "storeprofile",
+            Overview = L["Guide_StoreProfile_Overview"],
+            FilterNote = L["Guide_StoreProfile_FilterNote"],
+            Sections = new List<PageGuideSection>
+            {
+                new() { Icon = "bi-compass", Title = L["SP_HealthKicker"], Body = L["Guide_StoreProfile_Health"] },
+                new() { Icon = "bi-people", Title = L["SP_RiskSummary"], Body = L["Guide_StoreProfile_WorkforceRisk"] },
+                new() { Icon = "bi-graph-up-arrow", Title = L["SP_TurnoverTrend"], Body = L["Guide_StoreProfile_Turnover"] },
+                new() { Icon = "bi-stopwatch", Title = L["SP_NinetyDayKpi"], Body = L["Guide_StoreProfile_EarlyLeavers"] },
+                new() { Icon = "bi-chat-left-text", Title = L["SP_ExitSentiment"], Body = L["Guide_StoreProfile_Exit"] },
+                new() { Icon = "bi-clipboard-check", Title = L["SP_ActionPlan"], Body = L["Guide_StoreProfile_ActionPlan"] },
+            }
+        };
+    }
+    @await Html.PartialAsync("~/Views/Shared/Dashboard/_PageGuide.cshtml", storeProfileGuide)
+
     <div id="spState" class="sp-state"></div>
     <div id="spHealthSummary"></div>
     <div id="spKpis" class="sp-kpis"></div>
