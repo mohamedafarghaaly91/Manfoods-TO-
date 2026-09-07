@@ -82,6 +82,24 @@ public class DashboardApiController : ControllerBase
         return Ok(stores.Select(s => new { storeName = s.StoreName }));
     }
 
+    [HttpGet("operation-chart")]
+    public async Task<IActionResult> OperationChart([FromQuery] int month, [FromQuery] int year)
+    {
+        var role = HttpContext.Session.GetRole();
+        var assignedName = HttpContext.Session.GetEmail();
+        var rows = await _stores.GetStoresAsync(month, year, role, assignedName);
+        return Ok(rows.Select(s => new
+        {
+            storeName = s.StoreName,
+            storeLeader = s.StoreLeader,
+            operationDirector = s.OperationDirector,
+            operationManager = s.OperationManager,
+            seniorOperationConsultant = s.SeniorOperationConsultant,
+            operationConsultant = s.OperationConsultant,
+            headManager = s.HeadManager,
+        }));
+    }
+
     [HttpGet("operation-managers")]
     public async Task<IActionResult> OperationManagers([FromQuery] int? month, [FromQuery] int? year)
     {

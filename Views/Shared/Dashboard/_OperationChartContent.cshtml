@@ -1,0 +1,195 @@
+@{
+    var operationChartArea = string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase)
+        ? "/admin"
+        : "/home";
+}
+
+<style>
+.oc-page { --oc-accent:#8b1e3f; }
+.oc-head { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:18px; }
+.oc-head h1 { margin:0; font-size:clamp(1.45rem,2.5vw,2.15rem); }
+.oc-head p { margin:6px 0 0; color:var(--text-2); font-size:13px; }
+.oc-filters { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.oc-filter { display:flex; align-items:center; gap:7px; padding:8px 11px; border:1px solid var(--card-border); border-radius:9px; background:var(--card-bg); color:var(--text-2); font-size:12px; }
+.oc-filter select { min-width:105px; border:0; outline:0; background:transparent; color:var(--text); font-weight:700; }
+.oc-meta { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; color:var(--text-2); font-size:12px; }
+.oc-legend { display:flex; flex-wrap:wrap; gap:7px; }
+.oc-legend span { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border:1px solid var(--card-border); border-radius:999px; background:var(--card-bg); }
+.oc-legend i { color:var(--oc-accent); }
+.oc-board { overflow:auto; padding:26px 18px 38px; min-height:360px; border:1px solid var(--card-border); border-radius:var(--radius-lg); background:linear-gradient(180deg,var(--card-bg),var(--bg-2)); box-shadow:var(--shadow-sm); }
+.oc-tree { display:flex; justify-content:center; min-width:max-content; }
+.oc-tree ul { position:relative; display:flex; justify-content:center; gap:26px; margin:0; padding:28px 10px 0; list-style:none; }
+.oc-tree > ul { padding-top:0; }
+.oc-tree li { position:relative; display:flex; flex-direction:column; align-items:center; padding:28px 8px 0; }
+.oc-tree > ul > li { padding-top:0; }
+.oc-tree li::before,.oc-tree li::after { position:absolute; top:0; content:""; border-top:2px solid color-mix(in srgb,var(--oc-accent) 35%,var(--card-border)); }
+.oc-tree > ul > li::before,.oc-tree > ul > li::after { display:none; }
+.oc-tree li::before { right:50%; width:calc(50% + 13px); }
+.oc-tree li::after { left:50%; width:calc(50% + 13px); }
+.oc-tree li:only-child::before,.oc-tree li:only-child::after { display:none; }
+.oc-tree ul ul::before { position:absolute; top:0; left:50%; height:28px; content:""; border-left:2px solid color-mix(in srgb,var(--oc-accent) 35%,var(--card-border)); }
+.oc-node { position:relative; z-index:1; width:190px; padding:12px 13px; border:1px solid var(--card-border); border-top:3px solid var(--oc-accent); border-radius:11px; background:var(--card-bg); box-shadow:var(--shadow-sm); text-align:center; }
+.oc-node strong { display:block; color:var(--text); font-size:13px; line-height:1.35; }
+.oc-node small { display:block; margin-top:4px; color:var(--text-2); font-size:10.5px; line-height:1.3; }
+.oc-node em { display:inline-block; margin-top:7px; padding:3px 7px; border-radius:999px; background:color-mix(in srgb,var(--oc-accent) 10%,var(--card-bg)); color:var(--oc-accent); font-size:10px; font-style:normal; font-weight:800; }
+.oc-node.oc-root { border-top-color:#b88918; }
+.oc-node.oc-store { cursor:pointer; border-top-color:#0072b2; }
+.oc-node.oc-store:hover { transform:translateY(-2px); box-shadow:0 7px 18px rgba(0,0,0,.12); }
+.oc-node.oc-leader { border-top-color:#4b7f52; }
+.oc-empty { padding:50px 16px; text-align:center; color:var(--text-2); }
+.oc-loading { display:flex; align-items:center; justify-content:center; gap:8px; padding:50px 16px; color:var(--text-2); }
+@@media (max-width:700px) { .oc-head { display:block; } .oc-filters { margin-top:14px; } .oc-node { width:165px; } .oc-tree ul { gap:14px; } }
+</style>
+
+<div class="oc-page" id="operationChartRoot"
+     data-area-prefix="@operationChartArea"
+     data-title="@L["Page_OperationChart"]"
+     data-subtitle="@L["Page_OperationChartSub"]"
+     data-loading="@L["OC_Loading"]"
+     data-no-data="@L["OC_NoData"]"
+     data-stores="@L["OC_Stores"]"
+     data-store="@L["OC_Store"]"
+     data-general-manager="@L["OC_GeneralManager"]"
+     data-assistant-general-manager="@L["OC_AssistantGeneralManager"]"
+     data-operation-director="@L["OC_OperationDirector"]"
+     data-operation-manager="@L["OC_OperationManager"]"
+     data-senior-operation-consultant="@L["OC_SeniorOperationConsultant"]"
+     data-operation-consultant="@L["OC_OperationConsultant"]"
+     data-head-manager="@L["OC_HeadManager"]"
+     data-store-leader="@L["OC_StoreLeader"]">
+    <div class="oc-head">
+        <div>
+            <h1>@L["Page_OperationChart"]</h1>
+            <p>@L["Page_OperationChartSub"]</p>
+        </div>
+        <div class="oc-filters">
+            <label class="oc-filter"><i class="bi bi-calendar3"></i><span>@L["Common_Year"]</span><select id="ocYear"></select></label>
+            <label class="oc-filter"><i class="bi bi-calendar-month"></i><span>@L["Common_Month"]</span><select id="ocMonth"></select></label>
+        </div>
+    </div>
+    <div class="oc-meta">
+        <span id="ocPeriodLabel"></span>
+        <div class="oc-legend">
+            <span><i class="bi bi-person-badge"></i>@L["OC_Leadership"]</span>
+            <span><i class="bi bi-shop"></i>@L["OC_Stores"]</span>
+            <span><i class="bi bi-person-check"></i>@L["OC_StoreLeader"]</span>
+        </div>
+    </div>
+    <div class="oc-board" id="ocBoard">
+        <div class="oc-loading"><span class="spinner-border spinner-border-sm"></span>@L["OC_Loading"]</div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const root = document.getElementById('operationChartRoot');
+    if (!root) return;
+    const d = root.dataset;
+    const $ = id => document.getElementById(id);
+    const esc = value => typeof sapEscape === 'function' ? sapEscape(value ?? '') : String(value ?? '');
+    const clean = value => String(value ?? '').trim();
+    let periods = [];
+
+    const roleKeys = [
+        ['operationDirector', d.operationDirector],
+        ['operationManager', d.operationManager],
+        ['seniorOperationConsultant', d.seniorOperationConsultant],
+        ['operationConsultant', d.operationConsultant],
+        ['headManager', d.headManager],
+        ['storeName', d.store],
+    ];
+
+    function node(name, role, kind = 'role') {
+        return { name, role, kind, children: [], stores: 0 };
+    }
+
+    function addChild(parent, name, role, kind = 'role') {
+        let child = parent.children.find(x => x.name.toLowerCase() === name.toLowerCase() && x.role === role && x.kind === kind);
+        if (!child) {
+            child = node(name, role, kind);
+            parent.children.push(child);
+        }
+        if (kind === 'store') parent.stores += 1;
+        return child;
+    }
+
+    function insertRow(rootNode, row) {
+        let parent = rootNode;
+        for (const [key, role] of roleKeys) {
+            const value = clean(row[key]);
+            if (!value) continue;
+            const kind = key === 'storeName' ? 'store' : 'role';
+            parent = addChild(parent, value, role, kind);
+        }
+        const leader = clean(row.storeLeader);
+        if (leader && parent.kind === 'store') addChild(parent, leader, d.storeLeader, 'leader');
+    }
+
+    function storeCount(item) {
+        if (item.kind === 'store') return 1;
+        return item.children.reduce((total, child) => total + storeCount(child), 0);
+    }
+
+    function nodeMarkup(item) {
+        const storeClass = item.kind === 'store' ? ' oc-store' : '';
+        const leaderClass = item.kind === 'leader' ? ' oc-leader' : '';
+        const rootClass = item.kind === 'root' ? ' oc-root' : '';
+        const href = item.kind === 'store' ? `${d.areaPrefix}/dashboard/storeprofile?store=${encodeURIComponent(item.name)}` : '';
+        const tag = href ? `<a class="oc-node${storeClass}" href="${href}" title="${esc(item.name)}">` : `<div class="oc-node${storeClass}${leaderClass}${rootClass}">`;
+        const close = href ? '</a>' : '</div>';
+        const count = item.kind === 'store' || item.kind === 'leader' ? '' : `<em>${storeCount(item)} ${esc(d.stores)}</em>`;
+        return `${tag}<strong>${esc(item.name)}</strong><small>${esc(item.role)}</small>${count}${close}${item.children.length ? `<ul>${item.children.map(nodeMarkup).join('')}</ul>` : ''}`;
+    }
+
+    function render(rows) {
+        const board = $('ocBoard');
+        if (!rows.length) {
+            board.innerHTML = `<div class="oc-empty"><i class="bi bi-diagram-3 fs-2 d-block mb-2"></i>${esc(d.noData)}</div>`;
+            return;
+        }
+        const rootNode = node('علاء فتحي', d.generalManager, 'root');
+        const assistant = addChild(rootNode, 'عصام رضا', d.assistantGeneralManager);
+        rows.forEach(row => insertRow(assistant, row));
+        $('ocPeriodLabel').textContent = `${$('ocMonth').selectedOptions[0]?.textContent ?? ''} ${$('ocYear').value}`;
+        board.innerHTML = `<div class="oc-tree"><ul><li>${nodeMarkup(rootNode)}</li></ul></div>`;
+    }
+
+    async function loadRows() {
+        const month = $('ocMonth').value;
+        const year = $('ocYear').value;
+        $('ocBoard').innerHTML = `<div class="oc-loading"><span class="spinner-border spinner-border-sm"></span>${esc(d.loading)}</div>`;
+        try {
+            const response = await fetch(`/api/dashboard/operation-chart?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`, { credentials: 'same-origin' });
+            if (!response.ok) throw new Error('operation-chart');
+            render(await response.json());
+        } catch {
+            $('ocBoard').innerHTML = `<div class="oc-empty">${esc(d.noData)}</div>`;
+        }
+    }
+
+    async function init() {
+        try {
+            const response = await fetch('/api/dashboard/available-periods', { credentials: 'same-origin' });
+            periods = response.ok ? await response.json() : [];
+        } catch { periods = []; }
+        const yearValues = [...new Set(periods.map(p => p.year))].sort((a, b) => b - a);
+        $('ocYear').innerHTML = yearValues.map(y => `<option value="${y}">${y}</option>`).join('');
+        const selectedYear = yearValues[0];
+        const monthsForYear = () => periods.filter(p => Number(p.year) === Number($('ocYear').value)).sort((a, b) => b.month - a.month);
+        const refillMonths = () => {
+            const list = monthsForYear();
+            $('ocMonth').innerHTML = list.map(p => `<option value="${p.month}">${p.label}</option>`).join('');
+        };
+        $('ocYear').addEventListener('change', () => { refillMonths(); loadRows(); });
+        $('ocMonth').addEventListener('change', loadRows);
+        if (!selectedYear) {
+            $('ocBoard').innerHTML = `<div class="oc-empty">${esc(d.noData)}</div>`;
+            return;
+        }
+        $('ocYear').value = selectedYear;
+        refillMonths();
+        loadRows();
+    }
+    init();
+})();
+</script>
