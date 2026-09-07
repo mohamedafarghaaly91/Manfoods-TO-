@@ -14,3 +14,17 @@ mtime_ms = 1788795151913
 storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:4ba92a9e-4e37-4114-aa4e-57cac261ef50/89e25430-41a8-4dd4-a663-1900c2491d58/20be373a-06e8-4aaa-a809-23ce263aede4"
 storage_version_token = "1788795168646346"
 content_type = "text/markdown"
+
+[[outputs]]
+id = "OchxmxPxN7Z33ORZfSYSM"
+uri = "file://docs/HR-portal-data-only-assessment.md"
+type = "text"
+title = "التقييم المبني على البيانات الحالية فقط"
+description = "نسخة مصححة من التقييم تعتمد فقط على الموظفين النشطين والاستقالات ومرجع الفروع ومقابلات الخروج وخطط الإجراءات، بدون افتراض أي بيانات رواتب أو تدريب أو حضور أو مصادر جديدة."
+logical_id = "f04a0b05-86c1-4302-b0f2-13d353610168"
+content_hash = "sha256:75e168dba02256f7271175e9977894ecd0f3cc791f56a9a6e56b15d8667c5cea"
+size = 33932
+mtime_ms = 1788796330824
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:4ba92a9e-4e37-4114-aa4e-57cac261ef50/f04a0b05-86c1-4302-b0f2-13d353610168/b006fbd8-4dee-4197-a2d8-0f7ba7fa53e1"
+storage_version_token = "1788796337423266"
+content_type = "text/markdown"
