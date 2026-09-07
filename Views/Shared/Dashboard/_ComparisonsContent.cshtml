@@ -325,6 +325,8 @@
      data-mover-title-worsened="@L["CMP_MoverTitleWorsened"]"
      data-mover-desc-improved="@L["CMP_MoverDescImproved"]"
      data-mover-desc-worsened="@L["CMP_MoverDescWorsened"]"
+      data-exit-positive="@L["CMP_ExitPositive"]"
+      data-exit-responses="@L["CMP_ExitResponses"]"
      data-no-data-short="@L["Common_NoDataShort"]"></div>
 
 <div class="charts-grid mb-4">
@@ -335,6 +337,48 @@
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6><p>@L["CMP_NinetyByStoreSub"]</p></div>
         <div class="chart-body"><canvas id="cmpNinetyChart"></canvas></div>
+    </div>
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <div style="width:4px;height:22px;background:linear-gradient(135deg,oklch(0.52 0.16 210),oklch(0.68 0.13 190));border-radius:2px"></div>
+    <h5 class="mb-0 fw-bold">@L["Comparisons_WorkforceSection"]</h5>
+</div>
+<div class="charts-grid mb-4">
+    <div class="chart-card">
+        <div class="chart-header"><h6>@L["Chart_WorkforceByStoreCompare"]</h6><p>@L["CMP_WorkforceByStoreSub"]</p></div>
+        <div class="chart-body"><canvas id="cmpWorkforceChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-header"><h6>@L["Chart_ResignationsByStoreCompare"]</h6><p>@L["CMP_ResignationsByStoreSub"]</p></div>
+        <div class="chart-body"><canvas id="cmpResignationsChart"></canvas></div>
+    </div>
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <div style="width:4px;height:22px;background:linear-gradient(135deg,oklch(0.55 0.17 145),oklch(0.7 0.14 155));border-radius:2px"></div>
+    <h5 class="mb-0 fw-bold">@L["Comparisons_RetentionSection"]</h5>
+</div>
+<div class="chart-card mb-4">
+    <div class="chart-header"><h6>@L["Chart_RetentionMilestonesCompare"]</h6><p>@L["CMP_RetentionMilestonesSub"]</p></div>
+    <div class="chart-body"><canvas id="cmpRetentionChart"></canvas></div>
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <div style="width:4px;height:22px;background:linear-gradient(135deg,oklch(0.55 0.14 300),oklch(0.7 0.12 320));border-radius:2px"></div>
+    <h5 class="mb-0 fw-bold">@L["Comparisons_ExitSection"]</h5>
+</div>
+<div class="charts-grid mb-4">
+    <div class="chart-card">
+        <div class="chart-header"><h6>@L["Chart_ExitReasonsCompare"]</h6><p>@L["CMP_ExitReasonsSub"]</p></div>
+        <div class="chart-body"><canvas id="cmpExitReasonsChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-header"><h6>@L["Chart_ExitSentimentCompare"]</h6><p>@L["CMP_ExitSentimentSub"]</p></div>
+        <div class="chart-body">
+            <canvas id="cmpExitSentimentChart"></canvas>
+            <div id="cmpExitSentimentMeta" class="cmp-table-hint text-center mt-2"></div>
+        </div>
     </div>
 </div>
 
@@ -611,9 +655,24 @@ async function cmpInit() {
 /* Data fetching + rendering ----------------------------------------------- */
 async function cmpFetchSide(side) {
     const q = cmpBuildQuery(side);
-    const [kpi, ninety] = await Promise.all([
+    const p = panels[side];
+    const retentionQ = new URLSearchParams();
+    const minMonth = Math.min(...p.months), maxMonth = Math.max(...p.months);
+    retentionQ.set('fromMonth', minMonth); retentionQ.set('fromYear', p.year);
+    retentionQ.set('toMonth', maxMonth); retentionQ.set('toYear', p.year);
+    retentionQ.set('months', p.months.join(','));
+    if (p.store) retentionQ.set('store', p.store);
+    if (p.om) retentionQ.set('om', p.om);
+    if (p.oc) retentionQ.set('oc', p.oc);
+    if (p.soc) retentionQ.set('soc', p.soc);
+    if (p.od) retentionQ.set('od', p.od);
+    const exitQ = new URLSearchParams(q);
+    const [kpi, ninety, retention, exitReasons, exitSentiment] = await Promise.all([
         fetchJson(`/api/dashboard/kpis?${q}`),
-        fetchJson(`/api/ninety-day-turnover/kpi?${q}`)
+        fetchJson(`/api/ninety-day-turnover/kpi?${q}`),
+        fetchJson(`/api/retention/milestones?${retentionQ}`),
+        fetchJson(`/api/exit-interviews/reasons?${exitQ}`),
+        fetchJson(`/api/exit-interviews/sentiment-summary?${exitQ}`)
     ]);
     let byStore = [], ninetyByStore = [];
     if (!panels[side].store) {
@@ -622,7 +681,7 @@ async function cmpFetchSide(side) {
             fetchJson(`/api/ninety-day-turnover/by-store?${q}`)
         ]);
     }
-    return { kpi, ninety, byStore, ninetyByStore };
+    return { kpi, ninety, byStore, ninetyByStore, retention, exitReasons, exitSentiment };
 }
 
 function cmpDeltaBadge(a, b, lowerIsBetter) {
@@ -722,12 +781,16 @@ function cmpRenderInsight(dataA, dataB) {
 }
 
 let cmpTurnoverChart, cmpNinetyChart;
-function cmpBuildSeries(dataA, dataB, storeKey, overallA, overallB) {
+let cmpWorkforceChart, cmpResignationsChart, cmpRetentionChart, cmpExitReasonsChart, cmpExitSentimentChart;
+function cmpBuildSeries(dataA, dataB, storeKey, overallA, overallB, metricKey = 'turnoverRate') {
     const allA = !panels.A.store, allB = !panels.B.store;
     if (allA && allB) {
         const mapA = {}, mapB = {};
-        (dataA[storeKey] || []).forEach(r => mapA[r.label ?? r.storeName] = r.value ?? r.turnoverRate);
-        (dataB[storeKey] || []).forEach(r => mapB[r.label ?? r.storeName] = r.value ?? r.turnoverRate);
+        const valueOf = r => metricKey === 'turnoverRate'
+            ? (r.value ?? r.turnoverRate)
+            : (r[metricKey] ?? 0);
+        (dataA[storeKey] || []).forEach(r => mapA[r.label ?? r.storeName] = valueOf(r));
+        (dataB[storeKey] || []).forEach(r => mapB[r.label ?? r.storeName] = valueOf(r));
         const stores = Array.from(new Set([...Object.keys(mapA), ...Object.keys(mapB)]))
             .sort((s1, s2) => ((mapA[s2] || 0) + (mapB[s2] || 0)) - ((mapA[s1] || 0) + (mapB[s1] || 0)))
             .slice(0, 8);
@@ -766,6 +829,93 @@ function cmpRenderCharts(dataA, dataB) {
             scales: { y: { ticks: { callback: v => v + '%' } } }
         }
     });
+
+    const workforce = cmpBuildSeries(dataA, dataB, 'byStore', dataA.kpi.totalHeadcount, dataB.kpi.totalHeadcount, 'headcount');
+    cmpWorkforceChart = mkChart(cmpWorkforceChart, 'cmpWorkforceChart', {
+        type: 'bar',
+        data: { labels: workforce.labels, datasets: [
+            { label: cmpLabel('A'), data: workforce.seriesA, backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: workforce.seriesB, backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
+        ] },
+        options: {
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v : '' } }
+        }
+    });
+
+    const resignations = cmpBuildSeries(dataA, dataB, 'byStore', dataA.kpi.totalResignations, dataB.kpi.totalResignations, 'resignations');
+    cmpResignationsChart = mkChart(cmpResignationsChart, 'cmpResignationsChart', {
+        type: 'bar',
+        data: { labels: resignations.labels, datasets: [
+            { label: cmpLabel('A'), data: resignations.seriesA, backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: resignations.seriesB, backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
+        ] },
+        options: {
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v > 0 ? v : '' } }
+        }
+    });
+
+    const retentionLabels = Array.from(new Set([
+        ...(dataA.retention || []).map(x => x.label),
+        ...(dataB.retention || []).map(x => x.label)
+    ]));
+    const retentionValues = (rows) => {
+        const map = Object.fromEntries((rows || []).map(x => [x.label, x.totalHires > 0 ? x.retentionRate : null]));
+        return retentionLabels.map(label => map[label] ?? null);
+    };
+    cmpRetentionChart = mkChart(cmpRetentionChart, 'cmpRetentionChart', {
+        type: 'bar',
+        data: { labels: retentionLabels, datasets: [
+            { label: cmpLabel('A'), data: retentionValues(dataA.retention), backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: retentionValues(dataB.retention), backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
+        ] },
+        options: {
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw == null ? '—' : c.formattedValue + '%'}` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v == null ? '' : v.toFixed(1) + '%' } },
+            scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+        }
+    });
+
+    const reasonMaps = [dataA.exitReasons || [], dataB.exitReasons || []].map(rows =>
+        Object.fromEntries(rows.map(x => [x.label, x.value])));
+    const reasons = Array.from(new Set([
+        ...Object.keys(reasonMaps[0]), ...Object.keys(reasonMaps[1])
+    ])).sort((a, b) => (reasonMaps[0][b] || 0) + (reasonMaps[1][b] || 0) - (reasonMaps[0][a] || 0) - (reasonMaps[1][a] || 0)).slice(0, 8);
+    cmpExitReasonsChart = mkChart(cmpExitReasonsChart, 'cmpExitReasonsChart', {
+        type: 'bar',
+        data: { labels: reasons, datasets: [
+            { label: cmpLabel('A'), data: reasons.map(x => reasonMaps[0][x] || 0), backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: reasons.map(x => reasonMaps[1][x] || 0), backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
+        ] },
+        options: {
+            indexAxis: 'y',
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}` } } }
+        }
+    });
+
+    const sentimentA = dataA.exitSentiment?.positivePercent || 0;
+    const sentimentB = dataB.exitSentiment?.positivePercent || 0;
+    cmpExitSentimentChart = mkChart(cmpExitSentimentChart, 'cmpExitSentimentChart', {
+        type: 'bar',
+        data: { labels: [cmpL.exitPositive], datasets: [
+            { label: cmpLabel('A'), data: [sentimentA], backgroundColor: ChartColors.SERIES.SECONDARY, borderRadius: 4 },
+            { label: cmpLabel('B'), data: [sentimentB], backgroundColor: ChartColors.SERIES.PRIMARY, borderRadius: 4 }
+        ] },
+        options: {
+            interaction: { mode: 'nearest', intersect: false },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.formattedValue}%` } },
+                datalabels: { anchor: 'center', align: 'center', color: '#fff', font: { size: 10, weight: 'bold' }, formatter: v => v.toFixed(1) + '%' } },
+            scales: { y: { min: 0, max: 100, ticks: { callback: v => v + '%' } } }
+        }
+    });
+    document.getElementById('cmpExitSentimentMeta').innerHTML =
+        `<span class="me-3">${sapEscape(cmpLabel('A'))}: ${dataA.exitSentiment?.totalResponses || 0} ${sapEscape(cmpL.exitResponses)}</span>` +
+        `<span>${sapEscape(cmpLabel('B'))}: ${dataB.exitSentiment?.totalResponses || 0} ${sapEscape(cmpL.exitResponses)}</span>`;
 }
 
 let cmpTableRows = [];

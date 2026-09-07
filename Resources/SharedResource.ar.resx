@@ -1083,6 +1083,26 @@
   <data name="CMP_KpiEarlyLeavers" xml:space="preserve"><value>المغادرون خلال 90 يومًا</value></data>
   <data name="CMP_KpiEarlyLeaversDesc" xml:space="preserve"><value>استقالوا خلال 90 يومًا من التعيين</value></data>
   <data name="CMP_KpiNinetyRateDesc" xml:space="preserve"><value>المغادرون مبكرًا ÷ التعيينات في المجموعة</value></data>
+  <data name="Comparisons_WorkforceSection" xml:space="preserve"><value>عدد الموظفين والقوى العاملة</value></data>
+  <data name="Comparisons_ResignationsSection" xml:space="preserve"><value>عدد الاستقالات</value></data>
+  <data name="Chart_WorkforceByStoreCompare" xml:space="preserve"><value>القوى العاملة حسب الفرع — A مقابل B</value></data>
+  <data name="CMP_WorkforceByStoreSub" xml:space="preserve"><value>عدد الموظفين النشطين حسب الفرع، أو الإجمالي عند اختيار فرع محدد</value></data>
+  <data name="Chart_ResignationsByStoreCompare" xml:space="preserve"><value>عدد الاستقالات حسب الفرع — A مقابل B</value></data>
+  <data name="CMP_ResignationsByStoreSub" xml:space="preserve"><value>عدد الاستقالات حسب الفرع، أو إجمالي الاستقالات عند اختيار فرع محدد</value></data>
+  <data name="Comparisons_RetentionSection" xml:space="preserve"><value>الاحتفاظ بالموظفين</value></data>
+  <data name="Chart_RetentionMilestonesCompare" xml:space="preserve"><value>مراحل الاحتفاظ — A مقابل B</value></data>
+  <data name="CMP_RetentionMilestonesSub" xml:space="preserve"><value>الاحتفاظ عند 6 أشهر وسنة والمراحل التالية للأفواج المؤهلة</value></data>
+  <data name="Comparisons_ExitSection" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
+  <data name="Chart_ExitReasonsCompare" xml:space="preserve"><value>أسباب الاستقالة — A مقابل B</value></data>
+  <data name="CMP_ExitReasonsSub" xml:space="preserve"><value>أكثر أسباب الاستقالة تكرارًا في مقابلات الخروج لكل فترة</value></data>
+  <data name="Chart_ExitSentimentCompare" xml:space="preserve"><value>انطباع مقابلات الخروج — A مقابل B</value></data>
+  <data name="CMP_ExitSentimentSub" xml:space="preserve"><value>نسبة الانطباع الإيجابي وعدد مقابلات الخروج المسجلة</value></data>
+  <data name="CMP_ExitPositive" xml:space="preserve"><value>نسبة الانطباع الإيجابي</value></data>
+  <data name="CMP_ExitResponses" xml:space="preserve"><value>عدد الردود</value></data>
+  <data name="Guide_Comparisons_Chart_Workforce" xml:space="preserve"><value>عدد الموظفين النشطين في الفترة A مقابل الفترة B، مع عرضه حسب الفروع عند ترك الفترتين على كل الفروع، حتى يظهر تغير حجم القوى العاملة بوضوح بعيدًا عن النسب.</value></data>
+  <data name="Guide_Comparisons_Chart_Resignations" xml:space="preserve"><value>العدد الفعلي للاستقالات لكل فرع وفترة. يفصل هذا العدد عن معدل الدوران الذي يتأثر أيضًا بعدد الموظفين.</value></data>
+  <data name="Guide_Comparisons_Chart_Retention" xml:space="preserve"><value>الاحتفاظ عند 6 أشهر وسنة والمراحل التالية للأفواج المؤهلة في كل فترة. تُستبعد الأفواج التي لم يمض عليها وقت كافٍ للوصول إلى المرحلة.</value></data>
+  <data name="Guide_Comparisons_Chart_Exit" xml:space="preserve"><value>أكثر أسباب الاستقالة تكرارًا والانطباع الإيجابي في مقابلات الخروج لكل فترة، مع عرض عدد الردود أسفل رسم الانطباع حتى يظهر أثر العينات الصغيرة.</value></data>
   <data name="CMP_DeltaSuffix" xml:space="preserve"><value>(A−B)</value></data>
   <data name="CMP_Overall" xml:space="preserve"><value>الإجمالي العام</value></data>
   <data name="CMP_TitleNoChange" xml:space="preserve"><value>{0}: بدون تغيير</value></data>

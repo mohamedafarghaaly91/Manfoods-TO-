@@ -1082,6 +1082,21 @@
   <data name="CMP_KpiEarlyLeavers" xml:space="preserve"><value>90-Day Early Leavers</value></data>
   <data name="CMP_KpiEarlyLeaversDesc" xml:space="preserve"><value>Resigned within 90 days of hire</value></data>
   <data name="CMP_KpiNinetyRateDesc" xml:space="preserve"><value>Early leavers ÷ hires in the cohort</value></data>
+  <data name="Comparisons_WorkforceSection" xml:space="preserve"><value>Headcount &amp; Workforce</value></data>
+  <data name="Chart_WorkforceByStoreCompare" xml:space="preserve"><value>Workforce by Store — A vs B</value></data>
+  <data name="CMP_WorkforceByStoreSub" xml:space="preserve"><value>Active headcount by store, or total headcount when a store is selected</value></data>
+  <data name="Chart_ResignationsByStoreCompare" xml:space="preserve"><value>Resignations Count by Store — A vs B</value></data>
+  <data name="CMP_ResignationsByStoreSub" xml:space="preserve"><value>Resignation count by store, or total resignations when a store is selected</value></data>
+  <data name="Comparisons_RetentionSection" xml:space="preserve"><value>Retention</value></data>
+  <data name="Chart_RetentionMilestonesCompare" xml:space="preserve"><value>Retention Milestones — A vs B</value></data>
+  <data name="CMP_RetentionMilestonesSub" xml:space="preserve"><value>Retention at 6 months, 1 year and later milestones for eligible hire cohorts</value></data>
+  <data name="Comparisons_ExitSection" xml:space="preserve"><value>Exit Interviews</value></data>
+  <data name="Chart_ExitReasonsCompare" xml:space="preserve"><value>Reasons for Leaving — A vs B</value></data>
+  <data name="CMP_ExitReasonsSub" xml:space="preserve"><value>Most common reasons recorded in exit interviews for each period</value></data>
+  <data name="Chart_ExitSentimentCompare" xml:space="preserve"><value>Exit Interview Sentiment — A vs B</value></data>
+  <data name="CMP_ExitSentimentSub" xml:space="preserve"><value>Positive sentiment and the number of submitted exit interviews</value></data>
+  <data name="CMP_ExitPositive" xml:space="preserve"><value>Positive sentiment %</value></data>
+  <data name="CMP_ExitResponses" xml:space="preserve"><value>Interview responses</value></data>
   <data name="CMP_DeltaSuffix" xml:space="preserve"><value>(A−B)</value></data>
   <data name="CMP_Overall" xml:space="preserve"><value>Overall</value></data>
   <data name="CMP_TitleNoChange" xml:space="preserve"><value>{0}: No Change</value></data>
