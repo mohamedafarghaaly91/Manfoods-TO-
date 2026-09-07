@@ -1529,27 +1529,6 @@
   <data name="SP_LeaderTo" xml:space="preserve"><value>To</value></data>
   <data name="SP_LeaderMonths" xml:space="preserve"><value>Months</value></data>
   <data name="SP_NoLeaderHistory" xml:space="preserve"><value>No Store Leader history is available for this store.</value></data>
-  <data name="Nav_OperationChart" xml:space="preserve"><value>Operation Chart</value></data>
-  <data name="Page_OperationChart" xml:space="preserve"><value>Operation Chart</value></data>
-  <data name="Page_OperationChartSub" xml:space="preserve"><value>Interactive operational hierarchy from General Manager to every store and Store Leader.</value></data>
-  <data name="OC_Loading" xml:space="preserve"><value>Loading the operational hierarchy...</value></data>
-  <data name="OC_NoData" xml:space="preserve"><value>No Store Reference data is available for the selected month and year.</value></data>
-  <data name="OC_Stores" xml:space="preserve"><value>stores</value></data>
-  <data name="OC_Store" xml:space="preserve"><value>Store</value></data>
-  <data name="OC_Leadership" xml:space="preserve"><value>Leadership</value></data>
-  <data name="OC_StoreLeader" xml:space="preserve"><value>Store Leader</value></data>
-  <data name="OC_GeneralManager" xml:space="preserve"><value>General Manager</value></data>
-  <data name="OC_AssistantGeneralManager" xml:space="preserve"><value>Assistant General Manager</value></data>
-  <data name="OC_OperationDirector" xml:space="preserve"><value>Operation Director</value></data>
-  <data name="OC_OperationManager" xml:space="preserve"><value>Operation Manager</value></data>
-  <data name="OC_SeniorOperationConsultant" xml:space="preserve"><value>Senior Operation Consultant</value></data>
-  <data name="OC_OperationConsultant" xml:space="preserve"><value>Operation Consultant</value></data>
-  <data name="OC_HeadManager" xml:space="preserve"><value>Head Manager</value></data>
-  <data name="OC_GeneralManagerName" xml:space="preserve"><value>Alaa Fathy</value></data>
-  <data name="OC_AssistantGeneralManagerName" xml:space="preserve"><value>Essam Reda</value></data>
-  <data name="OC_ClickToExtend" xml:space="preserve"><value>Click to extend</value></data>
-  <data name="OC_Back" xml:space="preserve"><value>Back to operation chart</value></data>
-  <data name="OC_NoSubordinates" xml:space="preserve"><value>No subordinate data is available for this person.</value></data>
   <data name="Guide_StoreProfile_Overview" xml:space="preserve"><value>This is the 360-degree profile for one store. Use it to understand the store's current workforce position, turnover and early-leaver pattern, risk signals, exit-interview themes and action-plan progress without leaving the store context.</value></data>
   <data name="Guide_StoreProfile_Health" xml:space="preserve"><value>The Branch Health Command Center combines the selected period's current KPIs with existing action-plan baselines, recurring signals and high-risk employees. The status is a decision aid, not a new metric or data source.</value></data>
   <data name="Guide_StoreProfile_WorkforceRisk" xml:space="preserve"><value>The Workforce and Early Warning tabs explain who is currently in the store, how the team is distributed, and which employees or signals require attention. Use the breakdowns by job, tenure, payroll group, gender and cost-center classifications to locate concentration.</value></data>
