@@ -579,7 +579,7 @@ html, body {
 /* The OC card can contain many more rows than the three adjacent rollup
    cards. Keep the cards aligned and scroll only the OC table body. */
 .oc-analysis-card {
-    height: 560px !important;
+    height: 600px !important;
 }
 .oc-analysis-card .table-responsive {
     flex: 1 1 auto;
