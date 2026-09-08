@@ -798,7 +798,7 @@ async function ntdLoadTrend() {
         },
         options: {
             responsive: true,
-            interaction: { mode: 'nearest', intersect: false },
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: false },
                 tooltip: { callbacks: { label: c => ` ${c.formattedValue}%${data[c.dataIndex]?.isProvisional ? ' (provisional)' : ''}` } },

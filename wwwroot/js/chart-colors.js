@@ -19,12 +19,15 @@ function sapEscape(s) {
 // is loaded after Chart.js on all chart pages, including Action Center pages
 // that do not load dashboard.js.
 if (typeof Chart !== 'undefined') {
-    Chart.defaults.interaction.mode = 'nearest';
-    // Do not require the pointer to hit the exact rendered pixel. This is
-    // especially important for thin line points and narrow bars on dense or
-    // RTL dashboard layouts.
+    // 'nearest' picks the closest data POINT by pixel distance, which for a bar
+    // is near its tip/edge — hovering over the rest of the bar (or an empty part
+    // of its column) can miss it entirely while an unrelated neighboring area
+    // registers instead. 'index' makes the whole column/row strip for that
+    // category the hit-zone, so hovering anywhere over it reliably shows its
+    // tooltip.
+    Chart.defaults.interaction.mode = 'index';
     Chart.defaults.interaction.intersect = false;
-    Chart.defaults.plugins.tooltip.mode = 'nearest';
+    Chart.defaults.plugins.tooltip.mode = 'index';
     Chart.defaults.plugins.tooltip.intersect = false;
     Chart.defaults.plugins.tooltip.position = 'nearest';
 }
