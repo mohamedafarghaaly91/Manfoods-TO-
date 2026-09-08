@@ -140,7 +140,7 @@
         <div class="us-toolbar">
             <div class="us-search-wrap">
                 <i class="bi bi-search"></i>
-                <input type="text" id="usSearchInput" class="form-control form-control-dark form-control-sm us-search-input" placeholder="@L["Users_SearchPlaceholder"]">
+                <input type="search" id="usSearchInput" name="userSearch" class="form-control form-control-dark form-control-sm us-search-input" placeholder="@L["Users_SearchPlaceholder"]" autocomplete="off" autocapitalize="none" spellcheck="false">
             </div>
             <select id="usRoleFilter" class="form-select form-select-dark form-select-sm us-role-filter">
                 <option value="">@L["Users_FilterAllRoles"]</option>
@@ -168,7 +168,7 @@
                 <tbody id="usTableBody">
                     @foreach (var user in Model)
                     {
-                        <tr data-email="@user.Email.ToLower()" data-name="@user.AssignedName.ToLower()" data-role="@user.Role">
+                        <tr class="us-user-row" data-email="@user.Email.ToLower()" data-name="@user.AssignedName.ToLower()" data-role="@user.Role">
                             <td>
                                 <div class="us-name-cell">
                                     <div class="us-avatar">@((string.IsNullOrWhiteSpace(user.AssignedName) ? user.Email : user.AssignedName).Substring(0,1).ToUpper())</div>
@@ -213,7 +213,7 @@
                                 <a href="/admin/dashboard/edituser/@user.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></a>
                                 @if (!SuperAdminPolicy.IsSuperAdmin(user.Email))
                                 {
-                                    <form asp-area="Admin" asp-controller="Dashboard" asp-action="DeleteUser" method="post" class="d-inline" onsubmit="return confirm('@(string.Format(L["Users_DeleteConfirm"].Value, user.Email))')">
+                                    <form asp-area="Admin" asp-controller="Dashboard" asp-action="DeleteUser" method="post" class="d-inline" autocomplete="off" onsubmit="return confirm('@(string.Format(L["Users_DeleteConfirm"].Value, user.Email))')">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@user.Id"/>
                                         <button type="submit" class="btn btn-sm btn-danger-outline"><i class="bi bi-trash3"></i></button>
@@ -395,6 +395,14 @@
     const roleFilter = document.getElementById('usRoleFilter');
     const rows = Array.from(document.querySelectorAll('#usTableBody tr'));
     const noResults = document.getElementById('usNoResults');
+
+    // User rows contain independent links/forms. Keep their clicks inside the
+    // table so a page-level click/autofocus handler cannot treat a row action
+    // as an interaction with the search field.
+    rows.forEach(row => {
+        row.addEventListener('pointerdown', event => event.stopPropagation());
+        row.addEventListener('click', event => event.stopPropagation());
+    });
 
     function applyFilters() {
         const q = (searchInput?.value || '').trim().toLowerCase();
