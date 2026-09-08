@@ -31,6 +31,37 @@ public class ExitInterviewService : IExitInterviewService
         if (!string.IsNullOrWhiteSpace(filter.StoreLeader)) q = q.Where(e => e.StoreLeader == filter.StoreLeader);
         if (MultiValueFilter.Split(filter.OperationConsultant) is { } ocs) q = q.Where(e => ocs.Contains(e.OperationConsultant));
         if (MultiValueFilter.Split(filter.OperationManager) is { } oms) q = q.Where(e => oms.Contains(e.OperationManager));
+        if (!string.IsNullOrWhiteSpace(filter.SeniorOperationConsultant) || !string.IsNullOrWhiteSpace(filter.OperationDirector))
+        {
+            // ExitInterview stores OC/OM snapshots but not SOC/OD. Resolve those
+            // dimensions through each store's latest reference so comparison
+            // charts still honor the leadership filters selected by the user.
+            var latestReferences = await _db.StoreReferences
+                .AsNoTracking()
+                .Select(s => new
+                {
+                    s.StoreName,
+                    s.SeniorOperationConsultant,
+                    s.OperationDirector,
+                    s.Year,
+                    s.Month
+                })
+                .ToListAsync();
+            var latestByStore = latestReferences
+                .GroupBy(s => s.StoreName)
+                .ToDictionary(g => g.Key, g => g
+                    .OrderByDescending(s => s.Year)
+                    .ThenByDescending(s => s.Month)
+                    .First());
+            var matchingStores = latestByStore.Values
+                .Where(s => (string.IsNullOrWhiteSpace(filter.SeniorOperationConsultant)
+                             || MultiValueFilter.Split(filter.SeniorOperationConsultant)!.Contains(s.SeniorOperationConsultant))
+                         && (string.IsNullOrWhiteSpace(filter.OperationDirector)
+                             || MultiValueFilter.Split(filter.OperationDirector)!.Contains(s.OperationDirector)))
+                .Select(s => s.StoreName)
+                .ToList();
+            q = q.Where(e => matchingStores.Contains(e.Store));
+        }
         if (MultiValueFilter.Split(filter.Jobs) is { } jobs) q = q.Where(e => jobs.Contains(e.JobTitle));
         // Year=0 is the synthetic "undated" sentinel — skip date filtering so
         // all rows (which have month=0/year=0) are returned unfiltered.

@@ -17,13 +17,15 @@ public class ExitInterviewApiController : ControllerBase
 
     public ExitInterviewApiController(IExitInterviewService exitInterviews) => _exitInterviews = exitInterviews;
 
-    private ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months) =>
+    private ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months, string? soc = null, string? od = null) =>
         new()
         {
             Store = store,
             StoreLeader = storeLeader,
             OperationConsultant = oc,
             OperationManager = om,
+            SeniorOperationConsultant = soc,
+            OperationDirector = od,
             Year = year,
             Months = months,
             Jobs = Request.Query["jobs"].ToString()
@@ -44,34 +46,38 @@ public class ExitInterviewApiController : ControllerBase
 
     [HttpGet("reasons")]
     public async Task<IActionResult> Reasons([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] string? soc, [FromQuery] string? od,
         [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetReasonsForLeavingAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+        return Ok(await _exitInterviews.GetReasonsForLeavingAsync(BuildFilter(store, storeLeader, oc, om, year, months, soc, od), role, assignedName));
     }
 
     [HttpGet("would-return")]
     public async Task<IActionResult> WouldReturn([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] string? soc, [FromQuery] string? od,
         [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetWouldReturnAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+        return Ok(await _exitInterviews.GetWouldReturnAsync(BuildFilter(store, storeLeader, oc, om, year, months, soc, od), role, assignedName));
     }
 
     [HttpGet("overall-experience")]
     public async Task<IActionResult> OverallExperience([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] string? soc, [FromQuery] string? od,
         [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetOverallExperienceAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+        return Ok(await _exitInterviews.GetOverallExperienceAsync(BuildFilter(store, storeLeader, oc, om, year, months, soc, od), role, assignedName));
     }
 
     [HttpGet("workload")]
     public async Task<IActionResult> Workload([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] string? soc, [FromQuery] string? od,
         [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetWorkloadConditionAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+        return Ok(await _exitInterviews.GetWorkloadConditionAsync(BuildFilter(store, storeLeader, oc, om, year, months, soc, od), role, assignedName));
     }
 
     [HttpGet("training")]
@@ -132,10 +138,11 @@ public class ExitInterviewApiController : ControllerBase
 
     [HttpGet("sentiment-summary")]
     public async Task<IActionResult> SentimentSummary([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
+        [FromQuery] string? soc, [FromQuery] string? od,
         [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetSentimentSummaryAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
+        return Ok(await _exitInterviews.GetSentimentSummaryAsync(BuildFilter(store, storeLeader, oc, om, year, months, soc, od), role, assignedName));
     }
 
     [HttpGet("comments")]

@@ -6,6 +6,8 @@ public class ExitInterviewFilter
     public string? StoreLeader { get; set; }
     public string? OperationConsultant { get; set; }
     public string? OperationManager { get; set; }
+    public string? SeniorOperationConsultant { get; set; }
+    public string? OperationDirector { get; set; }
     public int? Year { get; set; }
     public string? Months { get; set; }
     public string? Jobs { get; set; }

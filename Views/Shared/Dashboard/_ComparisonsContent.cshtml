@@ -89,6 +89,12 @@
 
 
 .cmp-table-hint { font-size:12px; color:var(--text-3); }
+.cmp-chart-basis {
+    display:flex; align-items:flex-start; gap:7px; margin:10px 0 0;
+    padding:9px 11px; border:1px solid var(--card-border); border-radius:7px;
+    background:var(--bg-2); color:var(--text-3); font-size:11.5px; line-height:1.5;
+}
+.cmp-chart-basis i { color:var(--info); font-size:13px; margin-top:2px; flex:0 0 auto; }
 
 /* Chart.js draws its tick/legend text on <canvas>, which otherwise inherits
    the page's dir="rtl" and reorders numeric-leading labels. */
@@ -332,11 +338,17 @@
 <div class="charts-grid mb-4">
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_TurnoverByStoreCompare"]</h6><p>@L["CMP_TurnoverByStoreSub"]</p></div>
-        <div class="chart-body"><canvas id="cmpTurnoverChart"></canvas></div>
+        <div class="chart-body">
+            <canvas id="cmpTurnoverChart"></canvas>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisTurnover"]</span></p>
+        </div>
     </div>
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_NinetyDayByStoreCompare"]</h6><p>@L["CMP_NinetyByStoreSub"]</p></div>
-        <div class="chart-body"><canvas id="cmpNinetyChart"></canvas></div>
+        <div class="chart-body">
+            <canvas id="cmpNinetyChart"></canvas>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisNinety"]</span></p>
+        </div>
     </div>
 </div>
 
@@ -347,11 +359,17 @@
 <div class="charts-grid mb-4">
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_WorkforceByStoreCompare"]</h6><p>@L["CMP_WorkforceByStoreSub"]</p></div>
-        <div class="chart-body"><canvas id="cmpWorkforceChart"></canvas></div>
+        <div class="chart-body">
+            <canvas id="cmpWorkforceChart"></canvas>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisWorkforce"]</span></p>
+        </div>
     </div>
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_ResignationsByStoreCompare"]</h6><p>@L["CMP_ResignationsByStoreSub"]</p></div>
-        <div class="chart-body"><canvas id="cmpResignationsChart"></canvas></div>
+        <div class="chart-body">
+            <canvas id="cmpResignationsChart"></canvas>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisResignations"]</span></p>
+        </div>
     </div>
 </div>
 
@@ -361,7 +379,10 @@
 </div>
 <div class="chart-card mb-4">
     <div class="chart-header"><h6>@L["Chart_RetentionMilestonesCompare"]</h6><p>@L["CMP_RetentionMilestonesSub"]</p></div>
-    <div class="chart-body"><canvas id="cmpRetentionChart"></canvas></div>
+    <div class="chart-body">
+        <canvas id="cmpRetentionChart"></canvas>
+        <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisRetention"]</span></p>
+    </div>
 </div>
 
 <div class="d-flex align-items-center gap-2 mb-3">
@@ -371,13 +392,17 @@
 <div class="charts-grid mb-4">
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_ExitReasonsCompare"]</h6><p>@L["CMP_ExitReasonsSub"]</p></div>
-        <div class="chart-body"><canvas id="cmpExitReasonsChart"></canvas></div>
+        <div class="chart-body">
+            <canvas id="cmpExitReasonsChart"></canvas>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisExitReasons"]</span></p>
+        </div>
     </div>
     <div class="chart-card">
         <div class="chart-header"><h6>@L["Chart_ExitSentimentCompare"]</h6><p>@L["CMP_ExitSentimentSub"]</p></div>
         <div class="chart-body">
             <canvas id="cmpExitSentimentChart"></canvas>
             <div id="cmpExitSentimentMeta" class="cmp-table-hint text-center mt-2"></div>
+            <p class="cmp-chart-basis"><i class="bi bi-info-circle-fill"></i><span>@L["CMP_BasisExitSentiment"]</span></p>
         </div>
     </div>
 </div>
@@ -678,7 +703,7 @@ async function cmpFetchSide(side) {
     if (!panels[side].store) {
         [byStore, ninetyByStore] = await Promise.all([
             fetchJson(`/api/dashboard/store-comparison?${q}`),
-            fetchJson(`/api/ninety-day-turnover/by-store?${q}`)
+            fetchJson(`/api/ninety-day-turnover/store-comparison?${q}`)
         ]);
     }
     return { kpi, ninety, byStore, ninetyByStore, retention, exitReasons, exitSentiment };
@@ -815,7 +840,7 @@ function cmpRenderCharts(dataA, dataB) {
         }
     });
 
-    const n = cmpBuildSeries(dataA, dataB, 'ninetyByStore', dataA.ninety.rate, dataB.ninety.rate);
+    const n = cmpBuildSeries(dataA, dataB, 'ninetyByStore', dataA.ninety.rate, dataB.ninety.rate, 'rate');
     cmpNinetyChart = mkChart(cmpNinetyChart, 'cmpNinetyChart', {
         type: 'bar',
         data: { labels: n.labels, datasets: [
@@ -926,8 +951,8 @@ function cmpComputeTableRows(dataA, dataB) {
     const turnoverA = {}, turnoverB = {}, ninetyA = {}, ninetyB = {};
     dataA.byStore.forEach(r => turnoverA[r.storeName] = r.turnoverRate);
     dataB.byStore.forEach(r => turnoverB[r.storeName] = r.turnoverRate);
-    dataA.ninetyByStore.forEach(r => ninetyA[r.label] = r.value);
-    dataB.ninetyByStore.forEach(r => ninetyB[r.label] = r.value);
+    dataA.ninetyByStore.forEach(r => ninetyA[r.label ?? r.storeName] = r.rate ?? r.value);
+    dataB.ninetyByStore.forEach(r => ninetyB[r.label ?? r.storeName] = r.rate ?? r.value);
 
     const stores = Array.from(new Set([...Object.keys(turnoverA), ...Object.keys(turnoverB)]));
     return stores.map(s => {

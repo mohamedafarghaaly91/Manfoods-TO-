@@ -90,17 +90,34 @@ public class RetentionService : IRetentionService
 
     // Stores whose latest-known Operation Manager / Operation Consultant match the filter.
     // Returns null when no OM/OC filter is set.
-    private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc, string? soc = null, string? od = null)
+    private async Task<List<string>?> GetStoresForOmOcAsync(
+        string? om, string? oc, string? soc = null, string? od = null,
+        int? month = null, int? year = null)
     {
-        if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
+        var oms = MultiValueFilter.Split(om);
+        var ocs = MultiValueFilter.Split(oc);
+        var socs = MultiValueFilter.Split(soc);
+        var ods = MultiValueFilter.Split(od);
+        if (oms == null && ocs == null && socs == null && ods == null) return null;
+
+        if (month.HasValue && year.HasValue)
+        {
+            var q = _db.StoreReferences.Where(s => s.Month == month && s.Year == year);
+            if (oms != null) q = q.Where(s => oms.Contains(s.OperationManager));
+            if (ocs != null) q = q.Where(s => ocs.Contains(s.OperationConsultant));
+            if (socs != null) q = q.Where(s => socs.Contains(s.SeniorOperationConsultant));
+            if (ods != null) q = q.Where(s => ods.Contains(s.OperationDirector));
+            return await q.Select(s => s.StoreName).Distinct().ToListAsync();
+        }
+
         var refs = await LoadLatestStoreReferenceCandidatesAsync();
         var latestByStore = refs.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         return latestByStore.Values
-            .Where(s => (string.IsNullOrEmpty(om) || s.OperationManager == om)
-                     && (string.IsNullOrEmpty(oc) || s.OperationConsultant == oc)
-                     && (string.IsNullOrEmpty(soc) || s.SeniorOperationConsultant == soc)
-                     && (string.IsNullOrEmpty(od) || s.OperationDirector == od))
+            .Where(s => (oms == null || oms.Contains(s.OperationManager))
+                     && (ocs == null || ocs.Contains(s.OperationConsultant))
+                     && (socs == null || socs.Contains(s.SeniorOperationConsultant))
+                     && (ods == null || ods.Contains(s.OperationDirector)))
             .Select(s => s.StoreName)
             .ToList();
     }
@@ -188,7 +205,7 @@ public class RetentionService : IRetentionService
             cohorts = cohorts.Where(c => keys.Contains(c.CohortYear * 100 + c.CohortMonth));
         }
 
-        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od, toMonth, toYear);
         if (omOcStores != null) cohorts = cohorts.Where(c => omOcStores.Contains(c.Store));
         if (RequestedJobs is { } jobs) cohorts = cohorts.Where(c => jobs.Contains(c.JobTitle));
 

@@ -1094,6 +1094,13 @@
   <data name="Comparisons_RetentionSection" xml:space="preserve"><value>الاحتفاظ بالموظفين</value></data>
   <data name="Chart_RetentionMilestonesCompare" xml:space="preserve"><value>مراحل الاحتفاظ — A مقابل B</value></data>
   <data name="CMP_RetentionMilestonesSub" xml:space="preserve"><value>الاحتفاظ عند 6 أشهر وسنة والمراحل التالية للأفواج المؤهلة</value></data>
+  <data name="CMP_BasisTurnover" xml:space="preserve"><value>الأساس: عدد الاستقالات ÷ متوسط عدد الموظفين النشطين خلال الشهور المختارة. عند عدم اختيار فرع، يعرض الشارت أعلى 8 فروع حسب المعدل المجمع للفترتين A وB.</value></data>
+  <data name="CMP_BasisNinety" xml:space="preserve"><value>الأساس: الموظفون الذين تم تعيينهم في الأفواج المختارة وتركوا العمل خلال 90 يومًا ÷ إجمالي التعيينات في هذه الأفواج، مع تطبيق نفس الشهور والفلاتر.</value></data>
+  <data name="CMP_BasisWorkforce" xml:space="preserve"><value>الأساس: لقطات سجل الموظفين النشطين. يتم جمع عدد الموظفين عبر الشهور المختارة، ويعرض الشارت أعلى 8 فروع حسب إجمالي الفترتين A وB.</value></data>
+  <data name="CMP_BasisResignations" xml:space="preserve"><value>الأساس: سجلات الاستقالات المطابقة للشهور والفلاتر المختارة. الشارت يعرض أعدادًا وليس نسبة مئوية، مع ترتيب أعلى 8 فروع حسب الإجمالي المجمع.</value></data>
+  <data name="CMP_BasisRetention" xml:space="preserve"><value>الأساس: أفواج التعيين في كل فترة مختارة. كل مرحلة = الموظفون المستمرون ÷ أعضاء الفوج المؤهلين؛ يتم استبعاد الأفواج غير الناضجة حتى يصبح ناتجها قابلًا للتحديد.</value></data>
+  <data name="CMP_BasisExitReasons" xml:space="preserve"><value>الأساس: ردود مقابلات الخروج المطابقة للفترات والفلاتر التنظيمية المختارة، مجمعة حسب السبب. يتم عرض أكثر 8 أسباب تكرارًا بين A وB.</value></data>
+  <data name="CMP_BasisExitSentiment" xml:space="preserve"><value>الأساس: الإجابات الإيجابية في سؤالَي الرغبة في العودة والانطباع العام ÷ كل الإجابات غير الفارغة. العدد أسفل الشارت يحسب نماذج المقابلات.</value></data>
   <data name="Comparisons_ExitSection" xml:space="preserve"><value>مقابلات إنهاء الخدمة</value></data>
   <data name="Chart_ExitReasonsCompare" xml:space="preserve"><value>أسباب الاستقالة — A مقابل B</value></data>
   <data name="CMP_ExitReasonsSub" xml:space="preserve"><value>أكثر أسباب الاستقالة تكرارًا في مقابلات الخروج لكل فترة</value></data>

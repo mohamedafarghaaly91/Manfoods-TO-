@@ -110,17 +110,34 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
 
     // Stores whose latest-known Operation Manager / Operation Consultant match the filter.
     // Returns null when no OM/OC filter is set.
-    private async Task<List<string>?> GetStoresForOmOcAsync(string? om, string? oc, string? soc = null, string? od = null)
+    private async Task<List<string>?> GetStoresForOmOcAsync(
+        string? om, string? oc, string? soc = null, string? od = null,
+        int? month = null, int? year = null)
     {
-        if (string.IsNullOrEmpty(om) && string.IsNullOrEmpty(oc) && string.IsNullOrEmpty(soc) && string.IsNullOrEmpty(od)) return null;
+        var oms = MultiValueFilter.Split(om);
+        var ocs = MultiValueFilter.Split(oc);
+        var socs = MultiValueFilter.Split(soc);
+        var ods = MultiValueFilter.Split(od);
+        if (oms == null && ocs == null && socs == null && ods == null) return null;
+
+        if (month.HasValue && year.HasValue)
+        {
+            var q = _db.StoreReferences.Where(s => s.Month == month && s.Year == year);
+            if (oms != null) q = q.Where(s => oms.Contains(s.OperationManager));
+            if (ocs != null) q = q.Where(s => ocs.Contains(s.OperationConsultant));
+            if (socs != null) q = q.Where(s => socs.Contains(s.SeniorOperationConsultant));
+            if (ods != null) q = q.Where(s => ods.Contains(s.OperationDirector));
+            return await q.Select(s => s.StoreName).Distinct().ToListAsync();
+        }
+
         var refs = await LoadLatestStoreReferenceCandidatesAsync();
         var latestByStore = refs.GroupBy(s => s.StoreName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Year).ThenByDescending(s => s.Month).First());
         return latestByStore.Values
-            .Where(s => (string.IsNullOrEmpty(om) || s.OperationManager == om)
-                     && (string.IsNullOrEmpty(oc) || s.OperationConsultant == oc)
-                     && (string.IsNullOrEmpty(soc) || s.SeniorOperationConsultant == soc)
-                     && (string.IsNullOrEmpty(od) || s.OperationDirector == od))
+            .Where(s => (oms == null || oms.Contains(s.OperationManager))
+                     && (ocs == null || ocs.Contains(s.OperationConsultant))
+                     && (socs == null || socs.Contains(s.SeniorOperationConsultant))
+                     && (ods == null || ods.Contains(s.OperationDirector)))
             .Select(s => s.StoreName)
             .ToList();
     }
@@ -199,7 +216,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od, anchor.Month, anchor.Year);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         return ComputeKpi(activeHires, resTenures, keys, anchor.Month, anchor.Year, MultiValueFilter.Split(store), omOcStores, accessible);
     }
@@ -243,7 +260,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od, anchor.Month, anchor.Year);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
         var stores = activeHires.Where(a => keys.Contains(a.Year * 100 + a.Month)).Select(a => a.Store)
@@ -271,7 +288,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         var anchor = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
-        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
+        var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od, anchor.Month, anchor.Year);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
 
         var stores = activeHires.Where(a => keys.Contains(a.Year * 100 + a.Month)).Select(a => a.Store)
