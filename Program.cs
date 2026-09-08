@@ -28,6 +28,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "RequestVerificationToken";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 builder.Services.AddRateLimiter(options =>
@@ -180,6 +182,8 @@ app.Use(async (context, next) =>
         "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
         "img-src 'self' data:; " +
         "connect-src 'self'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
         "frame-ancestors 'self';";
 
     h.Remove("X-Powered-By");
