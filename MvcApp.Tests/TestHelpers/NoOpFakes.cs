@@ -45,7 +45,7 @@ public class NoOpNinetyDayTurnoverService : INinetyDayTurnoverService
     public Task<List<ChartDataItem>> GetEarlyLeaverGenderBreakdownAsync(int month, int year, string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
         Task.FromResult(new List<ChartDataItem>());
-    public Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null) =>
+    public Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null, string? store = null) =>
         Task.FromResult(new TrendMatrixResult());
     public Task<List<SmartInsightItem>> GetSmartInsightsAsync(int month, int year, string? store, string role, string? assignedName,
         int? fromMonth = null, int? fromYear = null, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null) =>
@@ -83,7 +83,7 @@ public class NoOpRetentionService : IRetentionService
         Task.FromResult(new List<ChartDataItem>());
     public Task<List<ChartDataItem>> GetAverageTenureByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null) =>
         Task.FromResult(new List<ChartDataItem>());
-    public Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null) =>
+    public Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null, string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
         Task.FromResult(new List<ManagerTenureRow>());
     public Task<List<ChartDataItem>> GetTimeToFirstResignationDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null) =>
         Task.FromResult(new List<ChartDataItem>());
