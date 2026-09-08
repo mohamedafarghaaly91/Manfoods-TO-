@@ -10,6 +10,14 @@ public class ScorecardRow
     public double Retention180Rate { get; set; }
     public double ExitSentimentPercent { get; set; }
     public int ExitResponseCount { get; set; }
+    public double FinalScore { get; set; }
+    public double TurnoverScore { get; set; }
+    public double RetentionScore { get; set; }
+    public double EarlyLeaverScore { get; set; }
+    public double ExitSentimentScore { get; set; }
+    public bool IsLowData { get; set; }
+    public int EarlyLeaverEligibleCount { get; set; }
+    public int RetentionEligibleCount { get; set; }
 }
 
 public class LeaderHistoryRow

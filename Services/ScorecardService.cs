@@ -18,6 +18,19 @@ public class ScorecardService : IScorecardService
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
 
+    private const double TurnoverTarget = 5.0;
+    private const double EarlyLeaverTarget = 2.0;
+    private const double RetentionTarget = 80.0;
+    private const double ExitSentimentTarget = 75.0;
+    private const double TurnoverWeight = 0.30;
+    private const double RetentionWeight = 0.15;
+    private const double EarlyLeaverWeight = 0.30;
+    private const double ExitSentimentWeight = 0.25;
+
+    private const int LowDataHeadcountThreshold = 10;
+    private const int LowDataCohortThreshold = 10;
+    private const int LowDataExitResponseThreshold = 3;
+
     public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess, IMemoryCache cache)
     {
         _db = db;
@@ -40,6 +53,7 @@ public class ScorecardService : IScorecardService
     {
         public HashSet<string> Stores { get; } = new();
         public Dictionary<(int Month, int Year), int> PeriodHeadcount { get; } = new();
+        public Dictionary<(int Month, int Year), int> PeriodResignations { get; } = new();
         public int TotalResignations;
         public string LatestOc = "";
         public string LatestOm = "";
@@ -66,9 +80,10 @@ public class ScorecardService : IScorecardService
     // following each person across whichever store(s) they were assigned to in each
     // period — instead of only looking at the single latest period's assignment.
     private async Task<Dictionary<string, NameAggregate>> BuildNameAggregatesAsync(
-        string dimension, string role, string? assignedName, string? om, string? oc, string? soc, string? od, string? months, int? year)
+        string dimension, string role, string? assignedName, string? om, string? oc, string? soc, string? od,
+        string? months, int? year, int? month = null, int? fromMonth = null, int? fromYear = null)
     {
-        var periods = DashboardService.ResolvePeriods(null, year, null, null, months);
+        var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         if (periodKeys.Count == 0) return new Dictionary<string, NameAggregate>();
 
@@ -105,6 +120,7 @@ public class ScorecardService : IScorecardService
 
             agg.Stores.Add(sr.StoreName);
             agg.PeriodHeadcount[period] = agg.PeriodHeadcount.GetValueOrDefault(period) + hc;
+            agg.PeriodResignations[period] = agg.PeriodResignations.GetValueOrDefault(period) + res;
             agg.TotalResignations += res;
             agg.LatestOc = sr.OperationConsultant;
             agg.LatestOm = sr.OperationManager;
@@ -171,13 +187,16 @@ public class ScorecardService : IScorecardService
         return records;
     }
 
-    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
+    public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null,
+        string? months = null, int? year = null, int? month = null, int? fromMonth = null, int? fromYear = null)
     {
         // Resolve once so both aggregates and the historical period window use
         // the same effective year (latest data year when caller passes no year).
         var effectiveYear = await ResolveEffectiveYearAsync(year);
 
-        var aggregates = await BuildNameAggregatesAsync(dimension, role, assignedName, om, oc, soc, od, months, effectiveYear);
+        var aggregates = await BuildNameAggregatesAsync(dimension, role, assignedName, om, oc, soc, od,
+            months, effectiveYear, month, fromMonth, fromYear);
         if (aggregates.Count == 0) return new List<ScorecardRow>();
 
         var historical = await LoadHistoricalRecordsAsync();
@@ -185,7 +204,8 @@ public class ScorecardService : IScorecardService
         // Scope early-leaver / retention rates to the selected period (hires whose hire
         // date falls within the resolved window). Falls back to all-time when no period
         // is specified so the scorecard is always populated.
-        var periodKeys = DashboardService.ResolvePeriods(null, effectiveYear, null, null, months)
+        var periods = DashboardService.ResolvePeriods(month, effectiveYear, fromMonth, fromYear, months);
+        var periodKeys = periods
             .Select(p => p.Year * 100 + p.Month)
             .ToHashSet();
         var periodFiltered = periodKeys.Count > 0
@@ -195,15 +215,27 @@ public class ScorecardService : IScorecardService
         // One batched query for every name's sentiment instead of one query per
         // name (was an N+1 — a separate ExitInterviews round trip per leader/OC/OM).
         var sentimentByName = await _exitInterviews.GetSentimentSummariesByDimensionAsync(
-            dimension, aggregates.Keys.ToList(), role, assignedName);
+            dimension, aggregates.Keys.ToList(), role, assignedName,
+            new ExitInterviewFilter
+            {
+                Year = effectiveYear,
+                Month = month,
+                Months = months,
+                FromMonth = fromMonth,
+                FromYear = fromYear,
+            });
 
         var asOf = DateOnly.FromDateTime(DateTime.UtcNow);
         var result = new List<ScorecardRow>();
         // Sequential — EF Core DbContext does not support concurrent queries.
         foreach (var (name, agg) in aggregates)
         {
+            // Turnover's target is monthly, so a multi-month selection is the
+            // average of each month's pooled responsibility rate—not a raw
+            // multi-month numerator compared with a one-month target.
+            var monthlyTurnoverRates = GetMonthlyTurnoverRates(agg, periods);
             var avgHeadcount = agg.PeriodHeadcount.Count > 0 ? agg.PeriodHeadcount.Values.Average() : 0;
-            var turnoverRate = MetricsCalculationService.RatePercent(agg.TotalResignations, avgHeadcount);
+            var turnoverRate = monthlyTurnoverRates.Count > 0 ? Math.Round(monthlyTurnoverRates.Average(), 1) : 0;
 
             var records = periodFiltered.Where(h => agg.Stores.Contains(h.Store)).ToList();
 
@@ -224,6 +256,20 @@ public class ScorecardService : IScorecardService
                 eligibleForRetention.Count);
 
             var sentiment = sentimentByName[name];
+            var turnoverAvailable = monthlyTurnoverRates.Count > 0;
+            var earlyLeaverAvailable = eligibleFor90.Count > 0;
+            var retentionAvailable = eligibleForRetention.Count > 0;
+            var sentimentAvailable = sentiment.AnsweredCount > 0;
+
+            var turnoverScore = ScoreLowerIsBetter(turnoverRate, TurnoverTarget);
+            var earlyLeaverScore = ScoreLowerIsBetter(early90, EarlyLeaverTarget);
+            var retentionScore = ScoreHigherIsBetter(retained180, RetentionTarget);
+            var sentimentScore = ScoreHigherIsBetter(sentiment.PositivePercent, ExitSentimentTarget);
+            var finalScore = WeightedScore(
+                (turnoverScore, TurnoverWeight, turnoverAvailable),
+                (retentionScore, RetentionWeight, retentionAvailable),
+                (earlyLeaverScore, EarlyLeaverWeight, earlyLeaverAvailable),
+                (sentimentScore, ExitSentimentWeight, sentimentAvailable));
 
             result.Add(new ScorecardRow
             {
@@ -235,11 +281,50 @@ public class ScorecardService : IScorecardService
                 Retention180Rate = retained180,
                 ExitSentimentPercent = sentiment.PositivePercent,
                 ExitResponseCount = sentiment.TotalResponses,
+                FinalScore = finalScore,
+                TurnoverScore = turnoverScore,
+                RetentionScore = retentionScore,
+                EarlyLeaverScore = earlyLeaverScore,
+                ExitSentimentScore = sentimentScore,
+                IsLowData = avgHeadcount < LowDataHeadcountThreshold
+                    || eligibleFor90.Count < LowDataCohortThreshold
+                    || eligibleForRetention.Count < LowDataCohortThreshold
+                    || sentiment.TotalResponses < LowDataExitResponseThreshold,
+                EarlyLeaverEligibleCount = eligibleFor90.Count,
+                RetentionEligibleCount = eligibleForRetention.Count,
             });
         }
 
-        return result.OrderByDescending(r => r.TurnoverRate).ToList();
+        return result.OrderByDescending(r => r.FinalScore).ToList();
     }
+
+    private static double ScoreLowerIsBetter(double actual, double target) =>
+        actual <= 0 ? 100 : Math.Round(Math.Min(100, target / actual * 100), 1);
+
+    private static double ScoreHigherIsBetter(double actual, double target) =>
+        actual <= 0 ? 0 : Math.Round(Math.Min(100, actual / target * 100), 1);
+
+    private static double WeightedScore(params (double Score, double Weight, bool Available)[] metrics)
+    {
+        var available = metrics.Where(m => m.Available).ToList();
+        if (available.Count == 0) return 0;
+        var weightTotal = available.Sum(m => m.Weight);
+        return Math.Round(available.Sum(m => m.Score * m.Weight) / weightTotal, 1);
+    }
+
+    private static List<double> GetMonthlyTurnoverRates(
+        NameAggregate aggregate, IEnumerable<(int Month, int Year)> periods) =>
+        periods
+            .Select(p =>
+            {
+                var key = (p.Month, p.Year);
+                var headcount = aggregate.PeriodHeadcount.GetValueOrDefault(key);
+                var resignations = aggregate.PeriodResignations.GetValueOrDefault(key);
+                return headcount > 0 ? MetricsCalculationService.RatePercent(resignations, headcount) : (double?)null;
+            })
+            .Where(rate => rate.HasValue)
+            .Select(rate => rate!.Value)
+            .ToList();
 
     public async Task<List<string>> GetLeaderNamesAsync(string role, string? assignedName)
     {
@@ -281,11 +366,12 @@ public class ScorecardService : IScorecardService
         return profile;
     }
 
-    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
+    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName,
+        string? months = null, int? year = null, int? month = null, int? fromMonth = null, int? fromYear = null)
     {
         if (string.IsNullOrWhiteSpace(leaderName)) return new List<LeaderHistoryRow>();
 
-        var periods = DashboardService.ResolvePeriods(null, year, null, null, months);
+        var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         if (periodKeys.Count == 0) return new List<LeaderHistoryRow>();
 
@@ -330,16 +416,20 @@ public class ScorecardService : IScorecardService
         return result;
     }
 
-    public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
+    public async Task<ScorecardRollupResult> GetRollupAsync(string role, string? assignedName,
+        string? om = null, string? oc = null, string? soc = null, string? od = null,
+        string? months = null, int? year = null, int? month = null, int? fromMonth = null, int? fromYear = null)
     {
         var result = new ScorecardRollupResult();
-        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, om, oc, soc, od, months, year);
+        var leaderAggregates = await BuildNameAggregatesAsync("leader", role, assignedName, om, oc, soc, od,
+            months, year, month, fromMonth, fromYear);
         if (leaderAggregates.Count == 0) return result;
 
+        var periods = DashboardService.ResolvePeriods(month, year, fromMonth, fromYear, months);
         var leaderRates = leaderAggregates.Select(kv =>
         {
-            var avgHeadcount = kv.Value.PeriodHeadcount.Count > 0 ? kv.Value.PeriodHeadcount.Values.Average() : 0;
-            var rate = avgHeadcount > 0 ? kv.Value.TotalResignations * 100.0 / avgHeadcount : 0;
+            var monthlyRates = GetMonthlyTurnoverRates(kv.Value, periods);
+            var rate = monthlyRates.Count > 0 ? monthlyRates.Average() : 0;
             return (Name: kv.Key, Rate: rate, Oc: kv.Value.LatestOc, Om: kv.Value.LatestOm, Soc: kv.Value.LatestSoc, Od: kv.Value.LatestOd);
         }).ToList();
 

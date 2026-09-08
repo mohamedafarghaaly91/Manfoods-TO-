@@ -37,7 +37,7 @@ public class ExitInterviewService : IExitInterviewService
         // all rows (which have month=0/year=0) are returned unfiltered.
         if (filter.Year.HasValue && filter.Year.Value > 0)
         {
-            var periods = DashboardService.ResolvePeriods(null, filter.Year, null, null, filter.Months);
+            var periods = DashboardService.ResolvePeriods(filter.Month, filter.Year, filter.FromMonth, filter.FromYear, filter.Months);
             var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
             q = q.Where(e => keys.Contains(e.Year * 100 + e.Month));
         }
@@ -237,6 +237,7 @@ public class ExitInterviewService : IExitInterviewService
         return new ExitSentimentSummary
         {
             TotalResponses = rows.Count,
+            AnsweredCount = answers.Count,
             PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
         };
     }
@@ -249,24 +250,28 @@ public class ExitInterviewService : IExitInterviewService
     }
 
     public async Task<Dictionary<string, ExitSentimentSummary>> GetSentimentSummariesByDimensionAsync(
-        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName)
+        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName,
+        ExitInterviewFilter? filter = null)
     {
         if (names.Count == 0) return new Dictionary<string, ExitSentimentSummary>();
 
+        var nameSet = names.ToHashSet();
+        IQueryable<ExitInterview> q = await ApplyFilterAsync(
+            _db.ExitInterviews.AsNoTracking(), filter ?? new ExitInterviewFilter(), role, assignedName);
+
         if (dimension != "leader" && dimension != "oc" && dimension != "om")
         {
-            // Every other dimension (e.g. "soc"/"od") looks up sentiment with an
-            // unfiltered ExitInterviewFilter() regardless of name — the same call
-            // GetSentimentSummaryAsync(new ExitInterviewFilter(), ...) would make
-            // for every single name — so compute it once and reuse for all of them.
-            var overall = await GetSentimentSummaryAsync(new ExitInterviewFilter(), role, assignedName);
+            var rows = await q.Select(e => new { e.WouldReturn, e.OverallExperience }).ToListAsync();
+            var answers = rows.Select(r => r.WouldReturn).Concat(rows.Select(r => r.OverallExperience))
+                .Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+            var overall = new ExitSentimentSummary
+            {
+                TotalResponses = rows.Count,
+                AnsweredCount = answers.Count,
+                PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
+            };
             return names.ToDictionary(n => n, _ => overall);
         }
-
-        var nameSet = names.ToHashSet();
-        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        IQueryable<ExitInterview> q = _db.ExitInterviews.AsNoTracking();
-        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
 
         var rows = dimension switch
         {
@@ -292,6 +297,7 @@ public class ExitInterviewService : IExitInterviewService
             return new ExitSentimentSummary
             {
                 TotalResponses = groupRows.Count,
+                AnsweredCount = answers.Count,
                 PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
             };
         });
