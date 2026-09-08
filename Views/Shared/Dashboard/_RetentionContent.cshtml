@@ -136,12 +136,17 @@
         FilterNote = L["Guide_Retention_FilterNote"],
         Sections = new List<PageGuideSection>
         {
+            new() { Icon = "bi-award", Title = L["RT_TenureMilestonesTitle"], Body = L["Guide_Retention_Milestones"] },
+            new() { Icon = "bi-shop", Title = L["Retention_TenureByStore"], Body = L["Guide_Retention_Chart_TenureByStore"] },
             new() { Icon = "bi-graph-up", Title = L["Chart_SurvivalCurve"], Body = L["Guide_Retention_Chart_Survival"] },
             new() { Icon = "bi-trophy", Title = L["Retention_LeaderboardTop"], Body = L["Guide_Retention_Chart_LeaderboardTop"] },
             new() { Icon = "bi-exclamation-triangle", Title = L["Retention_LeaderboardBottom"], Body = L["Guide_Retention_Chart_LeaderboardBottom"] },
-            new() { Icon = "bi-shop", Title = L["Retention_TenureByStore"], Body = L["Guide_Retention_Chart_TenureByStore"] },
             new() { Icon = "bi-person-lines-fill", Title = L["Retention_ByJobTitle"], Body = L["Guide_Retention_Chart_JobTitle"] },
             new() { Icon = "bi-gender-ambiguous", Title = L["Retention_ByGender"], Body = L["Guide_Retention_Chart_Gender"] },
+            new() { Icon = "bi-bar-chart-steps", Title = L["Retention_StoreTenureTop"], Body = L["Guide_Retention_Chart_StoreTenure"] },
+            new() { Icon = "bi-person-badge", Title = L["Retention_OcTenureTop"], Body = L["Guide_Retention_Chart_OcTenure"] },
+            new() { Icon = "bi-hourglass-split", Title = L["Retention_TimeToFirstResign"], Body = L["Guide_Retention_Chart_FirstResign"] },
+            new() { Icon = "bi-person-plus", Title = L["Retention_HiringVolume"], Body = L["Guide_Retention_Chart_HiringVolume"] },
             new() { Icon = "bi-people", Title = L["Retention_ByOcOm"], Body = L["Guide_Retention_Chart_OcOm"] },
         }
     };
