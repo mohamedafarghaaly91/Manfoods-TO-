@@ -30,6 +30,33 @@ if (typeof Chart !== 'undefined') {
     Chart.defaults.plugins.tooltip.mode = 'index';
     Chart.defaults.plugins.tooltip.intersect = false;
     Chart.defaults.plugins.tooltip.position = 'nearest';
+
+    // Horizontal bar charts (indexAxis:'y' — every leaderboard/ranking chart
+    // in the app) otherwise always keep their category labels on the left
+    // and grow bars rightward, regardless of page direction: correct for an
+    // LTR page, backwards for RTL, where the labels should sit on the right
+    // with each bar starting right next to its label and growing toward the
+    // left. Canvas itself is deliberately kept LTR (see .chart-body canvas
+    // in site.css) — that's a separate fix, for numeric-leading label text
+    // (store codes like "1480106 | Agami") that Chart.js's own RTL text
+    // handling would otherwise reorder incorrectly; this only repositions
+    // the axes via Chart.js's own layout options, so it doesn't touch that.
+    // Wrapping the constructor (rather than editing every chart call site)
+    // makes this apply to every current and future horizontal bar chart
+    // automatically, with no per-chart code needed.
+    const OriginalChart = Chart;
+    window.Chart = new Proxy(OriginalChart, {
+        construct(target, args) {
+            const [ctx, config] = args;
+            const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
+            if (isRtl && config?.options?.indexAxis === 'y') {
+                config.options.scales = config.options.scales || {};
+                config.options.scales.y = Object.assign({}, config.options.scales.y, { position: 'right' });
+                config.options.scales.x = Object.assign({}, config.options.scales.x, { reverse: true });
+            }
+            return new target(ctx, config);
+        }
+    });
 }
 
 const ChartColors = (function () {
