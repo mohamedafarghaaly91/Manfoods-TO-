@@ -451,7 +451,14 @@ html, body {
 .data-freshness-wrap {
     display: flex;
     justify-content: flex-end;
+    /* The page-guide orb (fixed, top-right, z-index:900) occupies this same
+       corner on pages that have one — reserve space so this chip renders to
+       its left instead of sitting underneath it before the page scrolls. */
+    padding-inline-end: 190px;
     margin-bottom: 12px;
+}
+@media (max-width: 760px) {
+    .data-freshness-wrap { padding-inline-end: 56px; }
 }
 
 .data-freshness-chip {
