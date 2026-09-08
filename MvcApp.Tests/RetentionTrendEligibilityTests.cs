@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -29,7 +30,7 @@ public class RetentionTrendEligibilityTests
             .GetRequiredService<IStringLocalizer<SharedResource>>();
 
     private static RetentionService NewService(AppDbContext db) =>
-        new(db, new StoreAccessService(db), new MemoryCache(new MemoryCacheOptions()), Localizer);
+        new(db, new StoreAccessService(db), new MemoryCache(new MemoryCacheOptions()), Localizer, new HttpContextAccessor());
 
     private static void AddActive(AppDbContext db, string employeeId, string store, DateOnly hireDate, int month, int year) =>
         db.ActiveEmployees.Add(new ActiveEmployee
