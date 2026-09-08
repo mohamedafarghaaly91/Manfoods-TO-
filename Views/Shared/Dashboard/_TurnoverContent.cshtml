@@ -742,6 +742,8 @@ async function tvLoadTurnoverByMonthChart() {
         if (storeFilter) q.set('store', storeFilter);
         if (omFilter)    q.set('om', omFilter);
         if (ocFilter)    q.set('oc', ocFilter);
+        if (socFilter)   q.set('soc', socFilter);
+        if (odFilter)    q.set('od', odFilter);
         if (jobFilter.length) q.set('jobs', jobFilter.join(','));
         return fetchJson(`/api/dashboard/kpis?${q.toString()}`);
     }));
@@ -797,6 +799,8 @@ async function tvLoadReasonsChart() {
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
+    if (socFilter)   q.set('soc', socFilter);
+    if (odFilter)    q.set('od', odFilter);
     if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     let data = await fetchJson(`/api/exit-interviews/reasons?${q.toString()}`) || [];
     // Exit interview submissions may lack a parsed date (month/year = 0) when the
@@ -808,6 +812,8 @@ async function tvLoadReasonsChart() {
         if (storeFilter) qAll.set('store', storeFilter);
         if (omFilter)    qAll.set('om', omFilter);
         if (ocFilter)    qAll.set('oc', ocFilter);
+        if (socFilter)   qAll.set('soc', socFilter);
+        if (odFilter)    qAll.set('od', odFilter);
         if (jobFilter.length) qAll.set('jobs', jobFilter.join(','));
         data = await fetchJson(`/api/exit-interviews/reasons?${qAll.toString()}`) || [];
     }
@@ -975,8 +981,11 @@ async function tvLoadTrendMatrix() {
     const body = document.getElementById('matrixBody');
     body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>' + tvL.loadingShort + '</td></tr>';
     const q = new URLSearchParams();
+    if (storeFilter) q.set('store', storeFilter);
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
+    if (socFilter) q.set('soc', socFilter);
+    if (odFilter) q.set('od', odFilter);
     if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
     if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     mxData = await fetchJson(`/api/dashboard/trend-matrix?${q.toString()}`);

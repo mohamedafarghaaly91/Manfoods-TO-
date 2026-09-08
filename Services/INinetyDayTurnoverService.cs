@@ -55,7 +55,7 @@ public interface INinetyDayTurnoverService
     /// <summary>One row per store, one column per hire-cohort month, showing the
     /// 90-day early-leave rate for that cohort — mirrors DashboardService.GetTrendMatrixAsync
     /// but for the 90-day metric instead of overall turnover.</summary>
-    Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null);
+    Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null, string? store = null);
 
     /// <summary>Auto-generated narrative insights: recent-vs-prior trend and
     /// best/worst store on the 90-day rate.</summary>

@@ -437,12 +437,16 @@ function acdRender(data, signalHistory, monthlyTurnoverHistory) {
     // ── KPI cards: baseline vs. latest snapshot ──
     const snaps = data.metricSnapshots || [];
     const latest = snaps.length ? snaps[snaps.length - 1] : null;
-    function deltaHtml(base, cur) {
+    // higherIsBetter: true for Retention Rate (up = improving), false for
+    // Turnover/Early-Leaver Rate (down = improving) — a rising retention
+    // rate must never be flagged red just because it went up.
+    function deltaHtml(base, cur, higherIsBetter) {
         if (base === null || base === undefined || cur === null || cur === undefined) return '';
         const delta = cur - base;
         if (Math.abs(delta) < 0.05) return `<div class="acd-kpi-delta" style="color:var(--text-3)">— ${sapEscape(d.noChange)}</div>`;
-        const improving = delta < 0;
-        return `<div class="acd-kpi-delta" style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${improving ? 'bi-arrow-down-right' : 'bi-arrow-up-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pt</div>`;
+        const improving = higherIsBetter ? delta > 0 : delta < 0;
+        const arrowUp = delta > 0;
+        return `<div class="acd-kpi-delta" style="color:${improving ? 'oklch(0.5 0.15 155)' : ChartColors.SEMANTIC.BAD}"><i class="bi ${arrowUp ? 'bi-arrow-up-right' : 'bi-arrow-down-right'}"></i> ${delta > 0 ? '+' : ''}${delta.toFixed(1)}pt</div>`;
     }
     html += `<div class="row g-3 mb-4">
         <div class="col-sm-4"><div class="card-dark">
@@ -458,7 +462,7 @@ function acdRender(data, signalHistory, monthlyTurnoverHistory) {
         <div class="col-sm-4"><div class="card-dark">
             <div class="acd-kpi-label">${sapEscape(d.kpiRetention)}</div>
             <div class="acd-kpi-value">${acdRate(latest ? latest.retentionRate : data.baselineRetentionRate)}</div>
-            ${latest ? deltaHtml(data.baselineRetentionRate, latest.retentionRate) : ''}
+            ${latest ? deltaHtml(data.baselineRetentionRate, latest.retentionRate, true) : ''}
         </div></div>
     </div>`;
 

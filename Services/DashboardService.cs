@@ -867,7 +867,7 @@ public class DashboardService : IDashboardService
             .ToList();
     }
 
-    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null, string? jobTitles = null)
+    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? sinceYear = null, string? months = null, string? jobTitles = null, string? store = null)
     {
         var accessible = await GetAccessibleStoresAsync(role, assignedName, null, null);
         var jobs = MultiValueFilter.Split(jobTitles);
@@ -930,6 +930,7 @@ public class DashboardService : IDashboardService
                                     .ToDictionary(g => g.Key, g => g.Sum(x => x.Count));
 
         var allStores = headcounts.Select(h => h.Store).Distinct().OrderBy(s => s).ToList();
+        if (MultiValueFilter.Split(store) is { } stores) allStores = allStores.Where(s => stores.Contains(s)).ToList();
         if (MultiValueFilter.Split(om) is { } oms) allStores = allStores.Where(s => omByStore.TryGetValue(s, out var v) && oms.Contains(v)).ToList();
         if (MultiValueFilter.Split(oc) is { } ocs) allStores = allStores.Where(s => ocByStore.TryGetValue(s, out var v) && ocs.Contains(v)).ToList();
         if (MultiValueFilter.Split(soc) is { } socs) allStores = allStores.Where(s => socByStore.TryGetValue(s, out var v) && socs.Contains(v)).ToList();

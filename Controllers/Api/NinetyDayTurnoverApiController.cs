@@ -136,10 +136,10 @@ public class NinetyDayTurnoverApiController : ControllerBase
     }
 
     [HttpGet("trend-matrix")]
-    public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months, [FromQuery] int? sinceYear)
+    public async Task<IActionResult> TrendMatrix([FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od, [FromQuery] string? months, [FromQuery] int? sinceYear, [FromQuery] string? store)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _turnover.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, months, sinceYear));
+        return Ok(await _turnover.GetTrendMatrixAsync(role, assignedName, om, oc, soc, od, months, sinceYear, store));
     }
 
     [HttpGet("senior-operation-consultants")]

@@ -373,6 +373,8 @@ async function wfLoadHeadcountTrend() {
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
+    if (socFilter)   q.set('soc', socFilter);
+    if (odFilter)    q.set('od', odFilter);
     if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
     const data = await fetchJson(`/api/dashboard/headcount-trend?${q.toString()}`);
@@ -426,6 +428,8 @@ async function wfLoadStoreTable() {
     const q = new URLSearchParams({ month: periodMonth, year: periodYear });
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
+    if (socFilter) q.set('soc', socFilter);
+    if (odFilter) q.set('od', odFilter);
     if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     const data = await fetchJson(`/api/dashboard/store-headcount-breakdown?${q.toString()}`);
     wfRenderStoreTable(data);

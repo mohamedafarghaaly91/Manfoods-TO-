@@ -1248,6 +1248,7 @@ async function ntdLoadTrendMatrix() {
     const body = document.getElementById('ntdMatrixBody');
     body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.6 0.22 22)"></div>' + ntdL.loadingShort + '</td></tr>';
     const q = new URLSearchParams();
+    if (ntdStoreFilter) q.set('store', ntdStoreFilter);
     if (ntdOmFilter) q.set('om', ntdOmFilter);
     if (ntdOcFilter) q.set('oc', ntdOcFilter);
     if (ntdSocFilter) q.set('soc', ntdSocFilter);

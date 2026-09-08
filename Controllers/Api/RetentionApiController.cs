@@ -136,10 +136,11 @@ public class RetentionApiController : ControllerBase
     }
 
     [HttpGet("average-tenure-by-manager")]
-    public async Task<IActionResult> AverageTenureByManager([FromQuery] string dimension, [FromQuery] int? month, [FromQuery] int? year)
+    public async Task<IActionResult> AverageTenureByManager([FromQuery] string dimension, [FromQuery] int? month, [FromQuery] int? year,
+        [FromQuery] string? store, [FromQuery] string? om, [FromQuery] string? oc, [FromQuery] string? soc, [FromQuery] string? od)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _retention.GetAverageTenureByManagerAsync(dimension, role, assignedName, month, year));
+        return Ok(await _retention.GetAverageTenureByManagerAsync(dimension, role, assignedName, month, year, store, om, oc, soc, od));
     }
 
     [HttpGet("time-to-first-resignation")]

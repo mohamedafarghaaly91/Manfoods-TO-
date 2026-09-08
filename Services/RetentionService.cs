@@ -690,7 +690,7 @@ public class RetentionService : IRetentionService
     /// given manager dimension ("om", "oc", "soc" or "od") — same shape as the "By Operation
     /// Consultant &amp; Manager" tables elsewhere, but measuring tenure instead of turnover.</summary>
     public async Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName,
-        int? month = null, int? year = null)
+        int? month = null, int? year = null, string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var anchor = await ResolveAnchorPeriodAsync(month, year);
         if (anchor == null) return new List<ManagerTenureRow>();
@@ -698,6 +698,8 @@ public class RetentionService : IRetentionService
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         var q = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Value.Month && e.Year == anchor.Value.Year && e.HireDate != null));
         if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
+        if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
+        else if (await GetStoresForOmOcAsync(om, oc, soc, od, anchor.Value.Month, anchor.Value.Year) is { } omOcStores) q = q.Where(e => omOcStores.Contains(e.Store));
         var rows = await q.Select(e => new { e.Store, e.HireDate }).ToListAsync();
 
         var mapping = await GetManagerMappingByStoreAsync();

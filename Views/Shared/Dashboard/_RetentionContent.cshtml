@@ -830,9 +830,15 @@ function rtRenderManagerTenureRows(tbodyId, rows) {
 }
 
 async function rtLoadManagerTenureTable() {
-    const jobsQuery = rtJobFilter.length ? `&jobs=${encodeURIComponent(rtJobFilter.join(','))}` : '';
+    const q = new URLSearchParams();
+    if (rtStoreFilter) q.set('store', rtStoreFilter);
+    if (rtOmFilter)    q.set('om', rtOmFilter);
+    if (rtOcFilter)    q.set('oc', rtOcFilter);
+    if (rtSocFilter)   q.set('soc', rtSocFilter);
+    if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     const [oc, od, om, soc] = await Promise.all(['oc', 'od', 'om', 'soc'].map(dim =>
-        fetch(`/api/retention/average-tenure-by-manager?dimension=${dim}${jobsQuery}`).then(r => r.ok ? r.json() : [])
+        fetch(`/api/retention/average-tenure-by-manager?dimension=${dim}&${q.toString()}`).then(r => r.ok ? r.json() : [])
     ));
     rtRenderManagerTenureRows('rtOcTableBody', oc);
     rtRenderManagerTenureRows('rtOdTableBody', od);

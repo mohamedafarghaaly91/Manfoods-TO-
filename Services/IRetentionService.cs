@@ -53,7 +53,7 @@ public interface IRetentionService
     Task<List<ChartDataItem>> GetAverageTenureByStoreAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, int? month = null, int? year = null);
 
     /// <summary>Average tenure (whole months) of the current active team, grouped by "om"/"oc"/"soc"/"od".</summary>
-    Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null);
+    Task<List<ManagerTenureRow>> GetAverageTenureByManagerAsync(string dimension, string role, string? assignedName, int? month = null, int? year = null, string? store = null, string? om = null, string? oc = null, string? soc = null, string? od = null);
 
     /// <summary>How soon after being hired people who eventually resigned actually left.</summary>
     Task<List<ChartDataItem>> GetTimeToFirstResignationDistributionAsync(string? store, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null);

@@ -475,11 +475,12 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .ToList();
     }
 
-    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null)
+    public async Task<TrendMatrixResult> GetTrendMatrixAsync(string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? sinceYear = null, string? store = null)
     {
         var activeHires = await LoadActiveHiresAsync();
         var resTenures = await LoadResignationTenuresAsync();
         var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
+        var stores = MultiValueFilter.Split(store);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         var monthFilter = MultiValueFilter.Split(months)?.Select(int.Parse).ToHashSet();
 
@@ -498,7 +499,8 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             .Distinct()
             .OrderBy(s => s)
             .ToList();
-        if (omOcStores != null) allStores = allStores.Where(s => omOcStores.Contains(s)).ToList();
+        if (stores != null) allStores = allStores.Where(s => stores.Contains(s)).ToList();
+        else if (omOcStores != null) allStores = allStores.Where(s => omOcStores.Contains(s)).ToList();
         if (accessible != null) allStores = allStores.Where(s => accessible.Contains(s)).ToList();
 
         var storeRefList = await LoadLatestStoreReferenceCandidatesAsync();
