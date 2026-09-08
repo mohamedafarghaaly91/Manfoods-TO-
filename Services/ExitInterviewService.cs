@@ -1,8 +1,10 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using MvcApp.Data;
 using MvcApp.Models;
 using MvcApp.Models.ViewModels;
+using MvcApp.Resources;
 
 namespace MvcApp.Services;
 
@@ -10,11 +12,13 @@ public class ExitInterviewService : IExitInterviewService
 {
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
+    private readonly IStringLocalizer<SharedResource> _L;
 
-    public ExitInterviewService(AppDbContext db, IStoreAccessService storeAccess)
+    public ExitInterviewService(AppDbContext db, IStoreAccessService storeAccess, IStringLocalizer<SharedResource> localizer)
     {
         _db = db;
         _storeAccess = storeAccess;
+        _L = localizer;
     }
 
     private async Task<IQueryable<ExitInterview>> ApplyFilterAsync(IQueryable<ExitInterview> q, ExitInterviewFilter filter, string role, string? assignedName)
@@ -202,16 +206,16 @@ public class ExitInterviewService : IExitInterviewService
 
         var drivers = new (string Label, Func<EngagementDriverRow, string> Selector)[]
         {
-            ("Fair Treatment", e => e.FairTreatment),
-            ("Encouraged to Share Opinions", e => e.EncourageOpinions),
-            ("Complaints Handled Effectively", e => e.ComplaintsHandling),
-            ("Benefits Match Job Requirements", e => e.BenefitsMatch),
-            ("Teamwork & Collaboration", e => e.Teamwork),
-            ("Communication with Management", e => e.Communication),
-            ("Assigned Appropriate Tasks", e => e.TaskFit),
-            ("Adequate Training", e => e.Training),
-            ("Received Feedback & Guidance", e => e.Feedback),
-            ("Could Use Personal Abilities", e => e.UsePersonalAbilities),
+            (_L["EiDriver_FairTreatment"], e => e.FairTreatment),
+            (_L["EiDriver_EncourageOpinions"], e => e.EncourageOpinions),
+            (_L["EiDriver_ComplaintsHandling"], e => e.ComplaintsHandling),
+            (_L["EiDriver_BenefitsMatch"], e => e.BenefitsMatch),
+            (_L["EiDriver_Teamwork"], e => e.Teamwork),
+            (_L["EiDriver_Communication"], e => e.Communication),
+            (_L["EiDriver_TaskFit"], e => e.TaskFit),
+            (_L["EiDriver_Training"], e => e.Training),
+            (_L["EiDriver_Feedback"], e => e.Feedback),
+            (_L["EiDriver_UsePersonalAbilities"], e => e.UsePersonalAbilities),
         };
 
         var result = new List<EngagementDriverItem>();

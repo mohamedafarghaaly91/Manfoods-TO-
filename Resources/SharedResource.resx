@@ -243,6 +243,10 @@
   <data name="Common_Resignations" xml:space="preserve"><value>Resignations</value></data>
   <data name="Common_TurnoverPct" xml:space="preserve"><value>Turnover%</value></data>
   <data name="Common_Month" xml:space="preserve"><value>Month</value></data>
+  <data name="Common_Gender_Male" xml:space="preserve"><value>Male</value></data>
+  <data name="Common_Gender_Female" xml:space="preserve"><value>Female</value></data>
+  <data name="Common_Payroll_Manfoods" xml:space="preserve"><value>Manfoods Company</value></data>
+  <data name="Common_Payroll_HourlyPaid" xml:space="preserve"><value>Hourly Paid</value></data>
   <data name="Common_Year" xml:space="preserve"><value>Year</value></data>
   <data name="Common_NoData" xml:space="preserve"><value>No data for this period.</value></data>
   <data name="Common_NoMatchingStores" xml:space="preserve"><value>No matching stores.</value></data>
@@ -569,6 +573,16 @@
   <data name="Chart_WorkPressureReasonSub" xml:space="preserve"><value>When workload was described as heavy, what they said caused it</value></data>
   <data name="Chart_EngagementDrivers" xml:space="preserve"><value>Engagement Drivers</value></data>
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>% who answered positively — lowest first</value></data>
+  <data name="EiDriver_FairTreatment" xml:space="preserve"><value>Fair Treatment</value></data>
+  <data name="EiDriver_EncourageOpinions" xml:space="preserve"><value>Encouraged to Share Opinions</value></data>
+  <data name="EiDriver_ComplaintsHandling" xml:space="preserve"><value>Complaints Handled Effectively</value></data>
+  <data name="EiDriver_BenefitsMatch" xml:space="preserve"><value>Benefits Match Job Requirements</value></data>
+  <data name="EiDriver_Teamwork" xml:space="preserve"><value>Teamwork &amp; Collaboration</value></data>
+  <data name="EiDriver_Communication" xml:space="preserve"><value>Communication with Management</value></data>
+  <data name="EiDriver_TaskFit" xml:space="preserve"><value>Assigned Appropriate Tasks</value></data>
+  <data name="EiDriver_Training" xml:space="preserve"><value>Adequate Training</value></data>
+  <data name="EiDriver_Feedback" xml:space="preserve"><value>Received Feedback &amp; Guidance</value></data>
+  <data name="EiDriver_UsePersonalAbilities" xml:space="preserve"><value>Could Use Personal Abilities</value></data>
   <data name="Chart_EiByJobTitle" xml:space="preserve"><value>Exit Interviews by Job Title</value></data>
   <data name="Chart_EiByJobTitleSub" xml:space="preserve"><value>Which roles are giving the most exit interviews</value></data>
   <data name="Chart_EiReasonsTrend" xml:space="preserve"><value>Reasons for Leaving Over Time</value></data>
@@ -1025,6 +1039,8 @@
   <data name="TV_KpiTrend" xml:space="preserve"><value>Trend vs Prior Period</value></data>
   <data name="TV_KpiTrendDesc" xml:space="preserve"><value>Change in turnover rate vs. the equivalent prior period</value></data>
   <data name="TV_KpiRangeNote" xml:space="preserve"><value>— cards above add up every period in the selected range.</value></data>
+  <data name="TV_TrendSubtitleStore" xml:space="preserve"><value>Turnover rate (%) for {0}, one point per month, all-time</value></data>
+  <data name="TV_TrendSubtitleTop6" xml:space="preserve"><value>Top 6 stores by average turnover rate — one line per store, one point per month, all-time</value></data>
   <data name="TV_NoInsights" xml:space="preserve"><value>No insights available — upload data for multiple periods to enable trend analysis.</value></data>
   <data name="TV_SpikeHeaderSingular" xml:space="preserve"><value>Top {0} Spiking Store vs Prior Period</value></data>
   <data name="TV_SpikeHeaderPlural" xml:space="preserve"><value>Top {0} Spiking Stores vs Prior Period</value></data>

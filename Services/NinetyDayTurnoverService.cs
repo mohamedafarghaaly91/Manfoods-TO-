@@ -434,7 +434,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         return leavers
             .Where(r => !string.IsNullOrWhiteSpace(r.PayrollGroup))
             .GroupBy(r => r.PayrollGroup)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+            .Select(g => new ChartDataItem { Label = DataLabelTranslator.PayrollGroup(g.Key, _L), Value = g.Count() })
             .OrderByDescending(c => c.Value)
             .ToList();
     }
@@ -446,7 +446,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         return leavers
             .Where(r => !string.IsNullOrWhiteSpace(r.Gender))
             .GroupBy(r => r.Gender)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
+            .Select(g => new ChartDataItem { Label = DataLabelTranslator.Gender(g.Key, _L), Value = g.Count() })
             .OrderBy(c => c.Label)
             .ToList();
     }

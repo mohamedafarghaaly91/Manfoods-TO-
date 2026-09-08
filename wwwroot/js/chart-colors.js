@@ -90,10 +90,23 @@ const ChartColors = (function () {
         return CATEGORICAL_PALETTE[Math.abs(hash) % CATEGORICAL_PALETTE.length];
     }
 
+    // Gender/Payroll Group values come back from the server already translated
+    // to the current UI language (see DataLabelTranslator.cs) — both the
+    // English and Arabic forms are keyed here to the same color so a chart
+    // looks identical after switching language, not just correctly labeled.
     const GENDER_COLORS = {
         'Male':   CATEGORICAL_PALETTE[0],
         'Female': CATEGORICAL_PALETTE[1],
         'Other':  CATEGORICAL_PALETTE[2],
+        'ذكر':    CATEGORICAL_PALETTE[0],
+        'أنثى':   CATEGORICAL_PALETTE[1],
+    };
+
+    const PAYROLL_GROUP_COLORS = {
+        'Manfoods Company':   CATEGORICAL_PALETTE[3],
+        'Hourly Paid':        CATEGORICAL_PALETTE[4],
+        'العاملين وقت كامل':  CATEGORICAL_PALETTE[3],
+        'العاملين بالساعة':   CATEGORICAL_PALETTE[4],
     };
 
     const RETENTION_MILESTONE_COLORS = {
@@ -259,6 +272,7 @@ const ChartColors = (function () {
         SERIES,
         SERIES_FILL,
         GENDER_COLORS,
+        PAYROLL_GROUP_COLORS,
         RETENTION_MILESTONE_COLORS,
         RETENTION_TENURE_BUCKET_COLORS,
         EARLY_WARNING_REASON_COLORS,

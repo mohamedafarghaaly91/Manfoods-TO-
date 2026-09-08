@@ -331,11 +331,14 @@ public class DashboardService : IDashboardService
             q = q.Where(r => omOcStores.Contains(r.Store));
         if (MultiValueFilter.Split(jobTitles) is { } jobs) q = q.Where(r => jobs.Contains(r.JobTitle));
 
-        return await q.Where(r => r.PayrollGroup != "")
+        var rows = await q.Where(r => r.PayrollGroup != "")
             .GroupBy(r => r.PayrollGroup)
-            .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
-            .OrderByDescending(x => x.Value)
+            .Select(g => new { g.Key, Count = g.Count() })
             .ToListAsync();
+        return rows
+            .Select(x => new ChartDataItem { Label = DataLabelTranslator.PayrollGroup(x.Key, _L), Value = x.Count })
+            .OrderByDescending(x => x.Value)
+            .ToList();
     }
 
     public async Task<List<ChartDataItem>> GetTurnoverByTenureAsync(int? month, int? year, string? store, string role, string? assignedName,
@@ -430,10 +433,13 @@ public class DashboardService : IDashboardService
             if (accessible != null) qAll = qAll.Where(e => accessible.Contains(e.Store));
             if (stores != null) qAll = qAll.Where(e => stores.Contains(e.Store));
             if (MultiValueFilter.Split(jobTitles) is { } jobs) qAll = qAll.Where(e => jobs.Contains(e.JobTitle));
-            return await qAll.GroupBy(e => e.Gender)
-                .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
-                .OrderBy(c => c.Label)
+            var rowsAll = await qAll.GroupBy(e => e.Gender)
+                .Select(g => new { g.Key, Count = g.Count() })
                 .ToListAsync();
+            return rowsAll
+                .Select(x => new ChartDataItem { Label = DataLabelTranslator.Gender(x.Key, _L), Value = x.Count })
+                .OrderBy(c => c.Label)
+                .ToList();
         }
 
         fromMonth ??= month; fromYear ??= year;
@@ -441,7 +447,9 @@ public class DashboardService : IDashboardService
         var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
-        return (await SumBreakdownAsync(periods, accessible, stores, omOcStores, MultiValueFilter.Split(jobTitles), e => e.Gender, excludeEmptyKey: false))
+        var summed = await SumBreakdownAsync(periods, accessible, stores, omOcStores, MultiValueFilter.Split(jobTitles), e => e.Gender, excludeEmptyKey: false);
+        return summed
+            .Select(c => new ChartDataItem { Label = DataLabelTranslator.Gender(c.Label, _L), Value = c.Value })
             .OrderBy(c => c.Label)
             .ToList();
     }
@@ -1008,10 +1016,13 @@ public class DashboardService : IDashboardService
             if (accessible != null) qAll = qAll.Where(e => accessible.Contains(e.Store));
             if (stores != null) qAll = qAll.Where(e => stores.Contains(e.Store));
             if (MultiValueFilter.Split(jobTitles) is { } jobs) qAll = qAll.Where(e => jobs.Contains(e.JobTitle));
-            return await qAll.GroupBy(e => e.PayrollGroup)
-                .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
-                .OrderByDescending(x => x.Value)
+            var rowsAll = await qAll.GroupBy(e => e.PayrollGroup)
+                .Select(g => new { g.Key, Count = g.Count() })
                 .ToListAsync();
+            return rowsAll
+                .Select(x => new ChartDataItem { Label = DataLabelTranslator.PayrollGroup(x.Key, _L), Value = x.Count })
+                .OrderByDescending(x => x.Value)
+                .ToList();
         }
 
         fromMonth ??= month; fromYear ??= year;
@@ -1019,7 +1030,9 @@ public class DashboardService : IDashboardService
         var anchor  = periods.OrderByDescending(p => p.Year * 100 + p.Month).First();
         var omOcStores = stores == null ? await GetStoresForOmOcAsync(anchor.Month, anchor.Year, om, oc, soc, od) : null;
 
-        return (await SumBreakdownAsync(periods, accessible, stores, omOcStores, MultiValueFilter.Split(jobTitles), e => e.PayrollGroup, excludeEmptyKey: true))
+        var summed = await SumBreakdownAsync(periods, accessible, stores, omOcStores, MultiValueFilter.Split(jobTitles), e => e.PayrollGroup, excludeEmptyKey: true);
+        return summed
+            .Select(c => new ChartDataItem { Label = DataLabelTranslator.PayrollGroup(c.Label, _L), Value = c.Value })
             .OrderByDescending(c => c.Value)
             .ToList();
     }
@@ -1134,14 +1147,15 @@ public class DashboardService : IDashboardService
             .Select(g => new { g.Key.Store, g.Key.PayrollGroup, Count = g.Count() })
             .ToListAsync();
         var payrollByStore = payrollGrouped.GroupBy(r => r.Store)
-            .ToDictionary(g => g.Key, g => g.OrderBy(x => x.PayrollGroup).ToDictionary(x => x.PayrollGroup, x => x.Count));
+            .ToDictionary(g => g.Key, g => g.OrderBy(x => x.PayrollGroup)
+                .ToDictionary(x => DataLabelTranslator.PayrollGroup(x.PayrollGroup, _L), x => x.Count));
 
         return genderGrouped.GroupBy(r => r.Store)
             .Select(g => new StoreHeadcountRow
             {
                 StoreName             = g.Key,
                 Headcount             = g.Sum(x => x.Count),
-                GenderBreakdown       = g.OrderBy(x => x.Gender).ToDictionary(x => x.Gender, x => x.Count),
+                GenderBreakdown       = g.OrderBy(x => x.Gender).ToDictionary(x => DataLabelTranslator.Gender(x.Gender, _L), x => x.Count),
                 PayrollGroupBreakdown = payrollByStore.TryGetValue(g.Key, out var pg) ? pg : new Dictionary<string, int>(),
             })
             .OrderByDescending(r => r.Headcount)

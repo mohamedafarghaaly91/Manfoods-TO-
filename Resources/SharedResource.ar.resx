@@ -243,6 +243,10 @@
   <data name="Common_Resignations" xml:space="preserve"><value>الاستقالات</value></data>
   <data name="Common_TurnoverPct" xml:space="preserve"><value>معدل الدوران%</value></data>
   <data name="Common_Month" xml:space="preserve"><value>الشهر</value></data>
+  <data name="Common_Gender_Male" xml:space="preserve"><value>ذكر</value></data>
+  <data name="Common_Gender_Female" xml:space="preserve"><value>أنثى</value></data>
+  <data name="Common_Payroll_Manfoods" xml:space="preserve"><value>العاملين وقت كامل</value></data>
+  <data name="Common_Payroll_HourlyPaid" xml:space="preserve"><value>العاملين بالساعة</value></data>
   <data name="Common_Year" xml:space="preserve"><value>السنة</value></data>
   <data name="Common_NoData" xml:space="preserve"><value>لا توجد بيانات لهذه الفترة.</value></data>
   <data name="Common_NoMatchingStores" xml:space="preserve"><value>لا توجد فروع مطابقة.</value></data>
@@ -569,6 +573,16 @@
   <data name="Chart_WorkPressureReasonSub" xml:space="preserve"><value>لما وصفوا ضغط العمل بإنه شديد، إيه كان السبب من وجهة نظرهم</value></data>
   <data name="Chart_EngagementDrivers" xml:space="preserve"><value>محركات الانخراط</value></data>
   <data name="Chart_EngagementDriversSub" xml:space="preserve"><value>نسبة الردود الإيجابية — الأقل رضا أولًا</value></data>
+  <data name="EiDriver_FairTreatment" xml:space="preserve"><value>المعاملة العادلة</value></data>
+  <data name="EiDriver_EncourageOpinions" xml:space="preserve"><value>تشجيع مشاركة الآراء</value></data>
+  <data name="EiDriver_ComplaintsHandling" xml:space="preserve"><value>التعامل الفعّال مع الشكاوى</value></data>
+  <data name="EiDriver_BenefitsMatch" xml:space="preserve"><value>مطابقة المزايا لمتطلبات الوظيفة</value></data>
+  <data name="EiDriver_Teamwork" xml:space="preserve"><value>العمل الجماعي والتعاون</value></data>
+  <data name="EiDriver_Communication" xml:space="preserve"><value>التواصل مع الإدارة</value></data>
+  <data name="EiDriver_TaskFit" xml:space="preserve"><value>إسناد المهام المناسبة</value></data>
+  <data name="EiDriver_Training" xml:space="preserve"><value>التدريب الكافي</value></data>
+  <data name="EiDriver_Feedback" xml:space="preserve"><value>الحصول على ملاحظات وتوجيه</value></data>
+  <data name="EiDriver_UsePersonalAbilities" xml:space="preserve"><value>إمكانية استغلال القدرات الشخصية</value></data>
   <data name="Chart_EiByJobTitle" xml:space="preserve"><value>مقابلات الخروج حسب الوظيفة</value></data>
   <data name="Chart_EiByJobTitleSub" xml:space="preserve"><value>أكتر الوظائف اللي بتعمل مقابلات خروج</value></data>
   <data name="Chart_EiReasonsTrend" xml:space="preserve"><value>أسباب الاستقالة عبر الوقت</value></data>
@@ -1026,6 +1040,8 @@
   <data name="TV_KpiTrend" xml:space="preserve"><value>الاتجاه مقارنة بالفترة السابقة</value></data>
   <data name="TV_KpiTrendDesc" xml:space="preserve"><value>التغير في معدل الدوران مقارنة بالفترة السابقة المماثلة</value></data>
   <data name="TV_KpiRangeNote" xml:space="preserve"><value>— تجمع البطاقات أعلاه كل فترة ضمن النطاق المحدد.</value></data>
+  <data name="TV_TrendSubtitleStore" xml:space="preserve"><value>معدل الدوران (%) لـ {0}، نقطة واحدة لكل شهر، لكل الفترات</value></data>
+  <data name="TV_TrendSubtitleTop6" xml:space="preserve"><value>أفضل 6 فروع حسب متوسط معدل الدوران — خط لكل فرع، نقطة لكل شهر، لكل الفترات</value></data>
   <data name="TV_NoInsights" xml:space="preserve"><value>لا توجد تحليلات متاحة — قم برفع بيانات لعدة فترات لتفعيل تحليل الاتجاهات.</value></data>
   <data name="TV_SpikeHeaderSingular" xml:space="preserve"><value>أعلى {0} فرع في الارتفاع مقارنة بالفترة السابقة</value></data>
   <data name="TV_SpikeHeaderPlural" xml:space="preserve"><value>أعلى {0} فروع في الارتفاع مقارنة بالفترة السابقة</value></data>

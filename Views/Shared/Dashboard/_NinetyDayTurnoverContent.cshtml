@@ -962,7 +962,7 @@ async function ntdLoadPayrollGroupChart() {
     const payrollLabels = data.map(d => d.label);
     ntdPayrollGroupInstance = new Chart(ctx.getContext('2d'), {
         type: 'bar',
-        data: { labels: payrollLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(payrollLabels, null), borderRadius: 4, maxBarThickness: 26 }] },
+        data: { labels: payrollLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: ChartColors.colorsByLabel(payrollLabels, ChartColors.PAYROLL_GROUP_COLORS), borderRadius: 4, maxBarThickness: 26 }] },
         options: {
             indexAxis: 'y',
             maintainAspectRatio: false,

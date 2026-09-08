@@ -315,7 +315,7 @@ async function wfLoadPayrollChart() {
     wfSetTitleBadge('wfPayrollTitle', true);
     const data = await fetchJson(`/api/dashboard/headcount-by-payroll-group?${buildQuery()}`);
     const labels = data.map(d => d.label);
-    const colors = ChartColors.colorsByLabel(labels, null);
+    const colors = ChartColors.colorsByLabel(labels, ChartColors.PAYROLL_GROUP_COLORS);
     wfPayrollChart = mkChart(wfPayrollChart, 'wfPayrollChart', {
         type: 'bar',
         data: { labels, datasets: [{ data: data.map(d => d.value), backgroundColor: colors, borderRadius: 4 }] },
@@ -410,7 +410,7 @@ function wfRenderStoreTable(rows) {
     if (!rows || !rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">' + wfL.noData + '</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => {
         const genderHtml  = wfRenderMixChips(r.genderBreakdown, l => ChartColors.GENDER_COLORS[l] || ChartColors.hashColor(l));
-        const payrollHtml = wfRenderMixChips(r.payrollGroupBreakdown || {}, l => ChartColors.hashColor(l));
+        const payrollHtml = wfRenderMixChips(r.payrollGroupBreakdown || {}, l => ChartColors.PAYROLL_GROUP_COLORS[l] || ChartColors.hashColor(l));
         return `<tr>
             <td class="px-3 py-2 fw-semibold">${sapEscape(r.storeName)}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>

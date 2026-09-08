@@ -445,7 +445,9 @@
      data-kpi-trend-desc="@L["TV_KpiTrendDesc"]"
      data-kpi-range-note="@L["TV_KpiRangeNote"]"
      data-loading-short="@L["Common_LoadingShort"]"
-     data-no-data-available="@L["Common_NoDataAvailable"]"></div>
+     data-no-data-available="@L["Common_NoDataAvailable"]"
+     data-trend-subtitle-store="@L["TV_TrendSubtitleStore"]"
+     data-trend-subtitle-top6="@L["TV_TrendSubtitleTop6"]"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -694,7 +696,7 @@ async function tvLoadPayrollGroupChart() {
     tvSetTitleBadge('tvPayrollTitle', true);
     const data = await fetchJson(`/api/dashboard/turnover-by-payroll-group?${buildQuery()}`);
     const payrollLabels = data.map(d => d.label);
-    const payrollColors = ChartColors.colorsByLabel(payrollLabels, null);
+    const payrollColors = ChartColors.colorsByLabel(payrollLabels, ChartColors.PAYROLL_GROUP_COLORS);
     payrollGroupChart = mkChart(payrollGroupChart, 'payrollGroupChart', {
         type: 'bar',
         data: { labels: payrollLabels, datasets: [{ data: data.map(d => d.value), backgroundColor: payrollColors, borderRadius: 4 }] },
@@ -1011,10 +1013,10 @@ function tvRenderTrendChart() {
     let rows;
     if (storeFilter) {
         rows = mxData.rows.filter(r => r.storeName === storeFilter);
-        if (subtitle) subtitle.textContent = `Turnover rate (%) for ${storeFilter}, one point per month, all-time`;
+        if (subtitle) subtitle.textContent = tvL.trendSubtitleStore.replace('{0}', storeFilter);
     } else {
         rows = mxData.rows.slice().sort((a, b) => (b.avgRate ?? -1) - (a.avgRate ?? -1)).slice(0, 6);
-        if (subtitle) subtitle.textContent = 'Top 6 stores by average turnover rate — one line per store, one point per month, all-time';
+        if (subtitle) subtitle.textContent = tvL.trendSubtitleTop6;
     }
 
     const ctx = document.getElementById('trendChart');

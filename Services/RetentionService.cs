@@ -657,7 +657,7 @@ public class RetentionService : IRetentionService
         return rows.Where(r => !string.IsNullOrWhiteSpace(r.Gender)).GroupBy(r => r.Gender)
             .Select(g => new ChartDataItem
             {
-                Label = g.Key,
+                Label = DataLabelTranslator.Gender(g.Key, _L),
                 Value = (int)MetricsCalculationService.RatePercent(
                     g.Count(x => (asOf.DayNumber - x.HireDate!.Value.DayNumber) >= MetricsCalculationService.SixMonthRetentionDays),
                     g.Count(), 0),
