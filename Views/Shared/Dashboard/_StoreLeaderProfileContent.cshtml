@@ -122,6 +122,7 @@
     const page = document.getElementById('slpPage');
     const params = new URLSearchParams(window.location.search);
     const leader = params.get('leader') || '';
+    const dimension = ['leader', 'oc', 'om'].includes(params.get('dimension')) ? params.get('dimension') : 'leader';
     const labels = {
         noData: page.dataset.noData, noExit: page.dataset.noExit, noComments: page.dataset.noComments,
         headcount: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(L["SLP_Headcount"].Value)),
@@ -185,6 +186,7 @@
         const q = new URLSearchParams({ leader });
         if (params.get('year')) q.set('year', params.get('year'));
         if (params.get('months')) q.set('months', params.get('months'));
+        q.set('dimension', dimension);
         const res = await fetch(`/api/scorecard/leader-profile?${q.toString()}`);
         if (!res.ok) { document.getElementById('slpError').textContent = labels.noData; document.getElementById('slpError').style.display=''; return; }
         const p = await res.json(), s = p.summary || {}, sentiment = p.exitSentiment || {};

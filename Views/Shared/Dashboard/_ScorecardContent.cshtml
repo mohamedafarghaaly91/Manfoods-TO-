@@ -612,7 +612,7 @@ function scRenderRankingTable() {
 }
 
 function scLeaderProfileHref(name) {
-    const q = new URLSearchParams({ leader: name });
+    const q = new URLSearchParams({ leader: name, dimension: scDimension });
     if (scYear) q.set('year', scYear);
     if (scMonths.length) q.set('months', scMonths.join(','));
     return `${scLeaderProfileUrl}?${q.toString()}`;

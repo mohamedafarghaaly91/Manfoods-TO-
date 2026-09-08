@@ -38,19 +38,23 @@ public class ScorecardApiController : ControllerBase
     }
 
     [HttpGet("leader-profile")]
-    public async Task<IActionResult> LeaderProfile([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
+    public async Task<IActionResult> LeaderProfile([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null,
+        [FromQuery] string dimension = "leader")
     {
         if (string.IsNullOrWhiteSpace(leader)) return BadRequest(new { error = "Leader name is required." });
+        if (!ValidDimensions.Contains(dimension)) return BadRequest(new { error = "Invalid dimension." });
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetLeaderProfileAsync(leader, role, assignedName, months, year));
+        return Ok(await _scorecard.GetLeaderProfileAsync(leader, role, assignedName, months, year, dimension));
     }
 
     [HttpGet("leader-history")]
-    public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
+    public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null,
+        [FromQuery] string dimension = "leader")
     {
         if (string.IsNullOrWhiteSpace(leader)) return BadRequest(new { error = "Leader name is required." });
+        if (!ValidDimensions.Contains(dimension)) return BadRequest(new { error = "Invalid dimension." });
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, role, assignedName, months, year));
+        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, role, assignedName, months, year, dimension));
     }
 
     [HttpGet("rollup")]

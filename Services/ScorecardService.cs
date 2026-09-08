@@ -47,6 +47,17 @@ public class ScorecardService : IScorecardService
         _ => "",
     };
 
+    private static string NormalizeProfileDimension(string dimension) =>
+        dimension is "leader" or "oc" or "om" ? dimension : "leader";
+
+    private static IQueryable<StoreReference> WhereDimension(
+        IQueryable<StoreReference> query, string dimension, string name) => dimension switch
+        {
+            "oc" => query.Where(s => s.OperationConsultant == name),
+            "om" => query.Where(s => s.OperationManager == name),
+            _ => query.Where(s => s.StoreLeader == name),
+        };
+
     private class NameAggregate
     {
         public HashSet<string> Stores { get; } = new();
@@ -263,22 +274,25 @@ public class ScorecardService : IScorecardService
         return await q.Select(s => s.StoreLeader).Distinct().OrderBy(s => s).ToListAsync();
     }
 
-    public async Task<StoreLeaderProfileViewModel> GetLeaderProfileAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
+    public async Task<StoreLeaderProfileViewModel> GetLeaderProfileAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null, string dimension = "leader")
     {
+        dimension = NormalizeProfileDimension(dimension);
         var profile = new StoreLeaderProfileViewModel { Name = leaderName };
         if (string.IsNullOrWhiteSpace(leaderName)) return profile;
 
         var effectiveYear = await ResolveEffectiveYearAsync(year);
-        var scorecard = await GetScorecardAsync("leader", role, assignedName, months: months, year: effectiveYear);
+        var scorecard = await GetScorecardAsync(dimension, role, assignedName, months: months, year: effectiveYear);
         profile.Summary = scorecard.FirstOrDefault(r => r.Name == leaderName);
-        profile.History = await GetLeaderHistoryAsync(leaderName, role, assignedName, months, effectiveYear);
+        profile.History = await GetLeaderHistoryAsync(leaderName, role, assignedName, months, effectiveYear, dimension);
 
         var filter = new ExitInterviewFilter
         {
-            StoreLeader = leaderName,
             Months = months,
             Year = effectiveYear,
         };
+        if (dimension == "leader") filter.StoreLeader = leaderName;
+        else if (dimension == "oc") filter.OperationConsultant = leaderName;
+        else filter.OperationManager = leaderName;
 
         profile.ExitSentiment = await _exitInterviews.GetSentimentSummaryAsync(filter, role, assignedName);
         profile.ExitReasons = await _exitInterviews.GetReasonsForLeavingAsync(filter, role, assignedName);
@@ -295,16 +309,18 @@ public class ScorecardService : IScorecardService
         return profile;
     }
 
-    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null)
+    public async Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null, string dimension = "leader")
     {
         if (string.IsNullOrWhiteSpace(leaderName)) return new List<LeaderHistoryRow>();
+        dimension = NormalizeProfileDimension(dimension);
 
         var periods = DashboardService.ResolvePeriods(null, year, null, null, months);
         var periodKeys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
         if (periodKeys.Count == 0) return new List<LeaderHistoryRow>();
 
-        var rowsQuery = _db.StoreReferences
-            .Where(s => s.StoreLeader == leaderName && periodKeys.Contains(s.Year * 100 + s.Month));
+        var rowsQuery = WhereDimension(
+            _db.StoreReferences.Where(s => periodKeys.Contains(s.Year * 100 + s.Month)),
+            dimension, leaderName);
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
         if (accessible != null) rowsQuery = rowsQuery.Where(s => accessible.Contains(s.StoreName));
         var rows = await rowsQuery
@@ -321,6 +337,31 @@ public class ScorecardService : IScorecardService
             .GroupBy(r => new { r.Store, r.Month, r.Year })
             .Select(g => new { g.Key.Store, g.Key.Month, g.Key.Year, Count = g.Count() })
             .ToListAsync()).ToDictionary(x => (x.Store, x.Month, x.Year), x => x.Count);
+
+        if (dimension != "leader")
+        {
+            return rows
+                .GroupBy(r => new { r.Year, r.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .Select(g =>
+                {
+                    var stores = g.Select(r => r.StoreName).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().OrderBy(s => s).ToList();
+                    var headcount = stores.Sum(store => headcountMap.GetValueOrDefault((store, g.Key.Month, g.Key.Year)));
+                    var resignations = stores.Sum(store => resignMap.GetValueOrDefault((store, g.Key.Month, g.Key.Year)));
+                    return new LeaderHistoryRow
+                    {
+                        Store = string.Join(", ", stores),
+                        Month = g.Key.Month,
+                        Year = g.Key.Year,
+                        PeriodLabel = $"{g.Key.Month:00}/{g.Key.Year}",
+                        Headcount = headcount,
+                        Resignations = resignations,
+                        TurnoverRate = MetricsCalculationService.RatePercent(resignations, headcount),
+                        IsStoreTransition = false,
+                    };
+                })
+                .ToList();
+        }
 
         var result = new List<LeaderHistoryRow>();
         string? previousStore = null;

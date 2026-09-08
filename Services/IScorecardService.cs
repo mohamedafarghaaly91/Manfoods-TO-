@@ -14,12 +14,12 @@ public interface IScorecardService
     /// <summary>Distinct Store Leader names (all-time) for the leader-search combobox.</summary>
     Task<List<string>> GetLeaderNamesAsync(string role, string? assignedName);
 
-    Task<StoreLeaderProfileViewModel> GetLeaderProfileAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null);
+    Task<StoreLeaderProfileViewModel> GetLeaderProfileAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null, string dimension = "leader");
 
     /// <summary>One Store Leader's per-period store-assignment history within
     /// the resolved window, in chronological order, with each row marked when
     /// it represents a transfer to a new store.</summary>
-    Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null);
+    Task<List<LeaderHistoryRow>> GetLeaderHistoryAsync(string leaderName, string role, string? assignedName, string? months = null, int? year = null, string dimension = "leader");
 
     /// <summary>For each Operation Consultant / Operation Manager, how many of
     /// their currently-assigned Store Leaders have above-average turnover
