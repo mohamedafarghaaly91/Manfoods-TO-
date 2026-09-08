@@ -261,12 +261,12 @@ public class ExitInterviewService : IExitInterviewService
 
         if (dimension != "leader" && dimension != "oc" && dimension != "om")
         {
-            var rows = await q.Select(e => new { e.WouldReturn, e.OverallExperience }).ToListAsync();
-            var answers = rows.Select(r => r.WouldReturn).Concat(rows.Select(r => r.OverallExperience))
+            var sentimentRows = await q.Select(e => new { e.WouldReturn, e.OverallExperience }).ToListAsync();
+            var answers = sentimentRows.Select(r => r.WouldReturn).Concat(sentimentRows.Select(r => r.OverallExperience))
                 .Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
             var overall = new ExitSentimentSummary
             {
-                TotalResponses = rows.Count,
+                TotalResponses = sentimentRows.Count,
                 AnsweredCount = answers.Count,
                 PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
             };
