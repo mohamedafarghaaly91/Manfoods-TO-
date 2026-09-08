@@ -568,6 +568,8 @@
   <data name="EI_Question" xml:space="preserve"><value>السؤال</value></data>
   <data name="EI_Comment" xml:space="preserve"><value>التعليق</value></data>
   <data name="EI_NoDataForFilters" xml:space="preserve"><value>مفيش بيانات للفلاتر المختارة.</value></data>
+  <data name="EI_ExcludeFamilyReasons" xml:space="preserve"><value>استبعاد أسباب عائلية</value></data>
+  <data name="EI_ExcludeFamilyReasonsHint" xml:space="preserve"><value>يؤثر فقط على الرسوم المبنية على سؤال أسباب ترك العمل</value></data>
   <data name="EI_NoCommentsForFilters" xml:space="preserve"><value>مفيش تعليقات للفلاتر المختارة.</value></data>
   <data name="Chart_NinetyDayTrend" xml:space="preserve"><value>اتجاه دوران 90 يوم</value></data>
   <data name="Chart_NinetyDayTrendSub" xml:space="preserve"><value>المعدل لكل مجموعة شهر تعيين، لكل الفترات — النقاط المتقطعة ما زالت مؤقتة</value></data>

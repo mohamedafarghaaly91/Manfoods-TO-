@@ -568,6 +568,8 @@
   <data name="EI_Question" xml:space="preserve"><value>Question</value></data>
   <data name="EI_Comment" xml:space="preserve"><value>Comment</value></data>
   <data name="EI_NoDataForFilters" xml:space="preserve"><value>No data for the selected filters.</value></data>
+  <data name="EI_ExcludeFamilyReasons" xml:space="preserve"><value>Exclude family reasons</value></data>
+  <data name="EI_ExcludeFamilyReasonsHint" xml:space="preserve"><value>Only affects charts based on the Reasons for Leaving question</value></data>
   <data name="EI_NoCommentsForFilters" xml:space="preserve"><value>No comments for the selected filters.</value></data>
   <data name="Chart_NinetyDayTrend" xml:space="preserve"><value>90-Day Turnover Trend</value></data>
   <data name="Chart_NinetyDayTrendSub" xml:space="preserve"><value>Rate per hire-month cohort, all-time — dashed points are still provisional</value></data>

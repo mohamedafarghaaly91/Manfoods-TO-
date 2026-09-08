@@ -8,6 +8,7 @@ public class ExitInterviewFilter
     public string? OperationManager { get; set; }
     public int? Year { get; set; }
     public string? Months { get; set; }
+    public bool ExcludeFamilyReasons { get; set; }
 }
 
 public class ExitInterviewFilterOptions

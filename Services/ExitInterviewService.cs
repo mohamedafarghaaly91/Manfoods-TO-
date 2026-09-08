@@ -8,6 +8,8 @@ namespace MvcApp.Services;
 
 public class ExitInterviewService : IExitInterviewService
 {
+    private const string FamilyReason = "أسباب عائلية";
+
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
 
@@ -58,6 +60,9 @@ public class ExitInterviewService : IExitInterviewService
               .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
               .OrderByDescending(c => c.Value)
               .ToList();
+
+    private static bool IsFamilyReason(string? value) =>
+        string.Equals(value?.Trim(), FamilyReason, StringComparison.Ordinal);
 
     /// <summary>
     /// Best-effort Arabic Likert/agree-disagree sentiment heuristic. The
@@ -117,8 +122,13 @@ public class ExitInterviewService : IExitInterviewService
         };
     }
 
-    public async Task<List<ChartDataItem>> GetReasonsForLeavingAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
-        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving));
+    public async Task<List<ChartDataItem>> GetReasonsForLeavingAsync(ExitInterviewFilter filter, string role, string? assignedName)
+    {
+        var values = await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving);
+        if (filter.ExcludeFamilyReasons)
+            values = values.Where(v => !IsFamilyReason(v)).ToList();
+        return GroupCount(values);
+    }
 
     public async Task<List<ChartDataItem>> GetWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
         GroupCount(await FilteredAsync(filter, role, assignedName, e => e.WouldReturn));
@@ -350,9 +360,13 @@ public class ExitInterviewService : IExitInterviewService
         {
             Store = filter.Store, StoreLeader = filter.StoreLeader,
             OperationConsultant = filter.OperationConsultant, OperationManager = filter.OperationManager,
+            ExcludeFamilyReasons = filter.ExcludeFamilyReasons,
         };
         var rows = await FilteredAsync(allTimeFilter, role, assignedName, e => new { e.Month, e.Year, e.ReasonForLeaving });
-        var dated = rows.Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
+        var dated = rows
+            .Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving))
+            .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
+            .ToList();
         if (dated.Count == 0) return new List<ExitReasonTrendPoint>();
 
         var topReasons = dated.GroupBy(r => r.ReasonForLeaving)
@@ -374,7 +388,10 @@ public class ExitInterviewService : IExitInterviewService
     public async Task<List<ExitReasonReturnItem>> GetReasonVsWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName)
     {
         var rows = await FilteredAsync(filter, role, assignedName, e => new { e.ReasonForLeaving, e.WouldReturn });
-        var valid = rows.Where(r => !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
+        var valid = rows
+            .Where(r => !string.IsNullOrWhiteSpace(r.ReasonForLeaving))
+            .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
+            .ToList();
 
         return valid.GroupBy(r => r.ReasonForLeaving)
             .Select(g =>
