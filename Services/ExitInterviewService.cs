@@ -64,6 +64,27 @@ public class ExitInterviewService : IExitInterviewService
     private static bool IsFamilyReason(string? value) =>
         string.Equals(value?.Trim(), FamilyReason, StringComparison.Ordinal);
 
+    private static List<ChartDataItem> GroupReasonCount(IEnumerable<string> values)
+    {
+        var grouped = values.Where(v => !string.IsNullOrWhiteSpace(v))
+            .GroupBy(ExitReasonTaxonomy.Classify)
+            .Select(g => new
+            {
+                Code = g.Key,
+                Item = new ChartDataItem
+                {
+                    Label = ExitReasonTaxonomy.Label(g.Key),
+                    Value = g.Count()
+                }
+            });
+
+        return grouped
+            .OrderByDescending(g => g.Item.Value)
+            .ThenBy(g => ExitReasonTaxonomy.Order(g.Code))
+            .Select(g => g.Item)
+            .ToList();
+    }
+
     /// <summary>
     /// Best-effort Arabic Likert/agree-disagree sentiment heuristic. The
     /// neutral phrase is checked first because it contains "أوافق" as a
@@ -127,7 +148,7 @@ public class ExitInterviewService : IExitInterviewService
         var values = await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving);
         if (filter.ExcludeFamilyReasons)
             values = values.Where(v => !IsFamilyReason(v)).ToList();
-        return GroupCount(values);
+        return GroupReasonCount(values);
     }
 
     public async Task<List<ChartDataItem>> GetWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
@@ -366,10 +387,11 @@ public class ExitInterviewService : IExitInterviewService
         var dated = rows
             .Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving))
             .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
+            .Select(r => new { r.Year, r.Month, Code = ExitReasonTaxonomy.Classify(r.ReasonForLeaving) })
             .ToList();
         if (dated.Count == 0) return new List<ExitReasonTrendPoint>();
 
-        var topReasons = dated.GroupBy(r => r.ReasonForLeaving)
+        var topReasons = dated.GroupBy(r => r.Code)
             .OrderByDescending(g => g.Count())
             .Take(5)
             .Select(g => g.Key)
@@ -380,7 +402,9 @@ public class ExitInterviewService : IExitInterviewService
             .Select(g => new ExitReasonTrendPoint
             {
                 Label = new DateOnly(g.Key.Year, g.Key.Month, 1).ToString("MMM yy"),
-                Counts = topReasons.ToDictionary(reason => reason, reason => g.Count(r => r.ReasonForLeaving == reason)),
+                Counts = topReasons.ToDictionary(
+                    code => ExitReasonTaxonomy.Label(code),
+                    code => g.Count(r => r.Code == code)),
             })
             .ToList();
     }
@@ -393,14 +417,14 @@ public class ExitInterviewService : IExitInterviewService
             .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
             .ToList();
 
-        return valid.GroupBy(r => r.ReasonForLeaving)
+        return valid.GroupBy(r => ExitReasonTaxonomy.Classify(r.ReasonForLeaving))
             .Select(g =>
             {
                 var withAnswer = g.Where(r => !string.IsNullOrWhiteSpace(r.WouldReturn)).ToList();
                 var yesCount = withAnswer.Count(r => IsYes(r.WouldReturn));
                 return new ExitReasonReturnItem
                 {
-                    Reason = g.Key,
+                    Reason = ExitReasonTaxonomy.Label(g.Key),
                     Count = g.Count(),
                     WouldReturnPercent = withAnswer.Count > 0 ? Math.Round(yesCount * 100.0 / withAnswer.Count, 1) : 0,
                 };
