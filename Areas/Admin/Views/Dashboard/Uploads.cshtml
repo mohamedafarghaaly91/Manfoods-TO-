@@ -475,7 +475,7 @@ function dmSetupDropzone(zoneId) {
     function render() {
         if (input.files && input.files.length > 0) {
             zone.classList.add('has-file');
-            hint.innerHTML = `<div class="dm-dropzone-filename">${input.files[0].name}</div><div class="dm-dropzone-change">${changeLabel}</div>`;
+            hint.innerHTML = `<div class="dm-dropzone-filename">${dmEsc(input.files[0].name)}</div><div class="dm-dropzone-change">${changeLabel}</div>`;
         } else {
             zone.classList.remove('has-file');
             hint.textContent = defaultHint;
@@ -543,7 +543,7 @@ function dmUpdateFileType(val) {
 function dmRenderUpdateFile() {
     if (dmUpdateInput.files && dmUpdateInput.files.length > 0) {
         dmUpdateZone.classList.add('has-file');
-        dmUpdateZoneHint.innerHTML = `<div class="dm-dropzone-filename">${dmUpdateInput.files[0].name}</div><div class="dm-dropzone-change">${changeLabel}</div>`;
+        dmUpdateZoneHint.innerHTML = `<div class="dm-dropzone-filename">${dmEsc(dmUpdateInput.files[0].name)}</div><div class="dm-dropzone-change">${changeLabel}</div>`;
         dmUpdateSubmitBtn.disabled = false;
     } else {
         dmUpdateZone.classList.remove('has-file');
