@@ -191,13 +191,12 @@
         }
         @if (latestDataPeriod is not null)
         {
-            <div class="data-freshness-banner" role="status">
-                <span class="data-freshness-icon"><i class="bi bi-database-check"></i></span>
-                <span class="data-freshness-copy">
-                    <span class="data-freshness-label">@L["Layout_DataFreshnessLabel"]</span>
+            <div class="data-freshness-wrap">
+                <span class="data-freshness-chip" role="status" title="@L["Layout_DataFreshnessCaption"]">
+                    <i class="bi bi-database-check"></i>
+                    <span class="data-freshness-label">@L["Layout_DataFreshnessLabel"]:</span>
                     <strong class="data-freshness-period">@latestDataPeriodLabel</strong>
                 </span>
-                <span class="data-freshness-caption">@L["Layout_DataFreshnessCaption"]</span>
             </div>
         }
         <div class="page-content">
