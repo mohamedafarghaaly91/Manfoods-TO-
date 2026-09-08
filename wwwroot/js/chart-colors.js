@@ -15,22 +15,15 @@ function sapEscape(s) {
     return div.innerHTML;
 }
 
-// Keep tooltip hit-testing consistent across every dashboard chart. This file
-// is loaded after Chart.js on all chart pages, including Action Center pages
-// that do not load dashboard.js.
+// Tooltips are switched off app-wide (removed by request — no hover popup on
+// any chart, anywhere). Forced at the Proxy construction level below rather
+// than just a global default, because a number of individual charts set
+// their own `tooltip: { enabled: true, callbacks: {...} }`, which would
+// otherwise override a plain Chart.defaults change — this way it's off
+// unconditionally, for every current and future chart, with no per-chart
+// edits needed. This file is loaded after Chart.js on all chart pages,
+// including Action Center pages that do not load dashboard.js.
 if (typeof Chart !== 'undefined') {
-    // 'nearest' picks the closest data POINT by pixel distance, which for a bar
-    // is near its tip/edge — hovering over the rest of the bar (or an empty part
-    // of its column) can miss it entirely while an unrelated neighboring area
-    // registers instead. 'index' makes the whole column/row strip for that
-    // category the hit-zone, so hovering anywhere over it reliably shows its
-    // tooltip.
-    Chart.defaults.interaction.mode = 'index';
-    Chart.defaults.interaction.intersect = false;
-    Chart.defaults.plugins.tooltip.mode = 'index';
-    Chart.defaults.plugins.tooltip.intersect = false;
-    Chart.defaults.plugins.tooltip.position = 'nearest';
-
     // Horizontal bar charts (indexAxis:'y' — every leaderboard/ranking chart
     // in the app) otherwise always keep their category labels on the left
     // and grow bars rightward, regardless of page direction: correct for an
@@ -42,18 +35,21 @@ if (typeof Chart !== 'undefined') {
     // handling would otherwise reorder incorrectly; this only repositions
     // the axes via Chart.js's own layout options, so it doesn't touch that.
     // Wrapping the constructor (rather than editing every chart call site)
-    // makes this apply to every current and future horizontal bar chart
+    // makes both of these apply to every current and future chart
     // automatically, with no per-chart code needed.
     const OriginalChart = Chart;
     window.Chart = new Proxy(OriginalChart, {
         construct(target, args) {
             const [ctx, config] = args;
+            config.options = config.options || {};
             const isRtl = document.documentElement.getAttribute('dir') === 'rtl';
-            if (isRtl && config?.options?.indexAxis === 'y') {
+            if (isRtl && config.options.indexAxis === 'y') {
                 config.options.scales = config.options.scales || {};
                 config.options.scales.y = Object.assign({}, config.options.scales.y, { position: 'right' });
                 config.options.scales.x = Object.assign({}, config.options.scales.x, { reverse: true });
             }
+            config.options.plugins = config.options.plugins || {};
+            config.options.plugins.tooltip = Object.assign({}, config.options.plugins.tooltip, { enabled: false });
             return new target(ctx, config);
         }
     });
