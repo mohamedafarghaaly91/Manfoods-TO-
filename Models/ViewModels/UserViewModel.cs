@@ -36,6 +36,21 @@ public class CreateUserViewModel
     public string Role { get; set; } = "";
 }
 
+public class LoginHistoryItem
+{
+    public DateTime LoggedInAt { get; set; }
+    public string? IpAddress { get; set; }
+    public string? UserAgent { get; set; }
+}
+
+public class UserLoginHistoryViewModel
+{
+    public int UserId { get; set; }
+    public string Email { get; set; } = "";
+    public string AssignedName { get; set; } = "";
+    public List<LoginHistoryItem> Logins { get; set; } = new();
+}
+
 public class EditUserViewModel
 {
     public int Id { get; set; }

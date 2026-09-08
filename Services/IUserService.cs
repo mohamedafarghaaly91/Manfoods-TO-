@@ -18,6 +18,10 @@ public interface IUserService
     /// identical to the caller so a hidden Admin/Super-Admin id can't be
     /// distinguished from a nonexistent one.</summary>
     Task<UserViewModel?> GetByIdAsync(int id, string actorEmail);
+    /// <summary>Returns null under the same visibility rule as GetByIdAsync
+    /// (not found, or `actorEmail` isn't allowed to view this user). Logins
+    /// are most-recent-first, capped at 200 rows.</summary>
+    Task<UserLoginHistoryViewModel?> GetLoginHistoryAsync(int id, string actorEmail);
     /// <summary>Returns (null, "duplicate-email", null) when a user with this
     /// email already exists, (null, "invalid-role", null) when Role isn't one
     /// of ValidRoles, or (null, "role-forbidden", null) when `actorEmail`

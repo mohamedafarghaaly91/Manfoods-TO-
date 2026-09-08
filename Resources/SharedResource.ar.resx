@@ -254,6 +254,7 @@
   <data name="Common_Status" xml:space="preserve"><value>الحالة</value></data>
   <data name="Common_Actions" xml:space="preserve"><value>الإجراءات</value></data>
   <data name="Common_Created" xml:space="preserve"><value>تاريخ الإنشاء</value></data>
+  <data name="Common_Date" xml:space="preserve"><value>التاريخ</value></data>
   <data name="Common_SearchStore" xml:space="preserve"><value>بحث في الفرع، مستشار، مدير...</value></data>
   <data name="Common_SearchComments" xml:space="preserve"><value>بحث في التعليقات...</value></data>
   <data name="Common_SmartInsights" xml:space="preserve"><value>تحليلات ذكية</value></data>
@@ -492,6 +493,7 @@
   <data name="Page_CreateUser" xml:space="preserve"><value>إنشاء مستخدم</value></data>
   <data name="Page_CreateUserSub" xml:space="preserve"><value>إضافة مستخدم جديد للنظام</value></data>
   <data name="Page_EditUser" xml:space="preserve"><value>تعديل مستخدم</value></data>
+  <data name="Page_LoginHistory" xml:space="preserve"><value>سجل تسجيل الدخول</value></data>
   <data name="Page_DataMgmt" xml:space="preserve"><value>إدارة البيانات</value></data>
   <data name="Page_DataMgmtSub" xml:space="preserve"><value>رفع ملفات Excel الشهرية لاستيراد بيانات القوى العاملة</value></data>
   <data name="Page_ChangePassword" xml:space="preserve"><value>تغيير كلمة المرور</value></data>
@@ -656,6 +658,12 @@
   <data name="Users_SearchPlaceholder" xml:space="preserve"><value>ابحث بالإيميل أو الاسم...</value></data>
   <data name="Users_FilterAllRoles" xml:space="preserve"><value>كل الأدوار</value></data>
   <data name="Users_NoResults" xml:space="preserve"><value>مفيش مستخدمين مطابقين للبحث.</value></data>
+  <data name="Users_ViewLoginHistory" xml:space="preserve"><value>عرض سجل تسجيل الدخول</value></data>
+  <data name="Users_NoLoginHistory" xml:space="preserve"><value>مفيش أي عمليات تسجيل دخول مسجّلة لهذا المستخدم لحد دلوقتي.</value></data>
+  <data name="Users_LoginHistoryCount" xml:space="preserve"><value>عدد عمليات تسجيل الدخول المسجّلة (الأحدث أولاً):</value></data>
+  <data name="Users_LoginTime" xml:space="preserve"><value>الوقت</value></data>
+  <data name="Users_IpAddress" xml:space="preserve"><value>عنوان IP</value></data>
+  <data name="Users_Device" xml:space="preserve"><value>الجهاز / المتصفح</value></data>
   <data name="Users_AssignedName" xml:space="preserve"><value>الاسم المعروض</value></data>
   <data name="Users_AssignedNamePlaceholder" xml:space="preserve"><value>مثال: أحمد محمد</value></data>
   <data name="Users_AssignedNameHelp" xml:space="preserve"><value>بيظهر في كل البورتال بدل الإيميل — في ملاحظات Action Center، وكاسم معروض في هيدر منطقة Home.</value></data>

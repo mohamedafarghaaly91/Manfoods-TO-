@@ -210,6 +210,7 @@
                                 {
                                     <button type="button" class="btn btn-sm btn-outline-secondary me-1 js-generate-otp" data-id="@user.Id" data-email="@user.Email" data-admin="true" title="@L["Users_GenerateOtp"]"><i class="bi bi-key"></i></button>
                                 }
+                                <a href="/admin/dashboard/loginhistory/@user.Id" class="btn btn-sm btn-outline-secondary me-1" title="@L["Users_ViewLoginHistory"]"><i class="bi bi-clock-history"></i></a>
                                 <a href="/admin/dashboard/edituser/@user.Id" class="btn btn-sm btn-outline-secondary me-1"><i class="bi bi-pencil"></i></a>
                                 @if (!SuperAdminPolicy.IsSuperAdmin(user.Email))
                                 {

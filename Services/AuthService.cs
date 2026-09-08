@@ -10,6 +10,7 @@ public class AuthService : IAuthService
     private readonly AppDbContext _db;
     private readonly ILogger<AuthService> _logger;
     private readonly IMemoryCache _cache;
+    private readonly IHttpContextAccessor _httpContext;
 
     // Per-account lockout on top of the per-IP "login" rate limiter: the
     // limiter caps request *volume* from one IP, but a patient attacker
@@ -22,11 +23,12 @@ public class AuthService : IAuthService
     private static readonly TimeSpan LockoutWindow = TimeSpan.FromMinutes(15);
     private static string FailKey(string email) => $"login-fail:{email.Trim().ToLowerInvariant()}";
 
-    public AuthService(AppDbContext db, ILogger<AuthService> logger, IMemoryCache cache)
+    public AuthService(AppDbContext db, ILogger<AuthService> logger, IMemoryCache cache, IHttpContextAccessor httpContext)
     {
         _db = db;
         _logger = logger;
         _cache = cache;
+        _httpContext = httpContext;
     }
 
     public async Task<(User? User, string? FailReason)> ValidateAsync(string email, string password)
@@ -75,7 +77,32 @@ public class AuthService : IAuthService
         }
 
         _cache.Remove(failKey);
+        await LogLoginAsync(user);
         return (user, null);
+    }
+
+    // Records the login the moment credentials check out — shared by both the
+    // Home and Admin AccountControllers' Login actions, since they both call
+    // ValidateAsync. Best-effort: a failure here must never block the login
+    // itself, so it's swallowed (logged) rather than surfaced to the caller.
+    private async Task LogLoginAsync(User user)
+    {
+        try
+        {
+            var http = _httpContext.HttpContext;
+            _db.LoginHistories.Add(new LoginHistory
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = http?.Request.Headers.UserAgent.ToString(),
+            });
+            await _db.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to record login history for user {UserId}.", user.Id);
+        }
     }
 
     public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)

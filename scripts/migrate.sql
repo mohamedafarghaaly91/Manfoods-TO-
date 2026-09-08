@@ -513,6 +513,25 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_signal_occurrences_sto
     CREATE UNIQUE INDEX ux_signal_occurrences_store_signal_period
         ON dbo.signal_occurrences (store_name, signal_code, year, month);
 
+-- ── login_history ────────────────────────────────────────────────────────
+-- One row per successful portal login (Home and Admin alike), written by
+-- AuthService.ValidateAsync the moment credentials check out. Powers the
+-- per-user login log opened from the Users page.
+IF OBJECT_ID('dbo.login_history', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.login_history (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        user_id INT NOT NULL,
+        email NVARCHAR(MAX) NOT NULL DEFAULT '',
+        logged_in_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        ip_address NVARCHAR(MAX) NULL,
+        user_agent NVARCHAR(MAX) NULL
+    );
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_login_history_user_logged_in_at' AND object_id = OBJECT_ID('dbo.login_history'))
+    CREATE INDEX ix_login_history_user_logged_in_at
+        ON dbo.login_history (user_id, logged_in_at);
+
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal
 -- user@mcd.com  / 123123654  →  Home portal

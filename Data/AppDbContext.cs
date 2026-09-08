@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<ActionPlanSeverityBandConfig> ActionPlanSeverityBandConfigs { get; set; }
     public DbSet<ActionPlanSeverityBandHistory> ActionPlanSeverityBandHistories { get; set; }
     public DbSet<SignalOccurrence> SignalOccurrences { get; set; }
+    public DbSet<LoginHistory> LoginHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,6 +53,13 @@ public class AppDbContext : DbContext
             .HasIndex(s => new { s.StoreName, s.SignalCode, s.Year, s.Month })
             .IsUnique()
             .HasDatabaseName("ux_signal_occurrences_store_signal_period");
+
+        // Per-user login history is always queried "most recent logins for
+        // this user" — same "config only takes effect for a fresh
+        // EnsureCreated() database" caveat as above.
+        modelBuilder.Entity<LoginHistory>()
+            .HasIndex(l => new { l.UserId, l.LoggedInAt })
+            .HasDatabaseName("ix_login_history_user_logged_in_at");
 
         // SQL Server's DATETIME2 (unlike Npgsql's TIMESTAMPTZ) has no concept of
         // DateTimeKind — every DateTime read back from it comes back as Kind=

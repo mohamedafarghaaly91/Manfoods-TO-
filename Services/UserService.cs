@@ -66,6 +66,21 @@ public class UserService : IUserService
         return ToVm(u);
     }
 
+    public async Task<UserLoginHistoryViewModel?> GetLoginHistoryAsync(int id, string actorEmail)
+    {
+        var u = await _db.Users.FindAsync(id);
+        if (u == null || !UserManagementPolicy.CanView(actorEmail, u)) return null;
+
+        var logins = await _db.LoginHistories
+            .Where(l => l.UserId == id)
+            .OrderByDescending(l => l.LoggedInAt)
+            .Take(200)
+            .Select(l => new LoginHistoryItem { LoggedInAt = l.LoggedInAt, IpAddress = l.IpAddress, UserAgent = l.UserAgent })
+            .ToListAsync();
+
+        return new UserLoginHistoryViewModel { UserId = u.Id, Email = u.Email, AssignedName = u.AssignedName ?? "", Logins = logins };
+    }
+
     public async Task<(UserViewModel? user, string? error, string? temporaryPassword)> CreateAsync(CreateUserViewModel vm, string actorEmail)
     {
         if (!UserManagementPolicy.IsValidRole(vm.Role)) return (null, "invalid-role", null);

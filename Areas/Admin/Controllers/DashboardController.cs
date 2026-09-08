@@ -540,6 +540,14 @@ public class DashboardController : Controller
     }
 
     [RequireAdminAuth]
+    public async Task<IActionResult> LoginHistory(int id)
+    {
+        var history = await _users.GetLoginHistoryAsync(id, HttpContext.Session.GetEmail());
+        if (history == null) return NotFound();
+        return View(history);
+    }
+
+    [RequireAdminAuth]
     public async Task<IActionResult> EditUser(int id)
     {
         var user = await _users.GetByIdAsync(id, HttpContext.Session.GetEmail());
