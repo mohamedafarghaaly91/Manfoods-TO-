@@ -111,6 +111,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
+builder.Services.AddScoped<IDataFreshnessService, DataFreshnessService>();
 builder.Services.AddSingleton<IBackgroundJobTracker, BackgroundJobTracker>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISessionValidationService, SessionValidationService>();

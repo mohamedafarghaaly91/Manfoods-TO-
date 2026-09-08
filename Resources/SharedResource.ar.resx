@@ -16,6 +16,8 @@
   <data name="Layout_DarkMode" xml:space="preserve"><value>الوضع الداكن</value></data>
   <data name="Layout_LightMode" xml:space="preserve"><value>الوضع الفاتح</value></data>
   <data name="Layout_FooterText" xml:space="preserve"><value>McDonald's Egypt Crew Insights Hub</value></data>
+  <data name="Layout_DataFreshnessLabel" xml:space="preserve"><value>البيانات محدثة حتى</value></data>
+  <data name="Layout_DataFreshnessCaption" xml:space="preserve"><value>آخر فترة بيانات تم رفعها</value></data>
   <data name="Notif_Title" xml:space="preserve"><value>التنبيهات</value></data>
   <data name="Notif_Empty" xml:space="preserve"><value>مفيش تنبيهات دلوقتي — كل حاجة تمام.</value></data>
 

@@ -448,6 +448,57 @@ html, body {
     white-space: pre-line;
 }
 
+.data-freshness-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border: 1px solid var(--card-border);
+    border-left: 4px solid var(--success);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--card-bg), var(--bg-2));
+    box-shadow: var(--shadow-sm);
+    color: var(--text-2);
+    font-size: 13px;
+}
+
+.data-freshness-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--success-bg);
+    color: var(--success);
+    font-size: 16px;
+}
+
+.data-freshness-copy {
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.data-freshness-label {
+    font-weight: 600;
+}
+
+.data-freshness-period {
+    color: var(--text);
+    font-weight: 800;
+}
+
+.data-freshness-caption {
+    margin-inline-start: auto;
+    color: var(--text-3);
+    font-size: 11px;
+}
+
 /* ══ KPI CARDS ════════════════════════════════════════ */
 .kpi-grid {
     display: grid;
@@ -1111,6 +1162,8 @@ a:hover { color: #fff; }
     .page-content { padding: 16px; }
     .login-card { padding: 32px 24px 28px; }
     .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .data-freshness-banner { align-items: flex-start; }
+    .data-freshness-caption { margin-inline-start: auto; text-align: end; }
 }
 @media (max-width: 480px) {
     .kpi-grid { grid-template-columns: 1fr; }
@@ -1134,6 +1187,7 @@ a:hover { color: #fff; }
 [dir="rtl"] .alert-success-banner { border-left: none; border-right: 4px solid var(--success); }
 [dir="rtl"] .alert-error-banner   { border-left: none; border-right: 4px solid var(--red); }
 [dir="rtl"] .alert-warning-banner { border-left: none; border-right: 4px solid var(--warning); }
+[dir="rtl"] .data-freshness-banner { border-left: 1px solid var(--card-border); border-right: 4px solid var(--success); }
 
 /* KPI card decoration bubble */
 [dir="rtl"] .kpi-card::after   { right: auto; left: -20px; }

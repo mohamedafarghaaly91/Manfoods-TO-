@@ -1,5 +1,6 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpCtx
 @inject Microsoft.Extensions.Localization.IStringLocalizer<MvcApp.Resources.SharedResource> L
+@inject MvcApp.Services.IDataFreshnessService DataFreshness
 @{
     var session      = HttpCtx.HttpContext?.Session;
     var userEmail    = session?.GetString("Email") ?? "";
@@ -18,6 +19,11 @@
     var switchLang   = isRtl ? "en" : "ar";
     var __area       = ViewContext.RouteData.Values["area"]?.ToString();
     var __areaPrefix = string.Equals(__area, "Home", StringComparison.OrdinalIgnoreCase) ? "/home" : "/admin";
+    var latestDataPeriod = await DataFreshness.GetLatestDataPeriodAsync();
+    var latestDataPeriodLabel = latestDataPeriod is null
+        ? ""
+        : new DateTime(latestDataPeriod.Year, latestDataPeriod.Month, 1)
+            .ToString("MMMM yyyy", System.Globalization.CultureInfo.CurrentCulture);
 }
 <!DOCTYPE html>
 <html lang="@currentLang" dir="@(isRtl ? "rtl" : "ltr")">
@@ -188,6 +194,17 @@
             {
                 <div class="alert-banner alert-error-banner">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>@errorMessage
+                </div>
+            }
+            @if (latestDataPeriod is not null)
+            {
+                <div class="data-freshness-banner" role="status">
+                    <span class="data-freshness-icon"><i class="bi bi-database-check"></i></span>
+                    <span class="data-freshness-copy">
+                        <span class="data-freshness-label">@L["Layout_DataFreshnessLabel"]</span>
+                        <strong class="data-freshness-period">@latestDataPeriodLabel</strong>
+                    </span>
+                    <span class="data-freshness-caption">@L["Layout_DataFreshnessCaption"]</span>
                 </div>
             }
             <div class="page-content">
