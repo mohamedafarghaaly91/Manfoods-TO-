@@ -205,9 +205,9 @@
         </div>
     </div>
 
-    @* All charts are intentionally stacked in one readable column. *@
-    <div class="rt-chart-stack">
-        <div class="chart-card mb-4">
+    @* Paired two-per-row, except charts with many categories which need the full row to stay readable. *@
+    <div class="charts-grid mb-4">
+        <div class="chart-card">
             <div class="chart-header">
                 <h6 id="rtSurvivalTitle">@L["Chart_SurvivalCurve"]</h6>
                 <p>@L["Chart_SurvivalCurveSub"]</p>
@@ -215,52 +215,52 @@
             <div class="chart-body"><canvas id="rtSurvivalChart" style="max-height:280px"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
-            <div class="chart-header"><h6 id="rtLeaderboardTopTitle">@L["Retention_LeaderboardTop"]</h6><p>@L["Retention_LeaderboardTopSub"]</p></div>
-            <div class="chart-body"><canvas id="rtLeaderboardTopChart"></canvas></div>
-        </div>
-
-        <div class="chart-card mb-4">
-            <div class="chart-header"><h6 id="rtLeaderboardBottomTitle">@L["Retention_LeaderboardBottom"]</h6><p>@L["Retention_LeaderboardBottomSub"]</p></div>
-            <div class="chart-body"><canvas id="rtLeaderboardBottomChart"></canvas></div>
-        </div>
-
-        <div class="chart-card mb-4">
-            <div class="chart-header"><h6 id="rtJobTitleTitle">@L["Retention_ByJobTitle"]</h6><p>@L["Retention_ByJobTitleSub"]</p></div>
-            <div class="chart-body"><canvas id="rtJobTitleChart"></canvas></div>
-        </div>
-
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtGenderTitle">@L["Retention_ByGender"]</h6><p>@L["Retention_ByGenderSub"]</p></div>
             <div class="chart-body"><canvas id="rtGenderChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
+            <div class="chart-header"><h6 id="rtLeaderboardTopTitle">@L["Retention_LeaderboardTop"]</h6><p>@L["Retention_LeaderboardTopSub"]</p></div>
+            <div class="chart-body"><canvas id="rtLeaderboardTopChart"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header"><h6 id="rtLeaderboardBottomTitle">@L["Retention_LeaderboardBottom"]</h6><p>@L["Retention_LeaderboardBottomSub"]</p></div>
+            <div class="chart-body"><canvas id="rtLeaderboardBottomChart"></canvas></div>
+        </div>
+
+        <div class="chart-card chart-full">
+            <div class="chart-header"><h6 id="rtJobTitleTitle">@L["Retention_ByJobTitle"]</h6><p>@L["Retention_ByJobTitleSub"]</p></div>
+            <div class="chart-body"><canvas id="rtJobTitleChart"></canvas></div>
+        </div>
+
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtStoreTenureTopTitle">@L["Retention_StoreTenureTop"]</h6><p>@L["Retention_StoreTenureTopSub"]</p></div>
             <div class="chart-body"><canvas id="rtStoreTenureTopChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtStoreTenureBottomTitle">@L["Retention_StoreTenureBottom"]</h6><p>@L["Retention_StoreTenureBottomSub"]</p></div>
             <div class="chart-body"><canvas id="rtStoreTenureBottomChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtOcTenureTopTitle">@L["Retention_OcTenureTop"]</h6><p>@L["Retention_OcTenureTopSub"]</p></div>
             <div class="chart-body"><canvas id="rtOcTenureTopChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtOcTenureBottomTitle">@L["Retention_OcTenureBottom"]</h6><p>@L["Retention_OcTenureBottomSub"]</p></div>
             <div class="chart-body"><canvas id="rtOcTenureBottomChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtFirstResignTitle">@L["Retention_TimeToFirstResign"]</h6><p>@L["Retention_TimeToFirstResignSub"]</p></div>
             <div class="chart-body"><canvas id="rtFirstResignChart"></canvas></div>
         </div>
 
-        <div class="chart-card mb-4">
+        <div class="chart-card">
             <div class="chart-header"><h6 id="rtHiringVolumeTitle">@L["Retention_HiringVolume"]</h6><p>@L["Retention_HiringVolumeSub"]</p></div>
             <div class="chart-body"><canvas id="rtHiringVolumeChart"></canvas></div>
         </div>
