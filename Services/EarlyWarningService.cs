@@ -698,8 +698,11 @@ public class EarlyWarningService : IEarlyWarningService
         string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         // Same go-live-gated (early leavers ÷ new hires) formula as GetWatchlistAsync,
-        // NinetyDayTurnoverService, and ScorecardService — kept in sync.
-        var historical   = await LoadHistoricalRecordsAsync();
+        // NinetyDayTurnoverService, and ScorecardService — kept in sync, including
+        // the Job filter, so this baseline moves the same way GetWatchlistAsync's
+        // own (embedded) companyRate does.
+        var historical = await LoadHistoricalRecordsAsync();
+        if (RequestedJobs is { } jobs) historical = historical.Where(h => jobs.Contains(h.JobTitle)).ToList();
         var goLiveHistorical = historical.Where(h => MetricsCalculationService.IsPastGoLive(h.HireDate)).ToList();
         var companyTotal = goLiveHistorical.Count;
         var companyEarly = goLiveHistorical.Count(h => MetricsCalculationService.IsEarlyLeaver(h.TenureDays));

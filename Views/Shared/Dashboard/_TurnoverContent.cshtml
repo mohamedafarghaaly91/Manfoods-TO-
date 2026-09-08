@@ -740,6 +740,7 @@ async function tvLoadTurnoverByMonthChart() {
         if (storeFilter) q.set('store', storeFilter);
         if (omFilter)    q.set('om', omFilter);
         if (ocFilter)    q.set('oc', ocFilter);
+        if (jobFilter.length) q.set('jobs', jobFilter.join(','));
         return fetchJson(`/api/dashboard/kpis?${q.toString()}`);
     }));
 
@@ -794,6 +795,7 @@ async function tvLoadReasonsChart() {
     if (storeFilter) q.set('store', storeFilter);
     if (omFilter)    q.set('om', omFilter);
     if (ocFilter)    q.set('oc', ocFilter);
+    if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     let data = await fetchJson(`/api/exit-interviews/reasons?${q.toString()}`) || [];
     // Exit interview submissions may lack a parsed date (month/year = 0) when the
     // Forms export didn't include a recognisable date column. In that case the
@@ -804,6 +806,7 @@ async function tvLoadReasonsChart() {
         if (storeFilter) qAll.set('store', storeFilter);
         if (omFilter)    qAll.set('om', omFilter);
         if (ocFilter)    qAll.set('oc', ocFilter);
+        if (jobFilter.length) qAll.set('jobs', jobFilter.join(','));
         data = await fetchJson(`/api/exit-interviews/reasons?${qAll.toString()}`) || [];
     }
     if (!data.length) return;
@@ -973,6 +976,7 @@ async function tvLoadTrendMatrix() {
     if (omFilter) q.set('om', omFilter);
     if (ocFilter) q.set('oc', ocFilter);
     if (fromPeriodYear) q.set('sinceYear', fromPeriodYear);
+    if (jobFilter.length) q.set('jobs', jobFilter.join(','));
     mxData = await fetchJson(`/api/dashboard/trend-matrix?${q.toString()}`);
     if (!mxData || !mxData.rows || !mxData.rows.length) {
         body.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted">' + tvL.noDataAvailable + '</td></tr>';

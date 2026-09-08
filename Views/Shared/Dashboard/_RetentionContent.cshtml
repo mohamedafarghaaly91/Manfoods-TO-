@@ -627,6 +627,7 @@ async function rtLoadMilestones() {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     const r = await fetch(`/api/retention/tenure-distribution?${q.toString()}`);
     rtRenderMilestones(r.ok ? await r.json() : []);
 }
@@ -643,6 +644,7 @@ async function rtLoadSurvivalCurve() {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     const r = await fetch(`/api/retention/active-tenure-curve?${q.toString()}`);
     const data = r.ok ? await r.json() : [];
     const ctx = document.getElementById('rtSurvivalChart');
@@ -711,6 +713,7 @@ async function rtLoadLeaderboard() {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     const r = await fetch(`/api/retention/store-retention-ranking?${q.toString()}`);
     const data = r.ok ? await r.json() : [];
     // Already ranked best-first by the API.
@@ -753,6 +756,7 @@ async function rtLoadTenureByStore() {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     const r = await fetch(`/api/retention/tenure-distribution-by-store?${q.toString()}`);
     rtRenderTenureTable(r.ok ? await r.json() : []);
 }
@@ -766,6 +770,7 @@ function rtFilterQuery() {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     return q;
 }
 
@@ -820,8 +825,9 @@ function rtRenderManagerTenureRows(tbodyId, rows) {
 }
 
 async function rtLoadManagerTenureTable() {
+    const jobsQuery = rtJobFilter.length ? `&jobs=${encodeURIComponent(rtJobFilter.join(','))}` : '';
     const [oc, od, om, soc] = await Promise.all(['oc', 'od', 'om', 'soc'].map(dim =>
-        fetch(`/api/retention/average-tenure-by-manager?dimension=${dim}`).then(r => r.ok ? r.json() : [])
+        fetch(`/api/retention/average-tenure-by-manager?dimension=${dim}${jobsQuery}`).then(r => r.ok ? r.json() : [])
     ));
     rtRenderManagerTenureRows('rtOcTableBody', oc);
     rtRenderManagerTenureRows('rtOdTableBody', od);

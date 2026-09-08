@@ -801,6 +801,7 @@ async function ewLoadTrendChart() {
     const results = await Promise.all(sortedPeriods.map(({ month, year }) => {
         const q = new URLSearchParams({ year, months: month });
         if (ewStoreFilter) q.set('store', ewStoreFilter);
+        if (ewJobFilter.length) q.set('jobs', ewJobFilter.join(','));
         return fetch(`/api/early-warning/summary?${q.toString()}`).then(r => r.ok ? r.json() : null);
     }));
 

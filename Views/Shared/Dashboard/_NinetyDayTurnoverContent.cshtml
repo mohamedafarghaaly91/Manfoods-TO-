@@ -775,6 +775,7 @@ async function ntdLoadTrend() {
     if (ntdOcFilter)    q.set('oc', ntdOcFilter);
     if (ntdSocFilter)   q.set('soc', ntdSocFilter);
     if (ntdOdFilter)    q.set('od', ntdOdFilter);
+    if (ntdJobFilter.length) q.set('jobs', ntdJobFilter.join(','));
     const r = await fetch(`/api/ninety-day-turnover/trend?${q.toString()}`);
     const data = r.ok ? await r.json() : [];
     const ctx = document.getElementById('ntdTrendChart');
@@ -826,6 +827,7 @@ async function ntdLoadByCohort() {
         if (ntdOcFilter)    q.set('oc', ntdOcFilter);
         if (ntdSocFilter)   q.set('soc', ntdSocFilter);
         if (ntdOdFilter)    q.set('od', ntdOdFilter);
+        if (ntdJobFilter.length) q.set('jobs', ntdJobFilter.join(','));
         return fetch(`/api/ninety-day-turnover/kpi?${q.toString()}`).then(r => r.ok ? r.json() : null);
     }));
     const cohortLabels = sortedMonths.map(ntdMonthShortName);
@@ -1248,6 +1250,7 @@ async function ntdLoadTrendMatrix() {
     if (ntdOcFilter) q.set('oc', ntdOcFilter);
     if (ntdSocFilter) q.set('soc', ntdSocFilter);
     if (ntdOdFilter) q.set('od', ntdOdFilter);
+    if (ntdJobFilter.length) q.set('jobs', ntdJobFilter.join(','));
     const r = await fetch(`/api/ninety-day-turnover/trend-matrix?${q.toString()}`);
     ndMxData = r.ok ? await r.json() : null;
     if (!ndMxData || !ndMxData.rows || !ndMxData.rows.length) {

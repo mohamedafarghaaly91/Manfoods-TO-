@@ -155,7 +155,7 @@ public class ScorecardService : IScorecardService
         // interaction (dimension click, year/month change). See UploadService for
         // the write-side invalidation of HistoricalRecordsCacheKey.
         if (_cache.TryGetValue(HistoricalRecordsCacheKey, out List<HistoricalRecord>? cached) && cached != null)
-            return cached;
+            return RequestedJobs is { } cachedJobs ? cached.Where(r => cachedJobs.Contains(r.JobTitle)).ToList() : cached;
 
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
