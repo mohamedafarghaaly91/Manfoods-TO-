@@ -63,14 +63,6 @@
 
 .sc-dim-btn { background: var(--bg-2); color: var(--text-2); border: 1px solid var(--card-border); }
 .sc-dim-btn.active { background: oklch(0.55 0.19 25); color: #fff; border-color: oklch(0.55 0.19 25); }
-.sc-period-presets { display:flex; gap:4px; flex-wrap:wrap; }
-.sc-period-btn { background:var(--card-bg); color:var(--text-2); border:1px solid var(--card-border); }
-.sc-period-btn.active { background:var(--red); color:#fff; border-color:var(--red); }
-.sc-score-explain { font-size:12px; color:var(--text-2); margin-top:-10px; margin-bottom:16px; }
-.sc-score-value { font-size:14px; font-weight:800; }
-.sc-score-sub { display:block; font-size:10px; color:var(--text-3); margin-top:2px; }
-.sc-low-data { color:oklch(0.6 0.14 75); cursor:help; }
-.sc-row-low-data { background:oklch(0.75 0.16 75 / .06); }
 
 .sc-transfer-badge {
     display:inline-block; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px;
@@ -102,11 +94,6 @@
         <p class="page-subtitle">@L["Page_ScorecardSub"]</p>
     </div>
     <div class="d-flex gap-2 flex-wrap align-items-end">
-        <div class="sc-period-presets" role="group" aria-label="@L["SC_FinalScore"]">
-            <button type="button" class="btn btn-sm sc-period-btn" data-preset="month">@L["SC_PeriodThisMonth"]</button>
-            <button type="button" class="btn btn-sm sc-period-btn active" data-preset="3m">@L["SC_PeriodLast3Months"]</button>
-            <button type="button" class="btn btn-sm sc-period-btn" data-preset="12m">@L["SC_PeriodLast12Months"]</button>
-        </div>
         <div class="sc-select-wrap"><select id="scYearSelect" class="sc-select"></select><i class="bi bi-chevron-down"></i></div>
 
         <div class="sc-multiselect" id="scMonthsMultiselect" data-label-select="@L["Common_SelectMonths"]" data-label-all="@L["Common_AllMonths"]">
@@ -169,8 +156,7 @@
 </div>
 
 <div id="scContent" data-no-data-window="@L["SC_NoDataForWindow"]" data-no-rollup-data="@L["SC_NoRollupData"]"
-     data-no-sentiment="@L["SC_NoSentimentData"]" data-loading="@L["Common_Loading"]" data-no-insights="@L["SC_NoInsights"]"
-     data-low-data="@L["SC_LowDataWarning"]" data-low-data-title="@L["SC_LowDataWarningTitle"]">
+     data-no-sentiment="@L["SC_NoSentimentData"]" data-loading="@L["Common_Loading"]" data-no-insights="@L["SC_NoInsights"]">
     <div id="scKpiCards" class="kpi-grid mb-4">
         <div class="kpi-spinner text-center py-3 w-100">
             <div class="spinner-border spinner-border-sm" style="color:oklch(0.5 0.18 25)"></div>
@@ -245,7 +231,6 @@
         </div>
     </div>
     <p class="text-muted-custom" style="font-size:13px;margin-top:-8px">@L["SC_RankingSub"]</p>
-    <p class="sc-score-explain"><strong>@L["SC_FinalScore"]:</strong> @L["SC_ScoreWeights"] — @L["SC_ScoreFormula"]</p>
 
     <div class="chart-card mb-4 p-0" style="overflow:hidden">
         <div class="table-responsive" style="max-height:600px;overflow-y:auto">
@@ -255,15 +240,14 @@
                         <th class="px-3 py-2 sc-sort-header" id="scNameHeader" data-sort-key="name"><span id="scNameHeaderLabel">@L["SC_StoreLeader"]</span><i class="bi sc-sort-icon"></i></th>
                         <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="storeCount">@L["Common_StoreName"]<i class="bi sc-sort-icon"></i></th>
                         <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="headcount">@L["Common_Headcount"]<i class="bi sc-sort-icon"></i></th>
-                            <th class="px-3 py-2 text-center sc-sort-header sc-sort-desc" data-sort-key="finalScore">@L["SC_FinalScore"]<i class="bi sc-sort-icon"></i></th>
-                            <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="turnoverRate">@L["SC_TurnoverRate"]<i class="bi sc-sort-icon"></i></th>
+                        <th class="px-3 py-2 text-center sc-sort-header sc-sort-desc" data-sort-key="turnoverRate">@L["SC_TurnoverRate"]<i class="bi sc-sort-icon"></i></th>
                         <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="earlyLeaver90Rate">@L["SC_EarlyLeave"]<i class="bi sc-sort-icon"></i></th>
                         <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="retention180Rate">@L["SC_180Retention"]<i class="bi sc-sort-icon"></i></th>
                         <th class="px-3 py-2 text-center sc-sort-header" data-sort-key="exitSentimentPercent">@L["SC_ExitSentiment"]<i class="bi sc-sort-icon"></i></th>
                     </tr>
                 </thead>
                 <tbody id="scBody">
-                    <tr><td colspan="8" class="text-center py-4 text-muted">
+                    <tr><td colspan="7" class="text-center py-4 text-muted">
                         <div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>@L["Common_Loading"]
                     </td></tr>
                 </tbody>
@@ -371,7 +355,6 @@
    aggregation window for all three sections: ranking, leader drill-down,
    and OC/OM rollup. Same filter components as Turnover/Retention/etc. */
 let scYear = null, scMonths = [], scYearMonthsMap = {};
-let scFromMonth = null, scFromYear = null, scToMonth = null, scPeriodPreset = '3m';
 let scDimension = 'leader';
 let scSelectedLeader = '';
 let scOmFilter = '', scOcFilter = '', scSocFilter = '', scOdFilter = '';
@@ -388,19 +371,13 @@ function scSetTitleBadge(id) {
     const el = document.getElementById(id);
     if (!el) return;
     if (!(id in scTitleBase)) scTitleBase[id] = el.textContent;
-    el.innerHTML = scTitleBase[id] + ' ' + rangeFilterBadge(scMonths.length > 1 || !!scFromMonth, true);
+    el.innerHTML = scTitleBase[id] + ' ' + rangeFilterBadge(scMonths.length > 1, true);
 }
 
 function scBuildQuery(extra) {
     const q = new URLSearchParams(extra || {});
     if (scYear) q.set('year', scYear);
-    if (scFromMonth && scFromYear && scToMonth) {
-        q.set('month', scToMonth);
-        q.set('fromMonth', scFromMonth);
-        q.set('fromYear', scFromYear);
-    } else if (scMonths.length) {
-        q.set('months', scMonths.join(','));
-    }
+    if (scMonths.length) q.set('months', scMonths.join(','));
     if (scOmFilter)  q.set('om', scOmFilter);
     if (scOcFilter)  q.set('oc', scOcFilter);
     if (scSocFilter) q.set('soc', scSocFilter);
@@ -432,16 +409,6 @@ function scMetricBadge(rate, metric) {
     return ChartColors.rateBadgeHtml(scColorRules[metric], rate);
 }
 
-function scScoreBadge(score, row) {
-    const bg = score >= 70 ? ChartColors.SEMANTIC.GOOD
-        : score >= 40 ? ChartColors.SEMANTIC.WARNING : ChartColors.SEMANTIC.BAD;
-    const fg = score >= 40 && score < 70 ? '#1C1C27' : '#fff';
-    const title = row
-        ? `Turnover ${row.turnoverScore.toFixed(1)} · Retention ${row.retentionScore.toFixed(1)} · Early Leavers ${row.earlyLeaverScore.toFixed(1)} · Exit Sentiment ${row.exitSentimentScore.toFixed(1)}`
-        : '';
-    return `<span title="${title}" style="background:${bg};color:${fg};padding:3px 10px;border-radius:12px;font-size:11.5px;font-weight:800">${score.toFixed(1)}</span>`;
-}
-
 /* Months multi-select ---------------------------------------------------- */
 function scBuildMonthsOptions() {
     const container = document.getElementById('scMonthsOptions');
@@ -457,8 +424,6 @@ function scBuildMonthsOptions() {
             if (cb.checked) { if (!scMonths.includes(m)) scMonths.push(m); }
             else { scMonths = scMonths.filter(x => x !== m); }
             scMonths.sort((a, b) => a - b);
-            scFromMonth = null; scFromYear = null; scToMonth = null; scPeriodPreset = 'manual';
-            scSetPeriodPresetButtons();
             scRenderMonthsChips();
             scOnMonthsChanged();
         });
@@ -468,11 +433,6 @@ function scBuildMonthsOptions() {
 function scRenderMonthsChips() {
     const chipsEl = document.getElementById('scMonthsChips');
     const labels = document.getElementById('scMonthsMultiselect').dataset;
-    if (scFromMonth && scPeriodPreset !== 'manual') {
-        const activePreset = document.querySelector(`.sc-period-btn[data-preset="${scPeriodPreset}"]`);
-        chipsEl.textContent = activePreset ? activePreset.textContent.trim() : labels.labelSelect;
-        return;
-    }
     const available = scYearMonthsMap[scYear] || [];
     if (!scMonths.length) { chipsEl.textContent = labels.labelSelect; return; }
     if (scMonths.length === available.length) { chipsEl.textContent = labels.labelAll; return; }
@@ -488,14 +448,10 @@ function scOnMonthsChanged() {
 
 document.getElementById('scMonthsSelectAll').addEventListener('click', () => {
     scMonths = (scYearMonthsMap[scYear] || []).slice().sort((a, b) => a - b);
-    scFromMonth = null; scFromYear = null; scToMonth = null; scPeriodPreset = 'manual';
-    scSetPeriodPresetButtons();
     scBuildMonthsOptions(); scRenderMonthsChips(); scOnMonthsChanged();
 });
 document.getElementById('scMonthsClearAll').addEventListener('click', () => {
     scMonths = [];
-    scFromMonth = null; scFromYear = null; scToMonth = null; scPeriodPreset = 'manual';
-    scSetPeriodPresetButtons();
     scBuildMonthsOptions(); scRenderMonthsChips(); scOnMonthsChanged();
 });
 document.getElementById('scMonthsTrigger').addEventListener('click', (e) => {
@@ -510,8 +466,6 @@ document.addEventListener('click', (e) => {
 document.getElementById('scYearSelect').addEventListener('change', async function () {
     scYear = parseInt(this.value);
     scMonths = (scYearMonthsMap[scYear] || []).slice().sort((a, b) => a - b);
-    scFromMonth = null; scFromYear = null; scToMonth = null; scPeriodPreset = 'manual';
-    scSetPeriodPresetButtons();
     scBuildMonthsOptions(); scRenderMonthsChips();
     await scLoadAll();
 });
@@ -519,46 +473,12 @@ document.getElementById('scYearSelect').addEventListener('change', async functio
 async function scResetFilters() {
     scOmFilter = ''; scOcFilter = ''; scSocFilter = ''; scOdFilter = '';
     scOmCombo.setValue(''); scOcCombo.setValue(''); scSocCombo.setValue(''); scOdCombo.setValue('');
-    scApplyPeriodPreset('3m');
-    await scLoadAll();
-}
-
-function scAvailablePeriods() {
-    return Object.entries(scYearMonthsMap)
-        .flatMap(([year, months]) => months.map(month => ({ year: Number(year), month })))
-        .sort((a, b) => a.year - b.year || a.month - b.month);
-}
-
-function scSetPeriodPresetButtons() {
-    document.querySelectorAll('.sc-period-btn').forEach(btn =>
-        btn.classList.toggle('active', btn.dataset.preset === scPeriodPreset));
-}
-
-function scApplyPeriodPreset(preset) {
-    const available = scAvailablePeriods();
-    if (!available.length) return;
-    const count = preset === 'month' ? 1 : preset === '12m' ? 12 : 3;
-    const selected = available.slice(-count);
-    const first = selected[0], last = selected[selected.length - 1];
-    scPeriodPreset = preset;
-    scYear = last.year;
-    scToMonth = last.month;
-    scFromMonth = first.month;
-    scFromYear = first.year;
-    scMonths = [];
     const yearSel = document.getElementById('scYearSelect');
-    if (yearSel) yearSel.value = scYear;
-    scBuildMonthsOptions();
-    scRenderMonthsChips();
-    scSetPeriodPresetButtons();
+    if (yearSel && yearSel.options.length) {
+        yearSel.selectedIndex = 0;
+        yearSel.dispatchEvent(new Event('change'));
+    }
 }
-
-document.querySelectorAll('.sc-period-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-        scApplyPeriodPreset(btn.dataset.preset);
-        await scLoadAll();
-    });
-});
 
 /* Generic searchable single-select combobox ------------------------------ */
 function scCreateCombobox({ inputId, panelId, onSelect }) {
@@ -604,7 +524,7 @@ const scOdCombo  = scCreateCombobox({ inputId: 'scOdInput',  panelId: 'scOdPanel
 
 /* Ranking table ----------------------------------------------------------- */
 let scRankingRows = [];
-const scSortState = { key: 'finalScore', dir: 'desc' };
+const scSortState = { key: 'turnoverRate', dir: 'desc' };
 const scLeaderProfileUrl = '@Url.Action("StoreLeaderProfile", "Dashboard")';
 
 function scSortValue(row, key) {
@@ -642,16 +562,15 @@ function scRenderRankingTable() {
     const noDataText = document.getElementById('scContent').dataset.noDataWindow;
     const noSentimentText = document.getElementById('scContent').dataset.noSentiment;
     if (!scRankingRows.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">${noDataText}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">${noDataText}</td></tr>`;
         return;
     }
     const rows = scApplySort(scRankingRows);
     tbody.innerHTML = rows.map(r => `
-        <tr class="${r.isLowData ? 'sc-row-low-data' : ''}">
+        <tr>
             <td class="px-3 py-2 fw-semibold"><a class="sc-leader-link" href="${scLeaderProfileHref(r.name)}">${sapEscape(r.name)}</a></td>
             <td class="px-3 py-2 text-center">${r.storeCount}</td>
             <td class="px-3 py-2 text-center">${r.headcount}</td>
-            <td class="px-3 py-2 text-center">${scScoreBadge(r.finalScore, r)}${r.isLowData ? `<span class="sc-low-data ms-1" title="${sapEscape(document.getElementById('scContent').dataset.lowDataTitle)}"><i class="bi bi-exclamation-triangle-fill"></i></span><span class="sc-score-sub">${sapEscape(document.getElementById('scContent').dataset.lowData)}</span>` : ''}</td>
             <td class="px-3 py-2 text-center">${scMetricBadge(r.turnoverRate, 'turnover')}</td>
             <td class="px-3 py-2 text-center">${scMetricBadge(r.earlyLeaver90Rate, 'ninetyDay')}</td>
             <td class="px-3 py-2 text-center">${scMetricBadge(r.retention180Rate, 'retention')}</td>
@@ -660,7 +579,9 @@ function scRenderRankingTable() {
 }
 
 function scLeaderProfileHref(name) {
-    const q = scBuildQuery({ leader: name });
+    const q = new URLSearchParams({ leader: name });
+    if (scYear) q.set('year', scYear);
+    if (scMonths.length) q.set('months', scMonths.join(','));
     return `${scLeaderProfileUrl}?${q.toString()}`;
 }
 
@@ -670,7 +591,7 @@ async function scLoadRanking() {
     scSetTitleBadge('scRankingTitle');
     const tbody = document.getElementById('scBody');
     const loadingText = document.getElementById('scContent').dataset.loading;
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>${loadingText}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm me-2" style="color:oklch(0.5 0.18 25)"></div>${loadingText}</td></tr>`;
 
     const q = scBuildQuery({ dimension: scDimension });
     const res = await fetch(`/api/scorecard?${q.toString()}`);
@@ -872,14 +793,14 @@ function scRenderInsights(leaderRows, rollup) {
     const withHeadcount = leaderRows.filter(r => r.headcount > 0);
 
     if (withHeadcount.length >= 2) {
-        const best = withHeadcount.slice().sort((a, b) => b.finalScore - a.finalScore)[0];
+        const best = withHeadcount.slice().sort((a, b) => a.turnoverRate - b.turnoverRate)[0];
         items.push({ icon: 'bi-trophy-fill', color: 'success', title: SC_I18N.insightBestLeaderTitle,
-            description: `${best.name} — ${best.finalScore.toFixed(1)} ${SC_I18N.insightBestLeaderDesc}` });
+            description: `${best.name} — ${best.turnoverRate.toFixed(1)}% ${SC_I18N.insightBestLeaderDesc}` });
 
-        const worst = withHeadcount.slice().sort((a, b) => a.finalScore - b.finalScore)[0];
+        const worst = withHeadcount.slice().sort((a, b) => b.turnoverRate - a.turnoverRate)[0];
         if (worst.name !== best.name)
             items.push({ icon: 'bi-exclamation-triangle-fill', color: 'danger', title: SC_I18N.insightWorstLeaderTitle,
-                description: `${worst.name} — ${worst.finalScore.toFixed(1)} ${SC_I18N.insightWorstLeaderDesc}` });
+                description: `${worst.name} — ${worst.turnoverRate.toFixed(1)}% ${SC_I18N.insightWorstLeaderDesc}` });
     }
 
     const topOc = (rollup.byOperationConsultant || []).slice().sort((a, b) => b.flaggedPercent - a.flaggedPercent)[0];
@@ -928,7 +849,7 @@ async function scLoadKpisAndInsights(rollup) {
 }
 
 async function scLoadAll() {
-    if (!scYear || (!scMonths.length && !scFromMonth)) return;
+    if (!scYear || !scMonths.length) return;
     const [, , rollup] = await Promise.all([scLoadRanking(), scLoadLeaderDetail(), scLoadRollup()]);
     await scLoadKpisAndInsights(rollup);
 }
@@ -936,9 +857,6 @@ async function scLoadAll() {
 (async function init() {
     await scLoadColorRules();
     const hasData = await scLoadFilters();
-    if (hasData) {
-        scApplyPeriodPreset('3m');
-        await scLoadAll();
-    }
+    if (hasData) await scLoadAll();
 })();
 </script>

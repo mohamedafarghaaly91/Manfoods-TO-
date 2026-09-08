@@ -76,13 +76,6 @@
 .ei-sort-header.ei-sort-asc .ei-sort-icon::before { content:"\f235"; }   /* bi-caret-up-fill */
 .ei-sort-header.ei-sort-desc .ei-sort-icon::before { content:"\f229"; } /* bi-caret-down-fill */
 .ei-sort-header:not(.ei-sort-asc):not(.ei-sort-desc) .ei-sort-icon::before { content:"\f229"; }
-.ei-reason-filter {
-    display:flex; align-items:center; gap:8px; min-height:42px;
-    padding:0 12px; background:var(--card-bg); border:1px solid var(--card-border);
-    border-radius:var(--radius-sm); box-shadow:var(--shadow-sm); cursor:pointer;
-    color:var(--text); font-size:12.5px; font-weight:600; white-space:nowrap;
-}
-.ei-reason-filter input { width:16px; height:16px; accent-color:var(--red); cursor:pointer; }
 </style>
 
 <div class="page-header">
@@ -123,11 +116,6 @@
             <input type="text" class="ei-combobox-input" id="eiOmInput" placeholder="@L["Common_AllOperationManagers"]" autocomplete="off">
             <div class="ei-combobox-panel" id="eiOmPanel"></div>
         </div>
-
-        <label class="ei-reason-filter" title="@L["EI_ExcludeFamilyReasonsHint"]">
-            <input type="checkbox" id="eiExcludeFamilyReasons" checked>
-            <span>@L["EI_ExcludeFamilyReasons"]</span>
-        </label>
 
         <button type="button" class="reset-filters-btn" onclick="eiResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -354,7 +342,6 @@
 const eiL = document.getElementById('eiContent').dataset;
 let eiYear = null, eiMonths = [], eiYearMonthsMap = {};
 let eiStoreFilter = '', eiLeaderFilter = '', eiOcFilter = '', eiOmFilter = '';
-let eiExcludeFamilyReasons = true;
 
 const eiTitleBase = {};
 function eiSetTitleBadge(id, affected) {
@@ -367,7 +354,7 @@ function eiSetTitleBadge(id, affected) {
 function eiMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function eiMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
 
-function eiBuildQuery(includeReasonFilter = false) {
+function eiBuildQuery() {
     const p = new URLSearchParams();
     // year=0 is the "undated" sentinel — send it so the backend knows to skip
     // date filtering; year=null means not yet initialised (don't send anything).
@@ -378,15 +365,11 @@ function eiBuildQuery(includeReasonFilter = false) {
     if (eiLeaderFilter) p.set('storeLeader', eiLeaderFilter);
     if (eiOcFilter)      p.set('oc', eiOcFilter);
     if (eiOmFilter)      p.set('om', eiOmFilter);
-    // This parameter is intentionally sent only to endpoints whose data is
-    // based on the Reasons for Leaving question. Other exit-interview answers
-    // must continue to use the full respondent population.
-    if (includeReasonFilter) p.set('excludeFamilyReasons', eiExcludeFamilyReasons ? 'true' : 'false');
     return p.toString();
 }
 
-async function eiFetch(path, includeReasonFilter = false) {
-    const r = await fetch(`/api/exit-interviews/${path}?${eiBuildQuery(includeReasonFilter)}`);
+async function eiFetch(path) {
+    const r = await fetch(`/api/exit-interviews/${path}?${eiBuildQuery()}`);
     return r.ok ? r.json() : [];
 }
 
@@ -494,9 +477,6 @@ document.getElementById('eiYearSelect').addEventListener('change', async functio
 async function eiResetFilters() {
     eiStoreFilter = ''; eiLeaderFilter = ''; eiOcFilter = ''; eiOmFilter = '';
     eiStoreCombo.setValue(''); eiLeaderCombo.setValue(''); eiOcCombo.setValue(''); eiOmCombo.setValue('');
-    eiExcludeFamilyReasons = true;
-    const reasonCheckbox = document.getElementById('eiExcludeFamilyReasons');
-    if (reasonCheckbox) reasonCheckbox.checked = true;
     const yearSel = document.getElementById('eiYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -565,7 +545,7 @@ let eiReasonsData = [], eiReturnData = [], eiDriversData = [], eiSentimentData =
 
 async function eiLoadReasons() {
     eiSetTitleBadge('eiReasonsTitle', true);
-    eiReasonsData = await eiFetch('reasons', true);
+    eiReasonsData = await eiFetch('reasons');
     eiReasonsChart = eiMkChart(eiReasonsChart, 'eiReasonsChart', eiReasonsData.map(d => d.label), eiReasonsData.map(d => d.value), true);
 }
 async function eiLoadReturn() {
@@ -609,7 +589,7 @@ async function eiLoadJobTitleChart() {
 let eiReasonsTrendChart;
 async function eiLoadReasonsTrendChart() {
     eiSetTitleBadge('eiReasonsTrendTitle', false);
-    const data = await eiFetch('reasons-trend', true);
+    const data = await eiFetch('reasons-trend');
     const ctx = document.getElementById('eiReasonsTrendChart');
     if (!ctx) return;
     if (eiReasonsTrendChart) eiReasonsTrendChart.destroy();
@@ -649,7 +629,7 @@ async function eiLoadReasonsTrendChart() {
 let eiReasonReturnChart;
 async function eiLoadReasonReturnChart() {
     eiSetTitleBadge('eiReasonReturnTitle', true);
-    const data = await eiFetch('reason-vs-would-return', true);
+    const data = await eiFetch('reason-vs-would-return');
     const ctx = document.getElementById('eiReasonReturnChart');
     if (!ctx) return;
     if (eiReasonReturnChart) eiReasonReturnChart.destroy();
@@ -938,10 +918,6 @@ async function eiLoadAll() {
 document.getElementById('eiCommentSearch').addEventListener('input', eiRenderComments);
 document.getElementById('eiCommentQuestionFilter').addEventListener('change', eiRenderComments);
 document.getElementById('eiChangeCommentSearch').addEventListener('input', eiRenderChangeComments);
-document.getElementById('eiExcludeFamilyReasons').addEventListener('change', function () {
-    eiExcludeFamilyReasons = this.checked;
-    eiLoadAll();
-});
 
 (async function init() {
     const hasData = await eiLoadFilters();

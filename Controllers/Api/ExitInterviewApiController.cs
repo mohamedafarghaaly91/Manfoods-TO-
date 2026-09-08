@@ -17,18 +17,8 @@ public class ExitInterviewApiController : ControllerBase
 
     public ExitInterviewApiController(IExitInterviewService exitInterviews) => _exitInterviews = exitInterviews;
 
-    private static ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months,
-        bool excludeFamilyReasons = false) =>
-        new()
-        {
-            Store = store,
-            StoreLeader = storeLeader,
-            OperationConsultant = oc,
-            OperationManager = om,
-            Year = year,
-            Months = months,
-            ExcludeFamilyReasons = excludeFamilyReasons
-        };
+    private static ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months) =>
+        new() { Store = store, StoreLeader = storeLeader, OperationConsultant = oc, OperationManager = om, Year = year, Months = months };
 
     private (string role, string? assignedName) Identity() =>
         (HttpContext.Session.GetRole(), HttpContext.Session.GetEmail());
@@ -45,11 +35,10 @@ public class ExitInterviewApiController : ControllerBase
 
     [HttpGet("reasons")]
     public async Task<IActionResult> Reasons([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
-        [FromQuery] int? year, [FromQuery] string? months, [FromQuery] bool excludeFamilyReasons = false)
+        [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetReasonsForLeavingAsync(
-            BuildFilter(store, storeLeader, oc, om, year, months, excludeFamilyReasons), role, assignedName));
+        return Ok(await _exitInterviews.GetReasonsForLeavingAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
     }
 
     [HttpGet("would-return")]
@@ -118,20 +107,18 @@ public class ExitInterviewApiController : ControllerBase
 
     [HttpGet("reasons-trend")]
     public async Task<IActionResult> ReasonsTrend([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
-        [FromQuery] int? year, [FromQuery] string? months, [FromQuery] bool excludeFamilyReasons = false)
+        [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetReasonsTrendAsync(
-            BuildFilter(store, storeLeader, oc, om, year, months, excludeFamilyReasons), role, assignedName));
+        return Ok(await _exitInterviews.GetReasonsTrendAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
     }
 
     [HttpGet("reason-vs-would-return")]
     public async Task<IActionResult> ReasonVsWouldReturn([FromQuery] string? store, [FromQuery] string? storeLeader, [FromQuery] string? oc, [FromQuery] string? om,
-        [FromQuery] int? year, [FromQuery] string? months, [FromQuery] bool excludeFamilyReasons = false)
+        [FromQuery] int? year, [FromQuery] string? months)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _exitInterviews.GetReasonVsWouldReturnAsync(
-            BuildFilter(store, storeLeader, oc, om, year, months, excludeFamilyReasons), role, assignedName));
+        return Ok(await _exitInterviews.GetReasonVsWouldReturnAsync(BuildFilter(store, storeLeader, oc, om, year, months), role, assignedName));
     }
 
     [HttpGet("sentiment-summary")]

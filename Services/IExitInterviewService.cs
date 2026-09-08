@@ -26,8 +26,7 @@ public interface IExitInterviewService
     /// summary (TotalResponses=0, PositivePercent=0) when it has no matching exit
     /// interviews — the same shape GetSentimentSummaryAsync would return for it.</summary>
     Task<Dictionary<string, ExitSentimentSummary>> GetSentimentSummariesByDimensionAsync(
-        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName,
-        ExitInterviewFilter? filter = null);
+        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName);
 
     Task<List<ExitInterviewCommentItem>> GetCommentsAsync(ExitInterviewFilter filter, string role, string? assignedName);
 

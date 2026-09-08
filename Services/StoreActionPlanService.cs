@@ -809,26 +809,22 @@ public class StoreActionPlanService : IStoreActionPlanService
     private static (string Category, List<string> Recommendations) MapReasonToRecommendations(string label)
     {
         var l = label ?? "";
-        var lower = l.ToLowerInvariant();
 
-        if (lower is "compensation" or "الراتب والمزايا" ||
-            l.Contains("راتب") || l.Contains("مرتب") || l.Contains("أجر") || l.Contains("اجر") || l.Contains("بدل"))
+        if (l.Contains("راتب") || l.Contains("مرتب") || l.Contains("أجر") || l.Contains("اجر") || l.Contains("بدل"))
             return ("Compensation", new List<string>
             {
                 "Review pay competitiveness against the local market.",
                 "Check for pay-equity issues within the store.",
             });
 
-        if (lower is "workload" or "schedule" or "ضغط وحجم العمل" or "مواعيد العمل" ||
-            l.Contains("ضغط") || l.Contains("ساعات") || l.Contains("جدول") || l.Contains("دوام") || l.Contains("وردي"))
+        if (l.Contains("ضغط") || l.Contains("ساعات") || l.Contains("جدول") || l.Contains("دوام") || l.Contains("وردي"))
             return ("Workload", new List<string>
             {
                 "Review staffing levels against sales volume.",
                 "Audit shift scheduling fairness.",
             });
 
-        if (lower is "manager" or "management" or "المدير والإدارة" ||
-            l.Contains("معامل") || l.Contains("إدارة") || l.Contains("اداره") || l.Contains("احترام") || l.Contains("عادل") || l.Contains("عدل"))
+        if (l.Contains("معامل") || l.Contains("إدارة") || l.Contains("اداره") || l.Contains("احترام") || l.Contains("عادل") || l.Contains("عدل"))
             return ("Management", new List<string>
             {
                 "Coach the Store Leader on people management.",

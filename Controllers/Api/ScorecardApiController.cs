@@ -23,14 +23,11 @@ public class ScorecardApiController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string dimension = "leader", [FromQuery] string? om = null,
-        [FromQuery] string? oc = null, [FromQuery] string? soc = null, [FromQuery] string? od = null,
-        [FromQuery] string? months = null, [FromQuery] int? year = null, [FromQuery] int? month = null,
-        [FromQuery] int? fromMonth = null, [FromQuery] int? fromYear = null)
+        [FromQuery] string? oc = null, [FromQuery] string? soc = null, [FromQuery] string? od = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         if (!ValidDimensions.Contains(dimension)) return BadRequest(new { error = "Invalid dimension." });
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, soc, od,
-            months, year, month, fromMonth, fromYear));
+        return Ok(await _scorecard.GetScorecardAsync(dimension, role, assignedName, om, oc, soc, od, months, year));
     }
 
     [HttpGet("leaders")]
@@ -49,21 +46,18 @@ public class ScorecardApiController : ControllerBase
     }
 
     [HttpGet("leader-history")]
-    public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null,
-        [FromQuery] int? year = null, [FromQuery] int? month = null, [FromQuery] int? fromMonth = null, [FromQuery] int? fromYear = null)
+    public async Task<IActionResult> LeaderHistory([FromQuery] string leader, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         if (string.IsNullOrWhiteSpace(leader)) return BadRequest(new { error = "Leader name is required." });
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, role, assignedName, months, year, month, fromMonth, fromYear));
+        return Ok(await _scorecard.GetLeaderHistoryAsync(leader, role, assignedName, months, year));
     }
 
     [HttpGet("rollup")]
     public async Task<IActionResult> Rollup([FromQuery] string? om = null, [FromQuery] string? oc = null,
-        [FromQuery] string? soc = null, [FromQuery] string? od = null, [FromQuery] string? months = null,
-        [FromQuery] int? year = null, [FromQuery] int? month = null, [FromQuery] int? fromMonth = null, [FromQuery] int? fromYear = null)
+        [FromQuery] string? soc = null, [FromQuery] string? od = null, [FromQuery] string? months = null, [FromQuery] int? year = null)
     {
         var (role, assignedName) = Identity();
-        return Ok(await _scorecard.GetRollupAsync(role, assignedName, om, oc, soc, od,
-            months, year, month, fromMonth, fromYear));
+        return Ok(await _scorecard.GetRollupAsync(role, assignedName, om, oc, soc, od, months, year));
     }
 }

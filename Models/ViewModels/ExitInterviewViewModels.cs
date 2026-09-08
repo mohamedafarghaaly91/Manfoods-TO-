@@ -7,11 +7,7 @@ public class ExitInterviewFilter
     public string? OperationConsultant { get; set; }
     public string? OperationManager { get; set; }
     public int? Year { get; set; }
-    public int? Month { get; set; }
     public string? Months { get; set; }
-    public int? FromMonth { get; set; }
-    public int? FromYear { get; set; }
-    public bool ExcludeFamilyReasons { get; set; }
 }
 
 public class ExitInterviewFilterOptions
@@ -33,7 +29,6 @@ public class ExitSentimentSummary
 {
     public double PositivePercent { get; set; }
     public int TotalResponses { get; set; }
-    public int AnsweredCount { get; set; }
 }
 
 public class ExitInterviewCommentItem

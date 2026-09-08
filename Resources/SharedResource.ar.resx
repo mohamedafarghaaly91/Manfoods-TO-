@@ -568,8 +568,6 @@
   <data name="EI_Question" xml:space="preserve"><value>السؤال</value></data>
   <data name="EI_Comment" xml:space="preserve"><value>التعليق</value></data>
   <data name="EI_NoDataForFilters" xml:space="preserve"><value>مفيش بيانات للفلاتر المختارة.</value></data>
-  <data name="EI_ExcludeFamilyReasons" xml:space="preserve"><value>استبعاد أسباب عائلية</value></data>
-  <data name="EI_ExcludeFamilyReasonsHint" xml:space="preserve"><value>يؤثر فقط على الرسوم المبنية على سؤال أسباب ترك العمل</value></data>
   <data name="EI_NoCommentsForFilters" xml:space="preserve"><value>مفيش تعليقات للفلاتر المختارة.</value></data>
   <data name="Chart_NinetyDayTrend" xml:space="preserve"><value>اتجاه دوران 90 يوم</value></data>
   <data name="Chart_NinetyDayTrendSub" xml:space="preserve"><value>المعدل لكل مجموعة شهر تعيين، لكل الفترات — النقاط المتقطعة ما زالت مؤقتة</value></data>
@@ -696,14 +694,6 @@
   <data name="SC_EarlyLeave" xml:space="preserve"><value>مغادرة مبكرة 90 يوم</value></data>
   <data name="SC_180Retention" xml:space="preserve"><value>احتفاظ 180 يوم</value></data>
   <data name="SC_ExitSentiment" xml:space="preserve"><value>شعور مقابلات الخروج</value></data>
-  <data name="SC_FinalScore" xml:space="preserve"><value>النتيجة النهائية</value></data>
-  <data name="SC_ScoreWeights" xml:space="preserve"><value>الأوزان: الدوران 30% · الاحتفاظ 15% · المغادرة المبكرة 30% · شعور مقابلات الخروج 25%</value></data>
-  <data name="SC_PeriodThisMonth" xml:space="preserve"><value>هذا الشهر</value></data>
-  <data name="SC_PeriodLast3Months" xml:space="preserve"><value>آخر 3 أشهر</value></data>
-  <data name="SC_PeriodLast12Months" xml:space="preserve"><value>آخر 12 شهرًا</value></data>
-  <data name="SC_LowDataWarning" xml:space="preserve"><value>بيانات قليلة — النتيجة مبدئية</value></data>
-  <data name="SC_LowDataWarningTitle" xml:space="preserve"><value>بيانات قليلة</value></data>
-  <data name="SC_ScoreFormula" xml:space="preserve"><value>الأهداف: الدوران ≤5% شهريًا · المغادرة المبكرة ≤2% · الاحتفاظ ≥80% بعد 180 يومًا · شعور مقابلات الخروج ≥75%. المؤشرات التي لا تتوفر لها بيانات تُستبعد ويُعاد توزيع أوزان الباقي.</value></data>
   <data name="SC_Ranking" xml:space="preserve"><value>الترتيب</value></data>
   <data name="SC_RankingSub" xml:space="preserve"><value>مجمّع على الفترة المختارة — بيتتبع كل شخص حتى لو اتنقل بين الفروع</value></data>
   <data name="SC_TrackLeader" xml:space="preserve"><value>تتبع مدير فرع</value></data>
@@ -734,9 +724,9 @@
   <data name="SC_KpiFlaggedLeaders" xml:space="preserve"><value>أعلى من المتوسط</value></data>
   <data name="SC_KpiFlaggedLeadersDesc" xml:space="preserve"><value>مديرو معدل الدوران عندهم أعلى من متوسط الشركة</value></data>
   <data name="SC_InsightBestLeaderTitle" xml:space="preserve"><value>أفضل مدير فرع</value></data>
-  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>نتيجة نهائية — أفضل مدير فرع في هذه الفترة.</value></data>
+  <data name="SC_InsightBestLeaderDesc" xml:space="preserve"><value>معدل دوران — أفضل مدير فرع في هذه الفترة.</value></data>
   <data name="SC_InsightWorstLeaderTitle" xml:space="preserve"><value>مدير فرع محتاج متابعة</value></data>
-  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>نتيجة نهائية — المدير الأكثر احتياجًا للمتابعة في هذه الفترة.</value></data>
+  <data name="SC_InsightWorstLeaderDesc" xml:space="preserve"><value>معدل دوران — المدير الأكثر احتياجًا للمتابعة في هذه الفترة.</value></data>
   <data name="SC_InsightTopOcTitle" xml:space="preserve"><value>استشاري العمليات يحتاج إلى متابعة</value></data>
   <data name="SC_InsightTopOcDesc" xml:space="preserve"><value>من مديري الفروع تابعينه معدل دورانهم أعلى من المتوسط.</value></data>
   <data name="SC_InsightTopOmTitle" xml:space="preserve"><value>مدير التشغيل يحتاج إلى متابعة</value></data>

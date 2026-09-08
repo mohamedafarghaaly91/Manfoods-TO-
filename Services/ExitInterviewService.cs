@@ -8,8 +8,6 @@ namespace MvcApp.Services;
 
 public class ExitInterviewService : IExitInterviewService
 {
-    private const string FamilyReason = "أسباب عائلية";
-
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
 
@@ -37,7 +35,7 @@ public class ExitInterviewService : IExitInterviewService
         // all rows (which have month=0/year=0) are returned unfiltered.
         if (filter.Year.HasValue && filter.Year.Value > 0)
         {
-            var periods = DashboardService.ResolvePeriods(filter.Month, filter.Year, filter.FromMonth, filter.FromYear, filter.Months);
+            var periods = DashboardService.ResolvePeriods(null, filter.Year, null, null, filter.Months);
             var keys = periods.Select(p => p.Year * 100 + p.Month).ToHashSet();
             q = q.Where(e => keys.Contains(e.Year * 100 + e.Month));
         }
@@ -60,30 +58,6 @@ public class ExitInterviewService : IExitInterviewService
               .Select(g => new ChartDataItem { Label = g.Key, Value = g.Count() })
               .OrderByDescending(c => c.Value)
               .ToList();
-
-    private static bool IsFamilyReason(string? value) =>
-        string.Equals(value?.Trim(), FamilyReason, StringComparison.Ordinal);
-
-    private static List<ChartDataItem> GroupReasonCount(IEnumerable<string> values)
-    {
-        var grouped = values.Where(v => !string.IsNullOrWhiteSpace(v))
-            .GroupBy(ExitReasonTaxonomy.Classify)
-            .Select(g => new
-            {
-                Code = g.Key,
-                Item = new ChartDataItem
-                {
-                    Label = ExitReasonTaxonomy.Label(g.Key),
-                    Value = g.Count()
-                }
-            });
-
-        return grouped
-            .OrderByDescending(g => g.Item.Value)
-            .ThenBy(g => ExitReasonTaxonomy.Order(g.Code))
-            .Select(g => g.Item)
-            .ToList();
-    }
 
     /// <summary>
     /// Best-effort Arabic Likert/agree-disagree sentiment heuristic. The
@@ -143,13 +117,8 @@ public class ExitInterviewService : IExitInterviewService
         };
     }
 
-    public async Task<List<ChartDataItem>> GetReasonsForLeavingAsync(ExitInterviewFilter filter, string role, string? assignedName)
-    {
-        var values = await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving);
-        if (filter.ExcludeFamilyReasons)
-            values = values.Where(v => !IsFamilyReason(v)).ToList();
-        return GroupReasonCount(values);
-    }
+    public async Task<List<ChartDataItem>> GetReasonsForLeavingAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
+        GroupCount(await FilteredAsync(filter, role, assignedName, e => e.ReasonForLeaving));
 
     public async Task<List<ChartDataItem>> GetWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName) =>
         GroupCount(await FilteredAsync(filter, role, assignedName, e => e.WouldReturn));
@@ -237,7 +206,6 @@ public class ExitInterviewService : IExitInterviewService
         return new ExitSentimentSummary
         {
             TotalResponses = rows.Count,
-            AnsweredCount = answers.Count,
             PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
         };
     }
@@ -250,28 +218,24 @@ public class ExitInterviewService : IExitInterviewService
     }
 
     public async Task<Dictionary<string, ExitSentimentSummary>> GetSentimentSummariesByDimensionAsync(
-        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName,
-        ExitInterviewFilter? filter = null)
+        string dimension, IReadOnlyCollection<string> names, string role, string? assignedName)
     {
         if (names.Count == 0) return new Dictionary<string, ExitSentimentSummary>();
 
-        var nameSet = names.ToHashSet();
-        IQueryable<ExitInterview> q = await ApplyFilterAsync(
-            _db.ExitInterviews.AsNoTracking(), filter ?? new ExitInterviewFilter(), role, assignedName);
-
         if (dimension != "leader" && dimension != "oc" && dimension != "om")
         {
-            var sentimentRows = await q.Select(e => new { e.WouldReturn, e.OverallExperience }).ToListAsync();
-            var answers = sentimentRows.Select(r => r.WouldReturn).Concat(sentimentRows.Select(r => r.OverallExperience))
-                .Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
-            var overall = new ExitSentimentSummary
-            {
-                TotalResponses = sentimentRows.Count,
-                AnsweredCount = answers.Count,
-                PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
-            };
+            // Every other dimension (e.g. "soc"/"od") looks up sentiment with an
+            // unfiltered ExitInterviewFilter() regardless of name — the same call
+            // GetSentimentSummaryAsync(new ExitInterviewFilter(), ...) would make
+            // for every single name — so compute it once and reuse for all of them.
+            var overall = await GetSentimentSummaryAsync(new ExitInterviewFilter(), role, assignedName);
             return names.ToDictionary(n => n, _ => overall);
         }
+
+        var nameSet = names.ToHashSet();
+        var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
+        IQueryable<ExitInterview> q = _db.ExitInterviews.AsNoTracking();
+        if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
 
         var rows = dimension switch
         {
@@ -297,7 +261,6 @@ public class ExitInterviewService : IExitInterviewService
             return new ExitSentimentSummary
             {
                 TotalResponses = groupRows.Count,
-                AnsweredCount = answers.Count,
                 PositivePercent = answers.Count == 0 ? 0 : Math.Round(answers.Count(a => Sentiment(a) > 0) * 100.0 / answers.Count, 1),
             };
         });
@@ -387,17 +350,12 @@ public class ExitInterviewService : IExitInterviewService
         {
             Store = filter.Store, StoreLeader = filter.StoreLeader,
             OperationConsultant = filter.OperationConsultant, OperationManager = filter.OperationManager,
-            ExcludeFamilyReasons = filter.ExcludeFamilyReasons,
         };
         var rows = await FilteredAsync(allTimeFilter, role, assignedName, e => new { e.Month, e.Year, e.ReasonForLeaving });
-        var dated = rows
-            .Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving))
-            .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
-            .Select(r => new { r.Year, r.Month, Code = ExitReasonTaxonomy.Classify(r.ReasonForLeaving) })
-            .ToList();
+        var dated = rows.Where(r => r.Month > 0 && r.Year > 0 && !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
         if (dated.Count == 0) return new List<ExitReasonTrendPoint>();
 
-        var topReasons = dated.GroupBy(r => r.Code)
+        var topReasons = dated.GroupBy(r => r.ReasonForLeaving)
             .OrderByDescending(g => g.Count())
             .Take(5)
             .Select(g => g.Key)
@@ -408,9 +366,7 @@ public class ExitInterviewService : IExitInterviewService
             .Select(g => new ExitReasonTrendPoint
             {
                 Label = new DateOnly(g.Key.Year, g.Key.Month, 1).ToString("MMM yy"),
-                Counts = topReasons.ToDictionary(
-                    code => ExitReasonTaxonomy.Label(code),
-                    code => g.Count(r => r.Code == code)),
+                Counts = topReasons.ToDictionary(reason => reason, reason => g.Count(r => r.ReasonForLeaving == reason)),
             })
             .ToList();
     }
@@ -418,19 +374,16 @@ public class ExitInterviewService : IExitInterviewService
     public async Task<List<ExitReasonReturnItem>> GetReasonVsWouldReturnAsync(ExitInterviewFilter filter, string role, string? assignedName)
     {
         var rows = await FilteredAsync(filter, role, assignedName, e => new { e.ReasonForLeaving, e.WouldReturn });
-        var valid = rows
-            .Where(r => !string.IsNullOrWhiteSpace(r.ReasonForLeaving))
-            .Where(r => !filter.ExcludeFamilyReasons || !IsFamilyReason(r.ReasonForLeaving))
-            .ToList();
+        var valid = rows.Where(r => !string.IsNullOrWhiteSpace(r.ReasonForLeaving)).ToList();
 
-        return valid.GroupBy(r => ExitReasonTaxonomy.Classify(r.ReasonForLeaving))
+        return valid.GroupBy(r => r.ReasonForLeaving)
             .Select(g =>
             {
                 var withAnswer = g.Where(r => !string.IsNullOrWhiteSpace(r.WouldReturn)).ToList();
                 var yesCount = withAnswer.Count(r => IsYes(r.WouldReturn));
                 return new ExitReasonReturnItem
                 {
-                    Reason = ExitReasonTaxonomy.Label(g.Key),
+                    Reason = g.Key,
                     Count = g.Count(),
                     WouldReturnPercent = withAnswer.Count > 0 ? Math.Round(yesCount * 100.0 / withAnswer.Count, 1) : 0,
                 };
