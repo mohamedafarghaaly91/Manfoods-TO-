@@ -732,9 +732,16 @@ html, body {
     box-shadow: var(--shadow-md, 0 8px 24px rgba(0,0,0,.2)); z-index: 2000;
 }
 .notif-panel-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    position: sticky; top: 0; z-index: 1; background: var(--card-bg);
     font-size: 13px; font-weight: 700; color: var(--text);
     padding: 12px 14px; border-bottom: 1px solid var(--card-border);
 }
+.notif-clear-btn {
+    background: none; border: none; padding: 2px 4px; cursor: pointer;
+    font-size: 11px; font-weight: 700; color: var(--text-3);
+}
+.notif-clear-btn:hover { color: var(--red); }
 .notif-empty { padding: 26px 14px; text-align: center; font-size: 12.5px; color: var(--text-3); }
 .notif-item {
     display: flex; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--card-border);

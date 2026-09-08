@@ -20,6 +20,7 @@
   <data name="Layout_DataFreshnessCaption" xml:space="preserve"><value>Latest uploaded reporting period</value></data>
   <data name="Notif_Title" xml:space="preserve"><value>Notifications</value></data>
   <data name="Notif_Empty" xml:space="preserve"><value>You're all caught up — no alerts right now.</value></data>
+  <data name="Notif_ClearAll" xml:space="preserve"><value>Clear</value></data>
 
   <!-- Page Guide -->
   <data name="Guide_TriggerLabel" xml:space="preserve"><value>Page Guide</value></data>

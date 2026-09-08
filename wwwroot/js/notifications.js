@@ -2,15 +2,25 @@
    Polls /api/notifications (scoped server-side to the caller's role/store
    access) and renders a dropdown panel positioned relative to the bell
    button itself, so it works regardless of what each layout's header
-   markup looks like or clips. */
+   markup looks like or clips.
+
+   Notifications themselves are computed live server-side every call (no
+   read/unread state, no history table) — "clearing" here is a purely
+   client-side dismissal: cleared items are hashed into localStorage and
+   hidden from this browser until the underlying condition actually
+   changes (the item's key stops appearing in a fresh fetch), at which
+   point its dismissal is dropped automatically so a *new* occurrence of
+   the same type/store/title shows up again. */
 (function () {
     const btn = document.getElementById('notifBtn');
     const badge = document.getElementById('notifBadge');
     const panel = document.getElementById('notifPanel');
     const list = document.getElementById('notifList');
+    const clearBtn = document.getElementById('notifClearBtn');
     if (!btn || !panel || !list) return;
 
     const areaPrefix = document.body.dataset.areaPrefix || '';
+    const DISMISSED_KEY = 'mf-notif-dismissed';
 
     const typeIcons = {
         critical: '<i class="bi bi-exclamation-octagon-fill" style="color:var(--danger)"></i>',
@@ -25,24 +35,38 @@
         return d.innerHTML;
     }
 
+    function itemKey(i) {
+        return `${i.type}::${i.store || ''}::${i.title}`;
+    }
+
+    function loadDismissed() {
+        try {
+            const raw = localStorage.getItem(DISMISSED_KEY);
+            return raw ? new Set(JSON.parse(raw)) : new Set();
+        } catch {
+            return new Set();
+        }
+    }
+
+    function saveDismissed(set) {
+        try {
+            localStorage.setItem(DISMISSED_KEY, JSON.stringify([...set]));
+        } catch { /* private browsing / storage disabled — dismissal just won't persist */ }
+    }
+
     function linkFor(item) {
         if (item.type === 'high-risk') return `${areaPrefix}/dashboard/earlywarning`;
         if (item.store) return `${areaPrefix}/dashboard/actioncenterdetail?store=${encodeURIComponent(item.store)}`;
         return `${areaPrefix}/dashboard/actioncenter`;
     }
 
-    async function fetchNotifications() {
-        let items;
-        try {
-            const res = await fetch('/api/notifications');
-            if (!res.ok) return;
-            items = await res.json();
-        } catch {
-            return;
-        }
+    let visibleItems = [];
 
+    function render(items) {
+        visibleItems = items;
         badge.hidden = items.length === 0;
         badge.textContent = items.length > 99 ? '99+' : String(items.length);
+        if (clearBtn) clearBtn.hidden = items.length === 0;
 
         if (items.length === 0) {
             list.innerHTML = `<div class="notif-empty">${esc(btn.dataset.emptyText || '')}</div>`;
@@ -58,6 +82,30 @@
                 </div>
             </a>
         `).join('');
+    }
+
+    async function fetchNotifications() {
+        let items;
+        try {
+            const res = await fetch('/api/notifications');
+            if (!res.ok) return;
+            items = await res.json();
+        } catch {
+            return;
+        }
+
+        // Drop any dismissal whose underlying notification is no longer live —
+        // keeps localStorage from growing forever and lets a resolved-then-
+        // recurring issue notify again instead of staying silently hidden.
+        const liveKeys = new Set(items.map(itemKey));
+        const dismissed = loadDismissed();
+        let dismissedChanged = false;
+        for (const k of [...dismissed]) {
+            if (!liveKeys.has(k)) { dismissed.delete(k); dismissedChanged = true; }
+        }
+        if (dismissedChanged) saveDismissed(dismissed);
+
+        render(items.filter(i => !dismissed.has(itemKey(i))));
     }
 
     function positionPanel() {
@@ -85,6 +133,16 @@
         if (!panel.hidden && !panel.contains(e.target) && !btn.contains(e.target)) panel.hidden = true;
     });
     window.addEventListener('resize', () => { if (!panel.hidden) positionPanel(); });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dismissed = loadDismissed();
+            visibleItems.forEach(i => dismissed.add(itemKey(i)));
+            saveDismissed(dismissed);
+            render([]);
+        });
+    }
 
     fetchNotifications();
     setInterval(fetchNotifications, 60000);
