@@ -18,7 +18,10 @@ public class LoginViewModel
 
 public class ChangePasswordViewModel
 {
-    [Required(ErrorMessage = "Val_CurrentPasswordRequired")]
+    // Not [Required] here — a forced first-login password change (temporary/
+    // OTP-issued password) skips this field entirely. The controller enforces
+    // it as required for a voluntary change instead, where the session's
+    // MustChangePassword flag says which case this is.
     [DataType(DataType.Password)]
     public string CurrentPassword { get; set; } = "";
 

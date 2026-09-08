@@ -115,4 +115,14 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> SetPasswordAsync(int userId, string newPassword)
+    {
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return false;
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.MustChangePassword = false;
+        await _db.SaveChangesAsync();
+        return true;
+    }
 }

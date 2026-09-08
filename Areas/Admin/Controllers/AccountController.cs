@@ -108,17 +108,29 @@ public class AccountController : Controller
 
     [HttpGet]
     [RequireAdminAuth]
-    public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+    public IActionResult ChangePassword()
+    {
+        ViewData["IsForced"] = HttpContext.Session.GetMustChangePassword();
+        return View(new ChangePasswordViewModel());
+    }
 
     [HttpPost, ValidateAntiForgeryToken]
     [RequireAdminAuth]
     public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
     {
-        if (!ModelState.IsValid) return View(vm);
         var userId = HttpContext.Session.GetUserId();
         if (userId == null) return Redirect("/adminlogin");
         var wasForced = HttpContext.Session.GetMustChangePassword();
-        var ok = await _auth.ChangePasswordAsync(userId.Value, vm.CurrentPassword, vm.NewPassword);
+        ViewData["IsForced"] = wasForced;
+        // A forced first-time change (temporary/OTP-issued password) skips the
+        // Current Password field entirely — the user already proved they have
+        // it by authenticating with it to reach this session.
+        if (!wasForced && string.IsNullOrEmpty(vm.CurrentPassword))
+            ModelState.AddModelError(nameof(vm.CurrentPassword), _L["Val_CurrentPasswordRequired"]);
+        if (!ModelState.IsValid) return View(vm);
+        var ok = wasForced
+            ? await _auth.SetPasswordAsync(userId.Value, vm.NewPassword)
+            : await _auth.ChangePasswordAsync(userId.Value, vm.CurrentPassword, vm.NewPassword);
         if (!ok) { ModelState.AddModelError("CurrentPassword", _L["Msg_CurrentPasswordIncorrect"]); return View(vm); }
         HttpContext.Session.SetMustChangePassword(false);
         TempData["Success"] = _L["Msg_PasswordChanged"].Value;
