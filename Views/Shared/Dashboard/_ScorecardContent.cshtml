@@ -126,6 +126,12 @@
             <input type="text" class="sc-combobox-input" id="scOdInput" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
             <div class="sc-combobox-panel" id="scOdPanel"></div>
         </div>
+        <div class="job-filter-wrap">
+            <button type="button" id="scJobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="scJobSelectLabel" data-all="@L["Common_JobTitle"]">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="scJobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="scResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -358,6 +364,7 @@ let scYear = null, scMonths = [], scYearMonthsMap = {};
 let scDimension = 'leader';
 let scSelectedLeader = '';
 let scOmFilter = '', scOcFilter = '', scSocFilter = '', scOdFilter = '';
+let scJobFilter = [];
 
 function scMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function scMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -382,6 +389,7 @@ function scBuildQuery(extra) {
     if (scOcFilter)  q.set('oc', scOcFilter);
     if (scSocFilter) q.set('soc', scSocFilter);
     if (scOdFilter)  q.set('od', scOdFilter);
+    if (scJobFilter.length) q.set('jobs', scJobFilter.join(','));
     return q;
 }
 
@@ -473,6 +481,11 @@ document.getElementById('scYearSelect').addEventListener('change', async functio
 async function scResetFilters() {
     scOmFilter = ''; scOcFilter = ''; scSocFilter = ''; scOdFilter = '';
     scOmCombo.setValue(''); scOcCombo.setValue(''); scSocCombo.setValue(''); scOdCombo.setValue('');
+    scJobFilter = [];
+    if (scJobPanel) {
+        scJobPanel.querySelectorAll('input').forEach(input => input.checked = false);
+        document.getElementById('scJobSelectLabel').textContent = document.getElementById('scJobSelectLabel').dataset.all;
+    }
     const yearSel = document.getElementById('scYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -521,6 +534,26 @@ const scOmCombo  = scCreateCombobox({ inputId: 'scOmInput',  panelId: 'scOmPanel
 const scOcCombo  = scCreateCombobox({ inputId: 'scOcInput',  panelId: 'scOcPanel',  onSelect: v => { scOcFilter  = v; scLoadAll(); } });
 const scSocCombo = scCreateCombobox({ inputId: 'scSocInput', panelId: 'scSocPanel', onSelect: v => { scSocFilter = v; scLoadAll(); } });
 const scOdCombo  = scCreateCombobox({ inputId: 'scOdInput',  panelId: 'scOdPanel',  onSelect: v => { scOdFilter  = v; scLoadAll(); } });
+const scJobButton = document.getElementById('scJobSelectButton');
+const scJobPanel = document.getElementById('scJobSelectPanel');
+if (scJobButton && scJobPanel) {
+    scJobButton.addEventListener('click', e => {
+        e.stopPropagation();
+        scJobPanel.hidden = !scJobPanel.hidden;
+        scJobButton.setAttribute('aria-expanded', String(!scJobPanel.hidden));
+    });
+    scJobPanel.addEventListener('change', () => {
+        scJobFilter = [...scJobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        const label = document.getElementById('scJobSelectLabel');
+        label.textContent = scJobFilter.length
+            ? `${scJobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}`
+            : label.dataset.all;
+        scLoadAll();
+    });
+    document.addEventListener('click', e => {
+        if (!scJobPanel.contains(e.target) && !scJobButton.contains(e.target)) scJobPanel.hidden = true;
+    });
+}
 
 /* Ranking table ----------------------------------------------------------- */
 let scRankingRows = [];
@@ -713,9 +746,10 @@ async function scLoadRollup() {
 
 /* Initial filter load -------------------------------------------------------- */
 async function scLoadFilters() {
-    const [periods, leaders] = await Promise.all([
+    const [periods, leaders, jobs] = await Promise.all([
         fetch('/api/dashboard/available-periods').then(r => r.ok ? r.json() : []),
-        fetch('/api/scorecard/leaders').then(r => r.ok ? r.json() : []),
+        fetch(`/api/scorecard/leaders?${scBuildQuery().toString()}`).then(r => r.ok ? r.json() : []),
+        fetch('/api/dashboard/job-titles').then(r => r.ok ? r.json() : []),
     ]);
 
     const hasData = (periods || []).length > 0;
@@ -735,6 +769,13 @@ async function scLoadFilters() {
     scRenderMonthsChips();
 
     scLeaderCombo.setOptions(leaders || []);
+    if (scJobPanel) {
+        scJobPanel.innerHTML = (jobs || []).map(job => `
+            <label class="job-filter-option">
+                <input type="checkbox" value="${sapEscape(job)}" ${scJobFilter.includes(job) ? 'checked' : ''}>
+                <span>${sapEscape(job)}</span>
+            </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    }
 
     const [managers, consultants, seniorConsultants, directors] = await Promise.all([
         fetch('/api/dashboard/operation-managers').then(r => r.ok ? r.json() : []),

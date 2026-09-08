@@ -31,7 +31,7 @@ public class ScorecardApiController : ControllerBase
     }
 
     [HttpGet("leaders")]
-    public async Task<IActionResult> Leaders()
+    public async Task<IActionResult> Leaders([FromQuery] string? jobs = null)
     {
         var (role, assignedName) = Identity();
         return Ok(await _scorecard.GetLeaderNamesAsync(role, assignedName));

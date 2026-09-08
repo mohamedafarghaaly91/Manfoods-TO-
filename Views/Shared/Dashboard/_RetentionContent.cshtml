@@ -115,6 +115,12 @@
             <input type="text" class="rt-combobox-input" id="rtOdInput" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
             <div class="rt-combobox-panel" id="rtOdPanel"></div>
         </div>
+        <div class="job-filter-wrap">
+            <button type="button" id="rtJobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="rtJobSelectLabel" data-all="@L["Common_JobTitle"]">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="rtJobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="rtResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -398,6 +404,7 @@
 const rtL = document.getElementById('rtContent').dataset;
 let rtYear = null, rtMonths = [], rtYearMonthsMap = {};
 let rtStoreFilter = '', rtOmFilter = '', rtOcFilter = '', rtSocFilter = '', rtOdFilter = '';
+let rtJobFilter = [];
 
 function rtMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function rtMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -427,6 +434,7 @@ function rtBuildQuery(extra) {
     if (rtOcFilter)    q.set('oc', rtOcFilter);
     if (rtSocFilter)   q.set('soc', rtSocFilter);
     if (rtOdFilter)    q.set('od', rtOdFilter);
+    if (rtJobFilter.length) q.set('jobs', rtJobFilter.join(','));
     return q;
 }
 
@@ -474,6 +482,26 @@ const rtOmCombo    = rtCreateCombobox({ inputId: 'rtOmInput',    panelId: 'rtOmP
 const rtOcCombo    = rtCreateCombobox({ inputId: 'rtOcInput',    panelId: 'rtOcPanel',    onSelect: v => { rtOcFilter    = v; rtLoadAll(); } });
 const rtSocCombo   = rtCreateCombobox({ inputId: 'rtSocInput',   panelId: 'rtSocPanel',   onSelect: v => { rtSocFilter   = v; rtLoadAll(); } });
 const rtOdCombo    = rtCreateCombobox({ inputId: 'rtOdInput',    panelId: 'rtOdPanel',    onSelect: v => { rtOdFilter    = v; rtLoadAll(); } });
+const rtJobButton = document.getElementById('rtJobSelectButton');
+const rtJobPanel = document.getElementById('rtJobSelectPanel');
+if (rtJobButton && rtJobPanel) {
+    rtJobButton.addEventListener('click', e => {
+        e.stopPropagation();
+        rtJobPanel.hidden = !rtJobPanel.hidden;
+        rtJobButton.setAttribute('aria-expanded', String(!rtJobPanel.hidden));
+    });
+    rtJobPanel.addEventListener('change', () => {
+        rtJobFilter = [...rtJobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        const label = document.getElementById('rtJobSelectLabel');
+        label.textContent = rtJobFilter.length
+            ? `${rtJobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}`
+            : label.dataset.all;
+        rtLoadAll();
+    });
+    document.addEventListener('click', e => {
+        if (!rtJobPanel.contains(e.target) && !rtJobButton.contains(e.target)) rtJobPanel.hidden = true;
+    });
+}
 
 /* Months multi-select ---------------------------------------------------- */
 function rtBuildMonthsOptions() {
@@ -534,6 +562,11 @@ document.getElementById('rtYearSelect').addEventListener('change', async functio
     rtMonths = (rtYearMonthsMap[rtYear] || []).slice().sort((a, b) => a - b);
     rtStoreFilter = ''; rtOmFilter = ''; rtOcFilter = ''; rtSocFilter = ''; rtOdFilter = '';
     rtStoreCombo.setValue(''); rtOmCombo.setValue(''); rtOcCombo.setValue(''); rtSocCombo.setValue(''); rtOdCombo.setValue('');
+    rtJobFilter = [];
+    if (rtJobPanel) {
+        rtJobPanel.querySelectorAll('input').forEach(input => input.checked = false);
+        document.getElementById('rtJobSelectLabel').textContent = document.getElementById('rtJobSelectLabel').dataset.all;
+    }
     rtBuildMonthsOptions(); rtRenderMonthsChips();
     await rtLoadAll();
 });
@@ -548,13 +581,14 @@ async function rtResetFilters() {
 
 /* Initial filter load ------------------------------------------------------ */
 async function rtLoadFilters() {
-    const [stores, cohortPeriods, managers, consultants, seniorConsultants, directors] = await Promise.all([
+    const [stores, cohortPeriods, managers, consultants, seniorConsultants, directors, jobs] = await Promise.all([
         fetch('/api/retention/stores').then(r => r.ok ? r.json() : []),
         fetch('/api/dashboard/available-periods').then(r => r.ok ? r.json() : []),
         fetch('/api/retention/operation-managers').then(r => r.ok ? r.json() : []),
         fetch('/api/retention/operation-consultants').then(r => r.ok ? r.json() : []),
         fetch('/api/retention/senior-operation-consultants').then(r => r.ok ? r.json() : []),
         fetch('/api/retention/operation-directors').then(r => r.ok ? r.json() : []),
+        fetch('/api/dashboard/job-titles').then(r => r.ok ? r.json() : []),
     ]);
 
     const hasData = (stores || []).length > 0;
@@ -578,6 +612,13 @@ async function rtLoadFilters() {
     rtOcCombo.setOptions(consultants || []);
     rtSocCombo.setOptions(seniorConsultants || []);
     rtOdCombo.setOptions(directors || []);
+    if (rtJobPanel) {
+        rtJobPanel.innerHTML = (jobs || []).map(job => `
+            <label class="job-filter-option">
+                <input type="checkbox" value="${sapEscape(job)}" ${rtJobFilter.includes(job) ? 'checked' : ''}>
+                <span>${sapEscape(job)}</span>
+            </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    }
     return true;
 }
 

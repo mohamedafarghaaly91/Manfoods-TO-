@@ -17,8 +17,17 @@ public class ExitInterviewApiController : ControllerBase
 
     public ExitInterviewApiController(IExitInterviewService exitInterviews) => _exitInterviews = exitInterviews;
 
-    private static ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months) =>
-        new() { Store = store, StoreLeader = storeLeader, OperationConsultant = oc, OperationManager = om, Year = year, Months = months };
+    private ExitInterviewFilter BuildFilter(string? store, string? storeLeader, string? oc, string? om, int? year, string? months) =>
+        new()
+        {
+            Store = store,
+            StoreLeader = storeLeader,
+            OperationConsultant = oc,
+            OperationManager = om,
+            Year = year,
+            Months = months,
+            Jobs = Request.Query["jobs"].ToString()
+        };
 
     private (string role, string? assignedName) Identity() =>
         (HttpContext.Session.GetRole(), HttpContext.Session.GetEmail());

@@ -100,6 +100,12 @@
             <input type="text" class="ew-combobox-input" id="ewStoreInput" placeholder="@L["Common_AllStores"]" autocomplete="off">
             <div class="ew-combobox-panel" id="ewStorePanel"></div>
         </div>
+        <div class="job-filter-wrap">
+            <button type="button" id="ewJobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="ewJobSelectLabel" data-all="@L["Common_JobTitle"]">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="ewJobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="ewResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -312,6 +318,7 @@ function ewSetTitleBadge(id, affected) {
 
 const EW_REASON_TYPES = ['new_hire_window', 'store_history', 'role_history', 'peak_window', 'gender_history', 'exit_interview_score', 'store_leader_history'];
 const EW_L = document.getElementById('ewLocalization').dataset;
+let ewJobFilter = [];
 
 function ewMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function ewMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -321,6 +328,7 @@ function ewBuildQuery(extra) {
     if (ewYear) q.set('year', ewYear);
     if (ewMonths.length) q.set('months', ewMonths.join(','));
     if (ewStoreFilter) q.set('store', ewStoreFilter);
+    if (ewJobFilter.length) q.set('jobs', ewJobFilter.join(','));
     return q;
 }
 
@@ -364,6 +372,26 @@ function ewCreateCombobox({ inputId, panelId, onSelect }) {
 }
 
 const ewStoreCombo = ewCreateCombobox({ inputId: 'ewStoreInput', panelId: 'ewStorePanel', onSelect: v => { ewStoreFilter = v; ewLoadAll(); } });
+const ewJobButton = document.getElementById('ewJobSelectButton');
+const ewJobPanel = document.getElementById('ewJobSelectPanel');
+if (ewJobButton && ewJobPanel) {
+    ewJobButton.addEventListener('click', e => {
+        e.stopPropagation();
+        ewJobPanel.hidden = !ewJobPanel.hidden;
+        ewJobButton.setAttribute('aria-expanded', String(!ewJobPanel.hidden));
+    });
+    ewJobPanel.addEventListener('change', () => {
+        ewJobFilter = [...ewJobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        const label = document.getElementById('ewJobSelectLabel');
+        label.textContent = ewJobFilter.length
+            ? `${ewJobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}`
+            : label.dataset.all;
+        ewLoadAll();
+    });
+    document.addEventListener('click', e => {
+        if (!ewJobPanel.contains(e.target) && !ewJobButton.contains(e.target)) ewJobPanel.hidden = true;
+    });
+}
 
 /* Months multi-select ---------------------------------------------------- */
 function ewBuildMonthsOptions() {
@@ -429,6 +457,11 @@ document.getElementById('ewYearSelect').addEventListener('change', async functio
 async function ewResetFilters() {
     ewStoreFilter = '';
     ewStoreCombo.setValue('');
+    ewJobFilter = [];
+    if (ewJobPanel) {
+        ewJobPanel.querySelectorAll('input').forEach(input => input.checked = false);
+        document.getElementById('ewJobSelectLabel').textContent = document.getElementById('ewJobSelectLabel').dataset.all;
+    }
     const yearSel = document.getElementById('ewYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -438,9 +471,10 @@ async function ewResetFilters() {
 
 /* Initial filter load ------------------------------------------------------ */
 async function ewLoadFilters() {
-    const [periods, stores] = await Promise.all([
+    const [periods, stores, jobs] = await Promise.all([
         fetch('/api/dashboard/available-periods').then(r => r.ok ? r.json() : []),
         fetch('/api/early-warning/stores').then(r => r.ok ? r.json() : []),
+        fetch('/api/dashboard/job-titles').then(r => r.ok ? r.json() : []),
     ]);
 
     const hasData = (periods || []).length > 0;
@@ -460,6 +494,13 @@ async function ewLoadFilters() {
     ewRenderMonthsChips();
 
     ewStoreCombo.setOptions(stores || []);
+    if (ewJobPanel) {
+        ewJobPanel.innerHTML = (jobs || []).map(job => `
+            <label class="job-filter-option">
+                <input type="checkbox" value="${sapEscape(job)}" ${ewJobFilter.includes(job) ? 'checked' : ''}>
+                <span>${sapEscape(job)}</span>
+            </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    }
     return true;
 }
 

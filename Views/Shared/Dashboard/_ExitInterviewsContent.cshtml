@@ -116,6 +116,12 @@
             <input type="text" class="ei-combobox-input" id="eiOmInput" placeholder="@L["Common_AllOperationManagers"]" autocomplete="off">
             <div class="ei-combobox-panel" id="eiOmPanel"></div>
         </div>
+        <div class="job-filter-wrap">
+            <button type="button" id="eiJobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="eiJobSelectLabel" data-all="@L["Common_JobTitle"]">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="eiJobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="eiResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -365,6 +371,7 @@ function eiBuildQuery() {
     if (eiLeaderFilter) p.set('storeLeader', eiLeaderFilter);
     if (eiOcFilter)      p.set('oc', eiOcFilter);
     if (eiOmFilter)      p.set('om', eiOmFilter);
+    if (eiJobFilter.length) p.set('jobs', eiJobFilter.join(','));
     return p.toString();
 }
 
@@ -411,6 +418,26 @@ const eiStoreCombo  = eiCreateCombobox({ inputId: 'eiStoreInput',  panelId: 'eiS
 const eiLeaderCombo = eiCreateCombobox({ inputId: 'eiLeaderInput', panelId: 'eiLeaderPanel', onSelect: v => { eiLeaderFilter = v; eiLoadAll(); } });
 const eiOcCombo     = eiCreateCombobox({ inputId: 'eiOcInput',     panelId: 'eiOcPanel',     onSelect: v => { eiOcFilter     = v; eiLoadAll(); } });
 const eiOmCombo     = eiCreateCombobox({ inputId: 'eiOmInput',     panelId: 'eiOmPanel',     onSelect: v => { eiOmFilter     = v; eiLoadAll(); } });
+let eiJobFilter = [];
+const eiJobButton = document.getElementById('eiJobSelectButton');
+const eiJobPanel = document.getElementById('eiJobSelectPanel');
+if (eiJobButton && eiJobPanel) {
+    eiJobButton.addEventListener('click', e => {
+        e.stopPropagation();
+        eiJobPanel.hidden = !eiJobPanel.hidden;
+        eiJobButton.setAttribute('aria-expanded', String(!eiJobPanel.hidden));
+    });
+    eiJobPanel.addEventListener('change', () => {
+        eiJobFilter = [...eiJobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        document.getElementById('eiJobSelectLabel').textContent = eiJobFilter.length
+            ? `${eiJobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}`
+            : document.getElementById('eiJobSelectLabel').dataset.all;
+        eiLoadAll();
+    });
+    document.addEventListener('click', e => {
+        if (!eiJobPanel.contains(e.target) && !eiJobButton.contains(e.target)) eiJobPanel.hidden = true;
+    });
+}
 
 /* Months multi-select ---------------------------------------------------- */
 function eiBuildMonthsOptions() {
@@ -477,6 +504,11 @@ document.getElementById('eiYearSelect').addEventListener('change', async functio
 async function eiResetFilters() {
     eiStoreFilter = ''; eiLeaderFilter = ''; eiOcFilter = ''; eiOmFilter = '';
     eiStoreCombo.setValue(''); eiLeaderCombo.setValue(''); eiOcCombo.setValue(''); eiOmCombo.setValue('');
+    eiJobFilter = [];
+    if (eiJobPanel) {
+        eiJobPanel.querySelectorAll('input').forEach(input => input.checked = false);
+        document.getElementById('eiJobSelectLabel').textContent = '@L["Common_JobTitle"]';
+    }
     const yearSel = document.getElementById('eiYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -486,9 +518,10 @@ async function eiResetFilters() {
 
 /* Initial filter load ------------------------------------------------------ */
 async function eiLoadFilters() {
-    const [opts, periods] = await Promise.all([
+    const [opts, periods, jobs] = await Promise.all([
         fetch('/api/exit-interviews/filters').then(r => r.ok ? r.json() : {}),
         fetch('/api/exit-interviews/available-periods').then(r => r.ok ? r.json() : []),
+        fetch('/api/dashboard/job-titles').then(r => r.ok ? r.json() : []),
     ]);
 
     const hasData = (periods || []).length > 0;
@@ -515,6 +548,13 @@ async function eiLoadFilters() {
     eiLeaderCombo.setOptions(opts.storeLeaders || []);
     eiOcCombo.setOptions(opts.operationConsultants || []);
     eiOmCombo.setOptions(opts.operationManagers || []);
+    if (eiJobPanel) {
+        eiJobPanel.innerHTML = (jobs || []).map(job => `
+            <label class="job-filter-option">
+                <input type="checkbox" value="${sapEscape(job)}" ${eiJobFilter.includes(job) ? 'checked' : ''}>
+                <span>${sapEscape(job)}</span>
+            </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    }
     return true;
 }
 

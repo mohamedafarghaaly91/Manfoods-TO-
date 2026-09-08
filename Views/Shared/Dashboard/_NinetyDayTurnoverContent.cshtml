@@ -140,6 +140,12 @@
             <input type="text" class="ntd-combobox-input" id="ntdOdInput" placeholder="@L["Common_OperationDirectors"]" autocomplete="off">
             <div class="ntd-combobox-panel" id="ntdOdPanel"></div>
         </div>
+        <div class="job-filter-wrap">
+            <button type="button" id="ntdJobSelectButton" class="job-filter-button" aria-haspopup="listbox" aria-expanded="false">
+                <span id="ntdJobSelectLabel" data-all="@L["Common_JobTitle"]">@L["Common_JobTitle"]</span><i class="bi bi-chevron-down"></i>
+            </button>
+            <div id="ntdJobSelectPanel" class="job-filter-panel" hidden></div>
+        </div>
 
         <button type="button" class="reset-filters-btn" onclick="ntdResetFilters()">
             <i class="bi bi-arrow-counterclockwise"></i>@L["Common_ResetFilters"]
@@ -520,6 +526,7 @@
 const ntdL = document.getElementById('ntdContent').dataset;
 let ntdYear = null, ntdMonths = [], ntdYearMonthsMap = {};
 let ntdStoreFilter = '', ntdOmFilter = '', ntdOcFilter = '', ntdSocFilter = '', ntdOdFilter = '';
+let ntdJobFilter = [];
 
 function ntdMonthShortName(m) { return new Date(2000, m - 1, 1).toLocaleString('default', { month: 'short' }); }
 function ntdMonthLongName(m, y) { return new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
@@ -546,6 +553,7 @@ function ntdBuildQuery(extra) {
     if (ntdOcFilter)    q.set('oc', ntdOcFilter);
     if (ntdSocFilter)   q.set('soc', ntdSocFilter);
     if (ntdOdFilter)    q.set('od', ntdOdFilter);
+    if (ntdJobFilter.length) q.set('jobs', ntdJobFilter.join(','));
     return q;
 }
 
@@ -593,6 +601,27 @@ const ntdOmCombo    = ntdCreateCombobox({ inputId: 'ntdOmInput',    panelId: 'nt
 const ntdOcCombo    = ntdCreateCombobox({ inputId: 'ntdOcInput',    panelId: 'ntdOcPanel',    onSelect: v => { ntdOcFilter    = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
 const ntdSocCombo   = ntdCreateCombobox({ inputId: 'ntdSocInput',   panelId: 'ntdSocPanel',   onSelect: v => { ntdSocFilter   = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
 const ntdOdCombo    = ntdCreateCombobox({ inputId: 'ntdOdInput',    panelId: 'ntdOdPanel',    onSelect: v => { ntdOdFilter    = v; ntdLoadAll(); ntdLoadTrendMatrix(); } });
+const ntdJobButton = document.getElementById('ntdJobSelectButton');
+const ntdJobPanel = document.getElementById('ntdJobSelectPanel');
+if (ntdJobButton && ntdJobPanel) {
+    ntdJobButton.addEventListener('click', e => {
+        e.stopPropagation();
+        ntdJobPanel.hidden = !ntdJobPanel.hidden;
+        ntdJobButton.setAttribute('aria-expanded', String(!ntdJobPanel.hidden));
+    });
+    ntdJobPanel.addEventListener('change', () => {
+        ntdJobFilter = [...ntdJobPanel.querySelectorAll('input:checked')].map(input => input.value);
+        const label = document.getElementById('ntdJobSelectLabel');
+        label.textContent = ntdJobFilter.length
+            ? `${ntdJobFilter.length} ${document.documentElement.dir === 'rtl' ? 'وظائف مختارة' : 'selected'}`
+            : label.dataset.all;
+        ntdLoadAll();
+        ntdLoadTrendMatrix();
+    });
+    document.addEventListener('click', e => {
+        if (!ntdJobPanel.contains(e.target) && !ntdJobButton.contains(e.target)) ntdJobPanel.hidden = true;
+    });
+}
 
 /* Months multi-select ---------------------------------------------------- */
 function ntdBuildMonthsOptions() {
@@ -659,6 +688,11 @@ document.getElementById('ntdYearSelect').addEventListener('change', function () 
 function ntdResetFilters() {
     ntdStoreFilter = ''; ntdOmFilter = ''; ntdOcFilter = ''; ntdSocFilter = ''; ntdOdFilter = '';
     ntdStoreCombo.setValue(''); ntdOmCombo.setValue(''); ntdOcCombo.setValue(''); ntdSocCombo.setValue(''); ntdOdCombo.setValue('');
+    ntdJobFilter = [];
+    if (ntdJobPanel) {
+        ntdJobPanel.querySelectorAll('input').forEach(input => input.checked = false);
+        document.getElementById('ntdJobSelectLabel').textContent = document.getElementById('ntdJobSelectLabel').dataset.all;
+    }
     const yearSel = document.getElementById('ntdYearSelect');
     if (yearSel && yearSel.options.length) {
         yearSel.selectedIndex = 0;
@@ -669,13 +703,14 @@ function ntdResetFilters() {
 
 /* Initial filter load ------------------------------------------------------ */
 async function ntdLoadFilters() {
-    const [periods, stores, managers, consultants, seniorConsultants, directors] = await Promise.all([
+    const [periods, stores, managers, consultants, seniorConsultants, directors, jobs] = await Promise.all([
         ntdFetch('cohort-periods'),
         fetch('/api/ninety-day-turnover/stores').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/operation-managers').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/operation-consultants').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/senior-operation-consultants').then(r => r.ok ? r.json() : []),
         fetch('/api/ninety-day-turnover/operation-directors').then(r => r.ok ? r.json() : []),
+        fetch('/api/dashboard/job-titles').then(r => r.ok ? r.json() : []),
     ]);
     const cohortPeriods = periods || [];
 
@@ -700,6 +735,13 @@ async function ntdLoadFilters() {
     ntdOcCombo.setOptions(consultants || []);
     ntdSocCombo.setOptions(seniorConsultants || []);
     ntdOdCombo.setOptions(directors || []);
+    if (ntdJobPanel) {
+        ntdJobPanel.innerHTML = (jobs || []).map(job => `
+            <label class="job-filter-option">
+                <input type="checkbox" value="${sapEscape(job)}" ${ntdJobFilter.includes(job) ? 'checked' : ''}>
+                <span>${sapEscape(job)}</span>
+            </label>`).join('') || '<div class="job-filter-empty">No jobs available</div>';
+    }
     return true;
 }
 

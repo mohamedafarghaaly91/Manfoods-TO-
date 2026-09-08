@@ -43,12 +43,17 @@ public class EarlyWarningService : IEarlyWarningService
     private readonly AppDbContext _db;
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
-    public EarlyWarningService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache)
+    private readonly IHttpContextAccessor _httpContext;
+    public EarlyWarningService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IHttpContextAccessor httpContext)
     {
         _db = db;
         _storeAccess = storeAccess;
         _cache = cache;
+        _httpContext = httpContext;
     }
+
+    private List<string>? RequestedJobs =>
+        MultiValueFilter.Split(_httpContext.HttpContext?.Request.Query["jobs"].ToString());
 
     // ── Constants ─────────────────────────────────────────────────────────────
     private const int DefaultNewHireWindowDays = 90;
@@ -479,7 +484,7 @@ public class EarlyWarningService : IEarlyWarningService
         string? store, string role, string? assignedName, string? months = null, int? year = null,
         string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
-        var cacheKey = $"early-warning:watchlist_{store}_{role}_{assignedName}_{months}_{year}_{om}_{oc}_{soc}_{od}";
+        var cacheKey = $"early-warning:watchlist_{store}_{role}_{assignedName}_{months}_{year}_{om}_{oc}_{soc}_{od}_{string.Join(',', RequestedJobs ?? new())}";
         if (_cache.TryGetValue(cacheKey, out List<EarlyWarningItem>? cachedWatchlist) && cachedWatchlist != null)
             return cachedWatchlist;
 
@@ -487,6 +492,11 @@ public class EarlyWarningService : IEarlyWarningService
         var historical = await LoadHistoricalRecordsAsync();
         var (candidatesRaw, anchorMonth, anchorYear) = await LoadActiveCandidatesAsync(months, year);
         var candidates = candidatesRaw;
+        if (RequestedJobs is { } jobs)
+        {
+            historical = historical.Where(h => jobs.Contains(h.JobTitle)).ToList();
+            candidates = candidates.Where(c => jobs.Contains(c.JobTitle)).ToList();
+        }
 
         // Role-based store access is always applied — never bypassed by the
         // explicit store filter, which only narrows further on top of it.

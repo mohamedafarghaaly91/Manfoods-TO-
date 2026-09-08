@@ -31,6 +31,7 @@ public class ExitInterviewService : IExitInterviewService
         if (!string.IsNullOrWhiteSpace(filter.StoreLeader)) q = q.Where(e => e.StoreLeader == filter.StoreLeader);
         if (MultiValueFilter.Split(filter.OperationConsultant) is { } ocs) q = q.Where(e => ocs.Contains(e.OperationConsultant));
         if (MultiValueFilter.Split(filter.OperationManager) is { } oms) q = q.Where(e => oms.Contains(e.OperationManager));
+        if (MultiValueFilter.Split(filter.Jobs) is { } jobs) q = q.Where(e => jobs.Contains(e.JobTitle));
         // Year=0 is the synthetic "undated" sentinel — skip date filtering so
         // all rows (which have month=0/year=0) are returned unfiltered.
         if (filter.Year.HasValue && filter.Year.Value > 0)

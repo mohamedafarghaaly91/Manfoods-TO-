@@ -21,14 +21,19 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
     private readonly IStringLocalizer<SharedResource> _L;
+    private readonly IHttpContextAccessor _httpContext;
 
-    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer)
+    public NinetyDayTurnoverService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer, IHttpContextAccessor httpContext)
     {
         _db = db;
         _storeAccess = storeAccess;
         _cache = cache;
         _L = localizer;
+        _httpContext = httpContext;
     }
+
+    private List<string>? RequestedJobs =>
+        MultiValueFilter.Split(_httpContext.HttpContext?.Request.Query["jobs"].ToString());
 
     private class ResignationTenure
     {
@@ -43,32 +48,32 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
         public int TenureDays { get; set; }
     }
 
-    private async Task<List<(string EmployeeId, string Store, int Month, int Year)>> LoadActiveHiresAsync()
+    private async Task<List<(string EmployeeId, string Store, string JobTitle, int Month, int Year)>> LoadActiveHiresAsync()
     {
         // This query has no request-specific parameters (the go-live threshold is a
         // fixed cutoff, not a per-call filter), so it's cached whole rather than
         // re-read from the database on every call — see UploadService for the
         // write-side invalidation of ActiveHiresCacheKey.
-        if (_cache.TryGetValue(ActiveHiresCacheKey, out List<(string EmployeeId, string Store, int Month, int Year)>? cached) && cached != null)
-            return cached;
+        if (_cache.TryGetValue(ActiveHiresCacheKey, out List<(string EmployeeId, string Store, string JobTitle, int Month, int Year)>? cached) && cached != null)
+            return RequestedJobs is { } cachedJobs ? cached.Where(a => cachedJobs.Contains(a.JobTitle)).ToList() : cached;
 
         // Go-live threshold is a dynamic date comparison (not a hardcoded year), so it
         // keeps working unchanged as future years' data arrives.
         var goLive = MetricsCalculationService.GoLiveDate;
         var rows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null && e.HireDate.Value >= goLive)
-            .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
+            .Select(e => new { e.EmployeeId, e.Store, e.JobTitle, e.HireDate })
             .ToListAsync();
-        var result = rows.Select(r => (r.EmployeeId, r.Store, r.HireDate!.Value.Month, r.HireDate!.Value.Year)).ToList();
+        var result = rows.Select(r => (r.EmployeeId, r.Store, r.JobTitle, r.HireDate!.Value.Month, r.HireDate!.Value.Year)).ToList();
         _cache.Set(ActiveHiresCacheKey, result, CacheDuration);
-        return result;
+        return RequestedJobs is { } jobs ? result.Where(a => jobs.Contains(a.JobTitle)).ToList() : result;
     }
 
     private async Task<List<ResignationTenure>> LoadResignationTenuresAsync()
     {
         // Same no-request-parameters cacheability as LoadActiveHiresAsync above.
         if (_cache.TryGetValue(ResignationTenuresCacheKey, out List<ResignationTenure>? cached) && cached != null)
-            return cached;
+            return RequestedJobs is { } cachedJobs ? cached.Where(r => cachedJobs.Contains(r.JobTitle)).ToList() : cached;
 
         var goLive = MetricsCalculationService.GoLiveDate;
         var rows = await _db.Resignations
@@ -87,7 +92,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
             TenureDays = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
         }).ToList();
         _cache.Set(ResignationTenuresCacheKey, result, CacheDuration);
-        return result;
+        return RequestedJobs is { } jobs ? result.Where(r => jobs.Contains(r.JobTitle)).ToList() : result;
     }
 
     // Fetches only the row(s) that could be "the latest period" for each store —
@@ -121,7 +126,7 @@ public class NinetyDayTurnoverService : INinetyDayTurnoverService
     }
 
     private static NinetyDayKpiViewModel ComputeKpi(
-        List<(string EmployeeId, string Store, int Month, int Year)> activeHires,
+        List<(string EmployeeId, string Store, string JobTitle, int Month, int Year)> activeHires,
         List<ResignationTenure> resTenures,
         HashSet<int> cohortKeys, int latestMonth, int latestYear, List<string>? stores, List<string>? omOcStores,
         List<string>? accessible = null)

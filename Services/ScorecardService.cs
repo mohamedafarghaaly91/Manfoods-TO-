@@ -17,14 +17,25 @@ public class ScorecardService : IScorecardService
     private readonly IExitInterviewService _exitInterviews;
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
+    private readonly IHttpContextAccessor _httpContext;
 
-    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess, IMemoryCache cache)
+    public ScorecardService(AppDbContext db, IExitInterviewService exitInterviews, IStoreAccessService storeAccess, IMemoryCache cache, IHttpContextAccessor httpContext)
     {
         _db = db;
         _exitInterviews = exitInterviews;
         _storeAccess = storeAccess;
         _cache = cache;
+        _httpContext = httpContext;
     }
+
+    private List<string>? RequestedJobs =>
+        MultiValueFilter.Split(_httpContext.HttpContext?.Request.Query["jobs"].ToString());
+
+    private IQueryable<ActiveEmployee> ApplyActiveJobFilter(IQueryable<ActiveEmployee> query) =>
+        RequestedJobs is { } jobs ? query.Where(e => jobs.Contains(e.JobTitle)) : query;
+
+    private IQueryable<Resignation> ApplyResignationJobFilter(IQueryable<Resignation> query) =>
+        RequestedJobs is { } jobs ? query.Where(e => jobs.Contains(e.JobTitle)) : query;
 
     private static string Pick(StoreReference s, string dimension) => dimension switch
     {
@@ -82,12 +93,12 @@ public class ScorecardService : IScorecardService
         if (MultiValueFilter.Split(soc) is { } socs) storeRefs = storeRefs.Where(s => socs.Contains(s.SeniorOperationConsultant)).ToList();
         if (MultiValueFilter.Split(od) is { } ods) storeRefs = storeRefs.Where(s => ods.Contains(s.OperationDirector)).ToList();
 
-        var headcountMap = (await _db.ActiveEmployees.Where(e => periodKeys.Contains(e.Year * 100 + e.Month))
+        var headcountMap = (await ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => periodKeys.Contains(e.Year * 100 + e.Month)))
             .GroupBy(e => new { e.Store, e.Month, e.Year })
             .Select(g => new { g.Key.Store, g.Key.Month, g.Key.Year, Count = g.Count() })
             .ToListAsync()).ToDictionary(x => (x.Store, x.Month, x.Year), x => x.Count);
 
-        var resignMap = (await _db.Resignations.Where(r => periodKeys.Contains(r.Year * 100 + r.Month))
+        var resignMap = (await ApplyResignationJobFilter(_db.Resignations.Where(r => periodKeys.Contains(r.Year * 100 + r.Month)))
             .GroupBy(r => new { r.Store, r.Month, r.Year })
             .Select(g => new { g.Key.Store, g.Key.Month, g.Key.Year, Count = g.Count() })
             .ToListAsync()).ToDictionary(x => (x.Store, x.Month, x.Year), x => x.Count);
@@ -117,6 +128,7 @@ public class ScorecardService : IScorecardService
     private class HistoricalRecord
     {
         public string Store { get; set; } = "";
+        public string JobTitle { get; set; } = "";
         public int? TenureDays { get; set; }
         public DateOnly HireDate { get; set; }
         /// <summary>YYYYMM key derived from the employee's hire date — used to scope
@@ -136,11 +148,11 @@ public class ScorecardService : IScorecardService
 
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
-            .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
+            .Select(e => new { e.EmployeeId, e.Store, e.JobTitle, e.HireDate })
             .ToListAsync();
         var resignationRows = await _db.Resignations
             .Where(r => r.HireDate != null && r.ResignationDate != null)
-            .Select(r => new { r.EmployeeId, r.Store, r.HireDate, r.ResignationDate })
+            .Select(r => new { r.EmployeeId, r.Store, r.JobTitle, r.HireDate, r.ResignationDate })
             .ToListAsync();
 
         var byEmployee = new Dictionary<string, HistoricalRecord>();
@@ -150,6 +162,7 @@ public class ScorecardService : IScorecardService
             byEmployee[a.EmployeeId] = new HistoricalRecord
             {
                 Store       = a.Store,
+                JobTitle    = a.JobTitle,
                 TenureDays  = null,
                 HireDate    = a.HireDate!.Value,
                 HireDateKey = a.HireDate!.Value.Year * 100 + a.HireDate!.Value.Month,
@@ -161,6 +174,7 @@ public class ScorecardService : IScorecardService
             byEmployee[r.EmployeeId] = new HistoricalRecord
             {
                 Store       = r.Store,
+                JobTitle    = r.JobTitle,
                 TenureDays  = r.ResignationDate!.Value.DayNumber - r.HireDate!.Value.DayNumber,
                 HireDate    = r.HireDate!.Value,
                 HireDateKey = r.HireDate!.Value.Year * 100 + r.HireDate!.Value.Month,
@@ -168,7 +182,7 @@ public class ScorecardService : IScorecardService
         }
         var records = byEmployee.Values.ToList();
         _cache.Set(HistoricalRecordsCacheKey, records, TimeSpan.FromHours(6));
-        return records;
+        return RequestedJobs is { } jobs ? records.Where(r => jobs.Contains(r.JobTitle)).ToList() : records;
     }
 
     public async Task<List<ScorecardRow>> GetScorecardAsync(string dimension, string role, string? assignedName, string? om = null, string? oc = null, string? soc = null, string? od = null, string? months = null, int? year = null)
@@ -298,12 +312,12 @@ public class ScorecardService : IScorecardService
             .ToListAsync();
         if (rows.Count == 0) return new List<LeaderHistoryRow>();
 
-        var headcountMap = (await _db.ActiveEmployees.Where(e => periodKeys.Contains(e.Year * 100 + e.Month))
+        var headcountMap = (await ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => periodKeys.Contains(e.Year * 100 + e.Month)))
             .GroupBy(e => new { e.Store, e.Month, e.Year })
             .Select(g => new { g.Key.Store, g.Key.Month, g.Key.Year, Count = g.Count() })
             .ToListAsync()).ToDictionary(x => (x.Store, x.Month, x.Year), x => x.Count);
 
-        var resignMap = (await _db.Resignations.Where(r => periodKeys.Contains(r.Year * 100 + r.Month))
+        var resignMap = (await ApplyResignationJobFilter(_db.Resignations.Where(r => periodKeys.Contains(r.Year * 100 + r.Month)))
             .GroupBy(r => new { r.Store, r.Month, r.Year })
             .Select(g => new { g.Key.Store, g.Key.Month, g.Key.Year, Count = g.Count() })
             .ToListAsync()).ToDictionary(x => (x.Store, x.Month, x.Year), x => x.Count);

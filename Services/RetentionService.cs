@@ -20,13 +20,15 @@ public class RetentionService : IRetentionService
     private readonly IStoreAccessService _storeAccess;
     private readonly IMemoryCache _cache;
     private readonly IStringLocalizer<SharedResource> _L;
+    private readonly IHttpContextAccessor _httpContext;
 
-    public RetentionService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer)
+    public RetentionService(AppDbContext db, IStoreAccessService storeAccess, IMemoryCache cache, IStringLocalizer<SharedResource> localizer, IHttpContextAccessor httpContext)
     {
         _db = db;
         _storeAccess = storeAccess;
         _cache = cache;
         _L = localizer;
+        _httpContext = httpContext;
     }
 
     // Real "retention" is a long-term measure — 30/90-day attrition is covered by the
@@ -56,12 +58,22 @@ public class RetentionService : IRetentionService
     {
         public string EmployeeId { get; set; } = "";
         public string Store { get; set; } = "";
+        public string JobTitle { get; set; } = "";
         public DateOnly HireDate { get; set; }
         public int CohortMonth { get; set; }
         public int CohortYear { get; set; }
         /// <summary>Null means still active (never resigned) as of the latest upload.</summary>
         public int? TenureDays { get; set; }
     }
+
+    private List<string>? RequestedJobs =>
+        MultiValueFilter.Split(_httpContext.HttpContext?.Request.Query["jobs"].ToString());
+
+    private IQueryable<ActiveEmployee> ApplyActiveJobFilter(IQueryable<ActiveEmployee> query) =>
+        RequestedJobs is { } jobs ? query.Where(e => jobs.Contains(e.JobTitle)) : query;
+
+    private IQueryable<Resignation> ApplyResignationJobFilter(IQueryable<Resignation> query) =>
+        RequestedJobs is { } jobs ? query.Where(e => jobs.Contains(e.JobTitle)) : query;
 
     // Fetches only the row(s) that could be "the latest period" for each store —
     // i.e. rows whose (Year, Month) matches that store's own max — instead of
@@ -105,12 +117,12 @@ public class RetentionService : IRetentionService
 
         var activeRows = await _db.ActiveEmployees
             .Where(e => e.HireDate != null)
-            .Select(e => new { e.EmployeeId, e.Store, e.HireDate })
+            .Select(e => new { e.EmployeeId, e.Store, e.JobTitle, e.HireDate })
             .ToListAsync();
 
         var resignationRows = await _db.Resignations
             .Where(r => r.HireDate != null && r.ResignationDate != null)
-            .Select(r => new { r.EmployeeId, r.Store, r.HireDate, r.ResignationDate })
+            .Select(r => new { r.EmployeeId, r.Store, r.JobTitle, r.HireDate, r.ResignationDate })
             .ToListAsync();
 
         var byEmployee = new Dictionary<string, EmployeeCohort>();
@@ -122,6 +134,7 @@ public class RetentionService : IRetentionService
             {
                 EmployeeId = a.EmployeeId,
                 Store = a.Store,
+                JobTitle = a.JobTitle,
                 HireDate = a.HireDate!.Value,
                 CohortMonth = a.HireDate!.Value.Month,
                 CohortYear = a.HireDate!.Value.Year,
@@ -138,10 +151,13 @@ public class RetentionService : IRetentionService
             if (string.IsNullOrWhiteSpace(r.EmployeeId)) continue;
             var store = !string.IsNullOrWhiteSpace(r.Store) ? r.Store
                 : byEmployee.TryGetValue(r.EmployeeId, out var prior) ? prior.Store : r.Store;
+            var jobTitle = !string.IsNullOrWhiteSpace(r.JobTitle) ? r.JobTitle
+                : byEmployee.TryGetValue(r.EmployeeId, out var priorJob) ? priorJob.JobTitle : r.JobTitle;
             byEmployee[r.EmployeeId] = new EmployeeCohort
             {
                 EmployeeId = r.EmployeeId,
                 Store = store,
+                JobTitle = jobTitle,
                 HireDate = r.HireDate!.Value,
                 CohortMonth = r.HireDate!.Value.Month,
                 CohortYear = r.HireDate!.Value.Year,
@@ -174,6 +190,7 @@ public class RetentionService : IRetentionService
 
         var omOcStores = await GetStoresForOmOcAsync(om, oc, soc, od);
         if (omOcStores != null) cohorts = cohorts.Where(c => omOcStores.Contains(c.Store));
+        if (RequestedJobs is { } jobs) cohorts = cohorts.Where(c => jobs.Contains(c.JobTitle));
 
         // Role-based store access is always applied — never bypassed by the
         // om/oc (or the caller's later explicit store) filter, which only
@@ -333,7 +350,7 @@ public class RetentionService : IRetentionService
             : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
 
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        var rowsQuery = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null));
         if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
         if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
@@ -366,7 +383,7 @@ public class RetentionService : IRetentionService
             : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
 
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        var rowsQuery = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null));
         if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
         if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
@@ -407,7 +424,7 @@ public class RetentionService : IRetentionService
             : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
 
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        var rowsQuery = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null));
         if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
         if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
@@ -446,7 +463,7 @@ public class RetentionService : IRetentionService
             : periods.Select(p => (p.Month, p.Year)).OrderByDescending(p => p.Year).ThenByDescending(p => p.Month).First();
 
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var rowsQuery = _db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null);
+        var rowsQuery = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Month && e.Year == anchor.Year && e.HireDate != null));
         if (accessible != null) rowsQuery = rowsQuery.Where(e => accessible.Contains(e.Store));
         if (MultiValueFilter.Split(store) is { } stores) rowsQuery = rowsQuery.Where(e => stores.Contains(e.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) rowsQuery = rowsQuery.Where(e => omOcStores.Contains(e.Store));
@@ -570,7 +587,7 @@ public class RetentionService : IRetentionService
         string? store, string role, string? assignedName, string? om, string? oc, string? soc, string? od)
     {
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var q = _db.ActiveEmployees.Where(e => e.Month == anchorMonth && e.Year == anchorYear && e.HireDate != null);
+        var q = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchorMonth && e.Year == anchorYear && e.HireDate != null));
         if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
         if (MultiValueFilter.Split(store) is { } stores) q = q.Where(e => stores.Contains(e.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) q = q.Where(e => omOcStores.Contains(e.Store));
@@ -662,7 +679,7 @@ public class RetentionService : IRetentionService
         if (anchor == null) return new List<ManagerTenureRow>();
 
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var q = _db.ActiveEmployees.Where(e => e.Month == anchor.Value.Month && e.Year == anchor.Value.Year && e.HireDate != null);
+        var q = ApplyActiveJobFilter(_db.ActiveEmployees.Where(e => e.Month == anchor.Value.Month && e.Year == anchor.Value.Year && e.HireDate != null));
         if (accessible != null) q = q.Where(e => accessible.Contains(e.Store));
         var rows = await q.Select(e => new { e.Store, e.HireDate }).ToListAsync();
 
@@ -699,7 +716,7 @@ public class RetentionService : IRetentionService
         string? om = null, string? oc = null, string? soc = null, string? od = null)
     {
         var accessible = await _storeAccess.GetAccessibleStoreNamesAsync(role, assignedName);
-        var q = _db.Resignations.Where(r => r.HireDate != null && r.ResignationDate != null);
+        var q = ApplyResignationJobFilter(_db.Resignations.Where(r => r.HireDate != null && r.ResignationDate != null));
         if (accessible != null) q = q.Where(r => accessible.Contains(r.Store));
         if (MultiValueFilter.Split(store) is { } stores) q = q.Where(r => stores.Contains(r.Store));
         else if (await GetStoresForOmOcAsync(om, oc, soc, od) is { } omOcStores) q = q.Where(r => omOcStores.Contains(r.Store));
