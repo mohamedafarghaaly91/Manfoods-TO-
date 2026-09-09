@@ -193,6 +193,7 @@
   <data name="CP_EnterCurrent" xml:space="preserve"><value>Enter current password</value></data>
   <data name="CP_MinEightChars" xml:space="preserve"><value>Minimum 12 characters</value></data>
   <data name="CP_RepeatNew" xml:space="preserve"><value>Repeat new password</value></data>
+  <data name="CP_WelcomeSetPassword" xml:space="preserve"><value>Welcome! Set a password for your account to continue.</value></data>
 
   <!-- Recover -->
   <data name="Recover_AdminRecovery" xml:space="preserve"><value>Admin Recovery</value></data>
@@ -1398,6 +1399,8 @@
   <data name="Msg_TooManyOtpAttempts" xml:space="preserve"><value>Too many wrong attempts. Ask your admin for a new OTP.</value></data>
   <data name="Msg_IncorrectOtpCode" xml:space="preserve"><value>Incorrect code. {0} attempt(s) left.</value></data>
   <data name="Msg_PasswordSetSuccess" xml:space="preserve"><value>Password set successfully. You can now log in.</value></data>
+  <data name="Msg_SetupLinkExpired" xml:space="preserve"><value>This link has expired. Please sign in again with your temporary password.</value></data>
+  <data name="Msg_SetupFailed" xml:space="preserve"><value>Something went wrong. Please try signing in again.</value></data>
 
   <!-- API error messages surfaced in the UI -->
   <data name="Api_NoteTextRequired" xml:space="preserve"><value>Note text is required.</value></data>

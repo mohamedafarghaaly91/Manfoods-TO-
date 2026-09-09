@@ -36,6 +36,29 @@ public class ChangePasswordViewModel
     public string ConfirmPassword { get; set; } = "";
 }
 
+/// <summary>Posted (as a fetch/AJAX call, not a page form) from the
+/// Update Password popup shown directly on the login page for an account
+/// still on a system-generated temporary password — see
+/// AccountController.SetupPassword in both Home and Admin areas. Token comes
+/// from PasswordSetupExtensions.BeginPasswordSetup, issued right after the
+/// temporary-password login check succeeds; deliberately never establishes a
+/// session, so the user still has to sign in fresh afterward.</summary>
+public class SetupPasswordViewModel
+{
+    [Required]
+    public string Token { get; set; } = "";
+
+    [Required(ErrorMessage = "Val_NewPasswordRequired")]
+    [StrongPassword]
+    [DataType(DataType.Password)]
+    public string NewPassword { get; set; } = "";
+
+    [Required(ErrorMessage = "Val_ConfirmNewPassword")]
+    [DataType(DataType.Password)]
+    [Compare("NewPassword", ErrorMessage = "Val_PasswordsDoNotMatch")]
+    public string ConfirmPassword { get; set; } = "";
+}
+
 public class ForgotPasswordViewModel
 {
     [Required(ErrorMessage = "Val_PhoneOrEmailRequired")]

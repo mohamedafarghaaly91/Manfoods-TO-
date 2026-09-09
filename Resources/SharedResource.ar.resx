@@ -193,6 +193,7 @@
   <data name="CP_EnterCurrent" xml:space="preserve"><value>أدخل كلمة المرور الحالية</value></data>
   <data name="CP_MinEightChars" xml:space="preserve"><value>12 حرف على الأقل</value></data>
   <data name="CP_RepeatNew" xml:space="preserve"><value>أعد كلمة المرور الجديدة</value></data>
+  <data name="CP_WelcomeSetPassword" xml:space="preserve"><value>أهلاً بيك! حدد كلمة مرور لحسابك عشان تكمل.</value></data>
 
   <!-- Recover -->
   <data name="Recover_AdminRecovery" xml:space="preserve"><value>استرداد المشرف</value></data>
@@ -1404,6 +1405,8 @@
   <data name="Msg_TooManyOtpAttempts" xml:space="preserve"><value>محاولات خاطئة كثيرة جدًا. اطلب من المسؤول رمز تحقق جديد.</value></data>
   <data name="Msg_IncorrectOtpCode" xml:space="preserve"><value>رمز غير صحيح. متبقي {0} محاولة.</value></data>
   <data name="Msg_PasswordSetSuccess" xml:space="preserve"><value>تم تعيين كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.</value></data>
+  <data name="Msg_SetupLinkExpired" xml:space="preserve"><value>انتهت صلاحية الرابط ده. سجّل دخول تاني بالباسورد المؤقتة.</value></data>
+  <data name="Msg_SetupFailed" xml:space="preserve"><value>حصل خطأ ما. حاول تسجل الدخول تاني.</value></data>
 
   <!-- API error messages surfaced in the UI -->
   <data name="Api_NoteTextRequired" xml:space="preserve"><value>نص الملاحظة مطلوب.</value></data>
