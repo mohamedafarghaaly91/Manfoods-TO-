@@ -38,7 +38,7 @@ public class UserService : IUserService
     private static UserViewModel ToVm(User u) => new()
     {
         Id = u.Id, Email = u.Email, Phone = u.Phone, Role = u.Role, AssignedName = u.AssignedName ?? "",
-        HasPassword = !string.IsNullOrEmpty(u.PasswordHash), CreatedAt = u.CreatedAt
+        HasPassword = !string.IsNullOrEmpty(u.PasswordHash), MustChangePassword = u.MustChangePassword, CreatedAt = u.CreatedAt
     };
 
     public async Task<List<UserViewModel>> GetAllAsync(string actorEmail)
