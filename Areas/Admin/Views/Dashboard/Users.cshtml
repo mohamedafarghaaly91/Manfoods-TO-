@@ -144,7 +144,7 @@
         <div class="us-toolbar">
             <div class="us-search-wrap">
                 <i class="bi bi-search"></i>
-                <input type="search" id="usSearchInput" class="form-control form-control-dark form-control-sm us-search-input" placeholder="@L["Users_SearchPlaceholder"]" autocomplete="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-1p-ignore="true">
+                <input type="search" id="usSearchInput" class="form-control form-control-dark form-control-sm us-search-input" placeholder="@L["Users_SearchPlaceholder"]" autocomplete="off" autocapitalize="none" spellcheck="false" data-lpignore="true" data-1p-ignore="true" readonly>
             </div>
             <select id="usRoleFilter" class="form-select form-select-dark form-select-sm us-role-filter">
                 <option value="">@L["Users_FilterAllRoles"]</option>
@@ -401,10 +401,21 @@
     const rows = Array.from(document.querySelectorAll('#usTableBody tr'));
     const noResults = document.getElementById('usNoResults');
 
-    // Some browsers auto-fill this field with a previously typed/saved value
-    // (e.g. a saved login email) despite autocomplete="off". Force it clear
-    // on every page load so the table always starts unfiltered.
-    if (searchInput) searchInput.value = '';
+    // Chrome (and others) can silently inject a saved login email into this
+    // field despite autocomplete="off" — the "email" in its placeholder is
+    // enough for the browser's autofill heuristic to treat it as a
+    // username-like field, and it can do this asynchronously, after this
+    // script has already run, so clearing the value here alone isn't
+    // reliable (the injected value can still end up baked into a
+    // back/forward-cache snapshot and reappear on browser Back). The
+    // `readonly` attribute in the markup is the actual fix — browsers skip
+    // autofilling readonly fields — and is lifted here on first focus so
+    // typing still works normally. Clearing on load stays as a harmless
+    // backup for any autofill that still slips through before this runs.
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.addEventListener('focus', () => searchInput.removeAttribute('readonly'), { once: true });
+    }
 
     // User rows contain independent links/forms. Keep their clicks inside the
     // table so a page-level click/autofocus handler cannot treat a row action
