@@ -156,6 +156,13 @@
         [dir="rtl"] .btn-signin i { margin-right: 0; margin-left: .5rem; }
         [dir="rtl"] .divider { direction: rtl; }
         [dir="rtl"] .admin-badge i { margin-right: 0; margin-left: 5px; }
+
+        /* ── Update Password popup (temporary-password first login) ── */
+        .setup-modal-backdrop {
+            display: none; position: fixed; inset: 0; z-index: 1200;
+            background: rgba(0,0,0,.55); align-items: center; justify-content: center; padding: 16px;
+        }
+        .setup-modal-backdrop .login-card { max-width: 420px; width: 100%; margin: 0; animation: none; }
     </style>
 </head>
 <body class="login-body">
@@ -237,6 +244,45 @@
         </div>
     </div>
 
+    <div id="loginL" hidden
+         data-setup-token="@ViewData["SetupToken"]"
+         data-setup-failed="@L["Msg_SetupFailed"]"
+         data-success-success="@L["Msg_PasswordSetSuccess"]"></div>
+
+    <div class="setup-modal-backdrop" id="setupPasswordModal">
+        <div class="login-card">
+            <div class="text-center">
+                <div class="logo-wrap"><i class="bi bi-key-fill" style="font-size:34px;color:var(--gold)"></i></div>
+                <h1 class="login-title" style="font-size:22px">@L["CP_UpdatePassword"]</h1>
+                <p class="login-subtitle" style="text-transform:none;letter-spacing:normal;font-size:12px">@L["CP_WelcomeSetPassword"]</p>
+            </div>
+
+            <div class="divider"><span>@L["CP_MinChars"]</span></div>
+
+            <div class="alert-error-banner" id="setupPasswordError" style="display:none"></div>
+
+            <input type="hidden" id="setupPasswordToken"/>
+
+            <div class="field-wrap">
+                <label>@L["CP_NewPassword"]</label>
+                <i class="bi bi-lock-fill fi"></i>
+                <input type="password" id="setupNewPassword" placeholder="@L["CP_MinEightChars"]" autocomplete="new-password"/>
+            </div>
+
+            <partial name="_PasswordChecklist"/>
+
+            <div class="field-wrap" style="margin-top:16px">
+                <label>@L["CP_ConfirmPassword"]</label>
+                <i class="bi bi-lock-fill fi"></i>
+                <input type="password" id="setupConfirmPassword" placeholder="@L["CP_RepeatNew"]" autocomplete="new-password"/>
+            </div>
+
+            <button type="button" class="btn-signin" id="setupPasswordSubmit">
+                <i class="bi bi-shield-lock-fill me-2"></i>@L["CP_UpdatePassword"]
+            </button>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
@@ -251,6 +297,56 @@
                 localStorage.setItem('mf-theme', next);
             });
         }
+    })();
+
+    (function () {
+        const meta = document.getElementById('loginL');
+        const modal = document.getElementById('setupPasswordModal');
+        const tokenInput = document.getElementById('setupPasswordToken');
+        const errBox = document.getElementById('setupPasswordError');
+        const afToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        tokenInput.value = meta.dataset.setupToken || '';
+        if (tokenInput.value) modal.style.display = 'flex';
+
+        initPasswordChecklist('setupNewPassword', 'pwChecklist');
+
+        document.getElementById('setupPasswordSubmit').addEventListener('click', async () => {
+            errBox.style.display = 'none';
+            const body = new URLSearchParams({
+                token: tokenInput.value,
+                newPassword: document.getElementById('setupNewPassword').value,
+                confirmPassword: document.getElementById('setupConfirmPassword').value,
+            });
+            let data;
+            try {
+                const res = await fetch('/adminlogin/setup-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': afToken },
+                    body,
+                });
+                data = await res.json();
+            } catch {
+                errBox.textContent = meta.dataset.setupFailed;
+                errBox.style.display = 'block';
+                return;
+            }
+            if (!data.success) {
+                errBox.textContent = (data.errors && data.errors[0]) || meta.dataset.setupFailed;
+                errBox.style.display = 'block';
+                return;
+            }
+            modal.style.display = 'none';
+            history.replaceState(null, '', '/adminlogin');
+            const emailInput = document.querySelector('input[name="Email"]');
+            if (emailInput && data.email) emailInput.value = data.email;
+            const passwordInput = document.querySelector('input[name="Password"]');
+            if (passwordInput) passwordInput.focus();
+            const banner = document.createElement('div');
+            banner.className = 'alert-success-banner';
+            banner.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>' + meta.dataset.successSuccess;
+            document.querySelector('.divider').insertAdjacentElement('afterend', banner);
+        });
     })();
     </script>
 </body>

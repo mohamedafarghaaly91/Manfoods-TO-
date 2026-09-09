@@ -38,7 +38,7 @@ public class UserService : IUserService
     private static UserViewModel ToVm(User u) => new()
     {
         Id = u.Id, Email = u.Email, Phone = u.Phone, Role = u.Role, AssignedName = u.AssignedName ?? "",
-        HasPassword = !string.IsNullOrEmpty(u.PasswordHash), CreatedAt = u.CreatedAt
+        HasPassword = !string.IsNullOrEmpty(u.PasswordHash), MustChangePassword = u.MustChangePassword, CreatedAt = u.CreatedAt
     };
 
     public async Task<List<UserViewModel>> GetAllAsync(string actorEmail)
@@ -71,12 +71,22 @@ public class UserService : IUserService
         var u = await _db.Users.FindAsync(id);
         if (u == null || !UserManagementPolicy.CanView(actorEmail, u)) return null;
 
-        var logins = await _db.LoginHistories
+        var logins = (await _db.LoginHistories
             .Where(l => l.UserId == id)
             .OrderByDescending(l => l.LoggedInAt)
             .Take(200)
-            .Select(l => new LoginHistoryItem { LoggedInAt = l.LoggedInAt, IpAddress = l.IpAddress, UserAgent = l.UserAgent })
-            .ToListAsync();
+            .ToListAsync())
+            .Select(l =>
+            {
+                var (browser, os) = UserAgentParser.Parse(l.UserAgent);
+                return new LoginHistoryItem
+                {
+                    LoggedInAt = l.LoggedInAt, IpAddress = l.IpAddress, UserAgent = l.UserAgent,
+                    Success = l.Success, Portal = l.Portal, FailureReason = l.FailureReason,
+                    Browser = browser, OperatingSystem = os,
+                };
+            })
+            .ToList();
 
         return new UserLoginHistoryViewModel { UserId = u.Id, Email = u.Email, AssignedName = u.AssignedName ?? "", Logins = logins };
     }

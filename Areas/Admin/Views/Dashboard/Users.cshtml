@@ -17,8 +17,12 @@
     };
 
     var restrictedRoles = new HashSet<string> { "Operation_Manager", "Operation_Consultant", "Head_Manager", "Senior_Operation_Consultant", "Operation_Director" };
+    // "Active" means the user has actually completed their first-login
+    // password setup — a system-generated temporary password already sits
+    // in PasswordHash from creation, so HasPassword alone isn't enough.
+    bool IsActive(MvcApp.Models.ViewModels.UserViewModel u) => u.HasPassword && !u.MustChangePassword;
     var total = Model.Count;
-    var active = Model.Count(u => u.HasPassword);
+    var active = Model.Count(IsActive);
     var pending = total - active;
     var admins = Model.Count(u => u.Role == "Admin");
     var restricted = Model.Count(u => restrictedRoles.Contains(u.Role));
@@ -179,7 +183,7 @@
                             <td class="text-muted-custom">@user.Phone</td>
                             <td><span class="role-badge role-@user.Role">@RoleLabel(user.Role)</span></td>
                             <td>
-                                @if (user.HasPassword)
+                                @if (IsActive(user))
                                 {
                                     <span class="role-badge" style="background:var(--success-bg);color:var(--success)">@L["Users_Active"]</span>
                                 }
@@ -396,6 +400,11 @@
     const roleFilter = document.getElementById('usRoleFilter');
     const rows = Array.from(document.querySelectorAll('#usTableBody tr'));
     const noResults = document.getElementById('usNoResults');
+
+    // Some browsers auto-fill this field with a previously typed/saved value
+    // (e.g. a saved login email) despite autocomplete="off". Force it clear
+    // on every page load so the table always starts unfiltered.
+    if (searchInput) searchInput.value = '';
 
     // User rows contain independent links/forms. Keep their clicks inside the
     // table so a page-level click/autofocus handler cannot treat a row action

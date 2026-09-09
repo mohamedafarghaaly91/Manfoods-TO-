@@ -3,11 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MvcApp.Models;
 
 /// <summary>
-/// One row per successful portal login (Home and Admin alike) — written by
-/// AuthService.ValidateAsync the moment credentials check out, which is the
-/// single choke point both AccountControllers' Login actions share. Failed
-/// attempts are never logged here (see AuthService's own lockout counter for
-/// that); this is purely "who actually got into the portal, and when."
+/// One row per login attempt (Home and Admin alike) that reached a known
+/// account with a password to check — written by AuthService.ValidateAsync,
+/// the single choke point both AccountControllers' Login actions share. An
+/// attempt against an unknown email is never logged (there's no account to
+/// attach it to, and it would otherwise let this log be used to enumerate
+/// registered emails); everything else — successful or not — is recorded.
 /// </summary>
 [Table("login_history")]
 public class LoginHistory
@@ -31,4 +32,17 @@ public class LoginHistory
 
     [Column("user_agent")]
     public string? UserAgent { get; set; }
+
+    [Column("success")]
+    public bool Success { get; set; } = true;
+
+    /// <summary>"Home" or "Admin" — which login form the attempt came through.</summary>
+    [Column("portal")]
+    public string Portal { get; set; } = "";
+
+    /// <summary>Short reason code (e.g. "wrong-password") for a failed attempt;
+    /// null for a successful one. Never set from an unknown-email attempt —
+    /// see the class summary.</summary>
+    [Column("failure_reason")]
+    public string? FailureReason { get; set; }
 }

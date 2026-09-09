@@ -20,10 +20,13 @@ public class AccountController : Controller
     public AccountController(IAuthService auth, IOtpService otp, IMemoryCache cache, IStringLocalizer<SharedResource> localizer) { _auth = auth; _otp = otp; _cache = cache; _L = localizer; }
 
     [HttpGet("/login")]
-    public IActionResult Login()
+    public IActionResult Login(string? setupToken)
     {
         if (HttpContext.Session.GetUserId() != null && !HttpContext.Session.IsAdmin())
             return RedirectToAction("Index", "Dashboard", new { area = "Home" });
+        // Set by the redirect below right after a temporary-password login —
+        // the view opens the Update Password popup automatically when present.
+        ViewData["SetupToken"] = setupToken;
         return View(new LoginViewModel());
     }
 
@@ -33,7 +36,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password);
+        var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password, "Home");
         if (user == null) { ModelState.AddModelError("", _L["Msg_InvalidCredentials"]); return View(vm); }
 
         if (user.Role == "Admin")
@@ -42,11 +45,39 @@ public class AccountController : Controller
             return View(vm);
         }
 
+        // A system-generated temporary password: never start an authenticated
+        // session on it. Instead, redirect back to this same login page with a
+        // one-time setup token that opens the Update Password popup — see
+        // SetupPassword below. They sign in fresh once it's set.
+        if (user.MustChangePassword)
+            return RedirectToAction("Login", new { setupToken = _cache.BeginPasswordSetup(user) });
+
         // Session-fixation mitigation: hand the authenticated identity off
         // via a one-time token rather than writing it into whatever session
         // this request arrived with — see SessionExtensions.BeginSessionRotation.
         var token = HttpContext.BeginSessionRotation(_cache, user.Id, user.Email, user.Role, user.AssignedName, user.MustChangePassword);
         return RedirectToAction("CompleteLogin", new { token });
+    }
+
+    // Called via fetch from the Update Password popup on the login page —
+    // not a page navigation, so this returns JSON rather than a View. Setting
+    // the password here never establishes a session (see BeginPasswordSetup):
+    // on success the popup just closes and the visible login form underneath
+    // is what the user submits next, with their new password.
+    [HttpPost("/login/setup-password"), ValidateAntiForgeryToken]
+    [EnableRateLimiting("login")]
+    public async Task<IActionResult> SetupPassword(SetupPasswordViewModel vm)
+    {
+        if (!ModelState.IsValid)
+            return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToArray() });
+
+        if (!_cache.TryCompletePasswordSetup(vm.Token, out var userId, out var email))
+            return Json(new { success = false, errors = new[] { _L["Msg_SetupLinkExpired"].Value } });
+
+        var ok = await _auth.SetPasswordAsync(userId, vm.NewPassword);
+        if (!ok) return Json(new { success = false, errors = new[] { _L["Msg_SetupLinkExpired"].Value } });
+
+        return Json(new { success = true, email });
     }
 
     [HttpGet("/login/complete")]

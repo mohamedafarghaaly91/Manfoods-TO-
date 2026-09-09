@@ -193,6 +193,7 @@
   <data name="CP_EnterCurrent" xml:space="preserve"><value>Enter current password</value></data>
   <data name="CP_MinEightChars" xml:space="preserve"><value>Minimum 12 characters</value></data>
   <data name="CP_RepeatNew" xml:space="preserve"><value>Repeat new password</value></data>
+  <data name="CP_WelcomeSetPassword" xml:space="preserve"><value>Welcome! Set a password for your account to continue.</value></data>
 
   <!-- Recover -->
   <data name="Recover_AdminRecovery" xml:space="preserve"><value>Admin Recovery</value></data>
@@ -678,6 +679,13 @@
   <data name="Users_LoginTime" xml:space="preserve"><value>Time</value></data>
   <data name="Users_IpAddress" xml:space="preserve"><value>IP Address</value></data>
   <data name="Users_Device" xml:space="preserve"><value>Device / Browser</value></data>
+  <data name="Users_LoginResult" xml:space="preserve"><value>Result</value></data>
+  <data name="Users_LoginPortal" xml:space="preserve"><value>Portal</value></data>
+  <data name="Users_LoginSuccess" xml:space="preserve"><value>Success</value></data>
+  <data name="Users_LoginFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Users_CurrentSession" xml:space="preserve"><value>Current session</value></data>
+  <data name="Users_LoginFailedWrongPassword" xml:space="preserve"><value>Wrong password</value></data>
+  <data name="Users_LoginFailedNoPassword" xml:space="preserve"><value>No password set yet</value></data>
   <data name="Users_AssignedName" xml:space="preserve"><value>Display Name</value></data>
   <data name="Users_AssignedNamePlaceholder" xml:space="preserve"><value>e.g. Ahmed Mohamed</value></data>
   <data name="Users_AssignedNameHelp" xml:space="preserve"><value>Shown across the portal instead of the email — in Action Center notes, and as the display name in the Home-area header.</value></data>
@@ -1391,6 +1399,8 @@
   <data name="Msg_TooManyOtpAttempts" xml:space="preserve"><value>Too many wrong attempts. Ask your admin for a new OTP.</value></data>
   <data name="Msg_IncorrectOtpCode" xml:space="preserve"><value>Incorrect code. {0} attempt(s) left.</value></data>
   <data name="Msg_PasswordSetSuccess" xml:space="preserve"><value>Password set successfully. You can now log in.</value></data>
+  <data name="Msg_SetupLinkExpired" xml:space="preserve"><value>This link has expired. Please sign in again with your temporary password.</value></data>
+  <data name="Msg_SetupFailed" xml:space="preserve"><value>Something went wrong. Please try signing in again.</value></data>
 
   <!-- API error messages surfaced in the UI -->
   <data name="Api_NoteTextRequired" xml:space="preserve"><value>Note text is required.</value></data>

@@ -514,9 +514,9 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ux_signal_occurrences_sto
         ON dbo.signal_occurrences (store_name, signal_code, year, month);
 
 -- ── login_history ────────────────────────────────────────────────────────
--- One row per successful portal login (Home and Admin alike), written by
--- AuthService.ValidateAsync the moment credentials check out. Powers the
--- per-user login log opened from the Users page.
+-- One row per login attempt against a known account (Home and Admin alike),
+-- written by AuthService.ValidateAsync. Powers the per-user login log opened
+-- from the Users page.
 IF OBJECT_ID('dbo.login_history', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.login_history (
@@ -525,12 +525,24 @@ BEGIN
         email NVARCHAR(MAX) NOT NULL DEFAULT '',
         logged_in_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         ip_address NVARCHAR(MAX) NULL,
-        user_agent NVARCHAR(MAX) NULL
+        user_agent NVARCHAR(MAX) NULL,
+        success BIT NOT NULL DEFAULT 1,
+        portal NVARCHAR(20) NOT NULL DEFAULT '',
+        failure_reason NVARCHAR(200) NULL
     );
 END
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'ix_login_history_user_logged_in_at' AND object_id = OBJECT_ID('dbo.login_history'))
     CREATE INDEX ix_login_history_user_logged_in_at
         ON dbo.login_history (user_id, logged_in_at);
+
+-- Backfill for databases created before failed-attempt logging was added —
+-- every row that already exists is a past successful login.
+IF COL_LENGTH('dbo.login_history', 'success') IS NULL
+    ALTER TABLE dbo.login_history ADD success BIT NOT NULL DEFAULT 1;
+IF COL_LENGTH('dbo.login_history', 'portal') IS NULL
+    ALTER TABLE dbo.login_history ADD portal NVARCHAR(20) NOT NULL DEFAULT '';
+IF COL_LENGTH('dbo.login_history', 'failure_reason') IS NULL
+    ALTER TABLE dbo.login_history ADD failure_reason NVARCHAR(200) NULL;
 
 -- ── seed users ────────────────────────────────
 -- admin@mcd.com / 123123654  →  Admin portal

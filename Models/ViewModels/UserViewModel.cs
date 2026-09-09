@@ -10,6 +10,11 @@ public class UserViewModel
     public string Role { get; set; } = "";
     public string AssignedName { get; set; } = "";
     public bool HasPassword { get; set; }
+    /// <summary>True until the user completes the mandatory first-login password
+    /// set/change (see AuthService.SetPasswordAsync). A password hash can exist
+    /// (the system-generated temporary one) while this is still true, so "Active"
+    /// in the UI means HasPassword && !MustChangePassword, not HasPassword alone.</summary>
+    public bool MustChangePassword { get; set; }
     public DateTime CreatedAt { get; set; }
     /// <summary>Number of stores this user's email currently matches in the latest
     /// StoreReference upload — null for roles that aren't store-restricted (Admin/User).
@@ -41,6 +46,11 @@ public class LoginHistoryItem
     public DateTime LoggedInAt { get; set; }
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
+    public bool Success { get; set; }
+    public string Portal { get; set; } = "";
+    public string? FailureReason { get; set; }
+    public string Browser { get; set; } = "";
+    public string OperatingSystem { get; set; } = "";
 }
 
 public class UserLoginHistoryViewModel
