@@ -397,6 +397,11 @@
     const rows = Array.from(document.querySelectorAll('#usTableBody tr'));
     const noResults = document.getElementById('usNoResults');
 
+    // Some browsers auto-fill this field with a previously typed/saved value
+    // (e.g. a saved login email) despite autocomplete="off". Force it clear
+    // on every page load so the table always starts unfiltered.
+    if (searchInput) searchInput.value = '';
+
     // User rows contain independent links/forms. Keep their clicks inside the
     // table so a page-level click/autofocus handler cannot treat a row action
     // as an interaction with the search field.
