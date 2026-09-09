@@ -678,6 +678,13 @@
   <data name="Users_LoginTime" xml:space="preserve"><value>Time</value></data>
   <data name="Users_IpAddress" xml:space="preserve"><value>IP Address</value></data>
   <data name="Users_Device" xml:space="preserve"><value>Device / Browser</value></data>
+  <data name="Users_LoginResult" xml:space="preserve"><value>Result</value></data>
+  <data name="Users_LoginPortal" xml:space="preserve"><value>Portal</value></data>
+  <data name="Users_LoginSuccess" xml:space="preserve"><value>Success</value></data>
+  <data name="Users_LoginFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="Users_CurrentSession" xml:space="preserve"><value>Current session</value></data>
+  <data name="Users_LoginFailedWrongPassword" xml:space="preserve"><value>Wrong password</value></data>
+  <data name="Users_LoginFailedNoPassword" xml:space="preserve"><value>No password set yet</value></data>
   <data name="Users_AssignedName" xml:space="preserve"><value>Display Name</value></data>
   <data name="Users_AssignedNamePlaceholder" xml:space="preserve"><value>e.g. Ahmed Mohamed</value></data>
   <data name="Users_AssignedNameHelp" xml:space="preserve"><value>Shown across the portal instead of the email — in Action Center notes, and as the display name in the Home-area header.</value></data>

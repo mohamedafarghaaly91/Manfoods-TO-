@@ -31,7 +31,7 @@ public class AuthService : IAuthService
         _httpContext = httpContext;
     }
 
-    public async Task<(User? User, string? FailReason)> ValidateAsync(string email, string password)
+    public async Task<(User? User, string? FailReason)> ValidateAsync(string email, string password, string portal)
     {
         var failKey = FailKey(email);
         if (_cache.TryGetValue(failKey, out int failCount) && failCount >= MaxFailedAttempts)
@@ -41,7 +41,11 @@ public class AuthService : IAuthService
             // caller already discards this and always shows one generic
             // "invalid credentials" message, so a locked account is not
             // distinguishable from a wrong password (no extra enumeration
-            // signal from the lockout itself).
+            // signal from the lockout itself). Not logged to login_history
+            // either — there's no cheap way to resolve the account here
+            // without undoing the whole point of checking the lockout before
+            // touching the database, and every attempt that built up to this
+            // lockout was already logged individually below.
             return (null, "Account temporarily locked after repeated failed attempts.");
         }
 
@@ -55,6 +59,9 @@ public class AuthService : IAuthService
             var reason = $"No user found for email '{email.ToLower()}'.";
             _logger.LogWarning("Login failed: {Reason}", reason);
             RecordFailure();
+            // Not logged to login_history — there's no account to attach the
+            // row to, and logging it under some placeholder would let this
+            // page be used to probe which emails are registered.
             return (null, reason);
         }
         // Bulk-created accounts start with no password set (pending activation
@@ -65,6 +72,7 @@ public class AuthService : IAuthService
             var reason = $"User '{email.ToLower()}' has no password hash set.";
             _logger.LogWarning("Login failed: {Reason}", reason);
             RecordFailure();
+            await LogAttemptAsync(user, portal, success: false, "no-password-set");
             return (null, reason);
         }
 
@@ -73,19 +81,21 @@ public class AuthService : IAuthService
             var reason = $"Password mismatch for '{email.ToLower()}'.";
             _logger.LogWarning("Login failed: {Reason}", reason);
             RecordFailure();
+            await LogAttemptAsync(user, portal, success: false, "wrong-password");
             return (null, reason);
         }
 
         _cache.Remove(failKey);
-        await LogLoginAsync(user);
+        await LogAttemptAsync(user, portal, success: true, null);
         return (user, null);
     }
 
-    // Records the login the moment credentials check out — shared by both the
-    // Home and Admin AccountControllers' Login actions, since they both call
-    // ValidateAsync. Best-effort: a failure here must never block the login
-    // itself, so it's swallowed (logged) rather than surfaced to the caller.
-    private async Task LogLoginAsync(User user)
+    // Records the attempt once it's resolved against a known account — shared
+    // by both the Home and Admin AccountControllers' Login actions, since they
+    // both call ValidateAsync. Best-effort: a failure here must never block
+    // the login itself, so it's swallowed (logged) rather than surfaced to
+    // the caller.
+    private async Task LogAttemptAsync(User user, string portal, bool success, string? failureReason)
     {
         try
         {
@@ -94,6 +104,9 @@ public class AuthService : IAuthService
             {
                 UserId = user.Id,
                 Email = user.Email,
+                Portal = portal,
+                Success = success,
+                FailureReason = failureReason,
                 IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = http?.Request.Headers.UserAgent.ToString(),
             });

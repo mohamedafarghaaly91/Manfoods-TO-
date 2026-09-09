@@ -1,7 +1,15 @@
+@using MvcApp.Extensions
 @model MvcApp.Models.ViewModels.UserLoginHistoryViewModel
 @{
     ViewData["Title"] = L["Page_LoginHistory"].Value;
     var displayName = string.IsNullOrWhiteSpace(Model.AssignedName) ? Model.Email : Model.AssignedName;
+    // Logins are most-recent-first, so when the viewer is looking at their own
+    // history, the top successful row is (in the overwhelming majority of
+    // cases) the very session they're viewing it from. There's no per-session
+    // id threaded through login_history to match exactly, so this is a
+    // best-effort marker, not a guarantee.
+    var viewingOwnHistory = Context.Session.GetUserId() == Model.UserId;
+    var currentSessionAt = viewingOwnHistory ? Model.Logins.FirstOrDefault(l => l.Success)?.LoggedInAt : null;
 }
 
 <div class="page-header">
@@ -23,6 +31,8 @@
                     <tr>
                         <th>@L["Common_Date"]</th>
                         <th>@L["Users_LoginTime"]</th>
+                        <th>@L["Users_LoginResult"]</th>
+                        <th>@L["Users_LoginPortal"]</th>
                         <th>@L["Users_IpAddress"]</th>
                         <th>@L["Users_Device"]</th>
                     </tr>
@@ -30,11 +40,37 @@
                 <tbody>
                     @foreach (var login in Model.Logins)
                     {
+                        var isCurrent = currentSessionAt.HasValue && login.LoggedInAt == currentSessionAt.Value;
                         <tr>
-                            <td>@login.LoggedInAt.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @login.LoggedInAt.ToString("MMM dd, yyyy")
+                                @if (isCurrent)
+                                {
+                                    <span class="role-badge" style="background:var(--success-bg);color:var(--success);margin-inline-start:6px">@L["Users_CurrentSession"]</span>
+                                }
+                            </td>
                             <td class="text-muted-custom">@login.LoggedInAt.ToString("hh:mm:ss tt")</td>
+                            <td>
+                                @if (login.Success)
+                                {
+                                    <span class="role-badge" style="background:var(--success-bg);color:var(--success)">@L["Users_LoginSuccess"]</span>
+                                }
+                                else
+                                {
+                                    var reasonLabel = login.FailureReason switch
+                                    {
+                                        "wrong-password" => L["Users_LoginFailedWrongPassword"].Value,
+                                        "no-password-set" => L["Users_LoginFailedNoPassword"].Value,
+                                        _ => L["Users_LoginFailed"].Value,
+                                    };
+                                    <span class="role-badge" style="background:var(--danger-bg);color:var(--danger)" title="@reasonLabel">@L["Users_LoginFailed"]</span>
+                                }
+                            </td>
+                            <td class="text-muted-custom">@(string.IsNullOrWhiteSpace(login.Portal) ? "—" : login.Portal)</td>
                             <td class="text-muted-custom">@(string.IsNullOrWhiteSpace(login.IpAddress) ? "—" : login.IpAddress)</td>
-                            <td class="text-muted-custom small">@(string.IsNullOrWhiteSpace(login.UserAgent) ? "—" : login.UserAgent)</td>
+                            <td class="text-muted-custom small" title="@login.UserAgent">
+                                @(login.Browser == "Unknown" && login.OperatingSystem == "Unknown" ? "—" : $"{login.Browser} · {login.OperatingSystem}")
+                            </td>
                         </tr>
                     }
                 </tbody>

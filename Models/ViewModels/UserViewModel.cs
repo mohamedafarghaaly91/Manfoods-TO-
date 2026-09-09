@@ -46,6 +46,11 @@ public class LoginHistoryItem
     public DateTime LoggedInAt { get; set; }
     public string? IpAddress { get; set; }
     public string? UserAgent { get; set; }
+    public bool Success { get; set; }
+    public string Portal { get; set; } = "";
+    public string? FailureReason { get; set; }
+    public string Browser { get; set; } = "";
+    public string OperatingSystem { get; set; } = "";
 }
 
 public class UserLoginHistoryViewModel

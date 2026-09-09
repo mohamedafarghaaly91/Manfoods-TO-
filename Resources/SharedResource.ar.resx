@@ -678,6 +678,13 @@
   <data name="Users_LoginTime" xml:space="preserve"><value>الوقت</value></data>
   <data name="Users_IpAddress" xml:space="preserve"><value>عنوان IP</value></data>
   <data name="Users_Device" xml:space="preserve"><value>الجهاز / المتصفح</value></data>
+  <data name="Users_LoginResult" xml:space="preserve"><value>النتيجة</value></data>
+  <data name="Users_LoginPortal" xml:space="preserve"><value>البوابة</value></data>
+  <data name="Users_LoginSuccess" xml:space="preserve"><value>ناجحة</value></data>
+  <data name="Users_LoginFailed" xml:space="preserve"><value>فاشلة</value></data>
+  <data name="Users_CurrentSession" xml:space="preserve"><value>الجلسة الحالية</value></data>
+  <data name="Users_LoginFailedWrongPassword" xml:space="preserve"><value>باسورد غلط</value></data>
+  <data name="Users_LoginFailedNoPassword" xml:space="preserve"><value>مفيش باسورد متسجل لسه</value></data>
   <data name="Users_AssignedName" xml:space="preserve"><value>الاسم المعروض</value></data>
   <data name="Users_AssignedNamePlaceholder" xml:space="preserve"><value>مثال: أحمد محمد</value></data>
   <data name="Users_AssignedNameHelp" xml:space="preserve"><value>بيظهر في كل البورتال بدل الإيميل — في ملاحظات Action Center، وكاسم معروض في هيدر منطقة Home.</value></data>

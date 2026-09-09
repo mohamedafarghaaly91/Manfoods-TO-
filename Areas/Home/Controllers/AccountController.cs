@@ -33,7 +33,7 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid) return View(vm);
 
-        var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password);
+        var (user, _) = await _auth.ValidateAsync(vm.Email, vm.Password, "Home");
         if (user == null) { ModelState.AddModelError("", _L["Msg_InvalidCredentials"]); return View(vm); }
 
         if (user.Role == "Admin")
